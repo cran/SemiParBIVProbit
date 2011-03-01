@@ -33,12 +33,15 @@ coefficient and total effective degrees of freedom for the penalized model.
 
 
 
+\author{
+Giampiero Marra, University College London
 
-\author{ 
-
-Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Rosalba Radice, London School of Hygiene and Tropical Medicine
 
 }
+
+
+
 
 \seealso{
 \code{\link{SemiParBIVProbit}}

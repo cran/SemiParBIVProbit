@@ -38,11 +38,14 @@
 
 
 
-\author{ 
+\author{
+Giampiero Marra, University College London
 
-Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Rosalba Radice, London School of Hygiene and Tropical Medicine
 
 }
+
+
 
 \seealso{
 \code{\link{summary.SemiParBIVProbit}}

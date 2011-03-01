@@ -35,7 +35,7 @@ to calculate `confidence' intervals for \eqn{\rho}{\rho}.}
 
 \details{ 
 
-The frequentist approximation for p-values of smooth terms described, for instance, in Marra and Wood (2010) is used. If \eqn{{\bf c}_i}{c_i}  
+The frequentist approximation for p-values of smooth terms described, for instance, in Marra and Wood (submitted paper) is used. If \eqn{{\bf c}_i}{c_i}  
 is the parameter vector for the ith smooth term and \eqn{{\bf V}_i}{V_i} its corresponding covariance matrix, then the 
 statistic is \eqn{{\bf c}_i^\prime {\bf V}_i^{k-} {\bf c}_i}{c_i'V_i^{k-}c_i} where \eqn{{\bf V}^{k-}_i}{V_i^{k-}} is the \eqn{k}{k} 
 pseudo-inverse of \eqn{{\bf V_i}}{V_i} and \eqn{k}{k} is the estimated rank of \eqn{{\bf V_i}}{V_i}. \eqn{k}{k} is determined heuristically as follows. It is the minimum
@@ -77,18 +77,23 @@ covariate selection, otherwise shrinkage approaches (Marra and Wood, submitted p
 
 \references{
 
-Diebold F. X. and Rudebusch G. D. (1989) Scoring the Leading Indicators. Journal of Business, 62, 369-391. 
+Diebold F.X. and Rudebusch G.D. (1989), Scoring the Leading Indicators. \emph{Journal of Business}, 62, 369-391. 
 
-Marra G. and Wood S. N., Practical Variable Selection for Generalized Additive Models. Submitted.
+Marra G. and Wood S.N. (in press), Practical Variable Selection for Generalized Additive Models. \emph{Computational Statistics and 
+Data Analysis}.
+
+}
+
+
+
+\author{
+Giampiero Marra, University College London
+
+Rosalba Radice, London School of Hygiene and Tropical Medicine
 
 }
 
 
-\author{ 
-
-Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
-
-}
 
 \seealso{
 \code{\link{ATE}}, \code{\link{InfCr}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{plot.SemiParBIVProbit}}

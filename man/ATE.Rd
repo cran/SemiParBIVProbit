@@ -48,16 +48,20 @@ The function returns the ATE with corresponding `confidence' intervals.
 }
 
 
-\references{
 
-Marra G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. The Canadian 
-Journal of Statistics.
+\author{
+
+Giampiero Marra, University College London
+
+Rosalba Radice, London School of Hygiene and Tropical Medicine
 
 }
 
-\author{ 
 
-Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+\references{
+
+Marra G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{The Canadian 
+Journal of Statistics}.
 
 }
 

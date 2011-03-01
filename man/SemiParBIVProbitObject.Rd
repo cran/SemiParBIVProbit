@@ -66,8 +66,14 @@
 
 
 \author{
-Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Giampiero Marra, University College London
+
+Rosalba Radice, London School of Hygiene and Tropical Medicine
+
 }
+
+
+
 
 
 

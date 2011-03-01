@@ -6,21 +6,24 @@
 \description{It provides the log-likelihood, gradient and Fisher information matrix for penalized or unpenalized maximum likelihood optimization.}
 
 
-\references{
-
-Marra G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. The Canadian 
-Journal of Statistics.
-
-}
-
 
 \author{
 
-Rosalba Radice
+Giampiero Marra, University College London
 
-Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Rosalba Radice, London School of Hygiene and Tropical Medicine
 
 }
+
+
+
+\references{
+
+Marra G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{The Canadian 
+Journal of Statistics}.
+
+}
+
 
 
 

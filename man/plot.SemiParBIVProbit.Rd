@@ -81,6 +81,8 @@ although each smooth is shown centred, the confidence intervals are obtained as 
 constrained to have average 0 (average taken over the covariate values) except for the smooth being plotted. The theoretical arguments 
 and simulation study of Marra and Wood (submitted paper) suggests that \code{TRUE} results in intervals with
 close to nominal (frequentist) coverage probabilities.
+
+This function is pretty similar to \code{plot.gam} in \code{mgcv}.
 }
 
 
@@ -91,21 +93,20 @@ The function generates plots.
 
 
 
+\author{
+Giampiero Marra, University College London
+
+Rosalba Radice, London School of Hygiene and Tropical Medicine
+
+}
+
+
+
 \references{
 
-Marra G. and Wood S. N., Coverage Properties of Confidence Intervals for Generalized Additive Model Components. Submitted.
+Marra G. and Wood S.N., Coverage Properties of Confidence Intervals for Generalized Additive Model Components. Submitted.
 
 }
-
-
-\author{ 
-
-Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
-
-This function is pretty much the same as \code{plot.gam} in \code{mgcv}.
-
-}
-
 
 
 \section{WARNING}{ 
