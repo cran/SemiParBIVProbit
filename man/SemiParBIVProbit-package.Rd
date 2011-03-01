@@ -25,16 +25,17 @@ possible via the use of shrinakge smoothers or information criteria.
 
 
 \author{
-Giampiero Marra and Rosalba Radice
+Giampiero Marra, University College London
+
+Rosalba Radice, London School of Hygiene and Tropical Medicine
 
 Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
-
 }
 
 \references{
 
-Marra G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. The Canadian 
-Journal of Statistics.
+Marra G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{The Canadian 
+Journal of Statistics}.
 
 }
 

@@ -46,12 +46,11 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, pr.tol=1e-6, data=list(),
   fit  <- trust(bprob, start.v, rinit=rinit, rmax=rmax, dat=dat,
                 X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, blather=TRUE, 
                 iterlim=10000, fterm=fterm, mterm=mterm)
-
+  conv.sp <- NULL
   bs.mgfit <- wor.c <- 0
-  conv.sp <- TRUE
     if(aut.sp==TRUE){
 
-     l.o <- fit$l; l.n <- 0 
+     l.o <- fit$l; l.n <- 0; conv.sp <- TRUE 
      #sp.ch <- list(); ct <- 0
      
 
@@ -86,7 +85,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, pr.tol=1e-6, data=list(),
              if(j>50){
               conv.sp <- FALSE
               break
-             } 
+             }
              j <- j + 1       
 
              #if(j>2) for(jj in 1:(length(sp.ch)-1)){if(identical(round(sp.ch[[jj]],8),round(sp,8))) ct <- ct + 1}   

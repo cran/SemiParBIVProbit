@@ -87,10 +87,10 @@ the approximate Un-Biased Risk Estimator (UBRE) score.
 
 The optimization problem is solved by Fisher scoring's method. Automatic smoothing parameter selection is integrated 
 using a performance-oriented iteration approach (Wood, 2004). At each iteration, (i) the penalized weighted least squares 
-problem is solved, then (ii) the smoothing parameters of that problem estimated by approximate UBRE. The two steps are iterated until 
+problem is solved, then (ii) the smoothing parameters of that problem estimated by approximate UBRE. Steps (i) and (ii) are iterated until 
 convergence.
 
-Details of the underlying fitting methods are given in Marra and Radice (2010). 
+Details of the underlying fitting methods are given in Marra and Radice (in press). 
 
 }
 
@@ -100,21 +100,24 @@ The function returns an object of class \code{SemiParBIVProbit} as described in 
 }
 
 
+\author{
+Giampiero Marra, University College London
+
+Rosalba Radice, London School of Hygiene and Tropical Medicine
+
+}
+
+
+
 \references{
 
-Marra G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. The Canadian 
-Journal of Statistics.
+Marra G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{The Canadian 
+Journal of Statistics}.
 
-Wood S. N. (2004), Stable and efficient multiple smoothing parameter estimation for generalized additive models. Journal of the American Statistical Association, 99, 673-686.
-
-}
-
-\author{ 
-Giampiero Marra and Rosalba Radice
-
-Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Wood S.N. (2004), Stable and efficient multiple smoothing parameter estimation for generalized additive models. \emph{Journal of the American Statistical Association}, 99, 673-686.
 
 }
+
 
 \section{WARNINGS}{
 
