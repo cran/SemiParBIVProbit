@@ -1,12 +1,13 @@
-SemiParBIVProbit <- function(formula.eq1, formula.eq2, pr.tol=1e-6, data=list(),
-        		          rinit=1, rmax=100, gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL,
-                            fterm=sqrt(.Machine$double.eps), mterm=sqrt(.Machine$double.eps), 
-        		          control=list(maxit=50,tol=1e-6,step.half=25,rank.tol=.Machine$double.eps^0.5) ){
+SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), method="UBRE", pr.tol=1e-6,
+                             gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL, rinit=1, rmax=100, 
+                             fterm=sqrt(.Machine$double.eps), mterm=sqrt(.Machine$double.eps), 
+        		     control=list(maxit=50,tol=1e-6,step.half=25,rank.tol=.Machine$double.eps^0.5) ){
 
   #require(VGAM,quietly=TRUE,warn.conflicts=FALSE)
   #require(mgcv,quietly=TRUE,warn.conflicts=FALSE)
   #require(trust,quietly=TRUE,warn.conflicts=FALSE)
   #library(mvtnorm)
+  #source("InfCr.r")
   #source("bprob.r")
   #source("spS.r")
   #source("S.m.r")
@@ -34,7 +35,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, pr.tol=1e-6, data=list(),
   X1    <- model.matrix(gam1); X1.d2 <- dim(X1)[2]
   X2    <- model.matrix(gam2); X2.d2 <- dim(X2)[2]
   l.sp1 <- length(gam1$smooth); l.sp2 <- length(gam2$smooth); n.e <- 3
-
+  
   dat <- cbind(gam1$y,gam2$y,X1,X2)
   n   <- length(dat[,1])
   
@@ -46,26 +47,57 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, pr.tol=1e-6, data=list(),
   fit  <- trust(bprob, start.v, rinit=rinit, rmax=rmax, dat=dat,
                 X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, blather=TRUE, 
                 iterlim=10000, fterm=fterm, mterm=mterm)
-  conv.sp <- NULL
-  bs.mgfit <- wor.c <- 0
+                
+  conv.sp <- NULL; bs.mgfit <- wor.c <- 0
+  
     if(aut.sp==TRUE){
 
-     l.o <- fit$l; l.n <- 0; conv.sp <- TRUE 
-     #sp.ch <- list(); ct <- 0
-     
+     l.o <- fit$l; l.n <- 0 
 
       if(l.sp1!=0 && l.sp2!=0){
-       j <- 1 
-	  while((abs(l.n-l.o)/(abs(l.n)+1))>pr.tol){     
+       j <- 1; conv.sp <- TRUE 
+	  while((abs(l.n-l.o)/(abs(l.o)+1))>pr.tol){     
 
              So <- spS(sp,gam1,gam2)
 		 wor.c    <- try(working.comp(fit,X1,X2,X1.d2,X2.d2,n,n.e))
              if(class(wor.c)=="try-error") break
-             bs.mgfit <- try(magic(y=wor.c$rW.Z,X=wor.c$rW.X,sp=sp,S=qu.mag$Ss,
+             
+             if(method=="UBRE"){
+   
+                bs.mgfit <- try(magic(y=wor.c$rW.Z,X=wor.c$rW.X,sp=sp,S=qu.mag$Ss,
                                    off=qu.mag$off,rank=qu.mag$rank,n.score=n.e*n,
                                    gcv=FALSE,gamma=gamma,control=control))
-             if(class(bs.mgfit)=="try-error") {conv.sp <- FALSE; break} 
-             sp <- bs.mgfit$sp
+                if(class(bs.mgfit)=="try-error") {conv.sp <- FALSE; break} 
+                sp <- bs.mgfit$sp
+                               }
+                               
+             if(method=="REML"){   
+             
+                wY <- wor.c$rW.Z; wX <- wor.c$rW.X
+		wS <- vector("list", length(qu.mag$off))
+		for(i in 1:length(qu.mag$off)) wS[[i]] <- matrix(0,dim(wX)[2],dim(wX)[2])
+		
+		bs.d <- NA 
+		for(i in 1:length(gam1$smooth)) bs.d[i] <- gam1$smooth[[i]]$bs.dim
+		j  <- i + 1; jj <- i + length(gam2$smooth)
+                for(i in j:jj) bs.d[i] <- gam2$smooth[[i-length(gam1$smooth)]]$bs.dim
+                bs.d <- bs.d - 2
+		  
+		for(i in 1:length(qu.mag$off)) 
+		        wS[[i]][seq(qu.mag$off[i],qu.mag$off[i]+bs.d[i]),
+		                seq(qu.mag$off[i],qu.mag$off[i]+bs.d[i])] <- qu.mag$Ss[[i]] 
+		  
+		vSn <- ""; for (i in 1:length(qu.mag$off)) vSn[i] <- paste("wS[[",i,"]]",sep="")
+		  
+		fw <- paste("list(wX=list(",vSn[1],sep="")
+		for (i in 2:length(qu.mag$off)) fw <- paste(fw,",",vSn[i],sep="")
+		fw <- paste(fw,"))",sep="")
+		pP <- eval(parse( text=fw ))
+		bs.mgfit <- gam(wY ~ wX - 1, paraPen=pP, method="REML" )
+		if(class(bs.mgfit)[1]=="try-error") {conv.sp <- FALSE; break} 
+                sp <- bs.mgfit$sp
+                               }
+		             
              S <- spS(sp,gam1,gam2)
              
              l.o <- fit$l
@@ -87,9 +119,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, pr.tol=1e-6, data=list(),
               break
              }
              j <- j + 1       
-
-             #if(j>2) for(jj in 1:(length(sp.ch)-1)){if(identical(round(sp.ch[[jj]],8),round(sp,8))) ct <- ct + 1}   
-             #if(ct>0) break              
+           
         }
       }
     }  

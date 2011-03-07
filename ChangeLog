@@ -1,3 +1,9 @@
+version 1.0
+
+- REML smoothing parameter selection implemented.
+
+
+
 version 0.2
 
 - plot function fixed.

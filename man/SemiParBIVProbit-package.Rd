@@ -9,12 +9,12 @@ by using parametric and nonparametric components.}
 
 \details{ \code{SemiParBIVProbit} provides a function for flexible bivariate probit modelling. The underlying representation and 
 estimation of the model is based on a penalized regression spline approach, with automatic smoothness selection. The algorithm is based on 
-the package \code{trust} (which carries out function minimization using a trust region algorithm) and 
-an adaptation of a low level smoothness selection fitting function of the package \code{mgcv}. 
+the package \code{trust} (which carries out function minimization using a trust region algorithm) and
+adaptations of some low level smoothness selection fitting functions of the package \code{mgcv}. 
  
 \code{\link{SemiParBIVProbit}} supports the use of many smoothers as extracted from \code{mgcv}. Scale invariant tensor product smooths
-are not currently supported. Estimation is by penalized maximum likelihood with automatic smoothness selection by approximate 
-Un-Biased Risk Estimator (UBRE) score. 
+are not currently supported. Estimation is by penalized maximum likelihood with automatic smoothness selection by either approximate 
+Un-Biased Risk Estimator (UBRE) score or approximate restricted maximum likelihood (REML). 
 
 Confidence intervals for smooth components are derived using a Bayesian approach. Approximate p-values for testing 
 individual smooth terms for equality to the zero function are also provided. Functions \code{\link{plot.SemiParBIVProbit}} and 

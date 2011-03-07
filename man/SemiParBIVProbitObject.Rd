@@ -47,8 +47,8 @@
 
 \item{t.edf}{Total degrees of freedom of the estimated bivariate probit model. It is calculated as \code{sum(diag(F))}.}
 
-\item{bs.mgfit}{A list of values and diagnostics extracted from \code{magic}. See the documentation 
-                of \code{magic} in \code{mgcv} for full details.}
+\item{bs.mgfit}{A list of values and diagnostics extracted from \code{magic} if UBRE is used. In the case of REML smoothing
+               parameter selection, an \code{mgcv} object is provided. See the documentation of \code{mgcv} for full details.}
 
 \item{conv.sp}{If \code{TRUE} then the smoothing parameter selection algorithm converged.}
                 

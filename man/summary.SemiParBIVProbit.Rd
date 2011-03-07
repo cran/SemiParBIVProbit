@@ -35,7 +35,7 @@ to calculate `confidence' intervals for \eqn{\rho}{\rho}.}
 
 \details{ 
 
-The frequentist approximation for p-values of smooth terms described, for instance, in Marra and Wood (submitted paper) is used. If \eqn{{\bf c}_i}{c_i}  
+The frequentist approximation for p-values of smooth terms described, for instance, in Marra and Wood (in press) is used. If \eqn{{\bf c}_i}{c_i}  
 is the parameter vector for the ith smooth term and \eqn{{\bf V}_i}{V_i} its corresponding covariance matrix, then the 
 statistic is \eqn{{\bf c}_i^\prime {\bf V}_i^{k-} {\bf c}_i}{c_i'V_i^{k-}c_i} where \eqn{{\bf V}^{k-}_i}{V_i^{k-}} is the \eqn{k}{k} 
 pseudo-inverse of \eqn{{\bf V_i}}{V_i} and \eqn{k}{k} is the estimated rank of \eqn{{\bf V_i}}{V_i}. \eqn{k}{k} is determined heuristically as follows. It is the minimum
@@ -43,7 +43,7 @@ value between the maximum \code{edf} value allowed for the ith smooth term and t
 as 2*\code{edf}. P-values are obtained by comparing the chi.sq statistic to the chi-squared distribution with \eqn{k}{k} degrees of freedom. 
 
 Notice that p-values are approximate. Simulation evidence suggests that if the data are not too noisy, then this p-value definition can lead to reliable
-covariate selection, otherwise shrinkage approaches (Marra and Wood, submitted paper) are more reliable. 
+covariate selection, otherwise shrinkage approaches (Marra and Wood, in press) are more reliable. 
 
 }
 
