@@ -1,4 +1,4 @@
-SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), method="UBRE", pr.tol=1e-6,
+SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), method="UBRE", pr.tol=1e-10,
                              gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL, rinit=1, rmax=100, 
                              fterm=sqrt(.Machine$double.eps), mterm=sqrt(.Machine$double.eps), 
         		     control=list(maxit=50,tol=1e-6,step.half=25,rank.tol=.Machine$double.eps^0.5) ){
@@ -21,7 +21,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), method="UBRE
   #set.seed(3)
   #dataS <- DataGen(n=500,rho=0.5,coef.bal=FALSE)
   #gamma=1.4
-  #formula.eq1 <- y1 ~       bin.ex + s(x1) + s(x2)  
+  #formula.eq1 <- y1 ~       s(x1,by=bin.ex) + s(x1,x2)  
   #formula.eq2 <- y2 ~  y1 + bin.ex + s(x1)
 
   #rinit=1;rmax=100;fterm=sqrt(.Machine$double.eps);mterm=sqrt(.Machine$double.eps)
@@ -29,6 +29,8 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), method="UBRE
   #data=dataS
   #pr.tol=1e-6
   #aut.sp=TRUE
+  #fp=FALSE
+  #start.v=NULL
 
   gam1  <- gam(formula.eq1, binomial(link="probit"), data=data, method="REML")
   gam2  <- gam(formula.eq2, binomial(link="probit"), data=data, method="REML")
@@ -56,7 +58,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), method="UBRE
 
       if(l.sp1!=0 && l.sp2!=0){
        j <- 1; conv.sp <- TRUE 
-	  while((abs(l.n-l.o)/(abs(l.o)+1))>pr.tol){     
+	  while( abs(l.n-l.o)/abs(l.o) > pr.tol ){     
 
              So <- spS(sp,gam1,gam2)
 		 wor.c    <- try(working.comp(fit,X1,X2,X1.d2,X2.d2,n,n.e))
@@ -78,10 +80,10 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), method="UBRE
 		for(i in 1:length(qu.mag$off)) wS[[i]] <- matrix(0,dim(wX)[2],dim(wX)[2])
 		
 		bs.d <- NA 
-		for(i in 1:length(gam1$smooth)) bs.d[i] <- gam1$smooth[[i]]$bs.dim
+		for(i in 1:length(gam1$smooth)) bs.d[i] <- gam1$smooth[[i]]$df
 		j  <- i + 1; jj <- i + length(gam2$smooth)
-                for(i in j:jj) bs.d[i] <- gam2$smooth[[i-length(gam1$smooth)]]$bs.dim
-                bs.d <- bs.d - 2
+                for(i in j:jj) bs.d[i] <- gam2$smooth[[i-length(gam1$smooth)]]$df
+                bs.d <- bs.d - 1
 		  
 		for(i in 1:length(qu.mag$off)) 
 		        wS[[i]][seq(qu.mag$off[i],qu.mag$off[i]+bs.d[i]),
@@ -93,7 +95,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), method="UBRE
 		for (i in 2:length(qu.mag$off)) fw <- paste(fw,",",vSn[i],sep="")
 		fw <- paste(fw,"))",sep="")
 		pP <- eval(parse( text=fw ))
-		bs.mgfit <- gam(wY ~ wX - 1, paraPen=pP, method="REML" )
+		bs.mgfit <- gam(wY ~ wX - 1, paraPen=pP, method="REML")
 		if(class(bs.mgfit)[1]=="try-error") {conv.sp <- FALSE; break} 
                 sp <- bs.mgfit$sp
                                }

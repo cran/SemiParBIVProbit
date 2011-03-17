@@ -18,7 +18,7 @@ the trust region algorithm) and adaptations of some low level fitting functions 
 
 \usage{
 SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), method="UBRE", 
-                 pr.tol=1e-6, gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL,
+                 pr.tol=1e-10, gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL,
                  rinit=1, rmax=100, fterm=sqrt(.Machine$double.eps), 
                  mterm=sqrt(.Machine$double.eps),   
                  control=list(maxit=50,tol=1e-6,step.half=25,
