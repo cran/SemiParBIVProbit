@@ -48,7 +48,7 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), method="UBRE",
 \item{aut.sp}{If \code{TRUE}, then automatic multiple smoothing parameter selection is carried out. If \code{FALSE}, then smoothing parameters 
               are set to the values obtained from the univariate fits.}
 
-\item{fp}{If \code{TRUE}, then a fully parametric model with regression splines if fitted. This makes sense 
+\item{fp}{If \code{TRUE}, then a fully parametric model with regression splines if fitted. This only makes sense 
           if used jointly with \code{aut.sp=FALSE}. See the example below.}  
 
 \item{start.v}{Although not necessary, starting values for the parameters of the two equations and correlation coefficient 
@@ -139,7 +139,7 @@ effects are linear or non-linear and for which equations.
 } 
 
 \seealso{
-\code{\link{ATE}}, \code{\link{InfCr}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{summary.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{InfCr}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{residuals.SemiParBIVProbit}}
 }
 
 \examples{
@@ -291,7 +291,8 @@ out <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cr",k=10),
                         data=dataSim)
 summary(out)
 
-ATE(out,eq=2,nm.end="y1") ## average treatment effect of y1 with CIs
+AT(out,eq=2,nm.bin="y1") ## average treatment effect (ATE) of y1 with CIs
+AT(out,eq=2,nm.bin="y1",E=FALSE) ## average treatment effect on the treated (ATT)
 
 #
 ## recursive bivariate probit modelling with unpenalized splines 

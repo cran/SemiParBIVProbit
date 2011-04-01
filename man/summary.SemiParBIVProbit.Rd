@@ -96,7 +96,7 @@ Rosalba Radice, London School of Hygiene and Tropical Medicine
 
 
 \seealso{
-\code{\link{ATE}}, \code{\link{InfCr}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{plot.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{InfCr}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{plot.SemiParBIVProbit}}
 }
 
 \examples{

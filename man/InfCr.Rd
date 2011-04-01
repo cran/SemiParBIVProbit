@@ -45,7 +45,7 @@ Rosalba Radice, London School of Hygiene and Tropical Medicine
 
 
 \seealso{
-\code{\link{ATE}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}
 }
 
 \examples{
