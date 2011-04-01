@@ -1,6 +1,10 @@
+version 1.0-2
+- function to calculate residuals from fitted model.
+- function ATE suppressed and replaced by AT.
+
 version 1.0-1
-- Basis dimension in REML smoothing parameter selection function fixed.
-- Default tolerance increased.
+- basis dimension in REML smoothing parameter selection function fixed.
+- default tolerance increased.
 
 version 1.0
 - REML smoothing parameter selection implemented.

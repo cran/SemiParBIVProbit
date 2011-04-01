@@ -61,7 +61,11 @@ bprob <- function(params, dat, X1.d2, X2.d2, S=0, gam1, gam2, fp){
                    -sum( dl.drho )  )
          H   <- H
          list(value=res, gradient=G, hessian=H, l=res, 
-              p11=p11, p10=p10, p01=p01, p00=p00, eta1=eta1, eta2=eta2) 
+              p11=p11, p10=p10, p01=p01, p00=p00, eta1=eta1, eta2=eta2,
+              dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.drho=dl.drho,
+              d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
+              d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
+              d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho) 
   }else{
          S.h <- rbind( cbind( cbind(matrix(0,(X1.d2-gam1$nsdf)+gam1$nsdf,gam1$nsdf),rbind(matrix(0,gam1$nsdf,(X1.d2-gam1$nsdf)),S[1:(X1.d2-gam1$nsdf),1:(X1.d2-gam1$nsdf)]))    , matrix(0,dim(be1.be2)[1],dim(be1.be2)[2]) , matrix(0,dim(be1.rho)[1],dim(be1.rho)[2]) ), 
                        cbind( t(matrix(0,dim(be1.be2)[1],dim(be1.be2)[2])) , cbind(matrix(0,length((X1.d2-(gam1$nsdf-1)):dim(S)[2])+gam2$nsdf,gam2$nsdf),rbind(matrix(0,gam2$nsdf,length((X1.d2-(gam1$nsdf-1)):dim(S)[2])),S[(X1.d2-(gam1$nsdf-1)):dim(S)[2],(X1.d2-(gam1$nsdf-1)):dim(S)[2]]))   , matrix(0,dim(be2.rho)[1],dim(be2.rho)[2]) ), 
