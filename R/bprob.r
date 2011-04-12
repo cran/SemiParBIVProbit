@@ -5,7 +5,7 @@ bprob <- function(params, dat, X1.d2, X2.d2, S=0, gam1, gam2, fp){
   eta1 <- dat1%*%params[1:X1.d2]
   eta2 <- dat2%*%params[(X1.d2+1):(X1.d2+X2.d2)]
   corr.st <- params[(X1.d2+X2.d2+1)]
-  corr    <- (exp(2*corr.st)-1)/(exp(2*corr.st)+1)
+  corr    <- tanh(corr.st)
 
   y1.y2   <- dat[,1]*dat[,2]
   y1.cy2  <- dat[,1]*(1-dat[,2])

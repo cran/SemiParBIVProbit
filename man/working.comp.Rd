@@ -20,8 +20,7 @@ Rosalba Radice, London School of Hygiene and Tropical Medicine
 
 \references{
 
-Marra G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{The Canadian 
-Journal of Statistics}.
+Marra G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{The Canadian Journal of Statistics}.
 
 }
 

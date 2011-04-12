@@ -3,18 +3,16 @@ AT <- function(x,eq,nm.bin="",sig.lev=0.05,n.sim=1000,s.meth="svd",E=TRUE,treat=
 if(eq==1){ind <- 1:length(x$gam1$coef); coef <- as.numeric(x$fit$argument[ind]); X <- x$X1}
 if(eq==2){ind <- x$X1.d2+(1:length(x$gam2$coef)); coef <- as.numeric(x$fit$argument[ind]); X <- x$X2}
 
+d0 <- d1 <- X
+d0[,nm.bin] <- 0
+d1[,nm.bin] <- 1
+
 if(E==TRUE){
 
-	d0 <- d1 <- X
-	d0[,nm.bin] <- 0
-	d1[,nm.bin] <- 1
 	est.AT <- mean( pnorm(d1%*%coef) - pnorm(d0%*%coef) )
 
        	   } else {
 
-	d0 <- d1 <- X
-	d0[,nm.bin] <- 0
-	d1[,nm.bin] <- 1
 	 if(treat==TRUE) est.AT <- mean( (pnorm(d1%*%coef) - pnorm(d0%*%coef))[as.logical(X[,nm.bin])] ) else est.AT <- mean( (pnorm(d1%*%coef) - pnorm(d0%*%coef))[as.logical(X[,nm.bin])!=TRUE] )
 
 }

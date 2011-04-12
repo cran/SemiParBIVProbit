@@ -1,5 +1,5 @@
 plot.SemiParBIVProbit <- function(x, eq, select, rug=TRUE, se=TRUE, se.l=1.95996, seWithMean=FALSE, n=100,
-                                 xlab = NULL, ylab=NULL, xlim=NULL, ylim = NULL, main=NULL, trans = I, n2 = 40, 
+                                 xlab = NULL, ylab=NULL, zlab=NULL, xlim=NULL, ylim = NULL, main=NULL, trans = I, n2 = 40, 
                                  theta = 30, phi = 30, too.far = 0.1, ...){
   sub.edf <- function(lab, edf){ 
       pos <- regexpr(":", lab)[1]
@@ -122,24 +122,24 @@ plot.SemiParBIVProbit <- function(x, eq, select, rug=TRUE, se=TRUE, se.l=1.95996
        	   if(is.null(xlab)) x.lab <- x$gam1$smooth[[select]]$term else x.lab <- xlab  
        	   if(is.null(ylab)) y.lab <- sub.edf(x$gam1$smooth[[select]]$label,edf) else y.lab <- ylab  
 
-      	 plot(xx,f,type="l",xlab=x.lab,ylim=ylim,ylab=y.lab, ...)
+      	 plot(xx,f,type="l",xlab=x.lab,ylim=ylim,ylab=y.lab, main=main, ...)
       	   if(se){lines( xx , ub, lty=2 )
        	          lines( xx , lb, lty=2 )
        	   }
       	   if(rug) rug(as.numeric(x$gam1$model[x$gam1$smooth[[select]]$term][[1]]))
          }
-         else{if(x$gam1$smooth[[select]]$dim==2){if(is.null(main)) title <- sub.edf(x$gam1$smooth[[select]]$label, edf) else title <- main
+         else{if(x$gam1$smooth[[select]]$dim==2){     if(is.null(zlab)) zlabel <- sub.edf(x$gam1$smooth[[select]]$label, edf) else zlabel <- zlab
                                                       if(is.null(xlab)) xlabel <- xterm else xlabel <- xlab
                                                       if(is.null(ylab)) ylabel <- yterm else ylabel <- ylab
-                pd.item <- list(fit = f, dim = 2, xm = xm, ym = ym, ylab = ylabel, xlab = xlabel, title = title, raw = raw)
-                if (is.null(ylim)) pd.item$ylim <- range(ym) else pd.item$ylim <- ylim
-                if (is.null(xlim)) pd.item$xlim <- range(xm) else pd.item$xlim <- xlim
-                pd <- pd.item
-                if(!is.null(main)) pd$title <- main
+
+
+                pd <- list(fit = f, dim = 2, xm = xm, ym = ym, ylab = ylabel, xlab = xlabel, zlab = zlabel, raw = raw)
+                if (is.null(ylim)) pd$ylim <- range(ym) else pd$ylim <- ylim
+                if (is.null(xlim)) pd$xlim <- range(xm) else pd$xlim <- xlim
                          persp(pd$xm, pd$ym, matrix(trans(pd$fit), n2, n2), xlab = pd$xlab, 
-                               ylab = pd$ylab, zlab = pd$title, 
+                               ylab = pd$ylab, zlab = pd$zlab, 
                                ylim = pd$ylim, xlim = pd$xlim,
-                               theta = theta, phi = phi, ...)
+                               theta = theta, phi = phi, main = main, ...)
                 
               }
           }
@@ -150,24 +150,23 @@ plot.SemiParBIVProbit <- function(x, eq, select, rug=TRUE, se=TRUE, se.l=1.95996
        	   if(is.null(xlab)) x.lab <- x$gam2$smooth[[select]]$term else x.lab <- xlab  
                if(is.null(ylab)) y.lab <- sub.edf(x$gam2$smooth[[select]]$label,edf) else y.lab <- ylab  
 
-      	 plot(xx,f,type="l",xlab=x.lab,ylim=ylim,ylab=y.lab, ...)
+      	 plot(xx,f,type="l",xlab=x.lab,ylim=ylim,ylab=y.lab, main=main, ...)
       	   if(se){lines( xx , ub, lty=2 )
        	          lines( xx , lb, lty=2 )
        	   }
       	   if(rug) rug(as.numeric(x$gam2$model[x$gam2$smooth[[select]]$term][[1]]))
          }
-         else{if(x$gam2$smooth[[select]]$dim==2){if(is.null(main)) title <- sub.edf(x$gam2$smooth[[select]]$label, edf) else title <- main
+         else{if(x$gam2$smooth[[select]]$dim==2){     if(is.null(zlab)) zlabel <- sub.edf(x$gam2$smooth[[select]]$label, edf) else zlabel <- zlab
                                                       if(is.null(xlab)) xlabel <- xterm else xlabel <- xlab
                                                       if(is.null(ylab)) ylabel <- yterm else ylabel <- ylab
-                pd.item <- list(fit = f, dim = 2, xm = xm, ym = ym, ylab = ylabel, xlab = xlabel, title = title, raw = raw)
-                if (is.null(ylim)) pd.item$ylim <- range(ym) else pd.item$ylim <- ylim
-                if (is.null(xlim)) pd.item$xlim <- range(xm) else pd.item$xlim <- xlim
-                pd <- pd.item
-                if(!is.null(main)) pd$title <- main
+
+                pd <- list(fit = f, dim = 2, xm = xm, ym = ym, ylab = ylabel, xlab = xlabel, zlab = zlabel, raw = raw)
+                if (is.null(ylim)) pd$ylim <- range(ym) else pd$ylim <- ylim
+                if (is.null(xlim)) pd$xlim <- range(xm) else pd$xlim <- xlim
                          persp(pd$xm, pd$ym, matrix(trans(pd$fit), n2, n2), xlab = pd$xlab, 
-                               ylab = pd$ylab, zlab = pd$title, 
+                               ylab = pd$ylab, zlab = pd$zlab, 
                                ylim = pd$ylim, xlim = pd$xlim,
-                               theta = theta, phi = phi, ...)
+                               theta = theta, phi = phi, main = main, ...)
                 
               }
           }
