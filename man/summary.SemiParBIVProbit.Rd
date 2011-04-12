@@ -79,8 +79,7 @@ covariate selection, otherwise shrinkage approaches (Marra and Wood, in press) a
 
 Diebold F.X. and Rudebusch G.D. (1989), Scoring the Leading Indicators. \emph{Journal of Business}, 62, 369-391. 
 
-Marra G. and Wood S.N. (in press), Practical Variable Selection for Generalized Additive Models. \emph{Computational Statistics and 
-Data Analysis}.
+Marra G. and Wood S.N. (2011), Practical Variable Selection for Generalized Additive Models. \emph{Computational Statistics and Data Analysis}, 55, 2372-2387.
 
 }
 
