@@ -1,16 +1,16 @@
-working.comp <- function(x,X1=X1,X2=X2,X1.d2=X1.d2,X2.d2=X2.d2,n=n,n.e=n.e){
+working.comp <- function(x,X1=X1,X2=X2,X1.d2=X1.d2,X2.d2=X2.d2,n=n){
   #x=fit
   der.1 <- x$dl.dbe1
   der.2 <- x$dl.dbe2
   der.3 <- x$dl.drho
   e.par <- x$argument
-  W <- c.W <- i.W <- matrix(0,n.e,n.e)
-  X <- rW.X <- matrix(0,n.e*n,(X1.d2+X2.d2+1))
-  D <- iW.D <- Z <- rW.Z <- matrix(0,n.e*n,1)
+  W <- c.W <- i.W <- matrix(0,3,3)
+  X <- rW.X <- matrix(0,3*n,(X1.d2+X2.d2+1))
+  D <- iW.D <- Z <- rW.Z <- matrix(0,3*n,1)
   j <- 1
   #n.e=3
   #i=1
-    for(i in seq(1,(n.e*n-2),by=n.e)) {
+    for(i in seq(1,(3*n-2),by=3)) {
       X[i,1:X1.d2]                   <- X1[j,]
       X[i+1,(X1.d2+1):(X1.d2+X2.d2)] <- X2[j,]
       X[i+2,(X1.d2+X2.d2+1)]         <- 1
@@ -19,7 +19,7 @@ working.comp <- function(x,X1=X1,X2=X2,X1.d2=X1.d2,X2.d2=X2.d2,n=n,n.e=n.e){
       D[i+2,1] <- der.3[j]
       W <- matrix(c( x$d2l.be1.be1[j],x$d2l.be1.be2[j],x$d2l.be1.rho[j],     
                      x$d2l.be1.be2[j],x$d2l.be2.be2[j],x$d2l.be2.rho[j],  
-                     x$d2l.be1.rho[j],x$d2l.be2.rho[j],x$d2l.rho.rho[j] ) , n.e , n.e ) 
+                     x$d2l.be1.rho[j],x$d2l.be2.rho[j],x$d2l.rho.rho[j] ) , 3 , 3 ) 
       #c.W <- chol(W),pivot=TRUE)
       #piv <- order(attr(c.W,"pivot")) 
       #c.W <- c.W[,piv]

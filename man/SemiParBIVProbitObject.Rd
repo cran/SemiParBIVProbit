@@ -8,16 +8,20 @@
 
 \value{ 
 
+
 \item{fit}{A list of values and diagnostics extracted from the output of the algorithm. For instance, \code{fit$argument} and \code{fit$S.h} return
-           the estimated parameters and overall penalty matrix, scaled by its smoothing parameters, for the bivariate probit model. See the 
+           the estimated parameters and overall penalty matrix scaled by its smoothing parameters, for the bivariate probit model. See the 
            documentation of \code{trust} for diagnostics.}
 
-\item{gam1}{A univariate GAM object for equation 1. This is useful to compare univariate and bivariate estimates. See the documentation of 
-           \code{mgcv} for full details.}
+\item{gam1}{A univariate GAM object for equation 1. See the documentation of \code{mgcv} for full details.}
 
 \item{gam2}{A univariate GAM object for equation 2.}
 
+\item{gam2.1}{A univariate GAM object for equation 2, estimated using the sample selection correction.}
+
 \item{sp}{Estimated smoothing parameters of the smooth components for the fitted bivariate probit model.}
+
+\item{iter.sp}{Number of iterations for the smoothing parameter estimation step.}
 
 \item{rho}{Estimated correlation coefficient between the two equations.}
 
@@ -31,11 +35,9 @@
 
 \item{X2.d2}{Number of columns of the design matrix for equation 2.} 
 
-\item{l.sp1}{Number of smooth components of equation 1.}
+\item{l.sp1}{Number of smooth components in equation 1.}
 
-\item{l.sp2}{Number of smooth components of equation 2.}
-
-\item{n.e}{Number of equations. This is used for internal calculations.}
+\item{l.sp2}{Number of smooth components in equation 2.}
 
 \item{He}{Penalized hessian.}
 
@@ -47,8 +49,7 @@
 
 \item{t.edf}{Total degrees of freedom of the estimated bivariate probit model. It is calculated as \code{sum(diag(F))}.}
 
-\item{bs.mgfit}{A list of values and diagnostics extracted from \code{magic} if UBRE is used. In the case of REML smoothing
-               parameter selection, an \code{mgcv} object is provided. See the documentation of \code{mgcv} for full details.}
+\item{bs.mgfit}{A list of values and diagnostics extracted from \code{magic}.}
 
 \item{conv.sp}{If \code{TRUE} then the smoothing parameter selection algorithm converged.}
                 
@@ -58,9 +59,13 @@
 \item{p11,p10,p01,p00}{Distribution function of a bivariate normal with zero means, unit variances and correlation \code{rho} evaluated 
                        at (y1=1,y2=1), (y1=1,y2=0), (y1=0,y2=1) and (y1=0,y2=0).}
 
+\item{p0}{Distribution function of a standardised univariate normal evaluated at y1=0, in the sample selection case.}
+
 \item{eta1,eta2}{The estimated linear predictors for the two equations.}
 
 \item{dat}{It returns the full design matrix associated with the observed binary variables and the two linear predictors.}
+
+\item{sel}{This is used for internal calculations.}
 
 }
 

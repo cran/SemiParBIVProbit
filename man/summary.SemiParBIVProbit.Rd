@@ -35,7 +35,7 @@ to calculate `confidence' intervals for \eqn{\rho}{\rho}.}
 
 \details{ 
 
-The frequentist approximation for p-values of smooth terms described, for instance, in Marra and Wood (in press) is used. If \eqn{{\bf c}_i}{c_i}  
+The frequentist approximation for p-values of smooth terms described, for instance, in Marra and Wood (2011) is used. If \eqn{{\bf c}_i}{c_i}  
 is the parameter vector for the ith smooth term and \eqn{{\bf V}_i}{V_i} its corresponding covariance matrix, then the 
 statistic is \eqn{{\bf c}_i^\prime {\bf V}_i^{k-} {\bf c}_i}{c_i'V_i^{k-}c_i} where \eqn{{\bf V}^{k-}_i}{V_i^{k-}} is the \eqn{k}{k} 
 pseudo-inverse of \eqn{{\bf V_i}}{V_i} and \eqn{k}{k} is the estimated rank of \eqn{{\bf V_i}}{V_i}. \eqn{k}{k} is determined heuristically as follows. It is the minimum
@@ -43,7 +43,7 @@ value between the maximum \code{edf} value allowed for the ith smooth term and t
 as 2*\code{edf}. P-values are obtained by comparing the chi.sq statistic to the chi-squared distribution with \eqn{k}{k} degrees of freedom. 
 
 Notice that p-values are approximate. Simulation evidence suggests that if the data are not too noisy, then this p-value definition can lead to reliable
-covariate selection, otherwise shrinkage approaches (Marra and Wood, in press) are more reliable. 
+covariate selection, otherwise shrinkage approaches (Marra and Wood, 2011) are more reliable. 
 
 }
 
@@ -52,7 +52,7 @@ covariate selection, otherwise shrinkage approaches (Marra and Wood, in press) a
 \value{
 
 \item{tableP1}{It returns a table containing parametric estimates, their standard errors, z-values and p-values for equation 1.}
-\item{tableP2}{It returns a table containing parametric estimates, their standard errors, z-values and p-values for equation 2.}
+\item{tableP2}{As above but for equation 2.}
 \item{tableNP1}{It returns a table of nonparametric summaries for each smooth component including estimated degrees of freedom, estimated rank, 
                 approximate Wald statistic for testing the null hypothesis that the smooth term is zero, and p-value for equation 1.}
 \item{tableNP2}{As above but for equation 2.}
@@ -60,8 +60,8 @@ covariate selection, otherwise shrinkage approaches (Marra and Wood, in press) a
 \item{rho}{Estimated correlation parameter between the two equations.} 
 \item{formula1}{The original GAM formula used for equation1.}
 \item{formula2}{The original GAM formula used for equation2.}
-\item{l.sp1}{Number of smooth components of equation 1.}
-\item{l.sp2}{Number of smooth components of equation 2.}
+\item{l.sp1}{Number of smooth components in equation 1.}
+\item{l.sp2}{Number of smooth components in equation 2.}
 \item{t.edf}{Total degrees of freedom of the estimated bivariate probit model.}
 \item{CIrs}{It returns `confidence' intervals for \eqn{\rho}{\rho}.}
 \item{table.R}{Joint absolute frequency table of observed binary value combinations.}
@@ -71,7 +71,7 @@ covariate selection, otherwise shrinkage approaches (Marra and Wood, in press) a
 \item{P1,P2}{Marginal probabilities for the two binary outcomes y1=1 and y2=1.}
 \item{QPS1,QPS2}{Quadratic probability scores for the two binary responses as suggested by Diebold and Rudebusch (1989). Values are on the interval [0,2], with 0 indicating a perfect fit.}
 \item{CR1,CR2}{Correct prediction ratios for the two binary responses as percentage.}
-
+\item{sel}{This is used for internal calculations.}
 
 }
 
