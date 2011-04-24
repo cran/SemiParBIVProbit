@@ -4,7 +4,7 @@
 \title{Average Effect}
 
 \description{ 
-\code{AT} can be used to calculate the unconditional average treatment effect (ATE) and average treatment effect on the treated (ATT) of a binary predictor/treatment, with corresponding `confidence' intervals calculated via posterior simulation.}
+\code{AT} can be used to calculate the unconditional average treatment effect (ATE) and average treatment effect on the treated (ATT) of a binary predictor/treatment, with corresponding `confidence' intervals conveniently calculated via posterior simulation.}
 
 
 

@@ -10,16 +10,15 @@ available see the documentation of \code{mgcv}. Multi-dimensional smooths are av
 via the use of penalized thin plate regression splines (isotropic). The current implementation does not support scale invariant tensor 
 product smooths. 
 
-The algorithm underlying \code{SemiParBIVProbit} is based on \code{trust} (which carries out function minimization using 
-the trust region algorithm) and adaptations of some low level fitting functions in \code{mgcv}. 
 }
 
 
 
 \usage{
-SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), method="UBRE", 
-                 pr.tol=1e-10, gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL,
-                 rinit=1, rmax=100, fterm=sqrt(.Machine$double.eps), 
+SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), 
+                 selection=FALSE, pr.tol=1e-6, gamma=1, aut.sp=TRUE, 
+                 fp=FALSE, start.v=NULL, rinit=1, rmax=100, 
+                 fterm=sqrt(.Machine$double.eps), 
                  mterm=sqrt(.Machine$double.eps),   
                  control=list(maxit=50,tol=1e-6,step.half=25,
                               rank.tol=.Machine$double.eps^0.5))
@@ -37,12 +36,11 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), method="UBRE",
 \item{data}{An optional data frame, list or environment containing the variables in the model.  If not found in \code{data}, the
             variables are taken from \code{environment(formula)}, typically the environment from which \code{SemiParBIVProbit} is called.} 
 
-\item{method}{The chosen smoothing parameter selection method. UBRE denotes the use of the 
-              approximate Un-Biased Risk Estimator, whereas REML that of restricted maximum likelihood.} 
+\item{selection}{If \code{TRUE}, then the numerical routine for bivariate probit modelling in the presence of sample selection is employed.}
 
 \item{pr.tol}{Tolerance to use in judging convergence of the whole algorithm.} 
 
-\item{gamma}{It is is an inflation factor for the model degrees of freedom in the UBRE/REML score. Smoother models can be obtained setting 
+\item{gamma}{It is is an inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
              this parameter to a value greater than 1. Typically \code{gamma=1.4} achieves this.}
 
 \item{aut.sp}{If \code{TRUE}, then automatic multiple smoothing parameter selection is carried out. If \code{FALSE}, then smoothing parameters 
@@ -51,7 +49,7 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), method="UBRE",
 \item{fp}{If \code{TRUE}, then a fully parametric model with regression splines if fitted. This only makes sense 
           if used jointly with \code{aut.sp=FALSE}. See the example below.}  
 
-\item{start.v}{Although not necessary, starting values for the parameters of the two equations and correlation coefficient 
+\item{start.v}{Although not recommended, starting values for the parameters of the two equations and correlation coefficient 
                can be provided here.}  
 
 \item{rinit}{Starting trust region radius. The trust region radius is adjusted as the algorithm proceeds. Bad initial 
@@ -81,17 +79,14 @@ The bivariate probit model has a probit link for each of the two equations, and 
 between the responses by the correlation parameter \eqn{\rho}{\rho} of a standard bivariate normal distribution. 
 
 In a semiparametric bivariate probit model the linear predictors are flexibly specified using 
-parametric components and smooth functions of covariates.
-
-Replacing the smooth components with their regression spline expressions yields a fully parametric bivariate probit model. In principle, classic 
-maximum likelihood (ML) estimation can be employed. However, to avoid overfitting, penalized likelihood maximization is used instead. Here the use of 
-penalty matrices allow for the suppression of that part of smooth term complexity which has no support from the data. The tradeoff between smoothness 
-and fitness is controlled by smoothing parameters associated with the penalty matrices. Smoothing parameters are chosen to either minimize 
-the approximate Un-Biased Risk Estimator (UBRE) score or maximize the restricted maximum likelihood (REML) function.
+parametric components and smooth functions of covariates. Replacing the smooth components with their regression spline expressions yields a fully parametric bivariate probit model. In principle, classic 
+maximum likelihood (ML) estimation can be employed. However, to avoid overfitting, penalized likelihood maximization has to be employed instead. Here the use of 
+penalty matrices allows for the suppression of that part of smooth term complexity which has no support from the data. The tradeoff between smoothness 
+and fitness is controlled by smoothing parameters associated with the penalty matrices. Smoothing parameters are chosen to minimize the approximate Un-Biased Risk Estimator (UBRE) score.
 
 The optimization problem is solved by Fisher scoring's method. Automatic smoothing parameter selection is integrated 
 using a performance-oriented iteration approach (Wood, 2004). At each iteration, (i) the penalized weighted least squares 
-problem is solved, then (ii) the smoothing parameters of that problem estimated by approximate UBRE/REML. Steps (i) and (ii) are iterated until 
+problem is solved, then (ii) the smoothing parameters of that problem estimated by approximate UBRE. Steps (i) and (ii) are iterated until 
 convergence.
 
 Details of the underlying fitting methods are given in Marra and Radice (in press). 

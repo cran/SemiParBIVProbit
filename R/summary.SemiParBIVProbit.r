@@ -80,6 +80,8 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
   dimnames(table2.2)[[2]] <- c("edf", "Est.rank", "Chi.sq", "p-value")
   }
 
+ if(object$sel==FALSE){
+ 
  Pre.p <- matrix(NA,n,8)
  Pre.c <- matrix(NA,n,2)
 
@@ -127,27 +129,55 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
  CR1 <- mean(as.numeric(object$gam1$y==P1.b))*100
  CR2 <- mean(as.numeric(object$gam2$y==P2.b))*100
 
+ }
+
+ if(object$sel==FALSE){
+
+
   if(object$l.sp1!=0 && object$l.sp2!=0){res <- list(tableP1=table1, tableP2=table2, 
                                            tableNP1=table1.1, tableNP2=table2.2, 
                                            n=n, rho=object$rho, 
                                            formula1=object$gam1$formula, formula2=object$gam2$formula, 
                                            l.sp1=object$l.sp1, l.sp2=object$l.sp2, 
                                            t.edf=object$t.edf, CIrs=CIrs,
-                                           table.R=table.R, table.P=table.P, table.F=table.F, MR=mean(matches)*100, 
-                                           P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2)
+                   			   table.R=table.R, table.P=table.P, table.F=table.F, MR=mean(matches)*100,
+                   			   P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2, sel=object$sel
+                                           )
                                class(res) <- "summary.SemiParBIVProbit"
-                               res
-  }
-  else{res <- list(tableP1=table1,tableP2=table2, 
+  }else{res <- list(tableP1=table1,tableP2=table2, 
                    n=n, rho=object$rho, 
                    formula1=object$gam1$formula, formula2=object$gam2$formula, 
                    l.sp1=0, l.sp2=0, 
                    t.edf=object$t.edf, CIrs=CIrs,
                    table.R=table.R, table.P=table.P, table.F=table.F, MR=mean(matches)*100,
-                   P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2)
+                   P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2, sel=object$sel
+                   )
        class(res) <- "summary.SemiParBIVProbit"
-       res
   }
+
+ }else{
+
+
+ if(object$l.sp1!=0 && object$l.sp2!=0){res <- list(tableP1=table1, tableP2=table2, 
+                                           tableNP1=table1.1, tableNP2=table2.2, 
+                                           n=n, rho=object$rho, 
+                                           formula1=object$gam1$formula, formula2=object$gam2$formula, 
+                                           l.sp1=object$l.sp1, l.sp2=object$l.sp2, 
+                                           t.edf=object$t.edf, CIrs=CIrs, sel=object$sel
+                                           )
+                               class(res) <- "summary.SemiParBIVProbit"
+  }else{res <- list(tableP1=table1,tableP2=table2, 
+                   n=n, rho=object$rho, 
+                   formula1=object$gam1$formula, formula2=object$gam2$formula, 
+                   l.sp1=0, l.sp2=0, 
+                   t.edf=object$t.edf, CIrs=CIrs, sel=object$sel
+                   )
+       class(res) <- "summary.SemiParBIVProbit"
+       }
+
+                    }
+
+res
 
 }
 

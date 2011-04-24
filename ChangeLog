@@ -1,20 +1,19 @@
-version 1.0-3
-- plot function fixed.
+version 2.0
+- routine for bivariate probit modelling with sample selection implemented.
 
 version 1.0-2
-- function to calculate residuals from fitted model.
 - function ATE suppressed and replaced by AT.
 
 version 1.0-1
-- basis dimension in REML smoothing parameter selection function fixed.
-- default tolerance increased.
+- basis dimension in UBRE smoothing parameter selection function fixed.
 
 version 1.0
-- REML smoothing parameter selection implemented.
+- plot function fixed.
+- function to calculate residuals from fitted model.
 
 version 0.2
 - R documentation and references updated.
 
-version 0.1
+version 0.1-1
 - initial release.
 
