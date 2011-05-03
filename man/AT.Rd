@@ -46,7 +46,7 @@ of the estimated model parameters.
 
 
 \value{
-The function returns the AT with corresponding `confidence' intervals.
+The function returns the ATE or ATT with corresponding `confidence' intervals.
 }
 
 
