@@ -64,14 +64,14 @@ covariate selection, otherwise shrinkage approaches (Marra and Wood, 2011) are m
 \item{l.sp2}{Number of smooth components in equation 2.}
 \item{t.edf}{Total degrees of freedom of the estimated bivariate probit model.}
 \item{CIrs}{It returns `confidence' intervals for \eqn{\rho}{\rho}.}
-\item{table.R}{Joint absolute frequency table of observed binary value combinations.}
-\item{table.P}{Joint absolute frequency table of predicted binary value combinations.}
+\item{sel}{This is used for internal calculations.}
+\item{table.R}{Joint absolute frequency table of observed binary value combinations. This as well as all remaining quantities below are not provided in the sample selection case.}
+\item{table.P}{Joint absolute frequency table of predicted binary value combinations. }
 \item{table.F}{It is given by \code{table.P}/\code{table.R}.}
 \item{MR}{Based on the comparison between \code{table.P} and \code{table.R}, it reports the matching rate as percentage.}
 \item{P1,P2}{Marginal probabilities for the two binary outcomes y1=1 and y2=1.}
 \item{QPS1,QPS2}{Quadratic probability scores for the two binary responses as suggested by Diebold and Rudebusch (1989). Values are on the interval [0,2], with 0 indicating a perfect fit.}
 \item{CR1,CR2}{Correct prediction ratios for the two binary responses as percentage.}
-\item{sel}{This is used for internal calculations.}
 
 }
 

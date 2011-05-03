@@ -5,8 +5,7 @@
 
 \description{ 
 \code{SemiParBIVProbit} can be used to fit bivariate probit models where the linear predictors are flexibly specified using parametric and 
-nonparametric components. Regression spline bases are extracted from the package \code{mgcv}. For an overview of the splines 
-available see the documentation of \code{mgcv}. Multi-dimensional smooths are available 
+nonparametric components. Regression spline bases are extracted from the package \code{mgcv}. Multi-dimensional smooths are available 
 via the use of penalized thin plate regression splines (isotropic). The current implementation does not support scale invariant tensor 
 product smooths. 
 
@@ -15,10 +14,10 @@ product smooths.
 
 
 \usage{
-SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), 
-                 selection=FALSE, pr.tol=1e-6, gamma=1, aut.sp=TRUE, 
-                 fp=FALSE, start.v=NULL, rinit=1, rmax=100, 
-                 fterm=sqrt(.Machine$double.eps), 
+SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), gcv=FALSE,  
+                 selection=FALSE, iterlimFS=1, iterlimSP=25, pr.tol=1e-6, 
+                 gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL, 
+                 rinit=1, rmax=100, fterm=sqrt(.Machine$double.eps), 
                  mterm=sqrt(.Machine$double.eps),   
                  control=list(maxit=50,tol=1e-6,step.half=25,
                               rank.tol=.Machine$double.eps^0.5))
@@ -36,11 +35,17 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(),
 \item{data}{An optional data frame, list or environment containing the variables in the model.  If not found in \code{data}, the
             variables are taken from \code{environment(formula)}, typically the environment from which \code{SemiParBIVProbit} is called.} 
 
+\item{gcv}{If \code{FALSE}, then UBRE is used otherwise GCV is employed.}
+
 \item{selection}{If \code{TRUE}, then the numerical routine for bivariate probit modelling in the presence of sample selection is employed.}
 
-\item{pr.tol}{Tolerance to use in judging convergence of the whole algorithm.} 
+\item{iterlimFS}{A positive integer specifying the maximum number of iterations of the Fisher scoring algorithm to allow in the smoothing parameter estimation step.} 
 
-\item{gamma}{It is is an inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
+\item{iterlimSP}{A positive integer specifying the maximum number of loops to be performed before the smoothing parameter estimation step is terminated.} 
+
+\item{pr.tol}{Tolerance to use in judging convergence of the algorithm when automatic smoothing parameter selection is used.} 
+
+\item{gamma}{It is is an inflation factor for the model degrees of freedom in the GCV/UBRE score. Smoother models can be obtained setting 
              this parameter to a value greater than 1. Typically \code{gamma=1.4} achieves this.}
 
 \item{aut.sp}{If \code{TRUE}, then automatic multiple smoothing parameter selection is carried out. If \code{FALSE}, then smoothing parameters 
@@ -76,20 +81,17 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(),
 \details{
 
 The bivariate probit model has a probit link for each of the two equations, and models the association
-between the responses by the correlation parameter \eqn{\rho}{\rho} of a standard bivariate normal distribution. 
-
-In a semiparametric bivariate probit model the linear predictors are flexibly specified using 
+between the responses by the correlation parameter \eqn{\rho}{\rho} of a standard bivariate normal distribution. In a semiparametric bivariate probit model the linear predictors are flexibly specified using 
 parametric components and smooth functions of covariates. Replacing the smooth components with their regression spline expressions yields a fully parametric bivariate probit model. In principle, classic 
 maximum likelihood (ML) estimation can be employed. However, to avoid overfitting, penalized likelihood maximization has to be employed instead. Here the use of 
 penalty matrices allows for the suppression of that part of smooth term complexity which has no support from the data. The tradeoff between smoothness 
-and fitness is controlled by smoothing parameters associated with the penalty matrices. Smoothing parameters are chosen to minimize the approximate Un-Biased Risk Estimator (UBRE) score.
+and fitness is controlled by smoothing parameters associated with the penalty matrices. Smoothing parameters are chosen to 
+minimize the approximate Un-Biased Risk Estimator (UBRE) or Generalised Cross Validation (GCV) score.
 
 The optimization problem is solved by Fisher scoring's method. Automatic smoothing parameter selection is integrated 
 using a performance-oriented iteration approach (Wood, 2004). At each iteration, (i) the penalized weighted least squares 
-problem is solved, then (ii) the smoothing parameters of that problem estimated by approximate UBRE. Steps (i) and (ii) are iterated until 
-convergence.
-
-Details of the underlying fitting methods are given in Marra and Radice (in press). 
+problem is solved, then (ii) the smoothing parameters of that problem estimated by approximate GCV/UBRE. Steps (i) and (ii) are iterated until 
+convergence. Details of the underlying fitting methods are given in Marra and Radice (in press). 
 
 }
 

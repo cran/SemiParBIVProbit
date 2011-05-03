@@ -1,4 +1,5 @@
-SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FALSE, pr.tol=1e-6,
+SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), gcv=FALSE, selection=FALSE, 
+                             iterlimFS=1, iterlimSP=25, pr.tol=1e-6,
                              gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL, rinit=1, rmax=100, 
                              fterm=sqrt(.Machine$double.eps), mterm=sqrt(.Machine$double.eps), 
         		     control=list(maxit=50,tol=1e-6,step.half=25,rank.tol=.Machine$double.eps^0.5) ){
@@ -57,7 +58,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
 
     fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, dat=dat,
                   X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, blather=TRUE, 
-                  iterlim=1000, fterm=fterm, mterm=mterm)   
+                  fterm=fterm, mterm=mterm)   
 
                                                      
     if(aut.sp==TRUE){
@@ -77,7 +78,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
              
                 	bs.mgfit <- try(magic(y=wor.c$rW.Z,X=wor.c$rW.X,sp=sp,S=qu.mag$Ss,
                         	           off=qu.mag$off,rank=qu.mag$rank,n.score=3*n,
-                                	   gcv=FALSE,gamma=gamma,control=control))
+                                	   gcv=gcv,gamma=gamma,control=control))
                 	if(class(bs.mgfit)=="try-error") {conv.sp <- FALSE; break} 
                 	sp <- bs.mgfit$sp
                                
@@ -86,18 +87,18 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
              l.o <- fit$l
              
              fit <- try(trust(func.opt, fit$argument, rinit=rinit, rmax=rmax, dat=dat, X1.d2=X1.d2, X2.d2=X2.d2, S=S, 
-                              gam1=gam1, gam2=gam2, fp=fp, blather=TRUE, iterlim=1000, fterm=fterm, mterm=mterm),silent=TRUE)
+                              gam1=gam1, gam2=gam2, fp=fp, blather=TRUE, iterlim=iterlimFS, fterm=fterm, mterm=mterm),silent=TRUE)
 
               if(class(fit)=="try-error"){ 
                fit  <- trust(func.opt, coefo, rinit=rinit, rmax=rmax, dat=dat,
                              X1.d2=X1.d2, X2.d2=X2.d2, S=So, gam1=gam1, gam2=gam2, fp=fp, blather=TRUE, 
-                             iterlim=1000, fterm=fterm, mterm=mterm)
+                             iterlim=iterlimFS, fterm=fterm, mterm=mterm)
                conv.sp <- FALSE; break
               }
               
              l.n <- fit$l
 
-             if(j.it>25){
+             if(j.it>iterlimSP){
               conv.sp <- FALSE; break
              }
              j.it <- j.it + 1      

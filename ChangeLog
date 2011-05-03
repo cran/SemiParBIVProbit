@@ -1,3 +1,6 @@
+version 2.0-1
+- GCV smoothing parameter selection allowed for.
+
 version 2.0
 - routine for bivariate probit modelling with sample selection implemented.
 

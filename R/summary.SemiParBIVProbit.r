@@ -139,18 +139,18 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
                                            n=n, rho=object$rho, 
                                            formula1=object$gam1$formula, formula2=object$gam2$formula, 
                                            l.sp1=object$l.sp1, l.sp2=object$l.sp2, 
-                                           t.edf=object$t.edf, CIrs=CIrs,
+                                           t.edf=object$t.edf, CIrs=CIrs, sel=object$sel,
                    			   table.R=table.R, table.P=table.P, table.F=table.F, MR=mean(matches)*100,
-                   			   P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2, sel=object$sel
+                   			   P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2
                                            )
                                class(res) <- "summary.SemiParBIVProbit"
   }else{res <- list(tableP1=table1,tableP2=table2, 
                    n=n, rho=object$rho, 
                    formula1=object$gam1$formula, formula2=object$gam2$formula, 
                    l.sp1=0, l.sp2=0, 
-                   t.edf=object$t.edf, CIrs=CIrs,
+                   t.edf=object$t.edf, CIrs=CIrs, sel=object$sel,
                    table.R=table.R, table.P=table.P, table.F=table.F, MR=mean(matches)*100,
-                   P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2, sel=object$sel
+                   P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2
                    )
        class(res) <- "summary.SemiParBIVProbit"
   }
