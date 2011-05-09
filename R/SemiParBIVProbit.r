@@ -4,12 +4,12 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), gcv=FALSE, s
                              fterm=sqrt(.Machine$double.eps), mterm=sqrt(.Machine$double.eps), 
         		     control=list(maxit=50,tol=1e-6,step.half=25,rank.tol=.Machine$double.eps^0.5) ){
 
-  gam1 <- gam(formula.eq1, binomial(link="probit"), data=data)
+  gam1 <- gam(formula.eq1, binomial(link="probit"), gamma=gamma, data=data)
   conv.sp <- gam2.1 <- NULL; bs.mgfit <- wor.c <- j.it <- 0
 
   if(selection==FALSE){
 
-  gam2  <- gam(formula.eq2, binomial(link="probit"), data=data)
+  gam2  <- gam(formula.eq2, binomial(link="probit"), gamma=gamma, data=data)
   X1    <- model.matrix(gam1); X1.d2 <- dim(X1)[2]
   X2    <- model.matrix(gam2); X2.d2 <- dim(X2)[2]
   l.sp1 <- length(gam1$smooth); l.sp2 <- length(gam2$smooth)
@@ -17,6 +17,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), gcv=FALSE, s
 
   i.rho <- 0.5; names(i.rho) <- "rho" 
   if(is.null(start.v)) start.v <- c(coef(gam1),coef(gam2),atanh(i.rho))
+
   func.opt <- bprob
   sp <- c(gam1$sp,gam2$sp)
   if(l.sp1!=0 && l.sp2!=0 && fp==FALSE){S <- spS(sp,gam1,gam2); qu.mag <- S.m(gam1,gam2)}
@@ -25,7 +26,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), gcv=FALSE, s
 
   inde <- gam1$y > 0
   environment(formula.eq2) <- environment(NULL)
-  gam2  <- gam(formula.eq2, binomial(link="probit"), data=data, subset=inde)
+  gam2  <- gam(formula.eq2, binomial(link="probit"), gamma=gamma, data=data, subset=inde)
   environment(gam2$formula) <- environment(gam1$formula)
   X1 <- model.matrix(gam1); X1.d2 <- dim(X1)[2]
   X2.d2 <- length(coef(gam2)); X2 <- matrix(0,length(inde),X2.d2)
@@ -38,16 +39,30 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), gcv=FALSE, s
   	 		       imr <- dnorm(p.g1)/pnorm(p.g1)
   		               formula.eq2.1 <- update.formula(formula.eq2, ~. + imr)
   			       environment(formula.eq2.1) <- environment(NULL)
-                               ols <- gam(formula.eq2.1, data=data, subset=inde) 
+                               ols <- gam(formula.eq2.1, data=data, gamma=gamma, subset=inde) 
                                rhi <- coef(ols)["imr"]/sqrt(ols$sig2)
                                ta2 <- (1 + rhi^2*imr*(-p.g1-imr))[inde]
-                               data.r <- cbind( ols$model[,1:1], ols$model[,2:dim(ols$model)[2]]/sqrt( pmax(10000*.Machine$double.eps, ta2) )  )
-                               names(data.r) <- names(ols$model)
-	                       gam2.1 <- gam(formula.eq2.1, binomial(link="probit"), data=data.r)
-                               environment(gam2.1$formula) <- environment(gam2$formula) 
+
+                               M <- ols$model
+                               vSn <- names(M); fw <-  paste(vSn[1],"~",vSn[2],sep="") 
+                               for (i in 3:length(vSn)) fw <- paste(fw,"+",vSn[i],sep="")
+                               fw <- as.formula(fw)
+                               MM <- as.data.frame(model.matrix(fw,M)[,-1])
+                               data.r <- MM/sqrt( pmax(10000*.Machine$double.eps, ta2) ) 
+                               data.r <- as.data.frame(cbind(ols$model[,1],data.r)); names(data.r)[1] <- names(M)[1]
+
+                               l <- as.matrix(data.r[,2:(ols$smooth[[1]]$first.para-1)])
+                               fw <-  paste(names(data.r)[1],"~ l",sep="")
+                               for(i in 1:length(ols$smooth)) fw <- paste(fw,"+",ols$smooth[[i]]$label,sep="")
+                               fw <- as.formula(fw)
+
+	                       gam2.1 <- gam(fw, binomial(link="probit"), gamma=gamma, data=data.r)
+                               names(gam2.1$coefficients)[2:(ols$smooth[[1]]$first.para-1)] <- names(ols$coefficients)[2:(ols$smooth[[1]]$first.para-1)]
+
                                rho.c <- coef(gam2.1)["imr"]  
                                rho <- ifelse( abs(rho.c) > 0.99, sign(rho.c)*0.95, rho.c ); names(rho) <- "rho"
   			       start.v <- c(coef(gam1),coef(gam2.1)[names(coef(gam2.1))!="imr"], atanh(rho)  )
+
   			     }
   func.opt <- bprobSS
   sp <- c(gam1$sp,gam2.1$sp)

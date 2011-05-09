@@ -1,3 +1,7 @@
+version 2.0-2
+- inflation factor in the GCV/UBRE score for univariate and bivariate models. 
+- two stage procedure to provide starting values in the sample selection algorithm implemented.
+
 version 2.0-1
 - GCV smoothing parameter selection allowed for.
 
