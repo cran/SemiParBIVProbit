@@ -1,3 +1,6 @@
+version 2.0-3
+- two stage procedure for fully parametric fit fixed. 
+
 version 2.0-2
 - inflation factor in the GCV/UBRE score for univariate and bivariate models. 
 - two stage procedure to provide starting values in the sample selection algorithm implemented.
