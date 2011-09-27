@@ -1,5 +1,5 @@
 SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), gcv=FALSE, selection=FALSE, 
-                             iterlimFS=1, iterlimSP=25, pr.tol=1e-6,
+                             iterlimFS=1, iterlimSP=50, pr.tol=1e-6,
                              gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL, rinit=1, rmax=100, 
                              fterm=sqrt(.Machine$double.eps), mterm=sqrt(.Machine$double.eps), 
         		     control=list(maxit=50,tol=1e-6,step.half=25,rank.tol=.Machine$double.eps^0.5) ){
@@ -28,9 +28,9 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), gcv=FALSE, s
   environment(formula.eq2) <- environment(NULL)
   gam2  <- gam(formula.eq2, binomial(link="probit"), gamma=gamma, data=data, subset=inde)
   environment(gam2$formula) <- environment(gam1$formula)
-  X1 <- model.matrix(gam1); X1.d2 <- dim(X1)[2]
-  X2.d2 <- length(coef(gam2)); X2 <- matrix(0,length(inde),X2.d2)
-  X2[inde,] <- model.matrix(gam2)
+  X1 <- model.matrix(gam1); X1.d2 <- dim(X1)[2]; X2.d2 <- length(coef(gam2))
+  X2 <- matrix(0,length(inde),X2.d2,dimnames = list(c(1:length(inde)),c(names(coef(gam2)))) )
+  X2[inde, ] <- model.matrix(gam2)
   y2 <- rep(0,length(inde)); y2[inde] <- gam2$y
   l.sp1 <- length(gam1$smooth); l.sp2 <- length(gam2$smooth)
   dat <- cbind(gam1$y,y2,X1,X2); n <- length(dat[,1])
@@ -81,7 +81,8 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), gcv=FALSE, s
 
     fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, dat=dat,
                   X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, blather=TRUE, 
-                  fterm=fterm, mterm=mterm)   
+                  fterm=fterm, mterm=mterm, iterlim = 1000)  
+    iter.if <- fit$iterations              
 
                                                      
     if(aut.sp==TRUE){
@@ -106,7 +107,6 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), gcv=FALSE, s
                 	sp <- bs.mgfit$sp
                                
              S <- spS(sp,gam1,gam2)
-             
              l.o <- fit$l
              
              fit <- try(trust(func.opt, fit$argument, rinit=rinit, rmax=rmax, dat=dat, X1.d2=X1.d2, X2.d2=X2.d2, S=S, 
@@ -146,8 +146,8 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), gcv=FALSE, s
   if(l.sp1!=0 && l.sp2!=0 && fp==FALSE){HeSh <- He - fit$S.h; F <- Vb%*%HeSh} else{HeSh <- He; F <- Vb%*%HeSh}      
   t.edf <- sum(diag(F))
 
-L <- list(fit=fit, gam1=gam1, gam2=gam2, gam2.1=gam2.1, sp=sp, iter.sp=j.it,
-          rho=tanh(fit$argument[length(fit$argument)]), n=n, X1=X1, X2=X2, X1.d2=X1.d2, X2.d2=X2.d2, 
+L <- list(fit=fit, gam1=gam1, gam2=gam2, gam2.1=gam2.1, sp=sp, iter.sp=j.it, iter.if=iter.if,
+          rho=tanh(fit$argument[length(fit$argument)]), n=n, n.sel=length(gam2$y), X1=X1, X2=X2, X1.d2=X1.d2, X2.d2=X2.d2, 
           l.sp1=l.sp1, l.sp2=l.sp2, He=He, HeSh=HeSh, Vb=Vb, F=F, 
           t.edf=t.edf, bs.mgfit=bs.mgfit, conv.sp=conv.sp, wor.c=wor.c,
           p11=fit$p11, p10=fit$p10, p01=fit$p01, p00=fit$p00, p0=fit$p0, eta1=fit$eta1, eta2=fit$eta2, 

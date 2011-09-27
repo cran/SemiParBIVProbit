@@ -17,15 +17,19 @@
 
 \item{gam2}{A univariate GAM object for equation 2.}
 
-\item{gam2.1}{A univariate GAM object for equation 2, estimated using the sample selection correction when this is the case.}
+\item{gam2.1}{A univariate GAM object for equation 2, estimated using a Heckman-type sample selection correction procedure (\code{selection=TRUE}).}
 
 \item{sp}{Estimated smoothing parameters of the smooth components for the fitted bivariate probit model.}
 
-\item{iter.sp}{Number of iterations for the smoothing parameter estimation step.}
+\item{iter.sp}{Number of iterations performed for the smoothing parameter estimation step.}
+
+\item{iter.if}{Number of iterations performed in the initial step of the Fisher scoring algorithm.}
 
 \item{rho}{Estimated correlation coefficient between the two equations.}
 
 \item{n}{Sample size.}
+
+\item{n.sel}{Number of selected observations in the sample selection case.}
 
 \item{X1}{It returns the design matrix associated with the first linear predictor.}
 
@@ -57,13 +61,13 @@
              the weight matrix times the pseudo-data vector and design matrix, \code{rW.Z} and \code{rW.X}.}                
 
 \item{p11,p10,p01,p00}{Distribution function of a bivariate normal with zero means, unit variances and correlation \code{rho} evaluated 
-                       at (y1=1,y2=1), (y1=1,y2=0), (y1=0,y2=1) and (y1=0,y2=0). The last two combinations are not evaluated in the sample selection case.}
+                       at (y1=1,y2=1), (y1=1,y2=0), (y1=0,y2=1) and (y1=0,y2=0). The last two combinations are not evaluated if \code{selection=TRUE}.}
 
-\item{p0}{Distribution function of a standardised univariate normal evaluated at y1=0, in the sample selection case.}
+\item{p0}{Distribution function of a standardised univariate normal evaluated at y1=0, when \code{selection=TRUE}.}
 
 \item{eta1,eta2}{The estimated linear predictors for the two equations.}
 
-\item{dat}{It returns the full design matrix associated with the observed binary variables and the two linear predictors.}
+\item{dat}{It returns the full design matrix associated with the observed binary variables and two linear predictors.}
 
 \item{sel}{This is used for internal calculations.}
 

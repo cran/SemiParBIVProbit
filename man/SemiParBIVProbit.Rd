@@ -5,7 +5,8 @@
 
 \description{ 
 \code{SemiParBIVProbit} can be used to fit bivariate probit models where the linear predictors are flexibly specified using parametric and 
-nonparametric components. Regression spline bases are extracted from the package \code{mgcv}. Multi-dimensional smooths are available 
+regression spline components. During the model fitting process, the possible presence of correlated error equations, endogeneity or sample selection is accounted for. Regression 
+spline bases are extracted from the package \code{mgcv}. Multi-dimensional smooths are available 
 via the use of penalized thin plate regression splines (isotropic). The current implementation does not support scale invariant tensor 
 product smooths. 
 
@@ -15,7 +16,7 @@ product smooths.
 
 \usage{
 SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), gcv=FALSE,  
-                 selection=FALSE, iterlimFS=1, iterlimSP=25, pr.tol=1e-6, 
+                 selection=FALSE, iterlimFS=1, iterlimSP=50, pr.tol=1e-6, 
                  gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL, 
                  rinit=1, rmax=100, fterm=sqrt(.Machine$double.eps), 
                  mterm=sqrt(.Machine$double.eps),   
@@ -83,15 +84,15 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), gcv=FALSE,
 The bivariate probit model has a probit link for each of the two equations, and models the association
 between the responses by the correlation parameter \eqn{\rho}{\rho} of a standard bivariate normal distribution. In a semiparametric bivariate probit model the linear predictors are flexibly specified using 
 parametric components and smooth functions of covariates. Replacing the smooth components with their regression spline expressions yields a fully parametric bivariate probit model. In principle, classic 
-maximum likelihood (ML) estimation can be employed. However, to avoid overfitting, penalized likelihood maximization has to be employed instead. Here the use of 
-penalty matrices allows for the suppression of that part of smooth term complexity which has no support from the data. The tradeoff between smoothness 
+maximum likelihood estimation can be employed. However, to avoid overfitting, penalized likelihood maximization has to be employed instead. Here the use of 
+penalty matrices allows for the suppression of that part of smooth term complexity which has no support from the data. The trade-off between smoothness 
 and fitness is controlled by smoothing parameters associated with the penalty matrices. Smoothing parameters are chosen to 
 minimize the approximate Un-Biased Risk Estimator (UBRE) or Generalised Cross Validation (GCV) score.
 
 The optimization problem is solved by Fisher scoring's method. Automatic smoothing parameter selection is integrated 
-using a performance-oriented iteration approach (Wood, 2004). At each iteration, (i) the penalized weighted least squares 
+using a performance-oriented iteration approach (Gu, 1992; Wood, 2004). At each iteration, (i) the penalized weighted least squares 
 problem is solved, then (ii) the smoothing parameters of that problem estimated by approximate GCV/UBRE. Steps (i) and (ii) are iterated until 
-convergence. Details of the underlying fitting methods are given in Marra and Radice (in press). 
+convergence. Details of the underlying fitting methods are given in Marra and Radice (2011). 
 
 }
 
@@ -112,8 +113,12 @@ Rosalba Radice, London School of Hygiene and Tropical Medicine
 
 \references{
 
-Marra G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{The Canadian 
-Journal of Statistics}.
+Gu C. (1992), Cross validating non-Gaussian data. \emph{Journal of Computational and Graphical Statistics}, 1, 169-179.
+
+Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
+Journal of Statistics}, 39, 259-279.
+
+Marra G. and Radice R., A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modelling. \emph{Submitted}.
 
 Wood S.N. (2004), Stable and efficient multiple smoothing parameter estimation for generalized additive models. \emph{Journal of the American Statistical Association}, 99, 673-686.
 
@@ -122,8 +127,8 @@ Wood S.N. (2004), Stable and efficient multiple smoothing parameter estimation f
 
 \section{WARNINGS}{
 
-Any automatic smoothing parameter selection procedure is not likely to work well when the data have low information content. This issue is likely 
-to be more severe for bivariate models, especially when \eqn{\rho}{\rho} is high and the number of observations low. Here, convergence failure is
+Any automatic smoothing parameter selection procedure is not likely to work well when the data have low information content. In bivariate probit models, this 
+issue is especially relevant when \eqn{\rho}{\rho} is high and the number of observations low. Here, convergence failure is
 typically associated with an infinite cycling between the two steps detailed above. If this occurs, then one might either (i) lower the total number of parameters to estimate by reducing the dimension of the regression spline 
 bases, (ii) set the smoothing parameters to the values obtained from the univariate fits (\code{aut.sp=FALSE}), or (iii) set the smoothing parameters to the values obtained from
 the non-converged algorithm. The default option is (iii).
@@ -187,9 +192,10 @@ InfCr(out,cr="BIC")
 ## "cr" cubic regression spline basis      - "cs" shrinkage version of "cr"
 ## "tp" thin plate regression spline basis - "ts" shrinkage version of "tp"
 ## for smooths of one variable, "cr/cs" and "tp/ts" achieve similar results 
-## k is the basis dimension
+## k is the basis dimension - default is 10
+## m is the order of the penalty for the specific term - default is 2
 
-out  <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cr",k=10) + s(x3,bs="cr",k=10), 
+out  <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cr",k=10,m=2) + s(x3,bs="cr",k=10), 
                          y2 ~ x1 + s(x2,bs="cr",k=10) + s(x3,bs="cr",k=10), 
                          data=dataSim)
 summary(out)
@@ -332,14 +338,82 @@ plot(outSb, eq=2, select=1,theta = 30, phi = 25)
 #
 #
 
+############
+## EXAMPLE 3
+############
+## Generate data with sample selection mechanism and exclusion restriction
+
+set.seed(0)
+
+n <- 2000
+
+Sigma <- matrix(c(1,0.5,0.5,1),2,2)
+u     <- rmvnorm(n,rep(0,2),Sigma)
+
+SigmaC <- matrix( c(1,0.5,0.5,0.5,1,0.5,0.5,0.5,1), 3 , 3)
+
+cov    <- rmvnorm(n,rep(0,3),SigmaC, method="svd")
+cov    <- pnorm(cov)
+
+bi <- round(cov[,1]); x1 <- cov[,2]; x2 <- cov[,3]
+  
+f11 <- function(x) -0.7*(4*x + 2.5*x^2 + 0.7*sin(5*x) + cos(7.5*x))
+f12 <- function(x) -0.4*( -0.3 - 1.6*x + sin(5*x))  
+f21 <- function(x) 0.6*(exp(x) + sin(2.9*x)) 
+
+ys <-  0.58 + 2.5*bi + f11(x1) + f12(x2) + u[, 1] > 0
+y  <- -0.68 - 1.5*bi + f21(x1) +         + u[, 2] > 0
+yo <- y*(ys > 0)
+  
+dataSim <- data.frame(y,ys,yo,bi,x1,x2)
+
+
+## SEMIPARAMETRIC SAMPLE SELECTION BIVARIATE PROBIT
+## the first equation MUST be the selection equation
+
+out <- SemiParBIVProbit(ys ~ bi + s(x1,bs="cr",k=10) + s(x2,bs="cr",k=10), 
+                        yo ~ bi + s(x1,bs="cr",k=10), 
+                        data=dataSim, selection=TRUE)
+
+AT(out,eq=2,nm.bin="bi",E=FALSE) ## average treatment effect on the treated (ATT) 
+
+## compare the two summary outputs
+## the second output produces a summary of the results obtained when only 
+## the outcome equation is fitted, i.e. selection bias is not accounted for
+
+summary(out)
+summary(out$gam2)
+
+## mean predicted probabilities that 'yo' is equal to 1
+## the second predicted probability does not account for selection bias
+
+mean(round(pnorm(out$eta2[out$eta2!=0])))
+mean(round(pnorm(predict(out$gam2))))
+
+## estimated smooth function plots
+## the red line is the true curve
+## the blue line is the naive curve not accounting for selection bias
+
+x1 <- sort(x1)
+f21.x1 <- f21(x1)[order(x1)]-mean(f21(x1))
+
+plot(out, eq=2, select=1,ylim=c(-1.2,1)); lines(x1, f21.x1, col="red")
+par(new=TRUE)
+plot(out$gam2, select=1, se=FALSE, col="blue",ylim=c(-1.2,1),ylab="",rug=FALSE)
+
+#
+#
+
 }
 
+
+\keyword{sample selection}
 \keyword{semiparametric bivariate probit modelling} 
-\keyword{bivariate probit models} 
+\keyword{bivariate probit model} 
 \keyword{endogeneity} 
 \keyword{smooth} 
-\keyword{regression splines}
-\keyword{shrinkage smoothers}
+\keyword{regression spline}
+\keyword{shrinkage smoother}
 \keyword{variable selection}
 
 

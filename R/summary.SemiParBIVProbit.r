@@ -163,14 +163,14 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
                                            n=n, rho=object$rho, 
                                            formula1=object$gam1$formula, formula2=object$gam2$formula, 
                                            l.sp1=object$l.sp1, l.sp2=object$l.sp2, 
-                                           t.edf=object$t.edf, CIrs=CIrs, sel=object$sel
+                                           t.edf=object$t.edf, CIrs=CIrs, sel=object$sel, n.sel=object$n.sel
                                            )
                                class(res) <- "summary.SemiParBIVProbit"
   }else{res <- list(tableP1=table1,tableP2=table2, 
                    n=n, rho=object$rho, 
                    formula1=object$gam1$formula, formula2=object$gam2$formula, 
                    l.sp1=0, l.sp2=0, 
-                   t.edf=object$t.edf, CIrs=CIrs, sel=object$sel
+                   t.edf=object$t.edf, CIrs=CIrs, sel=object$sel, n.sel=object$n.sel
                    )
        class(res) <- "summary.SemiParBIVProbit"
        }

@@ -26,11 +26,11 @@ print.summary.SemiParBIVProbit <- function(x,digits = max(3, getOption("digits")
     }
 
   if(x$sel==FALSE){ 
-    if(x$l.sp1!=0 && x$l.sp2!=0){ cat("n = ",x$n,"  rho = ",round(x$rho,3),"(",round(x$CIrs[1],3),",",round(x$CIrs[2],3),")","  total edf = ",round(x$t.edf,3),"  MR = ",round(x$MR,3),"%\n","QPS1 = ",round(x$QPS1,3),"  QPS2 = ",round(x$QPS2,3),"  CR1 = ",round(x$CR1,3),"%  CR2 = ",round(x$CR2,3),"%\n\n", sep="") }
-    else{ cat("n = ",x$n,"  rho = ",round(x$rho,3),"(",round(x$CIrs[1],3),",",round(x$CIrs[2],3),")","  total edf = ",round(x$t.edf,3),"  MR = ",round(x$MR,3),"%\n","QPS1 = ",round(x$QPS1,3),"  QPS2 = ",round(x$QPS2,3),"  CR1 = ",round(x$CR1,3),"%  CR2 = ",round(x$CR2,3),"%\n\n",sep="")  }
+    if(x$l.sp1!=0 && x$l.sp2!=0){ cat("n = ",x$n,"  rho = ",format(x$rho,digits=3),"(",format(x$CIrs[1],digits=3),",",format(x$CIrs[2],digits=3),")","  total edf = ",format(x$t.edf,digits=3),"  MR = ",format(x$MR,digits=3),"%\n","QPS1 = ",format(x$QPS1,digits=3),"  QPS2 = ",format(x$QPS2,digits=3),"  CR1 = ",format(x$CR1,digits=3),"%  CR2 = ",format(x$CR2,digits=3),"%\n\n", sep="") }
+    else{ cat("n = ",x$n,"  rho = ",format(x$rho,digits=3),"(",format(x$CIrs[1],digits=3),",",format(x$CIrs[2],digits=3),")","  total edf = ",format(x$t.edf,digits=3),"  MR = ",format(x$MR,digits=3),"%\n","QPS1 = ",format(x$QPS1,digits=3),"  QPS2 = ",format(x$QPS2,digits=3),"  CR1 = ",format(x$CR1,digits=3),"%  CR2 = ",format(x$CR2,digits=3),"%\n\n",sep="")  }
                   }else{
-    if(x$l.sp1!=0 && x$l.sp2!=0){ cat("n = ",x$n,"  rho = ",round(x$rho,3),"(",round(x$CIrs[1],3),",",round(x$CIrs[2],3),")","  total edf = ",round(x$t.edf,3),"\n\n", sep="") }
-    else{ cat("n = ",x$n,"  rho = ",round(x$rho,3),"(",round(x$CIrs[1],3),",",round(x$CIrs[2],3),")","  total edf = ",round(x$t.edf,3),"\n\n",sep="")  }
+    if(x$l.sp1!=0 && x$l.sp2!=0){ cat("n = ",x$n,"  n.sel = ",x$n.sel,"  rho = ",format(x$rho,digits=3),"(",format(x$CIrs[1],digits=3),",",format(x$CIrs[2],digits=3),")","  total edf = ",format(x$t.edf,digits=3),"\n\n", sep="") }
+    else{ cat("n = ",x$n,"  n.sel = ",x$n.sel,"  rho = ",format(x$rho,digits=3),"(",format(x$CIrs[1],digits=3),",",format(x$CIrs[2],digits=3),")","  total edf = ",format(x$t.edf,digits=3),"\n\n",sep="")  }
                        }
 
                         

@@ -53,7 +53,7 @@ Rosalba Radice, London School of Hygiene and Tropical Medicine
 }
 
 \keyword{semiparametric bivariate probit modelling} 
-\keyword{bivariate probit models} 
+\keyword{bivariate probit model} 
 \keyword{information criterion} 
 
 
