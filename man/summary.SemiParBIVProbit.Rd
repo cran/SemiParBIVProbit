@@ -42,8 +42,8 @@ pseudo-inverse of \eqn{{\bf V_i}}{V_i} and \eqn{k}{k} is the estimated rank of \
 value between the maximum \code{edf} value allowed for the ith smooth term and the smallest integer not less than the quantity calculated
 as 2*\code{edf}. P-values are obtained by comparing the chi.sq statistic to the chi-squared distribution with \eqn{k}{k} degrees of freedom. 
 
-Notice that p-values are approximate. Simulation evidence suggests that if the data are not too noisy, then this p-value definition can lead to reliable
-covariate selection, otherwise shrinkage approaches (Marra and Wood, 2011) are more reliable. 
+Notice that p-values are approximate. Simulation evidence suggests that if the data are not too 'noisy', then this p-value definition can lead to reliable
+covariate selection, otherwise shrinkage approaches are more reliable (Marra and Wood, 2011) . 
 
 }
 
@@ -65,7 +65,8 @@ covariate selection, otherwise shrinkage approaches (Marra and Wood, 2011) are m
 \item{t.edf}{Total degrees of freedom of the estimated bivariate probit model.}
 \item{CIrs}{It returns `confidence' intervals for \eqn{\rho}{\rho}.}
 \item{sel}{This is used for internal calculations.}
-\item{table.R}{Joint absolute frequency table of observed binary value combinations. This as well as all remaining quantities below are not provided in the sample selection case.}
+\item{n.sel}{Number of selected observations in the sample selection case.}
+\item{table.R}{Joint absolute frequency table of observed binary value combinations. This as well as all remaining quantities below are not provided when \code{selection=TRUE}.}
 \item{table.P}{Joint absolute frequency table of predicted binary value combinations. }
 \item{table.F}{It is given by \code{table.P}/\code{table.R}.}
 \item{MR}{Based on the comparison between \code{table.P} and \code{table.R}, it reports the matching rate as percentage.}
@@ -103,11 +104,11 @@ Rosalba Radice, London School of Hygiene and Tropical Medicine
 }
 
 
-\keyword{models}
+\keyword{model}
 \keyword{information criteria}
 \keyword{smooth}
 \keyword{regression}
-\keyword{shrinkage smoothers}
+\keyword{shrinkage smoother}
 \keyword{variable selection}
 
 

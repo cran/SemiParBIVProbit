@@ -45,9 +45,14 @@ of the estimated model parameters.
 }
 
 
+
 \value{
-The function returns the ATE or ATT with corresponding `confidence' intervals.
+
+\item{res}{It returns three values, namely the lower confidence interval limit, estimated AT and upper confidence interval limit, respectively.}
+\item{sig.lev}{The significance level used.}
+
 }
+
 
 
 
@@ -62,8 +67,8 @@ Rosalba Radice, London School of Hygiene and Tropical Medicine
 
 \references{
 
-Marra G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{The Canadian 
-Journal of Statistics}.
+Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
+Journal of Statistics}, 39, 259-279.
 
 }
 
@@ -77,7 +82,7 @@ Journal of Statistics}.
 }
 
 \keyword{semiparametric bivariate probit modelling} 
-\keyword{bivariate probit models} 
+\keyword{bivariate probit model} 
 \keyword{ATE} 
 \keyword{ATT} 
 \keyword{average treatment effect} 

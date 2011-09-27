@@ -26,8 +26,8 @@
 
 \details{ 
 
-It prints out the family, model equations, total number of observations, estimated correlation 
-coefficient and total effective degrees of freedom for the penalized model. 
+\code{print.SemiParBIVProbit} prints out the family, model equations, total number of observations, estimated correlation 
+coefficient and total effective degrees of freedom for the penalized or unpenalized model. 
 
 }
 

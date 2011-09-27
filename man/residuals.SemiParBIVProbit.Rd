@@ -27,7 +27,7 @@
 
 \details{
 
-Justification for these residuals is from the penalized IRLS algorithm used to fit the model (Marra and Radice, in press). 
+Justification for these residuals is from the penalized IRLS algorithm used to fit the model (Marra and Radice, 2011). 
 
 }
 
@@ -57,8 +57,8 @@ Rosalba Radice, London School of Hygiene and Tropical Medicine
 
 \references{
 
-Marra G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{The Canadian 
-Journal of Statistics}.
+Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
+Journal of Statistics}, 39, 259-279.
 
 }
 
@@ -79,8 +79,8 @@ Unfortunately residual plots from models fitted to binary data do not contain mu
 
 
 
-\keyword{Pearson residuals} 
-\keyword{working residuals} 
+\keyword{Pearson residual} 
+\keyword{working residual} 
 
 
 

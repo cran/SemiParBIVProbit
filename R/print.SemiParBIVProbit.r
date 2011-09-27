@@ -1,13 +1,28 @@
 print.SemiParBIVProbit <- function(x,...){
 
-  cat("\nFamily: BIVARIATE PROBIT\n\nFormula Eq. 1:\n")
+  if(x$sel==FALSE){ 
+
+  cat("\nFamily: BIVARIATE PROBIT\n\nFormula Eq. 1: ")
   print(x$gam1$formula)
 
-  cat("\nFormula Eq. 2:\n")
+  cat("Formula Eq. 2: ")
   print(x$gam2$formula)
   cat("\n")
 
-  cat("n = ",x$n,"  rho = ",round(x$rho,3),"  total edf = ",round(x$t.edf,3),"\n\n")
+  cat("n = ",x$n,"  rho = ",format(x$rho, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n")
+
+  }else{
+
+  cat("\nFamily: BIVARIATE PROBIT\n\nSELECTION EQ.: ")
+  print(x$gam1$formula)
+
+  cat("OUTCOME   EQ.: ")
+  print(x$gam2$formula)
+  cat("\n")
+
+  cat("n = ",x$n,"  n.sel = ",x$n.sel,"  rho = ",format(x$rho, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n")
+  }
+
 
 invisible(x)
 

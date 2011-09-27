@@ -4,13 +4,14 @@
 
 \title{Semiparametric Bivariate Probit Modelling}
 
-\description{ \code{SemiParBIVProbit} provides a function for bivariate probit modelling where the linear predictors can be flexibly specified 
-by using parametric and nonparametric components.}
+\description{\code{SemiParBIVProbit} provides a function for bivariate probit modelling with semiparametric predictors, including linear and nonlinear effects.
+}
 
-\details{ \code{SemiParBIVProbit} provides a function for flexible bivariate probit modelling. The underlying representation and 
-estimation of the model is based on a penalized regression spline approach, with automatic smoothness selection. The algorithm is based on 
-the package \code{trust} (which carries out function minimization using a trust region algorithm) and
-adaptations of some low level smoothness selection fitting functions of the package \code{mgcv}. 
+\details{\code{SemiParBIVProbit} provides a function for flexible bivariate probit modelling, in the presence of 
+correlated error equations, endogeneity or sample selection. The underlying representation and 
+estimation of the model is based on a penalized regression spline approach, with automatic smoothness selection. The 
+numerical routine carries out function minimization using a trust region algorithm from the package \code{trust} in combination with
+an adaptation of a low level smoothness selection fitting procedure from the package \code{mgcv}. 
  
 \code{\link{SemiParBIVProbit}} supports the use of many smoothers as extracted from \code{mgcv}. Scale invariant tensor product smooths
 are not currently supported. Estimation is by penalized maximum likelihood with automatic smoothness selection by approximate Un-Biased Risk Estimator (UBRE) or Generalised Cross Validation (GCV) score. 
@@ -33,8 +34,11 @@ Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 
 \references{
 
-Marra G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{The Canadian 
-Journal of Statistics}.
+Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
+Journal of Statistics}, 39, 259-279.
+
+Marra G. and Radice R., A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modelling. \emph{Submitted}.
+
 
 }
 
@@ -45,8 +49,9 @@ Journal of Statistics}.
 
 
 
-
+\keyword{endogeneity} 
 \keyword{package}
+\keyword{sample selection} 
 \keyword{semiparametric bivariate probit modelling} 
 \keyword{smooth} 
 \keyword{regression}

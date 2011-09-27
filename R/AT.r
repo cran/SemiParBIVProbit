@@ -1,12 +1,14 @@
 AT <- function(x,eq,nm.bin="",sig.lev=0.05,n.sim=1000,s.meth="svd",E=TRUE,treat=TRUE){
 
+if(is.character(nm.bin)==FALSE) stop("nm.bin is not a character")
+
 if(eq==1){ind <- 1:length(x$gam1$coef); coef <- as.numeric(x$fit$argument[ind]); X <- x$X1}
 
 if(x$sel==FALSE){
-if(eq==2){ind <- x$X1.d2+(1:length(x$gam2$coef)); coef <- as.numeric(x$fit$argument[ind]); X <- x$X2}
-}else{
-if(eq==2){ind <- x$X1.d2+(1:length(x$gam2$coef)); coef <- as.numeric(x$fit$argument[ind]); X <- x$X2[x$gam1$y > 0,]}
-}
+         if(eq==2){ind <- x$X1.d2+(1:length(x$gam2$coef)); coef <- as.numeric(x$fit$argument[ind]); X <- x$X2}
+                }else{
+         if(eq==2){ind <- x$X1.d2+(1:length(x$gam2$coef)); coef <- as.numeric(x$fit$argument[ind]); X <- x$X2[x$gam1$y > 0,]}
+  }
 
 d0 <- d1 <- X
 d0[,nm.bin] <- 0
@@ -36,13 +38,13 @@ if(treat==TRUE) for(i in 1:n.sim) est.ATb[i] <- mean((pnorm(d1%*%bs[i,ind])- pno
 
 }
 
-
 CIs <- quantile(est.ATb,c(sig.lev/2,1-sig.lev/2))
-res <- round(cbind(CIs[1],est.AT,CIs[2]),3) 
+res <- as.numeric(cbind(CIs[1],est.AT,CIs[2]))
+out <- list(res=res, sig.lev=sig.lev)
+ 
+class(out) <- "AT"
 
-cat("\nAverage Effect with corresponding ",(1-sig.lev)*100,"% 'Confidence' Intervals:\n\n",sep="")
-cat(res[2]," (",res[1],",",res[3],")\n\n",sep="")
-
+out
 
 }
 
