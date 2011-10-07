@@ -15,7 +15,7 @@ product smooths.
 
 
 \usage{
-SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), gcv=FALSE,  
+SemiParBIVProbit(formula.eq1, formula.eq2, data=list(),  
                  selection=FALSE, iterlimFS=1, iterlimSP=50, pr.tol=1e-6, 
                  gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL, 
                  rinit=1, rmax=100, fterm=sqrt(.Machine$double.eps), 
@@ -36,8 +36,6 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), gcv=FALSE,
 \item{data}{An optional data frame, list or environment containing the variables in the model.  If not found in \code{data}, the
             variables are taken from \code{environment(formula)}, typically the environment from which \code{SemiParBIVProbit} is called.} 
 
-\item{gcv}{If \code{FALSE}, then UBRE is used otherwise GCV is employed.}
-
 \item{selection}{If \code{TRUE}, then the numerical routine for bivariate probit modelling in the presence of sample selection is employed.}
 
 \item{iterlimFS}{A positive integer specifying the maximum number of iterations of the Fisher scoring algorithm to allow in the smoothing parameter estimation step.} 
@@ -46,7 +44,7 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), gcv=FALSE,
 
 \item{pr.tol}{Tolerance to use in judging convergence of the algorithm when automatic smoothing parameter selection is used.} 
 
-\item{gamma}{It is is an inflation factor for the model degrees of freedom in the GCV/UBRE score. Smoother models can be obtained setting 
+\item{gamma}{It is is an inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
              this parameter to a value greater than 1. Typically \code{gamma=1.4} achieves this.}
 
 \item{aut.sp}{If \code{TRUE}, then automatic multiple smoothing parameter selection is carried out. If \code{FALSE}, then smoothing parameters 
@@ -87,11 +85,11 @@ parametric components and smooth functions of covariates. Replacing the smooth c
 maximum likelihood estimation can be employed. However, to avoid overfitting, penalized likelihood maximization has to be employed instead. Here the use of 
 penalty matrices allows for the suppression of that part of smooth term complexity which has no support from the data. The trade-off between smoothness 
 and fitness is controlled by smoothing parameters associated with the penalty matrices. Smoothing parameters are chosen to 
-minimize the approximate Un-Biased Risk Estimator (UBRE) or Generalised Cross Validation (GCV) score.
+minimize the approximate Un-Biased Risk Estimator (UBRE).
 
 The optimization problem is solved by Fisher scoring's method. Automatic smoothing parameter selection is integrated 
 using a performance-oriented iteration approach (Gu, 1992; Wood, 2004). At each iteration, (i) the penalized weighted least squares 
-problem is solved, then (ii) the smoothing parameters of that problem estimated by approximate GCV/UBRE. Steps (i) and (ii) are iterated until 
+problem is solved, then (ii) the smoothing parameters of that problem estimated by approximate UBRE. Steps (i) and (ii) are iterated until 
 convergence. Details of the underlying fitting methods are given in Marra and Radice (2011). 
 
 }
@@ -129,7 +127,7 @@ Wood S.N. (2004), Stable and efficient multiple smoothing parameter estimation f
 
 Any automatic smoothing parameter selection procedure is not likely to work well when the data have low information content. In bivariate probit models, this 
 issue is especially relevant when \eqn{\rho}{\rho} is high and the number of observations low. Here, convergence failure is
-typically associated with an infinite cycling between the two steps detailed above. If this occurs, then one might either (i) lower the total number of parameters to estimate by reducing the dimension of the regression spline 
+typically associated with an infinite cycling between the two steps detailed above. If this occurs, as some practical solutions, one might either (i) lower the total number of parameters to estimate by reducing the dimension of the regression spline 
 bases, (ii) set the smoothing parameters to the values obtained from the univariate fits (\code{aut.sp=FALSE}), or (iii) set the smoothing parameters to the values obtained from
 the non-converged algorithm. The default option is (iii).
 

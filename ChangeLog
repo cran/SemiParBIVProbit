@@ -1,3 +1,6 @@
+version 2.0-4.1
+- R documentation and references updated.
+
 version 2.0-4
 - AT function extended. 
 - R documentation and references updated.
@@ -6,11 +9,8 @@ version 2.0-3
 - two stage procedure for fully parametric fit fixed. 
 
 version 2.0-2
-- inflation factor in the GCV/UBRE score for univariate and bivariate models. 
+- inflation factor for the UBRE score for univariate and bivariate models. 
 - two stage procedure to provide starting values in the sample selection algorithm implemented.
-
-version 2.0-1
-- GCV smoothing parameter selection allowed for.
 
 version 2.0
 - routine for bivariate probit modelling with sample selection implemented.
