@@ -14,7 +14,8 @@ numerical routine carries out function minimization using a trust region algorit
 an adaptation of a low level smoothness selection fitting procedure from the package \code{mgcv}. 
  
 \code{\link{SemiParBIVProbit}} supports the use of many smoothers as extracted from \code{mgcv}. Scale invariant tensor product smooths
-are not currently supported. Estimation is by penalized maximum likelihood with automatic smoothness selection by approximate Un-Biased Risk Estimator (UBRE) or Generalised Cross Validation (GCV) score. 
+are not currently supported. Estimation is by penalized maximum likelihood with automatic smoothness selection achieved 
+by using the approximate Un-Biased Risk Estimator (UBRE). 
 
 Confidence intervals for smooth components are derived using a Bayesian approach. Approximate p-values for testing 
 individual smooth terms for equality to the zero function are also provided. Functions \code{\link{plot.SemiParBIVProbit}} and 

@@ -1,4 +1,4 @@
-SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), gcv=FALSE, selection=FALSE, 
+SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FALSE, 
                              iterlimFS=1, iterlimSP=50, pr.tol=1e-6,
                              gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL, rinit=1, rmax=100, 
                              fterm=sqrt(.Machine$double.eps), mterm=sqrt(.Machine$double.eps), 
@@ -102,7 +102,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), gcv=FALSE, s
              
                 	bs.mgfit <- try(magic(y=wor.c$rW.Z,X=wor.c$rW.X,sp=sp,S=qu.mag$Ss,
                         	           off=qu.mag$off,rank=qu.mag$rank,n.score=3*n,
-                                	   gcv=gcv,gamma=gamma,control=control))
+                                	   gcv=FALSE,gamma=gamma,control=control))
                 	if(class(bs.mgfit)=="try-error") {conv.sp <- FALSE; break} 
                 	sp <- bs.mgfit$sp
                                
