@@ -34,12 +34,10 @@ coefficient and total effective degrees of freedom for the penalized or unpenali
 
 
 \author{
-Giampiero Marra, University College London
 
-Rosalba Radice, London School of Hygiene and Tropical Medicine
+Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 
 }
-
 
 
 

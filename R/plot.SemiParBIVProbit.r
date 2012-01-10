@@ -14,20 +14,24 @@ plot.SemiParBIVProbit <- function(x, eq, select, rug=TRUE, se=TRUE, se.l=1.95996
   }
 
   if(x$l.sp1==0 && x$l.sp2==0) stop("The model is fully parametric; no smooth components to plot")
-
+  
   if(eq==1) if(select>x$l.sp1) stop("No more smooth component to plot")
   if(eq==2) if(select>x$l.sp2) stop("No more smooth component to plot")
   
   if(eq==1) if(x$gam1$smooth[[select]]$dim>2) stop("No plotting for smooths of more than two variables")
   if(eq==2) if(x$gam2$smooth[[select]]$dim>2) stop("No plotting for smooths of more than two variables")
 
-  if(eq==1) ind <- x$gam1$smooth[[select]]$first.para:x$gam1$smooth[[select]]$last.para
-  if(eq==2) ind <- (x$gam2$smooth[[select]]$first.para:x$gam2$smooth[[select]]$last.para)+x$X1.d2
+  Kk1 <- Kk2 <- 0; if(x$npRE==TRUE){ Kk1 <- x$K - 1; Kk2 <- Kk1 + 1}  
+
+  if(eq==1) ind <- (x$gam1$smooth[[select]]$first.para+Kk1):(x$gam1$smooth[[select]]$last.para+Kk1)
+  if(eq==2) ind <- (x$gam2$smooth[[select]]$first.para:x$gam2$smooth[[select]]$last.para+Kk1)+x$X1.d2+Kk2
 
   est.par.c1 <- x$fit$argument
-  est.par.c2 <- est.par.c1[-c(1:x$X1.d2)]
-  Vb         <- x$Vb
-  d.F        <- diag(x$F)
+  est.par.c2 <- est.par.c1[-c(1:(x$X1.d2+Kk2))]
+  
+  lf  <- length(x$fit$argument)  
+  Vb  <- x$Vb[1:lf,1:lf]
+  d.F <- diag(x$F[1:lf,1:lf])
 
   if(eq==1){edf <- round(sum(d.F[ind]),2)
          if(x$gam1$smooth[[select]]$dim==1){raw <- x$gam1$model[x$gam1$smooth[[select]]$term] 
@@ -94,18 +98,18 @@ plot.SemiParBIVProbit <- function(x, eq, select, rug=TRUE, se=TRUE, se.l=1.95996
                                                          } 
               }
   X <- PredictMat(x$gam2$smooth[[select]], d)
-  f <- X%*%est.par.c2[ind-x$X1.d2]
+  f <- X%*%est.par.c2[ind-(x$X1.d2+Kk2)]
   }
 
   if(se){
       if(eq==1)
-             if(seWithMean){X1 <- matrix(c(x$gam1$cmX,rep(0,length(est.par.c2))), nrow(X), ncol(Vb), byrow = TRUE)
+             if(seWithMean==TRUE && x$npRE==FALSE){X1 <- matrix(c(x$gam1$cmX,rep(0,length(est.par.c2))), nrow(X), ncol(Vb), byrow = TRUE)
                             X1[,ind] <- X
                             se.fit <- sqrt(rowSums((X1 %*% Vb) * X1))                           
              }
              else se.fit <- sqrt(rowSums((X %*% Vb[ind,ind]) * X))
          
-      else   if(seWithMean){X1 <- matrix(c(rep(0,length(x$gam1$cmX)),x$gam2$cmX,0), nrow(X), ncol(Vb), byrow = TRUE)
+      else   if(seWithMean==TRUE && x$npRE==FALSE){X1 <- matrix(c(rep(0,length(x$gam1$cmX)),x$gam2$cmX,0), nrow(X), ncol(Vb), byrow = TRUE)
                             X1[,ind] <- X
                             se.fit <- sqrt(rowSums((X1 %*% Vb) * X1))                           
              }
@@ -174,13 +178,3 @@ plot.SemiParBIVProbit <- function(x, eq, select, rug=TRUE, se=TRUE, se.l=1.95996
 
 
 }
-
-
-
-
-
-
-
-
-
-

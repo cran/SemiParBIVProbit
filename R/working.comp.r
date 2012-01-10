@@ -24,8 +24,8 @@ working.comp <- function(x,X1=X1,X2=X2,X1.d2=X1.d2,X2.d2=X2.d2,n=n){
       #piv <- order(attr(c.W,"pivot")) 
       #c.W <- c.W[,piv]
       W.eig <- eigen(W)
-      c.W   <- W.eig$vec%*%diag(sqrt(pmax(W.eig$val,.Machine$double.eps^0.6)))%*%t(W.eig$vec) 
-      W.inv <- W.eig$vec%*%diag(1/pmax(W.eig$val,.Machine$double.eps^0.6))%*%t(W.eig$vec) 
+      c.W   <- W.eig$vec%*%diag(sqrt(pmax(W.eig$val,sqrt(.Machine$double.eps))))%*%t(W.eig$vec) 
+      W.inv <- W.eig$vec%*%diag(1/pmax(W.eig$val,sqrt(.Machine$double.eps)))%*%t(W.eig$vec) 
       rW.X[i:(i+2),1:(X1.d2+X2.d2+1)] <- c.W%*%X[i:(i+2),1:(X1.d2+X2.d2+1)]
       rW.Z[i:(i+2),1] <- c.W%*%( X[i:(i+2),]%*%e.par + W.inv%*%D[i:(i+2),1] )
       #solve(W,D[i:(i+2),1]) 

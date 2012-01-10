@@ -35,9 +35,8 @@ It returns a numeric value corresponding to the selected criterion.
 
 
 \author{
-Giampiero Marra, University College London
 
-Rosalba Radice, London School of Hygiene and Tropical Medicine
+Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 
 }
 

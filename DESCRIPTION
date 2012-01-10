@@ -1,15 +1,19 @@
 Package: SemiParBIVProbit
-Version: 2.0-4.1
-Depends: VGAM, trust, mgcv, mvtnorm
+Version: 3.0
 Author: Giampiero Marra <giampiero@stats.ucl.ac.uk> and Rosalba Radice
-        <rosalba.radice@lshtm.ac.uk>
+        <rosalba.radice@lshtm.ac.uk> with contributions from Georgios
+        Papageorgiou <gpapageo@gmail.com>
 Maintainer: Giampiero Marra <giampiero@stats.ucl.ac.uk>
 Title: Semiparametric Bivariate Probit Modelling
-Description: Routine for bivariate probit modelling with semiparametric
-        predictors, including linear and nonlinear effects, in the
-        presence of correlated error equations, endogeneity or sample
-        selection.
+Description: Routine for fitting bivariate probit models with
+        semiparametric predictors (including linear, nonlinear and
+        nonparametric random effects) in the presence of correlated
+        error equations, endogeneity or sample selection.
+Depends: R (>= 2.14.0), MASS, VGAM, magic, statmod, mgcv, trust,
+        mvtnorm
+LazyLoad: yes
 License: GPL (>= 2)
-Date/Publication: 2011-10-08 06:43:21
-Packaged: 2011-10-07 08:41:13 UTC; giampiero
+URL: http://www.ucl.ac.uk/statistics/people/giampieromarra
 Repository: CRAN
+Date/Publication: 2012-01-14 09:30:23
+Packaged: 2012-01-10 12:55:12 UTC; giampiero

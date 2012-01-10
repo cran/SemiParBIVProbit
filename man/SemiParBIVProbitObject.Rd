@@ -71,13 +71,22 @@
 
 \item{sel}{This is used for internal calculations.}
 
+\item{masses}{Probabilities associated with the \code{K} biavariate mass points.}
+
+\item{K}{Number of bivariate mass points.}
+
+\item{iter.npRE}{Number of iterations performed for the EM step.}
+
+\item{npRE}{This is used for internal calculations.}
+
+\item{logL.RE}{It returns the value of the log-likelihood when the model is fitted using nonparametric random effects.}
+
 }
 
 
 \author{
-Giampiero Marra, University College London
 
-Rosalba Radice, London School of Hygiene and Tropical Medicine
+Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 
 }
 

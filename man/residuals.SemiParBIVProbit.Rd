@@ -47,9 +47,7 @@ Justification for these residuals is from the penalized IRLS algorithm used to f
 
 \author{
 
-Giampiero Marra, University College London
-
-Rosalba Radice, London School of Hygiene and Tropical Medicine
+Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 
 }
 
@@ -58,7 +56,7 @@ Rosalba Radice, London School of Hygiene and Tropical Medicine
 \references{
 
 Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
-Journal of Statistics}, 39, 259-279.
+Journal of Statistics}, 39(2), 259-279.
 
 }
 
@@ -66,7 +64,11 @@ Journal of Statistics}, 39, 259-279.
 
 \section{WARNINGS}{
 
-Unfortunately residual plots from models fitted to binary data do not contain much information about the goodness-of-fit of the model. For instance, if one wants to check distributional assumptions from residuals, QQ-plots and/or half-normal plots with simulated envelope provide no useful information (this has also been checked in simulation). For binary data, it is necessary to be able to group the residuals according to some criterion.     
+Unfortunately residual plots from models fitted to binary data do not contain much information about 
+the goodness-of-fit of the model. For instance, if one wants to check distributional assumptions 
+from residuals, QQ-plots and/or half-normal plots with simulated envelope 
+provide no useful information (this has also been checked in simulation). For binary data, it is 
+necessary to be able to group the residuals according to some criterion.     
 
 } 
 

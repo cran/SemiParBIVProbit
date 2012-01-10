@@ -7,9 +7,8 @@
 
 
 \author{
-Giampiero Marra, University College London
 
-Rosalba Radice, London School of Hygiene and Tropical Medicine
+Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 
 }
 

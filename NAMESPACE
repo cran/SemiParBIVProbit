@@ -1,0 +1,16 @@
+
+exportPattern(".")
+
+import(mgcv, trust, mvtnorm)
+
+importFrom(MASS, ginv)
+importFrom(VGAM, pnorm2, dnorm2)
+importFrom(magic, adiag)
+importFrom(statmod, gauss.quad)
+
+S3method(plot, SemiParBIVProbit)
+S3method(summary, SemiParBIVProbit)
+S3method(residuals, SemiParBIVProbit)
+S3method(print, AT)
+S3method(print, SemiParBIVProbit)
+S3method(print, summary.SemiParBIVProbit)

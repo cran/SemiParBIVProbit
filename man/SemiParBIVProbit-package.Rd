@@ -4,7 +4,8 @@
 
 \title{Semiparametric Bivariate Probit Modelling}
 
-\description{\code{SemiParBIVProbit} provides a function for bivariate probit modelling with semiparametric predictors, including linear and nonlinear effects.
+\description{\code{SemiParBIVProbit} provides a function for bivariate probit modelling with semiparametric 
+predictors, including linear, nonlinear and random effects.
 }
 
 \details{\code{SemiParBIVProbit} provides a function for flexible bivariate probit modelling, in the presence of 
@@ -22,13 +23,14 @@ individual smooth terms for equality to the zero function are also provided. Fun
 \code{\link{summary.SemiParBIVProbit}} extract such information from a fitted \code{\link{SemiParBIVProbitObject}}. Model/variable selection is also 
 possible via the use of shrinakge smoothers or information criteria. 
 
+The use of nonparametric random effects is also allowed for.
+
 }
 
 
 \author{
-Giampiero Marra, University College London
-
-Rosalba Radice, London School of Hygiene and Tropical Medicine
+Giampiero Marra (University College London) and Rosalba Radice (London School of Hygiene and Tropical Medicine) with contributions 
+from Georgios Papageorgiou (Imperial College London)
 
 Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 }
@@ -36,7 +38,7 @@ Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 \references{
 
 Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
-Journal of Statistics}, 39, 259-279.
+Journal of Statistics}, 39(2), 259-279.
 
 Marra G. and Radice R., A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modelling. \emph{Submitted}.
 
@@ -55,6 +57,7 @@ Marra G. and Radice R., A Penalized Likelihood Estimation Approach to Semiparame
 \keyword{sample selection} 
 \keyword{semiparametric bivariate probit modelling} 
 \keyword{smooth} 
+\keyword{nonparametric random effects}
 \keyword{regression}
 \keyword{model selection}
 
