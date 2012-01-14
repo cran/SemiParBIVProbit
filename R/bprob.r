@@ -1,4 +1,4 @@
-bprob <- function(params, dat, X1.d2, X2.d2, S=0, gam1, gam2, fp){
+bprob <- function(params, dat, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K=NULL, n=NULL, N=NULL, cuid=NULL, uidf=NULL, masses=NULL){
 
   dat1 <- as.matrix(dat[,3:(X1.d2+2)])
   dat2 <- as.matrix(dat[,(X1.d2+3):(X1.d2+X2.d2+2)])
@@ -54,27 +54,29 @@ bprob <- function(params, dat, X1.d2, X2.d2, S=0, gam1, gam2, fp){
               cbind( t(be1.rho) , t(be2.rho) , sum(d2l.rho.rho) ) 
             ) 
 
-  if( ( length(gam1$smooth)==0 && length(gam2$smooth)==0 ) || fp==TRUE){
          res <- -sum(l.par)
          G   <- c( -colSums( c(dl.dbe1)*dat1 ),
                    -colSums( c(dl.dbe2)*dat2 ),
                    -sum( dl.drho )  )
-         H   <- H
+
+  if( ( length(gam1$smooth)==0 && length(gam2$smooth)==0 ) || fp==TRUE){
+
          list(value=res, gradient=G, hessian=H, l=res, 
               p11=p11, p10=p10, p01=p01, p00=p00, eta1=eta1, eta2=eta2,
               dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.drho=dl.drho,
               d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
               d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
               d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho) 
-  }else{
-         S.h <- rbind( cbind( cbind(matrix(0,(X1.d2-gam1$nsdf)+gam1$nsdf,gam1$nsdf),rbind(matrix(0,gam1$nsdf,(X1.d2-gam1$nsdf)),S[1:(X1.d2-gam1$nsdf),1:(X1.d2-gam1$nsdf)]))    , matrix(0,dim(be1.be2)[1],dim(be1.be2)[2]) , matrix(0,dim(be1.rho)[1],dim(be1.rho)[2]) ), 
-                       cbind( t(matrix(0,dim(be1.be2)[1],dim(be1.be2)[2])) , cbind(matrix(0,length((X1.d2-(gam1$nsdf-1)):dim(S)[2])+gam2$nsdf,gam2$nsdf),rbind(matrix(0,gam2$nsdf,length((X1.d2-(gam1$nsdf-1)):dim(S)[2])),S[(X1.d2-(gam1$nsdf-1)):dim(S)[2],(X1.d2-(gam1$nsdf-1)):dim(S)[2]]))   , matrix(0,dim(be2.rho)[1],dim(be2.rho)[2]) ), 
-                       cbind( t(matrix(0,dim(be1.rho)[1],dim(be1.rho)[2])) , t(matrix(0,dim(be2.rho)[1],dim(be2.rho)[2])) , 0 ) ) 
-         S.res <- -sum(l.par)
+  }else{     
+         S.h <- adiag(matrix(0,gam1$nsdf,gam1$nsdf),
+                      S[1:(X1.d2-gam1$nsdf),1:(X1.d2-gam1$nsdf)],
+                      matrix(0,gam2$nsdf,gam2$nsdf),
+                      S[(X1.d2-(gam1$nsdf-1)):dim(S)[2],(X1.d2-(gam1$nsdf-1)):dim(S)[2]],
+                      0)
+ 
+         S.res <- res
          res <- S.res + (1/2)*(t(params)%*%S.h%*%params)
-         G   <- c( -colSums( c(dl.dbe1)*dat1 ),
-                   -colSums( c(dl.dbe2)*dat2 ), 
-                   -sum(dl.drho) ) + S.h%*%params
+         G   <- G + S.h%*%params
          H   <- H + S.h  
          list(value=res, gradient=G, hessian=H, S.h=S.h, l=S.res, 
               p11=p11, p10=p10, p01=p01, p00=p00, eta1=eta1, eta2=eta2,

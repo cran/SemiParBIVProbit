@@ -11,7 +11,7 @@ It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVPro
 
 \method{summary}{SemiParBIVProbit}(object,n.sim=1000,s.meth="svd",sig.lev=0.05,thrs1=0.5,thrs2=0.5,...)
 
-
+                         
 }
 
 
@@ -26,7 +26,7 @@ to calculate `confidence' intervals for \eqn{\rho}{\rho}.}
 
 \item{sig.lev}{Significance level used for intervals obtained via posterior simulation.} 
 
-\item{thrs1,thrs2}{Threshold to calculate the correct prediction ratios for the two binary responses. Default value is 0.5.} 
+\item{thrs1,thrs2}{Threshold to calculate the correct prediction ratios for the two binary responses. Default value is 0.5. It only works when \code{selection=FALSE}.} 
 
 \item{...}{Other arguments.}
 
@@ -35,15 +35,16 @@ to calculate `confidence' intervals for \eqn{\rho}{\rho}.}
 
 \details{ 
 
-The frequentist approximation for p-values of smooth terms described, for instance, in Marra and Wood (2011) is used. If \eqn{{\bf c}_i}{c_i}  
-is the parameter vector for the ith smooth term and \eqn{{\bf V}_i}{V_i} its corresponding covariance matrix, then the 
-statistic is \eqn{{\bf c}_i^\prime {\bf V}_i^{k-} {\bf c}_i}{c_i'V_i^{k-}c_i} where \eqn{{\bf V}^{k-}_i}{V_i^{k-}} is the \eqn{k}{k} 
-pseudo-inverse of \eqn{{\bf V_i}}{V_i} and \eqn{k}{k} is the estimated rank of \eqn{{\bf V_i}}{V_i}. \eqn{k}{k} is determined heuristically as follows. It is the minimum
-value between the maximum \code{edf} value allowed for the ith smooth term and the smallest integer not less than the quantity calculated
-as 2*\code{edf}. P-values are obtained by comparing the chi.sq statistic to the chi-squared distribution with \eqn{k}{k} degrees of freedom. 
+As in the package \code{mgcv}, based on the results of Marra and Wood (in press), `Bayesian p-values' are returned for the smooth terms. These have 
+better frequentist performance than their frequentist counterpart. Let \eqn{\hat{\bf f}}
+and \eqn{{\bf V}_f}{V_f} denote the vector of values of a smooth term evaluated at the original covariate values and the
+corresponding Bayesian covariance matrix, and let \eqn{{\bf V}_f^{r-}}{V_f^{r-}} denote 
+the rank \eqn{r}{r} pseudoinverse of \eqn{{\bf V}_f}{V_f}. The statistic used 
+is \eqn{T=\hat{\bf f}^\prime {\bf V}_f^{r-} \hat{\bf f}}. This is 
+compared to a chi-squared distribution with degrees of freedom given by \eqn{r}{r}, which is obtained by 
+biased rounding of the estimated degrees of freedom. See Marra (submitted) for further details. 
 
-Notice that p-values are approximate. Simulation evidence suggests that if the data are not too 'noisy', then this p-value definition can lead to reliable
-covariate selection, otherwise shrinkage approaches are more reliable (Marra and Wood, 2011) . 
+Note that covariate selection can also be achieved using a shrinkage approach as shown in Marra and Wood (2011). 
 
 }
 
@@ -66,6 +67,9 @@ covariate selection, otherwise shrinkage approaches are more reliable (Marra and
 \item{CIrs}{It returns `confidence' intervals for \eqn{\rho}{\rho}.}
 \item{sel}{This is used for internal calculations.}
 \item{n.sel}{Number of selected observations in the sample selection case.}
+\item{npRE}{This is used for internal calculations.}
+\item{masses}{If \code{npRE=TRUE}, then it returns the probabilities associated with the biavariate mass points.}
+\item{table.npRE}{If \code{npRE=TRUE}, then it returns a table representing the estimated random effect distribution.}
 \item{table.R}{Joint absolute frequency table of observed binary value combinations. This as well as all remaining quantities below are not provided when \code{selection=TRUE}.}
 \item{table.P}{Joint absolute frequency table of predicted binary value combinations. }
 \item{table.F}{It is given by \code{table.P}/\code{table.R}.}
@@ -78,18 +82,21 @@ covariate selection, otherwise shrinkage approaches are more reliable (Marra and
 
 \references{
 
-Diebold F.X. and Rudebusch G.D. (1989), Scoring the Leading Indicators. \emph{Journal of Business}, 62, 369-391. 
+Diebold F.X. and Rudebusch G.D. (1989), Scoring the Leading Indicators. \emph{Journal of Business}, 62(3), 369-391. 
 
-Marra G. and Wood S.N. (2011), Practical Variable Selection for Generalized Additive Models. \emph{Computational Statistics and Data Analysis}, 55, 2372-2387.
+Marra G. and Wood S.N. (2011), Practical Variable Selection for Generalized Additive Models. \emph{Computational Statistics and Data Analysis}, 55(7), 2372-2387.
+
+Marra G. and Wood S.N. (in press), Coverage Properties of Confidence Intervals for Generalized Additive Model Components. \emph{Scandinavian Journal of Statistics}.
+
+Marra G. (submitted), On p-values for semiparametric bivariate equation probit models.
 
 }
 
 
 
 \author{
-Giampiero Marra, University College London
 
-Rosalba Radice, London School of Hygiene and Tropical Medicine
+Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 
 }
 

@@ -1,8 +1,9 @@
 print.SemiParBIVProbit <- function(x,...){
 
   if(x$sel==FALSE){ 
-
-  cat("\nFamily: BIVARIATE PROBIT\n\nFormula Eq. 1: ")
+  re <- ""
+  if(x$npRE==TRUE) re <- "with Random Effects"
+  cat("\nFamily: BIVARIATE PROBIT",re,"\n\nFormula Eq. 1: ")
   print(x$gam1$formula)
 
   cat("Formula Eq. 2: ")

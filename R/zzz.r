@@ -1,25 +1,33 @@
-.onAttach<-function(library,pkgname)
-{
- #Return a list, each element of which is a vector
- # the first element of the vector is the stuff before the colon in info[[1]]
- # the second element is the stuff after the colon (can get >2 elements some
- # times but ignore)
- info<-strsplit(library(help=pkgname,character.only=TRUE)$info[[1]],"\\:[ ]+")
- #Go through the list, pulling out the Package, Version and Built strings
- l<-length(info)
- package<-version<-built<-""
- for(i in 1:l) {
-   if(info[[i]][1]=="Package") package<-info[[i]][2]
-   if(info[[i]][1]=="Version") version<-info[[i]][2]
-   if(info[[i]][1]=="Built") built<-info[[i]][2]
- }
-require(VGAM,quietly=TRUE)
-require(mgcv,quietly=TRUE)
-require(trust,quietly=TRUE)
-require(mvtnorm,quietly=TRUE)
- #Print these out
- cat(paste("This is",package,version,"\nBuilt:",built,"\n"))
+#print.SemiParBIVProbit.version <- function()
+#{ library(help=SemiParBIVProbit)$info[[1]] -> version
+#  version <- version[pmatch("Version",version)]
+#  um <- strsplit(version," ")[[1]]
+#  version <- um[nchar(um)>0][2]
+#  hello <- paste("\nThis is SemiParBIVProbit ",version,".\nFor overview type 'help(\"SemiParBIVProbit-package\")'.\n",sep="")
+#  packageStartupMessage(hello)
+#}
+
+.onAttach <- function(...) { 
+
+#require(MASS, quietly = TRUE, warn.conflicts = FALSE)
+#require(VGAM, quietly = TRUE, warn.conflicts = FALSE)
+#require(magic, quietly = TRUE, warn.conflicts = FALSE)
+#require(statmod, quietly = TRUE, warn.conflicts = FALSE)
+#require(mgcv, quietly = TRUE, warn.conflicts = FALSE)
+#require(trust, quietly = TRUE, warn.conflicts = FALSE)
+#require(mvtnorm, quietly = TRUE, warn.conflicts = FALSE)
+
+  library(help=SemiParBIVProbit)$info[[1]] -> version
+  version <- version[pmatch("Version",version)]
+  um <- strsplit(version," ")[[1]]
+  version <- um[nchar(um)>0][2]
+  hello <- paste("\nThis is SemiParBIVProbit ",version,".\nFor overview type 'help(\"SemiParBIVProbit-package\")'.\n",sep="")
+  packageStartupMessage(hello)
+  
 }
+
+
+
 
 
 
