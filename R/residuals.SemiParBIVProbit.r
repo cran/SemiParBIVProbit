@@ -20,8 +20,8 @@ residuals.SemiParBIVProbit <- function(object,...){
                      object$fit$d2l.be1.rho[j],object$fit$d2l.be2.rho[j],object$fit$d2l.rho.rho[j] ) , 3 , 3 ) 
 
       W.eig <- eigen(W)
-      W.ins <- W.eig$vec%*%diag(1/sqrt(pmax(W.eig$val,.Machine$double.eps^0.6)))%*%t(W.eig$vec) 
-      W.inv <- W.eig$vec%*%diag(1/pmax(W.eig$val,.Machine$double.eps^0.6))%*%t(W.eig$vec) 
+      W.ins <- W.eig$vec%*%tcrossprod(diag(1/sqrt(pmax(W.eig$val,.Machine$double.eps^0.6))),W.eig$vec) 
+      W.inv <- W.eig$vec%*%tcrossprod(diag(1/pmax(W.eig$val,.Machine$double.eps^0.6)),W.eig$vec) 
 
       r.p[j,] <- W.ins%*%D[i:(i+2),1]
       r.w[j,] <- W.inv%*%D[i:(i+2),1]

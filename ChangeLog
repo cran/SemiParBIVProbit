@@ -1,6 +1,11 @@
+version 3.1
+- AT function modified to account for estimated random effects.
+- automatic smoothing parameter selection for models with nonparametric random effects.
+- examples in documentation updated.
+
 version 3.0
-- Linear predictors extended to include linear, nonlinear and random effects.
-- P-value computation in summary.SemiParBIVProbit modified.
+- linear predictors extended to include linear, nonlinear and nonparametric random effects.
+- p-value computation in summary.SemiParBIVProbit modified.
 
 version 2.0-4.1
 - R documentation and references updated.

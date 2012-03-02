@@ -1,14 +1,8 @@
-bprobNP <- function(params, dat, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N, cuid, uidf, masses){
-
-  dat1p <- as.matrix(dat[,3:(X1.d2+2)])
-  dat2p <- as.matrix(dat[,(X1.d2+3):(X1.d2+X2.d2+2)])
-
-  dat1 <- function(u) cbind(matrix(replace(rep(0,K),u,1),ncol=K,nrow=n,byrow=TRUE),dat1p)
-  dat2 <- function(u) cbind(matrix(replace(rep(0,K),u,1),ncol=K,nrow=n,byrow=TRUE),dat2p)
+bprobNP <- function(params, dat, dat1, dat2, dat1p, dat2p, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N, cuid, uidf, masses){
 
   corr.st <- params[X1.d2+X2.d2+2*K+1]
   corr    <- tanh(corr.st)
-  d.r <- 1/sqrt( pmax(10000*.Machine$double.eps, 1-corr^2) )
+  d.r     <- 1/sqrt( pmax(10000*.Machine$double.eps, 1-corr^2) )
   drh.drh.st   <- 4*exp(2*corr.st)/(exp(2*corr.st)+1)^2
 
   y1.y2   <- dat[,1]*dat[,2]
@@ -55,26 +49,21 @@ bprobNP <- function(params, dat, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N, 
   for (i in 1:N) if (uidf[i]>1) {Wp2[i,] <- apply(Wp1[(cuid[i]+1):(cuid[i+1]),],2,prod)
                                  }else{Wp2[i,] <- Wp1[(cuid[i]+1):(cuid[i+1]),]}
   Wp3 <- t(masses*t(Wp2))
-  #Wp3 <- replace(Wp3,Wp3<.Machine$double.eps^2,0) ISSUE HERE WHEN NUMBERS GET TOO SMALL
-  W <- Wp3/apply(Wp3,1,sum)
-  #if(sum(as.numeric(W=="NaN"))!=0) W <- replace(W,W=="NaN",1)
-  
-  We <- matrix(rep(c(W),rep(uidf,K)),ncol=K)
-
-  # reiterate the above to make it faster?
+  W   <- Wp3/apply(Wp3,1,sum)
+  We  <- matrix(rep(c(W),rep(uidf,K)),ncol=K)
 
   be1.be1 <- be2.be2 <- be1.be2 <- be1.rho <- be2.rho <- rho.rho <- g1 <- g2 <- g3 <- 0 
   
   for (w in 1:K){  
-  g1 <- g1 - colSums( c(dl.dbe1[,w])*c(We[,w])*dat1(w) )
-  g2 <- g2 - colSums( c(dl.dbe2[,w])*c(We[,w])*dat2(w) )
-  g3 <- g3 - sum( c(dl.drho[,w])*c(We[,w]) )
-  be1.be1 <- be1.be1 + t(dat1(w)*c(d2l.be1.be1[,w])*c(We[,w]))%*%dat1(w)
-  be2.be2 <- be2.be2 + t(dat2(w)*c(d2l.be2.be2[,w])*c(We[,w]))%*%dat2(w)
-  be1.be2 <- be1.be2 + t(dat1(w)*c(d2l.be1.be2[,w])*c(We[,w]))%*%dat2(w)
-  be1.rho <- be1.rho + t(t(rowSums(t(dat1(w)*c(d2l.be1.rho[,w])*c(We[,w])))))
-  be2.rho <- be2.rho + t(t(rowSums(t(dat2(w)*c(d2l.be2.rho[,w])*c(We[,w])))))
-  rho.rho <- rho.rho + c(d2l.rho.rho[,w])*c(We[,w]) 
+  g1 <- g1 - colSums( c(dl.dbe1[,w])*We[,w]*dat1(w) )
+  g2 <- g2 - colSums( c(dl.dbe2[,w])*We[,w]*dat2(w) )
+  g3 <- g3 - sum( c(dl.drho[,w])*We[,w] )
+  be1.be1 <- be1.be1 + crossprod(dat1(w)*c(d2l.be1.be1[,w])*We[,w],dat1(w))
+  be2.be2 <- be2.be2 + crossprod(dat2(w)*c(d2l.be2.be2[,w])*We[,w],dat2(w))
+  be1.be2 <- be1.be2 + crossprod(dat1(w)*c(d2l.be1.be2[,w])*We[,w],dat2(w))
+  be1.rho <- be1.rho + t(t(rowSums(t(dat1(w)*c(d2l.be1.rho[,w])*We[,w]))))
+  be2.rho <- be2.rho + t(t(rowSums(t(dat2(w)*c(d2l.be2.rho[,w])*We[,w]))))
+  rho.rho <- rho.rho + c(d2l.rho.rho[,w])*We[,w] 
   }
     
   H <- rbind( cbind( be1.be1    , be1.be2    , be1.rho ),
@@ -85,36 +74,18 @@ bprobNP <- function(params, dat, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N, 
   G      <- c(g1,g2,g3)
   res    <- -sum(We*l.par)
   masses <- apply(W,2,sum)/sum(W)
-  #print(masses)
-  #print(W)
-  
-  
-  ####################################################
-  ### for smoothing step #############################
-  ####################################################
-  # 
-  Wbe1.be1 <-  Wbe2.be2 <- Wbe1.be2 <- Wbe1.rho <- Wbe2.rho <- Wrho.rho <- Wdl.dbe1 <-  Wdl.dbe2 <- Wdl.drho <- 0 
-  for (w in 1:K){  
-  Wbe1.be1 <- Wbe1.be1 + c(d2l.be1.be1[,w])*c(We[,w])
-  Wbe2.be2 <- Wbe2.be2 + c(d2l.be2.be2[,w])*c(We[,w])
-  Wbe1.be2 <- Wbe1.be2 + c(d2l.be1.be2[,w])*c(We[,w])
-  Wbe1.rho <- Wbe1.rho + c(d2l.be1.rho[,w])*c(We[,w])
-  Wbe2.rho <- Wbe2.rho + c(d2l.be2.rho[,w])*c(We[,w])
-  Wdl.dbe1 <- Wdl.dbe1 - c(dl.dbe1[,w])*c(We[,w])
-  Wdl.dbe2 <- Wdl.dbe2 - c(dl.dbe2[,w])*c(We[,w])
-  Wdl.drho <- Wdl.drho - c(dl.drho[,w])*c(We[,w])
-  }  
-  #
+
   #################################################### 
   
   if( ( length(gam1$smooth)==0 && length(gam2$smooth)==0 ) || fp==TRUE){
   
          list(value=res, gradient=G, hessian=H, l=res, masses=masses,
-              eta1=eta1, eta2=eta2, # these quantities are not meaningful but kept for final outputs
-	      dl.dbe1=Wdl.dbe1, dl.dbe2=Wdl.dbe2, dl.drho=Wdl.drho,
-	      d2l.be1.be1=Wbe1.be1, d2l.be2.be2=Wbe2.be2, 
-	      d2l.be1.be2=Wbe1.be2, d2l.be1.rho=Wbe1.rho,
-              d2l.be2.rho=Wbe2.rho, d2l.rho.rho=rho.rho)
+              eta1=dat1p%*%params[(K+1):(X1.d2+K)], 
+              eta2=dat2p%*%params[(X1.d2+2*K+1):(X1.d2+X2.d2+2*K)],
+              dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.drho=dl.drho,
+              d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
+              d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
+              d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho, We=We)
          
   }else{
          S.h <- adiag(matrix(0,K+gam1$nsdf-1,K+gam1$nsdf-1),
@@ -124,15 +95,16 @@ bprobNP <- function(params, dat, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N, 
                       0)
           
          S.res <- res 
-         res <- S.res + (1/2)*(t(params)%*%S.h%*%params)
+         res <- S.res + 0.5*crossprod(params,S.h)%*%params
          G   <- G + S.h%*%params
          H   <- H + S.h
          list(value=res, gradient=G, hessian=H, S.h=S.h, l=S.res, masses=masses,
-         eta1=eta1, eta2=eta2, # these quantities are not meaningful but kept for final outputs
-	 dl.dbe1=Wdl.dbe1, dl.dbe2=Wdl.dbe2, dl.drho=Wdl.drho,
-	 d2l.be1.be1=Wbe1.be1, d2l.be2.be2=Wbe2.be2, 
-	 d2l.be1.be2=Wbe1.be2, d2l.be1.rho=Wbe1.rho,
-         d2l.be2.rho=Wbe2.rho, d2l.rho.rho=rho.rho)
+              eta1=dat1p%*%params[(K+1):(X1.d2+K)], 
+              eta2=dat2p%*%params[(X1.d2+2*K+1):(X1.d2+X2.d2+2*K)],
+              dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.drho=dl.drho,
+              d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
+              d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
+              d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho, We=We)
    }
 }
 

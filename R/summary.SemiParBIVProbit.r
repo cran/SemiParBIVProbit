@@ -3,7 +3,7 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
   testStat <- function (p, X, V, rank = NULL) {
       qrx <- qr(X)
       R <- qr.R(qrx)
-      V <- R %*% V[qrx$pivot, qrx$pivot] %*% t(R)
+      V <- R %*% tcrossprod(V[qrx$pivot, qrx$pivot],R)
       V <- (V + t(V))/2
       ed <- eigen(V, symmetric = TRUE)
       k <- max(0, floor(rank))
@@ -41,13 +41,13 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
           ev <- diag(ed$values[k:k1]^-0.5)
           B <- ev %*% B %*% ev
           eb <- eigen(B, symmetric = TRUE)
-          rB <- eb$vectors %*% diag(sqrt(eb$values)) %*% t(eb$vectors)
-          vec[, k:k1] <- t(rB %*% t(vec[, k:k1]))
+          rB <- eb$vectors %*% tcrossprod(diag(sqrt(eb$values)),eb$vectors)
+          vec[, k:k1] <- t(tcrossprod(rB,vec[, k:k1]))
       }
       else {
           vec <- t(t(vec)/sqrt(ed$val[1:k]))
       }
-      d <- t(vec) %*% (R %*% p)
+      d <- crossprod(vec,R%*%p)
       d <- sum(d^2)
       attr(d, "rank") <- rank
       d
@@ -60,12 +60,11 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
   SE <- sqrt(diag(object$Vb[1:lf,1:lf]))
   n  <- object$n 
 
-  #if(object$npRE==TRUE){ mm <- c(object$fit$argument,object$fit$masses[1:2])
-  #    bs <- rmvnorm(n.sim, mean = mm, sigma=object$Vb, method=s.meth)}else{
-  bs <- rmvnorm(n.sim, mean = object$fit$argument, sigma=object$Vb[1:lf,1:lf], method=s.meth)#}
-  d.rho <- dim(object$Vb[1:lf,1:lf])[1]
+  if(object$npRE==FALSE) bs <- rmvnorm(n.sim, mean = object$fit$argument, sigma=object$Vb, method=s.meth)
+  else bs <- rmvnorm(n.sim, mean = c(object$fit$argument,object$fit$masses[1:(object$K-1)]), sigma=object$Vb, method=s.meth)
+
   est.RHOb <- rep(NA,n.sim)
-  for(i in 1:n.sim) est.RHOb[i] <- tanh(bs[i,d.rho])
+  for(i in 1:n.sim) est.RHOb[i] <- tanh(bs[i,lf])
   CIrs <- as.numeric(quantile(est.RHOb,c(sig.lev/2,1-sig.lev/2)))
   
   Kk1 <- Kk2 <- 0; if(object$npRE==TRUE){ Kk1 <- object$K - 1; Kk2 <- Kk1 + 1}  
