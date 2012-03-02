@@ -1,7 +1,5 @@
-bprob <- function(params, dat, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K=NULL, n=NULL, N=NULL, cuid=NULL, uidf=NULL, masses=NULL){
+bprob <- function(params, dat, dat1, dat2, dat1p=NULL, dat2p=NULL, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K=NULL, n=NULL, N=NULL, cuid=NULL, uidf=NULL, masses=NULL){
 
-  dat1 <- as.matrix(dat[,3:(X1.d2+2)])
-  dat2 <- as.matrix(dat[,(X1.d2+3):(X1.d2+X2.d2+2)])
   eta1 <- dat1%*%params[1:X1.d2]
   eta2 <- dat2%*%params[(X1.d2+1):(X1.d2+X2.d2)]
   corr.st <- params[(X1.d2+X2.d2+1)]
@@ -43,9 +41,9 @@ bprob <- function(params, dat, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K=NULL, n=N
   d2l.be2.rho  <- -(-d.n2*d.n1n2*(B*(1/p11+1/p10)-B.c*(1/p01+1/p00)))*drh.drh.st 
   d2l.rho.rho  <- -(-d.n1n2^2*(1/p11+1/p01+1/p10+1/p00))*drh.drh.st^2 
                                 
-  be1.be1 <- t(dat1*c(d2l.be1.be1))%*%dat1
-  be2.be2 <- t(dat2*c(d2l.be2.be2))%*%dat2
-  be1.be2 <- t(dat1*c(d2l.be1.be2))%*%dat2
+  be1.be1 <- crossprod(dat1*c(d2l.be1.be1),dat1)
+  be2.be2 <- crossprod(dat2*c(d2l.be2.be2),dat2)
+  be1.be2 <- crossprod(dat1*c(d2l.be1.be2),dat2)
   be1.rho <- t(t(rowSums(t(dat1*c(d2l.be1.rho)))))
   be2.rho <- t(t(rowSums(t(dat2*c(d2l.be2.rho)))))
 
@@ -75,7 +73,7 @@ bprob <- function(params, dat, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K=NULL, n=N
                       0)
  
          S.res <- res
-         res <- S.res + (1/2)*(t(params)%*%S.h%*%params)
+         res <- S.res + 0.5*crossprod(params,S.h)%*%params
          G   <- G + S.h%*%params
          H   <- H + S.h  
          list(value=res, gradient=G, hessian=H, S.h=S.h, l=S.res, 

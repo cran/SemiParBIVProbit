@@ -75,11 +75,26 @@
 
 \item{K}{Number of bivariate mass points.}
 
-\item{iter.npRE}{Number of iterations performed for the EM step.}
+\item{iter.npRE}{Number of iterations performed for a starting value procedure when using nonparametric random effect.}
+
+\item{iter.npREsp}{Number of cumulative extra-iterations performed in the 
+smoothing parameter estimation loop when using nonparametric random effects.} 
 
 \item{npRE}{This is used for internal calculations.}
 
-\item{logL.RE}{It returns the value of the log-likelihood when the model is fitted using nonparametric random effects.}
+\item{logL}{It returns the value of the (unpenalized) log-likelihood evaluated at the (penalized or unpenalized) parameter 
+            estimates.}
+
+\item{eb.u1,eb.u2}{Estimated nonparametric random effects for each cluster or individual.}
+
+\item{Eb.u1,Eb.u2}{Estimated nonparametric random effects for each observation.}
+
+\item{id}{It represents the cluster or individual identifier.}
+
+\item{uidf}{It returns the number of observations within each cluster or for each individual.}
+
+\item{T.sv}{This is used for internal calculations.}
+
 
 }
 

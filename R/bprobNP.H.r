@@ -1,11 +1,5 @@
-bprobNP.H <- function(params, dat, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N, cuid, uidf, masses){
+bprobNP.H <- function(params, dat, dat1, dat2, dat1p=NULL, dat2p=NULL, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N, cuid, uidf, masses){
 
-  dat1p <- as.matrix(dat[,3:(X1.d2+2)])
-  dat2p <- as.matrix(dat[,(X1.d2+3):(X1.d2+X2.d2+2)])
-
-  dat1 <- function(u) cbind(matrix(replace(rep(0,K),u,1),ncol=K,nrow=n,byrow=TRUE),dat1p)
-  dat2 <- function(u) cbind(matrix(replace(rep(0,K),u,1),ncol=K,nrow=n,byrow=TRUE),dat2p)
-  
   q1 <- 2*dat[,1]-1
   q2 <- 2*dat[,2]-1
   
@@ -57,15 +51,15 @@ bprobNP.H <- function(params, dat, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N
   be1.be1 <- be2.be2 <- be1.be2 <- be1.rho <- be2.rho <- rho.rho <- g1 <- g2 <- g3 <- 0 
   
   for (w in 1:K){  
-  g1 <- g1 - colSums( c(dl.dbe1[,w])*c(We[,w])*dat1(w) )
-  g2 <- g2 - colSums( c(dl.dbe2[,w])*c(We[,w])*dat2(w) )
-  g3 <- g3 - sum( c(dl.drho[,w])*c(We[,w]) )
-  be1.be1 <- be1.be1 + t(dat1(w)*c(d2l.be1.be1[,w])*c(We[,w]))%*%dat1(w)
-  be2.be2 <- be2.be2 + t(dat2(w)*c(d2l.be2.be2[,w])*c(We[,w]))%*%dat2(w)
-  be1.be2 <- be1.be2 + t(dat1(w)*c(d2l.be1.be2[,w])*c(We[,w]))%*%dat2(w)
-  be1.rho <- be1.rho + t(t(rowSums(t(dat1(w)*c(d2l.be1.rho[,w])*c(We[,w])))))
-  be2.rho <- be2.rho + t(t(rowSums(t(dat2(w)*c(d2l.be2.rho[,w])*c(We[,w])))))
-  rho.rho <- rho.rho + c(d2l.rho.rho[,w])*c(We[,w]) 
+  g1 <- g1 - colSums( c(dl.dbe1[,w])*We[,w]*dat1(w) )
+  g2 <- g2 - colSums( c(dl.dbe2[,w])*We[,w]*dat2(w) )
+  g3 <- g3 - sum( c(dl.drho[,w])*We[,w] )
+  be1.be1 <- be1.be1 + crossprod(dat1(w)*c(d2l.be1.be1[,w])*We[,w],dat1(w))
+  be2.be2 <- be2.be2 + crossprod(dat2(w)*c(d2l.be2.be2[,w])*We[,w],dat2(w))
+  be1.be2 <- be1.be2 + crossprod(dat1(w)*c(d2l.be1.be2[,w])*We[,w],dat2(w))
+  be1.rho <- be1.rho + t(t(rowSums(t(dat1(w)*c(d2l.be1.rho[,w])*We[,w]))))
+  be2.rho <- be2.rho + t(t(rowSums(t(dat2(w)*c(d2l.be2.rho[,w])*We[,w]))))
+  rho.rho <- rho.rho + c(d2l.rho.rho[,w])*We[,w] 
   }
     
   H <- rbind( cbind( be1.be1    , be1.be2    , be1.rho ),
@@ -81,8 +75,7 @@ bprobNP.H <- function(params, dat, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N
   if( ( length(gam1$smooth)==0 && length(gam2$smooth)==0 ) || fp==TRUE){
   
          list(value=res, gradient=G, hessian=H, l=res, masses=masses,
-              dl.dbe1=dl.dbe1,dl.dbe2=dl.dbe2,dl.drho=dl.drho,W=W,l.par=l.par,
-              dat1p=dat1p,dat2p=dat2p)
+              dl.dbe1=dl.dbe1,dl.dbe2=dl.dbe2,dl.drho=dl.drho,W=W,l.par=l.par,Wp3=Wp3)
          
   }else{
          S.h <- adiag(matrix(0,K+gam1$nsdf-1,K+gam1$nsdf-1),
@@ -92,12 +85,11 @@ bprobNP.H <- function(params, dat, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N
                       0)
           
          S.res <- res 
-         res <- S.res + (1/2)*(t(params)%*%S.h%*%params)
+         res <- S.res + 0.5*crossprod(params,S.h)%*%params
          G   <- G + S.h%*%params
          H   <- H + S.h
          list(value=res, gradient=G, hessian=H, S.h=S.h, l=S.res, masses=masses,
-              dl.dbe1=dl.dbe1,dl.dbe2=dl.dbe2,dl.drho=dl.drho,W=W,l.par=l.par,
-              dat1p=dat1p,dat2p=dat2p)
+              dl.dbe1=dl.dbe1,dl.dbe2=dl.dbe2,dl.drho=dl.drho,W=W,l.par=l.par,Wp3=Wp3)
    }
 }
 

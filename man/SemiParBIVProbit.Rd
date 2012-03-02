@@ -23,7 +23,7 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(),
                  mterm=sqrt(.Machine$double.eps),   
                  control=list(maxit=50,tol=1e-6,step.half=25,
                               rank.tol=sqrt(.Machine$double.eps)),
-                 npRE=FALSE, K=3, id=NULL)
+                 npRE=FALSE, K=3, id=NULL, e.npRE=TRUE, e.npREsp=TRUE)
 }
 
 
@@ -79,6 +79,12 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(),
 \item{K}{If \code{npRE=TRUE}, then \code{K} represents the number of bivariate mass points and must be supplied. Default is 3.} 
 
 \item{id}{If \code{npRE=TRUE}, then \code{id} represents a cluster or individual identifier and must be supplied.} 
+
+\item{e.npRE}{If \code{npRE=TRUE}, then \code{e.npRE} indicates whether some extra iterations in the starting value procedure
+have to be carried out.}
+
+\item{e.npREsp}{If \code{npRE=TRUE}, then \code{e.npREsp} indicates whether some extra iterations in the smoothing 
+parameter selection loop have to be carried out.} 
 
 
 }
@@ -175,10 +181,8 @@ x3 <- runif(n)
 f1   <- function(x) (cos(pi*2*x)) + sin(pi*x)
 f2   <- function(x) (x+exp(-30*(x-0.5)^2))   
 
-y1 <- rep(0,n)
-y1 <- replace(y1, -1.55 + 2*x1    + f1(x2) + u[,1] > 0, 1)
-y2 <- rep(0,n)
-y2 <- replace(y2, -0.25 - 1.25*x1 + f2(x2) + u[,2] > 0, 1)
+y1 <- ifelse(-1.55 + 2*x1    + f1(x2) + u[,1] > 0, 1, 0)
+y2 <- ifelse(-0.25 - 1.25*x1 + f2(x2) + u[,2] > 0, 1, 0)
 
 dataSim <- data.frame(y1,y2,x1,x2,x3)
 
@@ -276,10 +280,8 @@ x2 <- runif(n)
 f1   <- function(x) (cos(pi*2*x)) + sin(pi*x)
 f2   <- function(x) (x+exp(-30*(x-0.5)^2))   
 
-y1 <- rep(0,n)
-y1 <- replace(y1, -1.55 + 2*x1    + f1(x2) + u[,1] > 0, 1)
-y2 <- rep(0,n)
-y2 <- replace(y2, -0.25 - 1.25*y1 + f2(x2) + u[,2] > 0, 1)
+y1 <- ifelse(-1.55 + 2*x1    + f1(x2) + u[,1] > 0, 1, 0)
+y2 <- ifelse(-0.25 - 1.25*y1 + f2(x2) + u[,2] > 0, 1, 0)
 
 dataSim <- data.frame(y1,y2,x1,x2)
 
@@ -318,10 +320,8 @@ summary(outFP)
 
 f.biv <- function(x,z) {-0.7*exp(((3*x+3) + 0.7*(3*z-3)^2)/5)}
 
-y1 <- rep(0,n)
-y1 <- replace(y1, -1.55 + 2*x1    + f1(x2)     + u[,1] > 0, 1)
-y2 <- rep(0,n)
-y2 <- replace(y2, 3.5 - 1.25*y1 + f.biv(x2,x3) + u[,2] > 0, 1)
+y1 <- ifelse(-1.55 + 2*x1    + f1(x2)     + u[,1] > 0, 1, 0)
+y2 <- ifelse(3.5 - 1.25*y1 + f.biv(x2,x3) + u[,2] > 0, 1, 0)
 
 dataSim <- data.frame(y1,y2,x1,x2,x3)
 
@@ -417,14 +417,14 @@ plot(out$gam2, select=1, se=FALSE, col="blue",ylim=c(-1.2,1),ylab="",rug=FALSE)
 
 set.seed(0)
 
-n   <- 2000
+n   <- 500 # this is very small; increasing it will improve the results
 sre <- round(runif(n,2,4))
 t.n <- sum(sre)
 id  <- rep(seq(1,n),sre)
 
-time <- NULL
-for (i in 1:n) time <- c(time,seq(1,sre[i]))
-time <- (time-mean(time))/2
+#time <- NULL
+#for (i in 1:n) time <- c(time,seq(1,sre[i]))
+#time <- (time-mean(time))/2
 
 Sigma <- matrix(c(1,0.5,0.5,1),2,2)
 u     <- rmvnorm(t.n,rep(0,2),Sigma)
@@ -449,53 +449,64 @@ x1 <- round(runif(t.n))
 x2 <- runif(t.n)
 x3 <- runif(t.n)
 
-f1 <- function(x) (cos(pi*2*x)) + sin(pi*x)
-f2 <- function(x) (x+exp(-30*(x-0.5)^2))
-
 # responses
 
-y1 <- rep(0,t.n)
-y2 <- rep(0,t.n)
+y1 <- ifelse(mpre1 + 2*x1    + 0.75*x2 + u[,1] > 0, 1, 0)
+y2 <- ifelse(mpre2 - 1.25*y1 + 2.55*x2 + u[,2] > 0, 1, 0)
 
-y1 <- replace(y1, mpre1 + 2*x1    + 0.75*x2 - time + u[,1] > 0, 1)
-y2 <- replace(y2, mpre2 - 1.25*y1 + 2.55*x2 + time + u[,2] > 0, 1)
-
-dataSim <- data.frame(id,time,y1,y2,x1,x2,x3)
+dataSim <- data.frame(id,y1,y2,x1,x2,x3)
 
 
 ## CASE WITH NO SMOOTH COMPONENTS
 
-out <- SemiParBIVProbit(y1 ~ x1 + x2 + x3 + time,
-                        y2 ~ y1 + x2 + x3 + time, 
+out <- SemiParBIVProbit(y1 ~ x1 + x2 + x3,
+                        y2 ~ y1 + x2 + x3, 
                         data=dataSim,
-                        npRE=TRUE, K=3, id=id)
+                        npRE=TRUE, K=3, id=dataSim$id)
 
 summary(out)
 
-## CASE WITH SMOOTH COMPONENTS
+## CASE WITH SMOOTH COMPONENTS AND FIXED NAIVE SMOOTHING PARAMETERS
 
-y1 <- rep(0,t.n)
-y2 <- rep(0,t.n)
+f1 <- function(x) exp(x) + sin(2.9*x)
+f2 <- function(x) x+exp(-30*(x-0.5)^2)
+F1 <- f1(x2) - mean(f1(x2)) 
+F2 <- f2(x2) - mean(f2(x2)) 
 
-y1 <- replace(y1, mpre1 + 2*x1    + f1(x2) - time + u[,1] > 0, 1)
-y2 <- replace(y2, mpre2 - 1.25*y1 + f2(x2) + time + u[,2] > 0, 1)
+y1 <- ifelse(mpre1 + 2*x1    + F1 + u[,1] > 0, 1, 0)
+y2 <- ifelse(mpre2 - 1.25*y1 + F2 + u[,2] > 0, 1, 0)
 
-dataSim <- data.frame(id,time,y1,y2,x1,x2,x3)
+dataSim <- data.frame(id,y1,y2,x1,x2,x3)
 
-out <- SemiParBIVProbit(y1 ~ x1 + s(x2) + x3 + time,
-                        y2 ~ y1 + s(x2) + x3 + time, 
-                        data=dataSim, aut.sp=FALSE, 
-                        npRE=TRUE, K=3, id=id)
+out <- SemiParBIVProbit(y1 ~ x1 + s(x2) + x3,
+                        y2 ~ y1 + s(x2) + x3, 
+                        data=dataSim, aut.sp=FALSE,
+                        npRE=TRUE, K=3, id=dataSim$id)
 
 summary(out)
 
-x2 <- sort(x2)
-f1.x2 <- f1(x2)[order(x2)]-mean(f1(x2))
-f2.x2 <- f2(x2)[order(x2)]-mean(f2(x2))
+x2s <- sort(x2)
+f1.x2 <- F1[order(x2)]
+f2.x2 <- F2[order(x2)]
 
-par(mfrow=c(2,1))
-plot(out, eq=1, select=1); lines(x2, f1.x2, col="red")
-plot(out, eq=2, select=1); lines(x2, f2.x2, col="red")
+par(mfrow=c(2,2))
+plot(out, eq=1, select=1); lines(x2s, f1.x2, col="red")
+plot(out, eq=2, select=1); lines(x2s, f2.x2, col="red")
+
+
+## CASE WITH SMOOTH COMPONENTS AND AUTOMATIC SMOOTHING PARAMETER
+## SELECTION
+
+outS <- SemiParBIVProbit(y1 ~ x1 + s(x2) + x3,
+                         y2 ~ y1 + s(x2) + x3, 
+                         data=dataSim,
+                         npRE=TRUE, K=3, id=dataSim$id)
+
+summary(outS)
+AT(outS,eq=2,nm.bin="y1",E=FALSE)
+
+plot(outS, eq=1, select=1); lines(x2s, f1.x2, col="red")
+plot(outS, eq=2, select=1); lines(x2s, f2.x2, col="red")
 
 #
 #
