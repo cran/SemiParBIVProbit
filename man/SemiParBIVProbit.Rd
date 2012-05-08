@@ -17,7 +17,7 @@ product smooths.
 
 \usage{
 SemiParBIVProbit(formula.eq1, formula.eq2, data=list(),  
-                 selection=FALSE, iterlimSP=50, pr.tol=1e-6, 
+                 selection=FALSE, H=FALSE, iterlimSP=50, pr.tol=1e-6, 
                  gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL, 
                  rinit=1, rmax=100, fterm=sqrt(.Machine$double.eps), 
                  mterm=sqrt(.Machine$double.eps),   
@@ -40,6 +40,8 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(),
             variables are taken from \code{environment(formula)}, typically the environment from which \code{SemiParBIVProbit} is called.} 
 
 \item{selection}{If \code{TRUE}, then the numerical routine for bivariate probit modelling in the presence of sample selection is employed.}
+
+\item{H}{If \code{TRUE}, then the hessian (rather than the Fisher) information matrix is used for fully parametric bivariate probit modelling.}
 
 \item{iterlimSP}{A positive integer specifying the maximum number of loops to be performed before the smoothing parameter estimation step is terminated.} 
 
@@ -78,7 +80,7 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(),
 
 \item{K}{If \code{npRE=TRUE}, then \code{K} represents the number of bivariate mass points and must be supplied. Default is 3.} 
 
-\item{id}{If \code{npRE=TRUE}, then \code{id} represents a cluster or individual identifier and must be supplied.} 
+\item{id}{If \code{npRE=TRUE}, then \code{id} represents the individual random effect identifier and must be supplied.} 
 
 \item{e.npRE}{If \code{npRE=TRUE}, then \code{e.npRE} indicates whether some extra iterations in the starting value procedure
 have to be carried out.}
@@ -154,7 +156,7 @@ effects are linear or non-linear and for which equations.
 } 
 
 \seealso{
-\code{\link{AT}}, \code{\link{InfCr}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{residuals.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{InfCr}}, \code{\link{LM.bpm}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{residuals.SemiParBIVProbit}}
 }
 
 \examples{
@@ -207,7 +209,7 @@ InfCr(out,cr="BIC")
 ## m is the order of the penalty for the specific term - default is 2
 
 out  <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cr",k=10,m=2) + s(x3,bs="cr",k=10), 
-                         y2 ~ x1 + s(x2,bs="cr",k=10) + s(x3,bs="cr",k=10), 
+                         y2 ~ x1 + s(x2,bs="cr",k=10)     + s(x3,bs="cr",k=10), 
                          data=dataSim)
 summary(out)
 InfCr(out)
@@ -236,22 +238,12 @@ plot(out, eq=2, select=1, seWithMean=TRUE); lines(x2, f2.x2, col="red")
 plot(out, eq=2, select=2, seWithMean=TRUE); lines(x3, f3.x3, col="red")
 
 
-#
-## set gamma=1.4 to obtain a smoother model
-
-outS <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cr",k=10) + s(x3,bs="cr",k=10), 
-                         y2 ~ x1 + s(x2,bs="cr",k=10) + s(x3,bs="cr",k=10), 
-                         data=dataSim, gamma=1.4)
-summary(outS)
-
-## compare the two summary outputs
-
 ## p-values suggest to drop x3 from both equations, with a stronger 
-## evidence for eq. 2. This can be also achieved via shrinkage smoothers
+## evidence for eq. 2. This can be also achieved using shrinkage smoothers
 
-outSS <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cs",k=10) + s(x3,bs="cs",k=10), 
-                          y2 ~ x1 + s(x2,bs="cs",k=10) + s(x3,bs="cs",k=10), 
-                          data=dataSim, gamma=1.4)
+outSS <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cs") + s(x3,bs="cs"), 
+                          y2 ~ x1 + s(x2,bs="cs") + s(x3,bs="cs"), 
+                          data=dataSim)
 
 par(mfrow=c(2,2),mar=c(4.5,4.5,2,2))
 plot(outSS, eq=1, select=1)
@@ -286,24 +278,40 @@ y2 <- ifelse(-0.25 - 1.25*y1 + f2(x2) + u[,2] > 0, 1, 0)
 dataSim <- data.frame(y1,y2,x1,x2)
 
 #
-#
+
+## Testing the hypothesis of absence of endogeneity... 
+
+LM.bpm(y1 ~ x1 + s(x2),y2 ~ y1 + s(x2),dataSim)
+
+# p-value suggests presence of endogeneity, hence fit a bivariate model
+
 
 ## CLASSIC RECURSIVE BIVARIATE PROBIT
 
+# Algorithm based on Fisher Scoring
 out <- SemiParBIVProbit(y1 ~ x1 + x2, 
                         y2 ~ y1 + x2, 
                         data=dataSim)
 summary(out)
 
+# Algorithm based on Newton's method
+out <- SemiParBIVProbit(y1 ~ x1 + x2, 
+                        y2 ~ y1 + x2, 
+                        data=dataSim,H=TRUE)
+summary(out)
+
+
 ## SEMIPARAMETRIC RECURSIVE BIVARIATE PROBIT
 
-out <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cr",k=10), 
-                        y2 ~ y1 + s(x2,bs="cr",k=10), 
+out <- SemiParBIVProbit(y1 ~ x1 + s(x2), 
+                        y2 ~ y1 + s(x2), 
                         data=dataSim)
 summary(out)
 
-AT(out,eq=2,nm.bin="y1") ## average treatment effect (ATE) of y1 with CIs
-AT(out,eq=2,nm.bin="y1",E=FALSE) ## average treatment effect on the treated (ATT)
+#
+## average treatment effect on the treated (ATT) with CIs
+
+AT(out,eq=2,nm.bin="y1",E=FALSE) 
 
 #
 ## recursive bivariate probit modelling with unpenalized splines 
@@ -315,10 +323,10 @@ outFP <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cr",k=5),
 summary(outFP)
 
 
-#
+
 ## example using a 2D smooth 
 
-f.biv <- function(x,z) {-0.7*exp(((3*x+3) + 0.7*(3*z-3)^2)/5)}
+f.biv <- function(x,z) -0.7*exp(((3*x+3) + 0.7*(3*z-3)^2)/5)
 
 y1 <- ifelse(-1.55 + 2*x1    + f1(x2)     + u[,1] > 0, 1, 0)
 y2 <- ifelse(3.5 - 1.25*y1 + f.biv(x2,x3) + u[,2] > 0, 1, 0)
@@ -372,15 +380,21 @@ yo <- y*(ys > 0)
   
 dataSim <- data.frame(y,ys,yo,bi,x1,x2)
 
+## Testing the hypothesis of absence of sample selection... 
 
+LM.bpm(ys ~ bi + s(x1) + s(x2),yo ~ bi + s(x1),dataSim,selection=TRUE)
+
+# p-value suggests presence of sample selection, hence fit a bivariate model
+
+#
 ## SEMIPARAMETRIC SAMPLE SELECTION BIVARIATE PROBIT
 ## the first equation MUST be the selection equation
 
-out <- SemiParBIVProbit(ys ~ bi + s(x1,bs="cr",k=10) + s(x2,bs="cr",k=10), 
-                        yo ~ bi + s(x1,bs="cr",k=10), 
+out <- SemiParBIVProbit(ys ~ bi + s(x1) + s(x2), 
+                        yo ~ bi + s(x1), 
                         data=dataSim, selection=TRUE)
 
-AT(out,eq=2,nm.bin="bi",E=FALSE) ## average treatment effect on the treated (ATT) 
+AT(out,eq=2,nm.bin="bi",E=FALSE) ## ATT
 
 ## compare the two summary outputs
 ## the second output produces a summary of the results obtained when only 
@@ -413,100 +427,68 @@ plot(out$gam2, select=1, se=FALSE, col="blue",ylim=c(-1.2,1),ylab="",rug=FALSE)
 ## EXAMPLE 4
 ############
 ## Generate data with one endogenous variable, exclusion restriction
-## and the presence of subject specific features 
+## and subject specific features 
 
 set.seed(0)
 
-n   <- 500 # this is very small; increasing it will improve the results
-sre <- round(runif(n,2,4))
-t.n <- sum(sre)
-id  <- rep(seq(1,n),sre)
+n.cl <- 100
+n.ob.cl <- 13
 
-#time <- NULL
-#for (i in 1:n) time <- c(time,seq(1,sre[i]))
-#time <- (time-mean(time))/2
+sre <- round( runif(n.cl,n.ob.cl,n.ob.cl+2) ) 
+t.n <- sum(sre) 
+id  <- rep(seq(1,n.cl),sre) 
 
-Sigma <- matrix(c(1,0.5,0.5,1),2,2)
-u     <- rmvnorm(t.n,rep(0,2),Sigma)
+sigma1 <- 1
+sigma2 <- 2
+rho <- rho.re <- 0.5
 
-
-# random effects distribution
-
-mp1 <- c(-2,0,2)
-mp2 <- c(-3,0,3) 
-m   <- c(0.4,0.2,0.4)
-mp.ind <- sample(c(1,2,3), n, replace = TRUE, prob = m)
-
-mpr1 <- mp1[mp.ind]
-mpr2 <- mp2[mp.ind]
-
-mpre1 <- rep(mpr1,sre)
-mpre2 <- rep(mpr2,sre)
-
-#
-
-x1 <- round(runif(t.n))
-x2 <- runif(t.n)
-x3 <- runif(t.n)
-
-# responses
-
-y1 <- ifelse(mpre1 + 2*x1    + 0.75*x2 + u[,1] > 0, 1, 0)
-y2 <- ifelse(mpre2 - 1.25*y1 + 2.55*x2 + u[,2] > 0, 1, 0)
-
-dataSim <- data.frame(id,y1,y2,x1,x2,x3)
+SigmaRE <- matrix(c(sigma1^2,            sigma1*sigma2*rho.re,
+                    sigma1*sigma2*rho.re,sigma2^2             ),2,2)
+                    
+u1 <- rmvnorm(n.cl,rep(0,2),SigmaRE,method="svd")
+u  <- cbind(rep(u1[,1],sre),rep(u1[,2],sre))
 
 
-## CASE WITH NO SMOOTH COMPONENTS
+Sigma  <- matrix(c(1,rho,rho,1),2,2)
+eps    <- rmvnorm(t.n,rep(0,2),Sigma)
 
-out <- SemiParBIVProbit(y1 ~ x1 + x2 + x3,
-                        y2 ~ y1 + x2 + x3, 
-                        data=dataSim,
-                        npRE=TRUE, K=3, id=dataSim$id)
+SigmaC <- matrix(c(1,0.5,0.5,
+                   0.5,1,0.5,
+                   0.5,0.5,1),3,3)
 
-summary(out)
+cov    <- rmvnorm(t.n,rep(0,3),SigmaC, method="svd")
 
-## CASE WITH SMOOTH COMPONENTS AND FIXED NAIVE SMOOTHING PARAMETERS
+x1 <- round(pnorm(cov[,1]))
+x2 <- pnorm(cov[,2])
+x3 <- cov[,3]
 
-f1 <- function(x) exp(x) + sin(2.9*x)
-f2 <- function(x) x+exp(-30*(x-0.5)^2)
-F1 <- f1(x2) - mean(f1(x2)) 
-F2 <- f2(x2) - mean(f2(x2)) 
+f1 <- function(x) 0.5*(exp(x) + sin(2.9*x))
+f2 <- function(x) 1.8*(0.25*exp(x) - x^3)
 
-y1 <- ifelse(mpre1 + 2*x1    + F1 + u[,1] > 0, 1, 0)
-y2 <- ifelse(mpre2 - 1.25*y1 + F2 + u[,2] > 0, 1, 0)
+f1.x2 <- f1(x2) - mean(f1(x2)) 
+f2.x2 <- f2(x2) - mean(f2(x2))  
+
+y1 <- ifelse(u[,1] +        -0.75*x1 + f1.x2 + x3 + eps[,1] > 0, 1, 0)
+y2 <- ifelse(u[,2] +  -1.5*y1 + 1*x1 + f2.x2      + eps[,2] > 0, 1, 0)
 
 dataSim <- data.frame(id,y1,y2,x1,x2,x3)
 
-out <- SemiParBIVProbit(y1 ~ x1 + s(x2) + x3,
-                        y2 ~ y1 + s(x2) + x3, 
-                        data=dataSim, aut.sp=FALSE,
+
+out <- SemiParBIVProbit(y1 ~      x1 + s(x2) + x3,
+                        y2 ~ y1 + x1 + s(x2), 
+                        data=dataSim, aut.sp=TRUE,
                         npRE=TRUE, K=3, id=dataSim$id)
 
 summary(out)
+AT(out,eq=2,nm.bin="y1",E=FALSE)
 
 x2s <- sort(x2)
-f1.x2 <- F1[order(x2)]
-f2.x2 <- F2[order(x2)]
+f1.x2 <- f1.x2[order(x2)]
+f2.x2 <- f2.x2[order(x2)]
 
-par(mfrow=c(2,2))
+par(mfrow=c(1,2))
 plot(out, eq=1, select=1); lines(x2s, f1.x2, col="red")
 plot(out, eq=2, select=1); lines(x2s, f2.x2, col="red")
-
-
-## CASE WITH SMOOTH COMPONENTS AND AUTOMATIC SMOOTHING PARAMETER
-## SELECTION
-
-outS <- SemiParBIVProbit(y1 ~ x1 + s(x2) + x3,
-                         y2 ~ y1 + s(x2) + x3, 
-                         data=dataSim,
-                         npRE=TRUE, K=3, id=dataSim$id)
-
-summary(outS)
-AT(outS,eq=2,nm.bin="y1",E=FALSE)
-
-plot(outS, eq=1, select=1); lines(x2s, f1.x2, col="red")
-plot(outS, eq=2, select=1); lines(x2s, f2.x2, col="red")
 
 #
 #

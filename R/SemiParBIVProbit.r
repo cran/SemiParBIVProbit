@@ -1,4 +1,4 @@
-SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FALSE, 
+SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FALSE, H=FALSE, 
                              iterlimSP=50, pr.tol=1e-6,
                              gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL, rinit=1, rmax=100, 
                              fterm=sqrt(.Machine$double.eps), mterm=sqrt(.Machine$double.eps), 
@@ -20,13 +20,16 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
   i.rho <- 0.5; names(i.rho) <- "rho" 
   if(is.null(start.v) && npRE==FALSE) start.v <- c(coef(gam1),coef(gam2),atanh(i.rho))
 
-  func.opt <- bprob
+  if(H==TRUE && l.sp1==0 && l.sp2==0) func.opt <- bprobH else func.opt <- bprob
+  
   sp <- c(gam1$sp,gam2$sp)
 
   dat1 <- as.matrix(dat[,3:(X1.d2+2)])
   dat2 <- as.matrix(dat[,(X1.d2+3):(X1.d2+X2.d2+2)])
 
       if(npRE==TRUE){ 
+
+           if(dim(dat)[1]!=length(id)) stop("The length of your id does not match the number of rows of your data frame")
       
            if(l.sp1!=0 && l.sp2!=0 && fp==FALSE){S <- spS(sp,gam1,gam2); qu.mag <- S.m(gam1,gam2,K,npRE=FALSE)}
       
@@ -86,7 +89,9 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
                              X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, 
                              K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses)
 	    count.npRE <- count.npRE + 1
-                                                        
+	    
+	    if(count.npRE > 5000) break
+                                                                           
             }
             if(sum(as.numeric(T.sv$gradient=="NaN"))==0) start.v <- as.vector(start.v) else start.v <- as.vector(starm.v) 
             names(start.v) <- nsv   
@@ -112,8 +117,10 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
   dat2 <- as.matrix(dat[,(X1.d2+3):(X1.d2+X2.d2+2)])
 
   if(is.null(start.v)) startvSS <- startSS(gam1, gam2, formula.eq2, data, gamma, inde, l.sp1, l.sp2, fp); start.v <- startvSS$start.v 
-		     
-  func.opt <- bprobSS
+		    
+		    
+		    
+  if(H==TRUE && l.sp1==0 && l.sp2==0) func.opt <- bprobSSH else func.opt <- bprobSS		    
   sp <- c(gam1$sp,startvSS$gam2.1$sp)
   
 
@@ -169,6 +176,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
             		                 X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, 
                 		         K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses)
 	    		count.npREsp <- count.npREsp + 1
+	    		if(count.npREsp > 5000) break
                 		                                       }
 
             		if(sum(as.numeric(T.sv$gradient=="NaN"))==0) o.ests <- as.vector(o.ests) else o.ests <- as.vector(o.estm) 
@@ -242,8 +250,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
         u1 <- fit$argument[1:K]
         u2 <- fit$argument[(K+X1.d2+1):(K+X1.d2+K)]
 
-        ## normalized weights
-        nw <- T.sv$Wp3/matrix(rep(apply(T.sv$Wp3,1,sum),3),ncol=K)
+        nw <- T.sv$Wp3/matrix(rep(apply(T.sv$Wp3,1,sum),K),ncol=K)
 
         eb.u1 <- apply(t(u1*t(nw)),1,sum)
         eb.u2 <- apply(t(u2*t(nw)),1,sum)

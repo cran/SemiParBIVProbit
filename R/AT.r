@@ -6,14 +6,14 @@ Eb.u <- 0; est.ATb <- NA
 
 if(eq==1){ind <- 1:length(x$gam1$coef); coef <- as.numeric(x$fit$argument[ind]); X <- x$X1} 
 if(eq==1 && x$npRE==TRUE){ind <- (x$K+1):(x$X1.d2+x$K); coef <- as.numeric(x$fit$argument[ind]); X <- X[,-1]
-                          Eb.u <- x$Eb.u1; nw <- x$T.sv$Wp3/matrix(rep(apply(x$T.sv$Wp3,1,sum),3),ncol=x$K)}
+                          Eb.u <- x$Eb.u1; nw <- x$T.sv$Wp3/matrix(rep(apply(x$T.sv$Wp3,1,sum),x$K),ncol=x$K)}
 
 
 if(x$sel==FALSE){
 
          if(eq==2){ind <- x$X1.d2+(1:length(x$gam2$coef)); coef <- as.numeric(x$fit$argument[ind]); X <- x$X2}
          if(eq==2 && x$npRE==TRUE){ind <- (x$X1.d2+2*x$K+1):(x$X1.d2+x$X2.d2+2*x$K); coef <- as.numeric(x$fit$argument[ind]); 
-                                   X <- X[,-1]; Eb.u <- x$Eb.u2; nw <- x$T.sv$Wp3/matrix(rep(apply(x$T.sv$Wp3,1,sum),3),ncol=x$K)}
+                                   X <- X[,-1]; Eb.u <- x$Eb.u2; nw <- x$T.sv$Wp3/matrix(rep(apply(x$T.sv$Wp3,1,sum),x$K),ncol=x$K)}
 
                 }else{
 

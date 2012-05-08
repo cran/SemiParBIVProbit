@@ -1,3 +1,9 @@
+version 3.2
+- lagrange multiplier test (score test) for testing for the presence of endogeneity or sample selection implemented.
+- fisher information matrix in sample selection case fixed.
+- empirical random effet calculation fixed.
+- examples in documentation updated.
+
 version 3.1
 - AT function modified to account for estimated random effects.
 - automatic smoothing parameter selection for models with nonparametric random effects.

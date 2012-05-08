@@ -85,13 +85,13 @@ smoothing parameter estimation loop when using nonparametric random effects.}
 \item{logL}{It returns the value of the (unpenalized) log-likelihood evaluated at the (penalized or unpenalized) parameter 
             estimates.}
 
-\item{eb.u1,eb.u2}{Estimated nonparametric random effects for each cluster or individual.}
+\item{eb.u1,eb.u2}{Estimated nonparametric random effects for each identifier.}
 
 \item{Eb.u1,Eb.u2}{Estimated nonparametric random effects for each observation.}
 
-\item{id}{It represents the cluster or individual identifier.}
+\item{id}{It represents the individual identifier.}
 
-\item{uidf}{It returns the number of observations within each cluster or for each individual.}
+\item{uidf}{It returns the number of observations within each group.}
 
 \item{T.sv}{This is used for internal calculations.}
 
