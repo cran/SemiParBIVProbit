@@ -50,16 +50,16 @@ bprobNP.H <- function(params, dat, dat1, dat2, dat1p=NULL, dat2p=NULL, X1.d2, X2
 
   be1.be1 <- be2.be2 <- be1.be2 <- be1.rho <- be2.rho <- rho.rho <- g1 <- g2 <- g3 <- 0 
   
-  for (w in 1:K){  
-  g1 <- g1 - colSums( c(dl.dbe1[,w])*We[,w]*dat1(w) )
-  g2 <- g2 - colSums( c(dl.dbe2[,w])*We[,w]*dat2(w) )
-  g3 <- g3 - sum( c(dl.drho[,w])*We[,w] )
-  be1.be1 <- be1.be1 + crossprod(dat1(w)*c(d2l.be1.be1[,w])*We[,w],dat1(w))
-  be2.be2 <- be2.be2 + crossprod(dat2(w)*c(d2l.be2.be2[,w])*We[,w],dat2(w))
-  be1.be2 <- be1.be2 + crossprod(dat1(w)*c(d2l.be1.be2[,w])*We[,w],dat2(w))
-  be1.rho <- be1.rho + t(t(rowSums(t(dat1(w)*c(d2l.be1.rho[,w])*We[,w]))))
-  be2.rho <- be2.rho + t(t(rowSums(t(dat2(w)*c(d2l.be2.rho[,w])*We[,w]))))
-  rho.rho <- rho.rho + c(d2l.rho.rho[,w])*We[,w] 
+  for (u in 1:K){  
+  g1 <- g1 - colSums( c(dl.dbe1[,u])*We[,u]*dat1(u) )
+  g2 <- g2 - colSums( c(dl.dbe2[,u])*We[,u]*dat2(u) )
+  g3 <- g3 - sum( c(dl.drho[,u])*We[,u] )
+  be1.be1 <- be1.be1 + crossprod(dat1(u)*c(d2l.be1.be1[,u])*We[,u],dat1(u))
+  be2.be2 <- be2.be2 + crossprod(dat2(u)*c(d2l.be2.be2[,u])*We[,u],dat2(u))
+  be1.be2 <- be1.be2 + crossprod(dat1(u)*c(d2l.be1.be2[,u])*We[,u],dat2(u))
+  be1.rho <- be1.rho + t(t(rowSums(t(dat1(u)*c(d2l.be1.rho[,u])*We[,u]))))
+  be2.rho <- be2.rho + t(t(rowSums(t(dat2(u)*c(d2l.be2.rho[,u])*We[,u]))))
+  rho.rho <- rho.rho + c(d2l.rho.rho[,u])*We[,u] 
   }
     
   H <- rbind( cbind( be1.be1    , be1.be2    , be1.rho ),
@@ -72,7 +72,7 @@ bprobNP.H <- function(params, dat, dat1, dat2, dat1p=NULL, dat2p=NULL, X1.d2, X2
   masses <- apply(W,2,sum)/sum(W)
   
   
-  if( ( length(gam1$smooth)==0 && length(gam2$smooth)==0 ) || fp==TRUE){
+   if( ( length(gam1$smooth)==0 && length(gam2$smooth)==0 ) || fp==TRUE){
   
          list(value=res, gradient=G, hessian=H, l=res, masses=masses,
               dl.dbe1=dl.dbe1,dl.dbe2=dl.dbe2,dl.drho=dl.drho,W=W,l.par=l.par,Wp3=Wp3)

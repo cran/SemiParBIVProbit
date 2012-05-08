@@ -9,10 +9,10 @@ bprobSS <- function(params, dat, dat1, dat2, dat1p=NULL, dat2p=NULL, X1.d2, X2.d
   y1.cy2 <- dat[,1]*(1-dat[,2])
   cy1    <- (1-dat[,1])
 
-  d.r <- 1/sqrt( pmax(10000*.Machine$double.eps, 1-corr^2) )
+  d.r  <- 1/sqrt( pmax(10000*.Machine$double.eps, 1-corr^2) )
 
   A   <- pnorm( (eta2-corr*eta1)*d.r )
-  A.c <- pnorm( (eta2-corr*eta1)*d.r , lower.tail = FALSE)
+  A.c <- 1 - A
   B   <- pnorm( (eta1-corr*eta2)*d.r )
 
   p11 <- pmax( pnorm2( eta1, eta2, corr), 1000*.Machine$double.eps )
@@ -31,19 +31,19 @@ bprobSS <- function(params, dat, dat1, dat2, dat1p=NULL, dat2p=NULL, X1.d2, X2.d
   dl.dbe2 <- d.n2*B*( y1.y2/p11 - y1.cy2/p10)  
   dl.drho <- d.n1n2*(y1.y2/p11 - y1.cy2/p10)*drh.drh.st
 
-  d2l.be1.be1  <- -  ( d.n1^2*( A^2*-1/p11 + A.c^2*-1/p10 - 1/((1-p0)*p0) )  )  
+  d2l.be1.be1  <- -  ( d.n1^2*( -A^2/p11 - A.c^2/p10 - 1/p0)  )  
   d2l.be2.be2  <- -  ( d.n2^2*(B^2*(-1/p11-1/p10))  )
-  d2l.rho.rho  <- -  ( -d.n1n2^2*(1/p11+1/p10)   )*drh.drh.st^2 
-  d2l.be2.rho  <- -  ( -d.n2*d.n1n2*B*(1/p11+1/p10)  )*drh.drh.st 
   d2l.be1.be2  <- -  ( d.n1*d.n2*(-A*B/p11+A.c*B/p10)  )
+  d2l.be2.rho  <- -  ( -d.n2*d.n1n2*B*(1/p11+1/p10)  )*drh.drh.st 
   d2l.be1.rho  <- -  ( -d.n1*d.n1n2*(A*(1/p11)-A.c*(1/p10))  )*drh.drh.st 
-                                                            
+  d2l.rho.rho  <- -  ( -d.n1n2^2*(1/p11+1/p10)   )*drh.drh.st^2 
+                                                     
   be1.be1 <- crossprod(dat1*c(d2l.be1.be1),dat1)
   be2.be2 <- crossprod(dat2*c(d2l.be2.be2),dat2)
   be1.be2 <- crossprod(dat1*c(d2l.be1.be2),dat2)
   be1.rho <- t(t(rowSums(t(dat1*c(d2l.be1.rho)))))
   be2.rho <- t(t(rowSums(t(dat2*c(d2l.be2.rho)))))
-
+  
   H <- rbind( cbind( be1.be1    , be1.be2    , be1.rho ), 
               cbind( t(be1.be2) , be2.be2    , be2.rho ), 
               cbind( t(be1.rho) , t(be2.rho) , sum(d2l.rho.rho) ) 

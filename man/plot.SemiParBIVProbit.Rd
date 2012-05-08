@@ -74,7 +74,7 @@ is labelled as \code{s(var1,var2,edf)}, which indicates the variables of which t
 If \code{seWithMean=TRUE}, then the confidence intervals include the uncertainty about the overall mean. That is, 
 although each smooth is shown centred, the confidence intervals are obtained as if every other term in the model was 
 constrained to have average 0 (average taken over the covariate values) except for the smooth being plotted. The theoretical arguments 
-and simulation study of Marra and Wood (in press) suggests that \code{seWithMean=TRUE} results in intervals with
+and simulation study of Marra and Wood (2012) suggests that \code{seWithMean=TRUE} results in intervals with
 close to nominal frequentist coverage probabilities.
 
 This function is pretty similar to \code{plot.gam} in \code{mgcv}.
@@ -98,7 +98,7 @@ Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 
 \references{
 
-Marra G. and Wood S.N. (in press), Coverage Properties of Confidence Intervals for Generalized Additive Model Components. \emph{Scandinavian Journal of Statistics}.
+Marra G. and Wood S.N. (2012), Coverage Properties of Confidence Intervals for Generalized Additive Model Components. \emph{Scandinavian Journal of Statistics}, 39(1), 53-74.
 
 }
 

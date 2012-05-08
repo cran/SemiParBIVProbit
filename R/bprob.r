@@ -13,9 +13,9 @@ bprob <- function(params, dat, dat1, dat2, dat1p=NULL, dat2p=NULL, X1.d2, X2.d2,
   d.r <- 1/sqrt( pmax(10000*.Machine$double.eps, 1-corr^2) )
 
   A   <- pnorm( (eta2-corr*eta1)*d.r )
-  A.c <- pnorm( (eta2-corr*eta1)*d.r , lower.tail = FALSE)
+  A.c <- 1 - A
   B   <- pnorm( (eta1-corr*eta2)*d.r )
-  B.c <- pnorm( (eta1-corr*eta2)*d.r , lower.tail = FALSE)
+  B.c <- 1 - B
 
   p11 <- pmax( pnorm2( eta1, eta2, corr), 1000*.Machine$double.eps )
   p10 <- pmax( pnorm(eta1) - p11, 1000*.Machine$double.eps )

@@ -35,7 +35,7 @@ to calculate `confidence' intervals for \eqn{\rho}{\rho}.}
 
 \details{ 
 
-As in the package \code{mgcv}, based on the results of Marra and Wood (in press), `Bayesian p-values' are returned for the smooth terms. These have 
+As in the package \code{mgcv}, based on the results of Marra and Wood (2012), `Bayesian p-values' are returned for the smooth terms. These have 
 better frequentist performance than their frequentist counterpart. Let \eqn{\hat{\bf f}}
 and \eqn{{\bf V}_f}{V_f} denote the vector of values of a smooth term evaluated at the original covariate values and the
 corresponding Bayesian covariance matrix, and let \eqn{{\bf V}_f^{r-}}{V_f^{r-}} denote 
@@ -86,7 +86,7 @@ Diebold F.X. and Rudebusch G.D. (1989), Scoring the Leading Indicators. \emph{Jo
 
 Marra G. and Wood S.N. (2011), Practical Variable Selection for Generalized Additive Models. \emph{Computational Statistics and Data Analysis}, 55(7), 2372-2387.
 
-Marra G. and Wood S.N. (in press), Coverage Properties of Confidence Intervals for Generalized Additive Model Components. \emph{Scandinavian Journal of Statistics}.
+Marra G. and Wood S.N. (2012), Coverage Properties of Confidence Intervals for Generalized Additive Model Components. \emph{Scandinavian Journal of Statistics}, 39(1), 53-74.
 
 Marra G. (submitted), On p-values for semiparametric bivariate equation probit models.
 
