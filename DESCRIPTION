@@ -1,5 +1,5 @@
 Package: SemiParBIVProbit
-Version: 3.2
+Version: 3.2-1
 Author: Giampiero Marra <giampiero@stats.ucl.ac.uk> and Rosalba Radice
         <rosalba.radice@lshtm.ac.uk> with contributions from Georgios
         Papageorgiou <gpapageo@gmail.com>
@@ -15,5 +15,5 @@ LazyLoad: yes
 License: GPL (>= 2)
 URL: http://www.ucl.ac.uk/statistics/people/giampieromarra
 Repository: CRAN
-Date/Publication: 2012-05-08 14:22:12
-Packaged: 2012-05-08 13:26:47 UTC; giampiero
+Date/Publication: 2012-05-16 13:47:16
+Packaged: 2012-05-16 13:23:37 UTC; giampiero

@@ -107,7 +107,7 @@ using a performance-oriented iteration approach (Gu, 1992; Wood, 2004). At each 
 problem is solved, then (ii) the smoothing parameters of that problem estimated by approximate UBRE. Steps (i) and (ii) are iterated until 
 convergence. Details of the underlying fitting methods are given in Marra and Radice (2011). 
 
-The use of nonparametric random effects is allowed for via the option \code{npRE} (see Example 4).
+The use of nonparametric random effects is allowed for via the option \code{npRE} and is illustrated in Example 4 below. See Marra and Papageorgiou (submitted) for full details.
 
 }
 
@@ -128,6 +128,8 @@ Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 \references{
 
 Gu C. (1992), Cross validating non-Gaussian data. \emph{Journal of Computational and Graphical Statistics}, 1(2), 169-179.
+
+Marra G. and Papageorgiou G., A semiparametric regression framework with nonparametric mixing for modeling correlated bivariate binary responses. \emph{Submitted}.
 
 Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
 Journal of Statistics}, 39(2), 259-279.

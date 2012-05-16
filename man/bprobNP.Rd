@@ -17,6 +17,13 @@ Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 }
 
 
+\references{
+
+Marra G. and Papageorgiou G., A semiparametric regression framework with nonparametric mixing for modeling correlated bivariate binary responses. \emph{Submitted}.
+
+}
+
+
 
 
 
