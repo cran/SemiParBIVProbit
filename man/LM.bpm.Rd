@@ -60,7 +60,7 @@ Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 
 Kiefer N.M. (1982), Testing for dependence in multivariate probit models. \emph{Biometrika}, 69(1), 161-166.
 
-Marra G., Radice R. and Missiroli S., Testing for the Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models: A Monte Carlo Study. \emph{Submitted}.
+Marra G., Radice R. and Missiroli S., Testing for the Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Submitted}.
 
 
 }

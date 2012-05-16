@@ -2,6 +2,17 @@ LM.bpm <- function(formula.eq1,formula.eq2,data=list(),selection=FALSE,FI=FALSE)
 
 G.Eh.E <- function(params,dat,dat1,dat2,X1.d2,X2.d2,gam1,gam2,selection,FI){
 
+  S.h <- 0
+  
+  if( length(gam1$smooth)!=0 && length(gam2$smooth)!=0 && FI==FALSE){ 
+  S <- spS(c(gam1$sp,gam2$sp),gam1,gam2)
+  S.h <- adiag(matrix(0,gam1$nsdf,gam1$nsdf),
+                      S[1:(X1.d2-gam1$nsdf),1:(X1.d2-gam1$nsdf)],
+                      matrix(0,gam2$nsdf,gam2$nsdf),
+                      S[(X1.d2-(gam1$nsdf-1)):dim(S)[2],(X1.d2-(gam1$nsdf-1)):dim(S)[2]],
+                      0)
+  }
+
   if(FI==TRUE){
   
   eta1 <- dat1%*%params[1:X1.d2]
@@ -105,7 +116,7 @@ G.Eh.E <- function(params,dat,dat1,dat2,X1.d2,X2.d2,gam1,gam2,selection,FI){
   H <- rbind( cbind( be1.be1    , be1.be2    , be1.rho ), 
               cbind( t(be1.be2) , be2.be2    , be2.rho ), 
               cbind( t(be1.rho) , t(be2.rho) , sum(d2l.rho.rho) ) 
-             ) 
+             ) + S.h 
                                      
   H.eig <- eigen(H)
   k.e <- sum(as.numeric(H.eig$val<sqrt(.Machine$double.eps)))

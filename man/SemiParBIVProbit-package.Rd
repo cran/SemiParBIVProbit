@@ -37,6 +37,8 @@ Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 
 \references{
 
+Marra G. and Papageorgiou G., A semiparametric regression framework with nonparametric mixing for modeling correlated bivariate binary responses. \emph{Submitted}.
+
 Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
 Journal of Statistics}, 39(2), 259-279.
 
