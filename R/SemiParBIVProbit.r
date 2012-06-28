@@ -5,7 +5,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
         		     control=list(maxit=50,tol=1e-6,step.half=25,rank.tol=sqrt(.Machine$double.eps)),
                              npRE=FALSE, K=3, id=NULL, e.npRE=TRUE, e.npREsp=TRUE){
                              
-  conv.sp <- gam2.1 <- bs.mgfit <- wor.c <- j.it <- count.npRE <- count.npREsp <- N <- cuid <- uidf <- masses <- logL.RE <- eb.u1 <- eb.u2 <- Eb.u1 <- Eb.u2 <- uidf <- T.sv <- NULL
+  conv.sp <- startvSS <- bs.mgfit <- wor.c <- j.it <- count.npRE <- count.npREsp <- N <- cuid <- uidf <- masses <- logL.RE <- eb.u1 <- eb.u2 <- Eb.u1 <- Eb.u2 <- uidf <- T.sv <- NULL
 
   gam1 <- gam(formula.eq1, binomial(link="probit"), gamma=gamma, data=data)
   
@@ -101,6 +101,8 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
                     } 
 
                      }else{
+
+  if(npRE==TRUE) stop("Bivariate probit sample selection modelling with random effects not implemented yet")
 
   inde <- gam1$y > 0
   environment(formula.eq2) <- environment(NULL)
@@ -283,7 +285,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
                                        }else{HeSh <- He; F <- Vb%*%HeSh}      
   t.edf <- sum(diag(F))
 
-L <- list(fit=fit, gam1=gam1, gam2=gam2, gam2.1=gam2.1, sp=sp, iter.sp=j.it, iter.if=iter.if,
+L <- list(fit=fit, gam1=gam1, gam2=gam2, gam2.1=startvSS$gam2.1, sp=sp, iter.sp=j.it, iter.if=iter.if,
           rho=tanh(fit$argument[length(fit$argument)]), n=n, n.sel=length(gam2$y), 
           X1=X1, X2=X2, X1.d2=X1.d2, X2.d2=X2.d2, 
           l.sp1=l.sp1, l.sp2=l.sp2, He=He, HeSh=HeSh, Vb=Vb, F=F, 

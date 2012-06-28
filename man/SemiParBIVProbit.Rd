@@ -408,8 +408,8 @@ summary(out$gam2)
 ## mean predicted probabilities that 'yo' is equal to 1
 ## the second predicted probability does not account for selection bias
 
-mean(round(pnorm(out$eta2[out$eta2!=0])))
-mean(round(pnorm(predict(out$gam2))))
+mean(pnorm(out$eta2[out$eta2!=0]))
+mean(pnorm(predict(out$gam2)))
 
 ## estimated smooth function plots
 ## the red line is the true curve

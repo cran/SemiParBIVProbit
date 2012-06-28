@@ -1,11 +1,11 @@
-84de1ebfcf71b6a864c6bca10e1086dd *ChangeLog
-9d1e2c4d06f2470da74c3f8f18d4543a *DESCRIPTION
+1e091b2e31cf1895b59820e7bdc2c041 *ChangeLog
+e842673c98ae7861f7e966ac7645aea9 *DESCRIPTION
 a6f862779ee68bdab7ef17198abce6e3 *NAMESPACE
 b38799225b26fcb0bf11112f27a0341f *R/AT.r
 b16a818fefe57c40719b2f57b2d5bdd0 *R/InfCr.r
 c5a721a8726afb33aa6119ac91780048 *R/LM.bpm.r
 b3a2b39789af4c2b40f2b4934add98e1 *R/S.m.r
-4aac094ab0314f6f1c453167e9733387 *R/SemiParBIVProbit.r
+bfa67869f7b69c0bb5ea5a0c0c46fb65 *R/SemiParBIVProbit.r
 e1d2b6da50066eaa3fe1578fe95681fa *R/bprob.r
 02a858d3843246e61ade22c4af1355a1 *R/bprobH.r
 48ed0d87db88563d08c3e58e1d495618 *R/bprobNP.H.r
@@ -29,7 +29,7 @@ cbf36e7fede797b8499bb5d3c23b5855 *inst/CITATION
 50e209c433d569be1e335a069c7c3be7 *man/LM.bpm.Rd
 33182a2bdb8314a7187f65f6c211e7f9 *man/S.m.Rd
 9ce0f92d288acc82df3ef8cb28e4a203 *man/SemiParBIVProbit-package.Rd
-a48ec38bb95c60375e29c106f1cf3e10 *man/SemiParBIVProbit.Rd
+7c29a4931f08f438272b1e8246ef0919 *man/SemiParBIVProbit.Rd
 7d8fc985e5740542cde52372b5bca093 *man/SemiParBIVProbitObject.Rd
 c3b511a1503fb6a7c92169326c4699dc *man/bprob.Rd
 cd2197f0667c249247739e18acc8bd9d *man/bprobH.Rd
