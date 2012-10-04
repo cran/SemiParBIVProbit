@@ -42,7 +42,7 @@ corresponding Bayesian covariance matrix, and let \eqn{{\bf V}_f^{r-}}{V_f^{r-}}
 the rank \eqn{r}{r} pseudoinverse of \eqn{{\bf V}_f}{V_f}. The statistic used 
 is \eqn{T=\hat{\bf f}^\prime {\bf V}_f^{r-} \hat{\bf f}}. This is 
 compared to a chi-squared distribution with degrees of freedom given by \eqn{r}{r}, which is obtained by 
-biased rounding of the estimated degrees of freedom. See Marra (in press) for further details. 
+biased rounding of the estimated degrees of freedom. See Marra (2013) for further details. 
 
 Note that covariate selection can also be achieved using a shrinkage approach as shown in Marra and Wood (2011). 
 
@@ -84,7 +84,7 @@ Note that covariate selection can also be achieved using a shrinkage approach as
 
 Diebold F.X. and Rudebusch G.D. (1989), Scoring the Leading Indicators. \emph{Journal of Business}, 62(3), 369-391. 
 
-Marra G. (in press), On p-values for semiparametric bivariate probit models. \emph{Statistical Methodology}.
+Marra G. (2013), On P-values for Semiparametric Bivariate Probit Models. \emph{Statistical Methodology}, 10(1), 23-28.
 
 Marra G. and Wood S.N. (2011), Practical Variable Selection for Generalized Additive Models. \emph{Computational Statistics and Data Analysis}, 55(7), 2372-2387.
 
@@ -97,14 +97,14 @@ Marra G. and Wood S.N. (2012), Coverage Properties of Confidence Intervals for G
 
 \author{
 
-Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 }
 
 
 
 \seealso{
-\code{\link{AT}}, \code{\link{InfCr}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{plot.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{InfCr}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
 }
 
 \examples{

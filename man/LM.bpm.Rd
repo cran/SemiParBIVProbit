@@ -52,7 +52,7 @@ It returns a numeric p-value corresponding to the null hypothesis \eqn{\rho}{\rh
 
 \author{
 
-Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 }
 

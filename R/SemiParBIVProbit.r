@@ -1,4 +1,4 @@
-SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FALSE, H=FALSE, 
+SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), p.weights=NULL, selection=FALSE, H=FALSE, 
                              iterlimSP=50, pr.tol=1e-6,
                              gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL, rinit=1, rmax=100, 
                              fterm=sqrt(.Machine$double.eps), mterm=sqrt(.Machine$double.eps), 
@@ -6,12 +6,25 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
                              npRE=FALSE, K=3, id=NULL, e.npRE=TRUE, e.npREsp=TRUE){
                              
   conv.sp <- startvSS <- bs.mgfit <- wor.c <- j.it <- count.npRE <- count.npREsp <- N <- cuid <- uidf <- masses <- logL.RE <- eb.u1 <- eb.u2 <- Eb.u1 <- Eb.u2 <- uidf <- T.sv <- NULL
+             
+  if(!is.null(p.weights)){
+            p.weights <- as.vector(p.weights)
+            if (!is.numeric(p.weights)) stop("prior weights must be a numeric vector")
+            if (any(p.weights < 0))     stop("negative prior weights not allowed")
+      }
+        
+  environment(formula.eq1) <- environment(NULL)                                                      
+  gam1 <- gam(formula.eq1, binomial(link="probit"), gamma=gamma, weights=p.weights, data=data)
+  environment(gam1$formula) <- environment(formula.eq2)  
 
-  gam1 <- gam(formula.eq1, binomial(link="probit"), gamma=gamma, data=data)
+  if(is.null(p.weights)) p.weights <- rep(1,length(gam1$y))
   
   if(selection==FALSE){
 
-  gam2  <- gam(formula.eq2, binomial(link="probit"), gamma=gamma, data=data)
+  environment(formula.eq2) <- environment(NULL) 
+  gam2  <- gam(formula.eq2, binomial(link="probit"), gamma=gamma, weights=p.weights, data=data)
+  environment(gam2$formula) <- environment(gam1$formula) 
+
   X1    <- model.matrix(gam1); X1.d2 <- dim(X1)[2]
   X2    <- model.matrix(gam2); X2.d2 <- dim(X2)[2]
   l.sp1 <- length(gam1$smooth); l.sp2 <- length(gam2$smooth)
@@ -38,12 +51,11 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
            start.v <- c(coef(gam1),coef(gam2),atanh(i.rho))
            fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, dat=dat, dat1=dat1, dat2=dat2,
                          X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, blather=TRUE, 
-                         fterm=fterm, mterm=mterm, iterlim = 1e+4,
+                         fterm=fterm, mterm=mterm, iterlim = 1e+4, p.weights=p.weights,
                          K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses) 
            start.v <- fit$argument
                                 }
                                
-
       	dat <- dat[,-c(3,(3+X1.d2))]
         X1.d2 <- X1.d2-1; X2.d2 <- X2.d2-1
         
@@ -75,7 +87,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
 
 
         T.sv <- func.opt(start.v, dat=dat, dat1=dat1, dat2=dat2, dat1p=dat1p, dat2p=dat2p, 
-                         X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, 
+                         X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, p.weights=p.weights, 
                          K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses)
                          
           count.npRE <- 0 
@@ -86,7 +98,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
 	    start.v <- start.v - ginv(T.sv$hessian)%*%T.sv$gradient 
 	    masses <- T.sv$masses
 	    T.sv <- func.opt(start.v, dat=dat, dat1=dat1, dat2=dat2, dat1p=dat1p, dat2p=dat2p,  
-                             X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, 
+                             X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, p.weights=p.weights, 
                              K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses)
 	    count.npRE <- count.npRE + 1
 	    
@@ -102,11 +114,10 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
 
                      }else{
 
-  if(npRE==TRUE) stop("Bivariate probit sample selection modelling with random effects not implemented yet")
-
+  if(npRE==TRUE) stop("Routine for bivariate probit sample selection modelling with random effects not implemented yet")
   inde <- gam1$y > 0
   environment(formula.eq2) <- environment(NULL)
-  gam2  <- gam(formula.eq2, binomial(link="probit"), gamma=gamma, data=data, subset=inde)
+  gam2  <- gam(formula.eq2, binomial(link="probit"), gamma=gamma, weights=p.weights, data=data, subset=inde)
   environment(gam2$formula) <- environment(gam1$formula)
   X1 <- model.matrix(gam1); X1.d2 <- dim(X1)[2]; X2.d2 <- length(coef(gam2))
   X2 <- matrix(0,length(inde),X2.d2,dimnames = list(c(1:length(inde)),c(names(coef(gam2)))) )
@@ -118,9 +129,8 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
   dat1 <- as.matrix(dat[,3:(X1.d2+2)])
   dat2 <- as.matrix(dat[,(X1.d2+3):(X1.d2+X2.d2+2)])
 
-  if(is.null(start.v)) startvSS <- startSS(gam1, gam2, formula.eq2, data, gamma, inde, l.sp1, l.sp2, fp); start.v <- startvSS$start.v 
-		    
-		    
+  if(is.null(start.v)) startvSS <- startSS(gam1, gam2, formula.eq2, data, gamma, p.weights, inde, l.sp1, l.sp2, fp); start.v <- startvSS$start.v 
+		    	    
 		    
   if(H==TRUE && l.sp1==0 && l.sp2==0) func.opt <- bprobSSH else func.opt <- bprobSS		    
   sp <- c(gam1$sp,startvSS$gam2.1$sp)
@@ -130,15 +140,17 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
 
     if(l.sp1!=0 && l.sp2!=0 && fp==FALSE && npRE==TRUE){S <- spS(sp,gam1,gam2); qu.mag <- S.m(gam1,gam2,K=K,npRE)}
     if(l.sp1!=0 && l.sp2!=0 && fp==FALSE && npRE!=TRUE){S <- spS(sp,gam1,gam2); qu.mag <- S.m(gam1,gam2,K=K,npRE=FALSE)}
-    
-    
+      
+
     fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, dat=dat, dat1=dat1, dat2=dat2, dat1p=dat1p, dat2p=dat2p, 
-                  X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, blather=TRUE, 
+                  X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, blather=TRUE, p.weights=p.weights, 
                   fterm=fterm, mterm=mterm, iterlim = 1e+4, 
                   K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses)  
 
     iter.if <- fit$iterations    
-                                             
+           
+    if(fp==TRUE) aut.sp <- FALSE      
+           
     if(aut.sp==TRUE){
 
       if(l.sp1!=0 && l.sp2!=0){
@@ -166,7 +178,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
 
                      noe <- names(o.ests)
                      T.sv <- func.opt(o.ests, dat=dat, dat1=dat1, dat2=dat2, dat1p=dat1p, dat2p=dat2p,  
-                                      X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, 
+                                      X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, p.weights=p.weights, 
                          	      K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses)
                          
       	  		while( max(abs(T.sv$gradient)) > pr.tol*10000 && sum(as.numeric(T.sv$gradient=="NaN"))==0){
@@ -175,7 +187,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
 	    		o.ests <- o.ests - ginv(T.sv$hessian)%*%T.sv$gradient
 	    		masses <- T.sv$masses
 	    		T.sv <- func.opt(o.ests, dat=dat, dat1=dat1, dat2=dat2, dat1p=dat1p, dat2p=dat2p,  
-            		                 X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, 
+            		                 X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, p.weights=p.weights, 
                 		         K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses)
 	    		count.npREsp <- count.npREsp + 1
 	    		if(count.npREsp > 5000) break
@@ -187,12 +199,12 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
 
 
              fit <- try(trust(func.opt, fit$argument, rinit=rinit, rmax=rmax, dat=dat, dat1=dat1, dat2=dat2, dat1p=dat1p, dat2p=dat2p,  
-                              X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, blather=TRUE, 
+                              X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, blather=TRUE, p.weights=p.weights, 
                               iterlim=1e+4, fterm=fterm, mterm=mterm, K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses),silent=TRUE)
 
               if(class(fit)=="try-error"){ 
                fit  <- trust(func.opt, coefo, rinit=rinit, rmax=rmax, dat=dat, dat1=dat1, dat2=dat2, dat1p=dat1p, dat2p=dat2p, 
-                             X1.d2=X1.d2, X2.d2=X2.d2, S=So, gam1=gam1, gam2=gam2, fp=fp, blather=TRUE, 
+                             X1.d2=X1.d2, X2.d2=X2.d2, S=So, gam1=gam1, gam2=gam2, fp=fp, blather=TRUE, p.weights=p.weights,
                              iterlim=1e+4, fterm=fterm, mterm=mterm, K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses)
                conv.sp <- FALSE; break
                                           } 
@@ -213,7 +225,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
     
         func.opt <- bprobNP.H
         T.sv <- func.opt(fit$argument, dat=dat, dat1=dat1, dat2=dat2, dat1p=dat1p, dat2p=dat2p, 
-                         X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp,
+                         X1.d2=X1.d2, X2.d2=X2.d2, S=S, gam1=gam1, gam2=gam2, fp=fp, p.weights=p.weights,
                          K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses)
 
         npar <- K + X1.d2 + K + X2.d2 + 1 + K - 1
@@ -284,13 +296,29 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), selection=FA
                                              HeSh <- He - fit$S.h; F <- Vb%*%HeSh
                                        }else{HeSh <- He; F <- Vb%*%HeSh}      
   t.edf <- sum(diag(F))
+  rho <- tanh(fit$argument[length(fit$argument)])
 
-L <- list(fit=fit, gam1=gam1, gam2=gam2, gam2.1=startvSS$gam2.1, sp=sp, iter.sp=j.it, iter.if=iter.if,
-          rho=tanh(fit$argument[length(fit$argument)]), n=n, n.sel=length(gam2$y), 
-          X1=X1, X2=X2, X1.d2=X1.d2, X2.d2=X2.d2, 
+  if(selection==TRUE){
+
+  eta1      <- fit$eta1
+  non.sel.d <- X1[,names(gam2$coef)]
+  param     <- fit$argument[-c(1:length(gam1$coef),length(fit$argument))]
+  eta2      <- non.sel.d%*%param
+
+  p00 <- pnorm2(-eta1,-eta2,rho)
+  p01 <- pnorm2(-eta1,eta2,-rho)
+
+  fit$p00 <- p00 
+  fit$p01 <- p01
+
+  }
+
+
+L <- list(fit=fit, gam1=gam1, gam2=gam2, gam2.1=startvSS$gam2.1, p.weights=p.weights, sp=sp, iter.sp=j.it, iter.if=iter.if,
+          rho=rho, n=n, n.sel=length(gam2$y), X1=X1, X2=X2, X1.d2=X1.d2, X2.d2=X2.d2, 
           l.sp1=l.sp1, l.sp2=l.sp2, He=He, HeSh=HeSh, Vb=Vb, F=F, 
           t.edf=t.edf, bs.mgfit=bs.mgfit, conv.sp=conv.sp, wor.c=wor.c,
-          p11=fit$p11, p10=fit$p10, p01=fit$p01, p00=fit$p00, p0=fit$p0, eta1=fit$eta1, eta2=fit$eta2, 
+          p11=fit$p11, p10=fit$p10, p01=fit$p01, p00=fit$p00, eta1=fit$eta1, eta2=fit$eta2, 
           dat=dat,sel=selection,masses=fit$masses,K=K,iter.npRE=count.npRE, iter.npREsp=count.npREsp, 
           npRE=npRE, logL=logL, eb.u1=eb.u1, eb.u2=eb.u2, Eb.u1=Eb.u1, Eb.u2=Eb.u2, id=id, uidf=uidf, T.sv=T.sv)
 

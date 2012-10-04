@@ -1,14 +1,14 @@
-startSS <- function(gam1, gam2, formula.eq2, data, gamma, inde, l.sp1, l.sp2, fp){
+startSS <- function(gam1, gam2, formula.eq2, data, gamma, p.weights, inde, l.sp1, l.sp2, fp){
 
                                p.g1 <- predict(gam1)
   	 		       imr <- dnorm(p.g1)/pnorm(p.g1)
   		               formula.eq2.1 <- update.formula(formula.eq2, ~. + imr)
   			       environment(formula.eq2.1) <- environment(NULL)
-                               ols <- gam(formula.eq2.1, data=data, gamma=gamma, subset=inde) 
+                               ols <- gam(formula.eq2.1, data=data, gamma=gamma, weights=p.weights, subset=inde) 
                                rhi <- coef(ols)["imr"]/sqrt(ols$sig2)
                                ta2 <- (1 + rhi^2*imr*(-p.g1-imr))[inde]
 
-                               M <- ols$model
+                               M <- ols$model[,-dim(ols$model)[2]]
                                vSn <- names(M); fw <-  paste(vSn[1],"~",vSn[2],sep="") 
                                if(dim(M)[2]>2) for (i in 3:length(vSn)) fw <- paste(fw,"+",vSn[i],sep="")
                                fw <- as.formula(fw)
@@ -21,7 +21,7 @@ startSS <- function(gam1, gam2, formula.eq2, data, gamma, inde, l.sp1, l.sp2, fp
                                fw <-  paste(names(data.r)[1],"~ l",sep="")
                                if(l.sp1!=0 && l.sp2!=0 && fp==FALSE) for(i in 1:length(ols$smooth)) fw <- paste(fw,"+",ols$smooth[[i]]$label,sep="")
                                fw <- as.formula(fw)
-	                       gam2.1 <- suppressWarnings(try(gam(fw, binomial(link="probit"), gamma=gamma, data=data.r),silent=TRUE))
+	                       gam2.1 <- suppressWarnings(try(gam(fw, binomial(link="probit"), gamma=gamma, weights=p.weights[inde], data=data.r),silent=TRUE))
 
                                if(class(gam2.1)[1]=="try-error"){
                                                                  names(rhi) <- "rho" 

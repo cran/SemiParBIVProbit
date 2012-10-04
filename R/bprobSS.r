@@ -1,4 +1,4 @@
-bprobSS <- function(params, dat, dat1, dat2, dat1p=NULL, dat2p=NULL, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K=NULL, n=NULL, N=NULL, cuid=NULL, uidf=NULL, masses=NULL){
+bprobSS <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p=NULL, dat2p=NULL, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K=NULL, n=NULL, N=NULL, cuid=NULL, uidf=NULL, masses=NULL){
 
   eta1 <- dat1%*%params[1:X1.d2]
   eta2 <- dat2%*%params[(X1.d2+1):(X1.d2+X2.d2)]
@@ -23,20 +23,20 @@ bprobSS <- function(params, dat, dat1, dat2, dat1p=NULL, dat2p=NULL, X1.d2, X2.d
   d.n2   <- dnorm(eta2) 
   d.n1n2 <- dnorm2(eta1,eta2,corr) 
 
-  l.par <- y1.y2*log(p11)+y1.cy2*log(p10)+cy1*log(p0) 
+  l.par <- p.weights*(y1.y2*log(p11)+y1.cy2*log(p10)+cy1*log(p0)) 
 
   drh.drh.st   <- 4*exp(2*corr.st)/(exp(2*corr.st)+1)^2
   
-  dl.dbe1 <- d.n1*( y1.y2/p11*A  + y1.cy2/p10*A.c - cy1/p0 )  
-  dl.dbe2 <- d.n2*B*( y1.y2/p11 - y1.cy2/p10)  
-  dl.drho <- d.n1n2*(y1.y2/p11 - y1.cy2/p10)*drh.drh.st
+  dl.dbe1 <- p.weights*d.n1*( y1.y2/p11*A  + y1.cy2/p10*A.c - cy1/p0 )  
+  dl.dbe2 <- p.weights*d.n2*B*( y1.y2/p11 - y1.cy2/p10)  
+  dl.drho <- p.weights*d.n1n2*(y1.y2/p11 - y1.cy2/p10)*drh.drh.st
 
-  d2l.be1.be1  <- -  ( d.n1^2*( -A^2/p11 - A.c^2/p10 - 1/p0)  )  
-  d2l.be2.be2  <- -  ( d.n2^2*(B^2*(-1/p11-1/p10))  )
-  d2l.be1.be2  <- -  ( d.n1*d.n2*(-A*B/p11+A.c*B/p10)  )
-  d2l.be2.rho  <- -  ( -d.n2*d.n1n2*B*(1/p11+1/p10)  )*drh.drh.st 
-  d2l.be1.rho  <- -  ( -d.n1*d.n1n2*(A*(1/p11)-A.c*(1/p10))  )*drh.drh.st 
-  d2l.rho.rho  <- -  ( -d.n1n2^2*(1/p11+1/p10)   )*drh.drh.st^2 
+  d2l.be1.be1  <- -  p.weights*( d.n1^2*( -A^2/p11 - A.c^2/p10 - 1/p0)  )  
+  d2l.be2.be2  <- -  p.weights*( d.n2^2*(B^2*(-1/p11-1/p10))  )
+  d2l.be1.be2  <- -  p.weights*( d.n1*d.n2*(-A*B/p11+A.c*B/p10)  )
+  d2l.be2.rho  <- -  p.weights*( -d.n2*d.n1n2*B*(1/p11+1/p10)  )*drh.drh.st 
+  d2l.be1.rho  <- -  p.weights*( -d.n1*d.n1n2*(A*(1/p11)-A.c*(1/p10))  )*drh.drh.st 
+  d2l.rho.rho  <- -  p.weights*( -d.n1n2^2*(1/p11+1/p10)   )*drh.drh.st^2 
                                                      
   be1.be1 <- crossprod(dat1*c(d2l.be1.be1),dat1)
   be2.be2 <- crossprod(dat2*c(d2l.be2.be2),dat2)

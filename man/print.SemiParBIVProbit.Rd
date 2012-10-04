@@ -35,7 +35,7 @@ coefficient and total effective degrees of freedom for the penalized or unpenali
 
 \author{
 
-Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 }
 
