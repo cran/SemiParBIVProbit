@@ -47,7 +47,7 @@ Justification for these residuals is from the penalized IRLS algorithm used to f
 
 \author{
 
-Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 }
 
@@ -68,7 +68,8 @@ Unfortunately residual plots from models fitted to binary data do not contain mu
 the goodness-of-fit of the model. For instance, if one wants to check distributional assumptions 
 from residuals, QQ-plots and/or half-normal plots with simulated envelope 
 provide no useful information (this has also been checked in simulation). For binary data, it is 
-necessary to be able to group the residuals according to some criterion.     
+necessary to be able to group the residuals according to some criterion. On top of this, for the sample selection case, such residuals 
+are not meaningful and alternative definitions have to be employed.       
 
 } 
 
@@ -76,7 +77,7 @@ necessary to be able to group the residuals according to some criterion.
 
 
 \seealso{
-\code{\link{InfCr}}, \code{\link{SemiParBIVProbit}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}  
+\code{\link{InfCr}}, \code{\link{SemiParBIVProbit}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}   
 }
 
 

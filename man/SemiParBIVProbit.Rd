@@ -16,7 +16,7 @@ product smooths.
 
 
 \usage{
-SemiParBIVProbit(formula.eq1, formula.eq2, data=list(),  
+SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), p.weights=NULL,  
                  selection=FALSE, H=FALSE, iterlimSP=50, pr.tol=1e-6, 
                  gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL, 
                  rinit=1, rmax=100, fterm=sqrt(.Machine$double.eps), 
@@ -39,6 +39,8 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(),
 \item{data}{An optional data frame, list or environment containing the variables in the model.  If not found in \code{data}, the
             variables are taken from \code{environment(formula)}, typically the environment from which \code{SemiParBIVProbit} is called.} 
 
+\item{p.weights}{Optional vector of prior weights to be used in fitting.} 
+
 \item{selection}{If \code{TRUE}, then the numerical routine for bivariate probit modelling in the presence of sample selection is employed.}
 
 \item{H}{If \code{TRUE}, then the hessian (rather than the Fisher) information matrix is used for fully parametric bivariate probit modelling.}
@@ -53,8 +55,7 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(),
 \item{aut.sp}{If \code{TRUE}, then automatic multiple smoothing parameter selection is carried out. If \code{FALSE}, then smoothing parameters 
               are set to the values obtained from the univariate fits.}
 
-\item{fp}{If \code{TRUE}, then a fully parametric model with regression splines if fitted. This only makes sense 
-          if used jointly with \code{aut.sp=FALSE}. See the example below.}  
+\item{fp}{If \code{TRUE}, then a fully parametric model with regression splines if fitted. See the example below.}  
 
 \item{start.v}{Although not recommended, starting values for the parameters of the two equations and correlation coefficient 
                can be provided here.}  
@@ -105,7 +106,7 @@ minimize the approximate Un-Biased Risk Estimator (UBRE).
 The optimization problem is solved by Fisher scoring's method. Automatic smoothing parameter selection is integrated 
 using a performance-oriented iteration approach (Gu, 1992; Wood, 2004). At each iteration, (i) the penalized weighted least squares 
 problem is solved, then (ii) the smoothing parameters of that problem estimated by approximate UBRE. Steps (i) and (ii) are iterated until 
-convergence. Details of the underlying fitting methods are given in Marra and Radice (2011). 
+convergence. Details of the underlying fitting methods are given in Marra and Radice (2011, submitted). 
 
 The use of nonparametric random effects is allowed for via the option \code{npRE} and is illustrated in Example 4 below. See Marra and Papageorgiou (submitted) for full details.
 
@@ -119,7 +120,7 @@ The function returns an object of class \code{SemiParBIVProbit} as described in 
 
 \author{
 
-Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 }
 
@@ -158,7 +159,7 @@ effects are linear or non-linear and for which equations.
 } 
 
 \seealso{
-\code{\link{AT}}, \code{\link{InfCr}}, \code{\link{LM.bpm}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{residuals.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{InfCr}}, \code{\link{LM.bpm}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}, \code{\link{residuals.SemiParBIVProbit}}
 }
 
 \examples{
@@ -320,10 +321,9 @@ AT(out,eq=2,nm.bin="y1",E=FALSE)
 ## can be achieved as follows
 
 outFP <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cr",k=5), 
-                          y2 ~ y1 + s(x2,bs="cr",k=6), aut.sp=FALSE, fp=TRUE, 
+                          y2 ~ y1 + s(x2,bs="cr",k=6), fp=TRUE, 
                           data=dataSim)
 summary(outFP)
-
 
 
 ## example using a 2D smooth 
@@ -358,9 +358,9 @@ plot(outSb, eq=2, select=1,theta = 30, phi = 25)
 ############
 ## Generate data with sample selection mechanism and exclusion restriction
 
-set.seed(0)
+\dontrun{ set.seed(0)
 
-n <- 2000
+n <- 1200
 
 Sigma <- matrix(c(1,0.5,0.5,1),2,2)
 u     <- rmvnorm(n,rep(0,2),Sigma)
@@ -405,7 +405,7 @@ AT(out,eq=2,nm.bin="bi",E=FALSE) ## ATT
 summary(out)
 summary(out$gam2)
 
-## mean predicted probabilities that 'yo' is equal to 1
+## approximate predicted probability that 'yo' is equal to 1
 ## the second predicted probability does not account for selection bias
 
 mean(pnorm(out$eta2[out$eta2!=0]))
@@ -415,10 +415,10 @@ mean(pnorm(predict(out$gam2)))
 ## the red line is the true curve
 ## the blue line is the naive curve not accounting for selection bias
 
-x1 <- sort(x1)
-f21.x1 <- f21(x1)[order(x1)]-mean(f21(x1))
+x1.s <- sort(x1[dataSim$ys>0])
+f21.x1 <- f21(x1.s)[order(x1.s)]-mean(f21(x1.s))
 
-plot(out, eq=2, select=1,ylim=c(-1.2,1)); lines(x1, f21.x1, col="red")
+plot(out, eq=2, select=1,ylim=c(-1.2,1)); lines(x1.s, f21.x1, col="red")
 par(new=TRUE)
 plot(out$gam2, select=1, se=FALSE, col="blue",ylim=c(-1.2,1),ylab="",rug=FALSE)
 
@@ -478,7 +478,7 @@ dataSim <- data.frame(id,y1,y2,x1,x2,x3)
 
 out <- SemiParBIVProbit(y1 ~      x1 + s(x2) + x3,
                         y2 ~ y1 + x1 + s(x2), 
-                        data=dataSim, aut.sp=TRUE,
+                        data=dataSim,
                         npRE=TRUE, K=3, id=dataSim$id)
 
 summary(out)
@@ -491,6 +491,8 @@ f2.x2 <- f2.x2[order(x2)]
 par(mfrow=c(1,2))
 plot(out, eq=1, select=1); lines(x2s, f1.x2, col="red")
 plot(out, eq=2, select=1); lines(x2s, f2.x2, col="red")
+
+}
 
 #
 #

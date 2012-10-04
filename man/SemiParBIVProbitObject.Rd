@@ -19,6 +19,8 @@
 
 \item{gam2.1}{A univariate GAM object for equation 2, estimated using a Heckman-type sample selection correction procedure (\code{selection=TRUE}).}
 
+\item{p.weights}{Prior weights used during model fitting.}
+
 \item{sp}{Estimated smoothing parameters of the smooth components for the fitted bivariate probit model.}
 
 \item{iter.sp}{Number of iterations performed for the smoothing parameter estimation step.}
@@ -61,9 +63,7 @@
              the weight matrix times the pseudo-data vector and design matrix, \code{rW.Z} and \code{rW.X}.}                
 
 \item{p11,p10,p01,p00}{Distribution function of a bivariate normal with zero means, unit variances and correlation \code{rho} evaluated 
-                       at (y1=1,y2=1), (y1=1,y2=0), (y1=0,y2=1) and (y1=0,y2=0). The last two combinations are not evaluated if \code{selection=TRUE}.}
-
-\item{p0}{Distribution function of a standardised univariate normal evaluated at y1=0, when \code{selection=TRUE}.}
+                       at (y1=1,y2=1), (y1=1,y2=0), (y1=0,y2=1) and (y1=0,y2=0).}
 
 \item{eta1,eta2}{The estimated linear predictors for the two equations.}
 
@@ -101,7 +101,7 @@ smoothing parameter estimation loop when using nonparametric random effects.}
 
 \author{
 
-Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 }
 
@@ -111,7 +111,7 @@ Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
 
 
 \seealso{
-\code{\link{SemiParBIVProbit}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}
+\code{\link{SemiParBIVProbit}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
 }
 
 

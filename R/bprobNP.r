@@ -1,4 +1,4 @@
-bprobNP <- function(params, dat, dat1, dat2, dat1p, dat2p, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N, cuid, uidf, masses){
+bprobNP <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p, dat2p, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N, cuid, uidf, masses){
 
   corr.st <- params[X1.d2+X2.d2+2*K+1]
   corr    <- tanh(corr.st)
@@ -31,16 +31,16 @@ bprobNP <- function(params, dat, dat1, dat2, dat1p, dat2p, X1.d2, X2.d2, S=NULL,
   d.n2   <- dnorm(eta2)
   d.n1n2 <- dnorm2(eta1,eta2,corr)
 
-  l.par[,u] <- y1.y2*log(p11)+y1.cy2*log(p10)+cy1.y2*log(p01)+cy1.cy2*log(p00)
-  dl.dbe1[,u] <- d.n1*((y1.y2/p11-cy1.y2/p01)*A+(y1.cy2/p10-cy1.cy2/p00)*A.c)
-  dl.dbe2[,u] <- d.n2*((y1.y2/p11-y1.cy2/p10)*B+(cy1.y2/p01-cy1.cy2/p00)*B.c)
-  dl.drho[,u] <- d.n1n2*(y1.y2/p11-y1.cy2/p10-cy1.y2/p01+cy1.cy2/p00)*drh.drh.st
-  d2l.be1.be1[,u]  <- -(d.n1^2*(A^2*(-1/p11-1/p01)+A.c^2*(-1/p10-1/p00)))
-  d2l.be2.be2[,u]  <- -(d.n2^2*(B^2*(-1/p11-1/p10)+B.c^2*(-1/p01-1/p00)))
-  d2l.be1.be2[,u]  <- -(d.n1*d.n2*(A*B.c/p01-A*B/p11+A.c*B/p10-A.c*B.c/p00))
-  d2l.be1.rho[,u]  <- -(-d.n1*d.n1n2*(A*(1/p11+1/p01)-A.c*(1/p10+1/p00)))*drh.drh.st
-  d2l.be2.rho[,u]  <- -(-d.n2*d.n1n2*(B*(1/p11+1/p10)-B.c*(1/p01+1/p00)))*drh.drh.st
-  d2l.rho.rho[,u]  <- -(-d.n1n2^2*(1/p11+1/p01+1/p10+1/p00))*drh.drh.st^2
+  l.par[,u] <- p.weights*( y1.y2*log(p11)+y1.cy2*log(p10)+cy1.y2*log(p01)+cy1.cy2*log(p00) )
+  dl.dbe1[,u] <- p.weights*d.n1*((y1.y2/p11-cy1.y2/p01)*A+(y1.cy2/p10-cy1.cy2/p00)*A.c)
+  dl.dbe2[,u] <- p.weights*d.n2*((y1.y2/p11-y1.cy2/p10)*B+(cy1.y2/p01-cy1.cy2/p00)*B.c)
+  dl.drho[,u] <- p.weights*d.n1n2*(y1.y2/p11-y1.cy2/p10-cy1.y2/p01+cy1.cy2/p00)*drh.drh.st
+  d2l.be1.be1[,u]  <- -p.weights*(d.n1^2*(A^2*(-1/p11-1/p01)+A.c^2*(-1/p10-1/p00)))
+  d2l.be2.be2[,u]  <- -p.weights*(d.n2^2*(B^2*(-1/p11-1/p10)+B.c^2*(-1/p01-1/p00)))
+  d2l.be1.be2[,u]  <- -p.weights*(d.n1*d.n2*(A*B.c/p01-A*B/p11+A.c*B/p10-A.c*B.c/p00))
+  d2l.be1.rho[,u]  <- -p.weights*(-d.n1*d.n1n2*(A*(1/p11+1/p01)-A.c*(1/p10+1/p00)))*drh.drh.st
+  d2l.be2.rho[,u]  <- -p.weights*(-d.n2*d.n1n2*(B*(1/p11+1/p10)-B.c*(1/p01+1/p00)))*drh.drh.st
+  d2l.rho.rho[,u]  <- -p.weights*(-d.n1n2^2*(1/p11+1/p01+1/p10+1/p00))*drh.drh.st^2
 
   } 
 

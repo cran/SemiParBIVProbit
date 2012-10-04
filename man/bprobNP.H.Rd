@@ -3,13 +3,13 @@
 
 \title{Internal Function}
 
-\description{It provides the log-likelihood, gradient and hessian matrix for penalized or unpenalized maximum likelihood estimation in the presense
+\description{It provides the log-likelihood, gradient and Hessian matrix for penalized or unpenalized maximum likelihood estimation in the presense
 of nonparametric random effects. This is used for inferential purposes only.}
 
 
 \author{
 
-Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 }
 

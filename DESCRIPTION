@@ -1,9 +1,9 @@
 Package: SemiParBIVProbit
-Version: 3.2-2
-Author: Giampiero Marra <giampiero@stats.ucl.ac.uk> and Rosalba Radice
-        <rosalba.radice@lshtm.ac.uk> with contributions from Georgios
+Version: 3.2-3
+Author: Giampiero Marra <giampiero.marra@ucl.ac.uk> and Rosalba Radice
+        <r.radice@bbk.ac.uk> with contributions from Georgios
         Papageorgiou <gpapageo@gmail.com>
-Maintainer: Giampiero Marra <giampiero@stats.ucl.ac.uk>
+Maintainer: Giampiero Marra <giampiero.marra@ucl.ac.uk>
 Title: Semiparametric Bivariate Probit Modelling
 Description: Routine for fitting bivariate probit models with
         semiparametric predictors (including linear, nonlinear and
@@ -15,5 +15,5 @@ LazyLoad: yes
 License: GPL (>= 2)
 URL: http://www.ucl.ac.uk/statistics/people/giampieromarra
 Repository: CRAN
-Date/Publication: 2012-06-28 16:47:27
-Packaged: 2012-06-28 15:06:22 UTC; giampiero
+Date/Publication: 2012-10-04 11:37:08
+Packaged: 2012-10-04 11:04:52 UTC; giampiero

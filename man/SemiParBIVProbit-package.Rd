@@ -20,8 +20,8 @@ by using the approximate Un-Biased Risk Estimator (UBRE).
 
 Confidence intervals for smooth components are derived using a Bayesian approach. Approximate p-values for testing 
 individual smooth terms for equality to the zero function are also provided. Functions \code{\link{plot.SemiParBIVProbit}} and 
-\code{\link{summary.SemiParBIVProbit}} extract such information from a fitted \code{\link{SemiParBIVProbitObject}}. Model/variable selection is also 
-possible via the use of shrinakge smoothers or information criteria. 
+\code{\link{summary.SemiParBIVProbit}} extract such information from a fitted \code{\link{SemiParBIVProbitObject}}. Model/variable 
+selection is also possible via the use of shrinakge smoothers or information criteria. 
 
 The use of nonparametric random effects is also allowed for.
 
@@ -29,10 +29,10 @@ The use of nonparametric random effects is also allowed for.
 
 
 \author{
-Giampiero Marra (University College London) and Rosalba Radice (London School of Hygiene and Tropical Medicine) with contributions 
-from Georgios Papageorgiou (Imperial College London)
+Giampiero Marra (University College London, Department of Statistical Science) and Rosalba Radice (Birkbeck, University of London, Department of Economics, Mathematics and Statistics) with contributions 
+from Georgios Papageorgiou (Imperial College London, Department of Epidemiology and Biostatistics)
 
-Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 }
 
 \references{

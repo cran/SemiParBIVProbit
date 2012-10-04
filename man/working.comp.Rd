@@ -11,7 +11,7 @@ procedure by exploiting the band structure of the weight matrix.}
 
 \author{
 
-Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 }
 

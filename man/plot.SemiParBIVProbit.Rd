@@ -90,7 +90,7 @@ The function generates plots.
 
 \author{
 
-Maintainer: Giampiero Marra \email{giampiero@stats.ucl.ac.uk}
+Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 }
 
@@ -112,7 +112,7 @@ The function can not deal with smooths of more than 2 variables.
 
 
 \seealso{
-\code{\link{AT}}, \code{\link{InfCr}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{InfCr}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
 }
 
 

@@ -1,4 +1,4 @@
-bprobNP.H <- function(params, dat, dat1, dat2, dat1p=NULL, dat2p=NULL, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N, cuid, uidf, masses){
+bprobNP.H <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p=NULL, dat2p=NULL, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N, cuid, uidf, masses){
 
   q1 <- 2*dat[,1]-1
   q2 <- 2*dat[,2]-1
@@ -26,16 +26,16 @@ bprobNP.H <- function(params, dat, dat1, dat2, dat1p=NULL, dat2p=NULL, X1.d2, X2
   v1 <- delta*( w2 - corr.sq*w1 )
   v2 <- delta*( w1 - corr.sq*w2 )
 
-  l.par[,u] <- L.PHI2
-  dl.dbe1[,u] <- q1*g1/PHI2
-  dl.dbe2[,u] <- q2*g2/PHI2
-  dl.drho[,u] <- q1*q2*phi2/PHI2
-  d2l.be1.be1[,u]  <- -(-w1*g1 - corr.sq*phi2 - g1^2/PHI2)/PHI2
-  d2l.be2.be2[,u]  <- -(-w2*g2 - corr.sq*phi2 - g2^2/PHI2)/PHI2
-  d2l.be1.be2[,u]  <- -(phi2/PHI2 - g1*g2/PHI2^2)*q1*q2
-  d2l.be1.rho[,u]  <- -(corr.sq*delta*v1 - w1 - g1/PHI2)*phi2/PHI2*q2
-  d2l.be2.rho[,u]  <- -(corr.sq*delta*v2 - w2 - g2/PHI2)*phi2/PHI2*q1
-  d2l.rho.rho[,u]  <- -( phi2/PHI2*( delta^2*corr.sq*( 1 - delta^2*(w1^2+w2^2 - 2*corr.sq*w1*w2) ) + delta^2*w1*w2 - phi2/PHI2 ) )
+  l.par[,u] <- p.weights*L.PHI2
+  dl.dbe1[,u] <- p.weights*q1*g1/PHI2
+  dl.dbe2[,u] <- p.weights*q2*g2/PHI2
+  dl.drho[,u] <- p.weights*q1*q2*phi2/PHI2
+  d2l.be1.be1[,u]  <- -p.weights*(-w1*g1 - corr.sq*phi2 - g1^2/PHI2)/PHI2
+  d2l.be2.be2[,u]  <- -p.weights*(-w2*g2 - corr.sq*phi2 - g2^2/PHI2)/PHI2
+  d2l.be1.be2[,u]  <- -p.weights*(phi2/PHI2 - g1*g2/PHI2^2)*q1*q2
+  d2l.be1.rho[,u]  <- -p.weights*(corr.sq*delta*v1 - w1 - g1/PHI2)*phi2/PHI2*q2
+  d2l.be2.rho[,u]  <- -p.weights*(corr.sq*delta*v2 - w2 - g2/PHI2)*phi2/PHI2*q1
+  d2l.rho.rho[,u]  <- -p.weights*( phi2/PHI2*( delta^2*corr.sq*( 1 - delta^2*(w1^2+w2^2 - 2*corr.sq*w1*w2) ) + delta^2*w1*w2 - phi2/PHI2 ) )
 
   } 
 

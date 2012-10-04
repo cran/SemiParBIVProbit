@@ -1,3 +1,8 @@
+version 3.2-3
+- optional prior weight vector to be used in fitting allowed for.
+- prediction function included.
+- calculation of joint probabilities in sample selection case updated.
+
 version 3.2-2
 - examples in documentation updated.
 - command to extract Heckman model estimates fixed.
