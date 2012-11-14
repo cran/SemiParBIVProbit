@@ -43,7 +43,7 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), p.weights=NULL,
 
 \item{selection}{If \code{TRUE}, then the numerical routine for bivariate probit modelling in the presence of sample selection is employed.}
 
-\item{H}{If \code{TRUE}, then the hessian (rather than the Fisher) information matrix is used for fully parametric bivariate probit modelling.}
+\item{H}{If \code{TRUE}, then the hessian (rather than the Fisher) information matrix is used for bivariate probit modelling. This option can be used for parametric models only.}
 
 \item{iterlimSP}{A positive integer specifying the maximum number of loops to be performed before the smoothing parameter estimation step is terminated.} 
 
@@ -77,7 +77,7 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), p.weights=NULL,
                the method tries halving it up to a maximum of \code{step.half} times; \code{rank.tol}: constant used to test for numerical rank 
                deficiency of the problem. See the documentation of \code{magic} in \code{mgcv} for further details.}
 
-\item{npRE}{If \code{TRUE}, then the numerical routine for bivariate probit modelling with nonparametric random effects is employed.}
+\item{npRE}{If \code{TRUE}, then the routine for bivariate probit modelling with nonparametric random effects is employed.}
 
 \item{K}{If \code{npRE=TRUE}, then \code{K} represents the number of bivariate mass points and must be supplied. Default is 3.} 
 
@@ -96,19 +96,22 @@ parameter selection loop have to be carried out.}
 \details{
 
 The bivariate probit model has a probit link for each of the two equations, and models the association
-between the responses by the correlation parameter \eqn{\rho}{\rho} of a standardised bivariate normal distribution. In a semiparametric bivariate probit model the linear predictors are flexibly specified using 
-parametric components and smooth functions of covariates. Replacing the smooth components with their regression spline expressions yields a fully parametric bivariate probit model. In principle, classic 
+between the responses by the correlation parameter \eqn{\rho}{\rho} of a standardised bivariate normal distribution. In a semiparametric bivariate probit 
+model the linear predictors are flexibly specified using 
+parametric components and smooth functions of covariates. Replacing the smooth components with their regression spline expressions 
+yields a fully parametric bivariate probit model. In principle, classic 
 maximum likelihood estimation can be employed. However, to avoid overfitting, penalized likelihood maximization has to be employed instead. Here the use of 
 penalty matrices allows for the suppression of that part of smooth term complexity which has no support from the data. The trade-off between smoothness 
 and fitness is controlled by smoothing parameters associated with the penalty matrices. Smoothing parameters are chosen to 
 minimize the approximate Un-Biased Risk Estimator (UBRE).
 
-The optimization problem is solved by Fisher scoring's method. Automatic smoothing parameter selection is integrated 
+Automatic smoothing parameter selection is integrated 
 using a performance-oriented iteration approach (Gu, 1992; Wood, 2004). At each iteration, (i) the penalized weighted least squares 
 problem is solved, then (ii) the smoothing parameters of that problem estimated by approximate UBRE. Steps (i) and (ii) are iterated until 
 convergence. Details of the underlying fitting methods are given in Marra and Radice (2011, submitted). 
 
-The use of nonparametric random effects is allowed for via the option \code{npRE} and is illustrated in Example 4 below. See Marra and Papageorgiou (submitted) for full details.
+The use of nonparametric random effects is allowed for via the option \code{npRE} and is 
+illustrated in Example 4 below. See Marra and Papageorgiou (submitted) for full details.
 
 }
 
@@ -176,12 +179,10 @@ set.seed(0)
 
 n <- 400
 
-Sigma <- matrix(c(1,0.5,0.5,1),2,2)
+Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
 u     <- rmvnorm(n,rep(0,2),Sigma)
 
-x1 <- round(runif(n))
-x2 <- runif(n)
-x3 <- runif(n)
+x1 <- round(runif(n)); x2 <- runif(n); x3 <- runif(n)
 
 f1   <- function(x) (cos(pi*2*x)) + sin(pi*x)
 f2   <- function(x) (x+exp(-30*(x-0.5)^2))   
@@ -266,11 +267,12 @@ set.seed(0)
 
 n <- 400
 
-Sigma <- matrix(c(1,0.5,0.5,1),2,2)
+Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
 u     <- rmvnorm(n,rep(0,2),Sigma)
 
-x1 <- round(runif(n))
-x2 <- runif(n)
+cov   <- rmvnorm(n,rep(0,2),Sigma, method="svd")
+cov   <- pnorm(cov)
+x1 <- round(cov[,1]); x2 <- cov[,2]
 
 f1   <- function(x) (cos(pi*2*x)) + sin(pi*x)
 f2   <- function(x) (x+exp(-30*(x-0.5)^2))   
@@ -325,31 +327,6 @@ outFP <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cr",k=5),
                           data=dataSim)
 summary(outFP)
 
-
-## example using a 2D smooth 
-
-f.biv <- function(x,z) -0.7*exp(((3*x+3) + 0.7*(3*z-3)^2)/5)
-
-y1 <- ifelse(-1.55 + 2*x1    + f1(x2)     + u[,1] > 0, 1, 0)
-y2 <- ifelse(3.5 - 1.25*y1 + f.biv(x2,x3) + u[,2] > 0, 1, 0)
-
-dataSim <- data.frame(y1,y2,x1,x2,x3)
-
-
-outSb <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cr"), 
-                          y2 ~ y1 + s(x2,x3,bs="tp"), 
-                          data=dataSim)
-summary(outSb)
-
-par(mfrow=c(1,2),mar=c(4.5,4.5,2,2))
-
-x2 <- x3 <- seq(0, 1, length=40)
-z <- outer(x2, x3, f.biv)
-
-persp(x2, x3, z, theta = 30, phi = 25,
-      xlab="x2", ylab="x3", zlab="f.biv")
-plot(outSb, eq=2, select=1,theta = 30, phi = 25) 
-
 #
 #
 
@@ -358,18 +335,18 @@ plot(outSb, eq=2, select=1,theta = 30, phi = 25)
 ############
 ## Generate data with sample selection mechanism and exclusion restriction
 
-\dontrun{ set.seed(0)
+\dontrun{ 
+
+set.seed(0)
 
 n <- 1200
 
-Sigma <- matrix(c(1,0.5,0.5,1),2,2)
+Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
 u     <- rmvnorm(n,rep(0,2),Sigma)
 
-SigmaC <- matrix( c(1,0.5,0.5,0.5,1,0.5,0.5,0.5,1), 3 , 3)
-
+SigmaC <- matrix(0.5, 3, 3); diag(SigmaC) <- 1
 cov    <- rmvnorm(n,rep(0,3),SigmaC, method="svd")
 cov    <- pnorm(cov)
-
 bi <- round(cov[,1]); x1 <- cov[,2]; x2 <- cov[,3]
   
 f11 <- function(x) -0.7*(4*x + 2.5*x^2 + 0.7*sin(5*x) + cos(7.5*x))
@@ -451,13 +428,10 @@ u1 <- rmvnorm(n.cl,rep(0,2),SigmaRE,method="svd")
 u  <- cbind(rep(u1[,1],sre),rep(u1[,2],sre))
 
 
-Sigma  <- matrix(c(1,rho,rho,1),2,2)
+Sigma  <- matrix(rho, 2, 2); diag(Sigma) <- 1
 eps    <- rmvnorm(t.n,rep(0,2),Sigma)
 
-SigmaC <- matrix(c(1,0.5,0.5,
-                   0.5,1,0.5,
-                   0.5,0.5,1),3,3)
-
+SigmaC <- matrix(0.5, 3, 3); diag(SigmaC) <- 1
 cov    <- rmvnorm(t.n,rep(0,3),SigmaC, method="svd")
 
 x1 <- round(pnorm(cov[,1]))

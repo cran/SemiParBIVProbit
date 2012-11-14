@@ -45,8 +45,8 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 \code{\link{AT}}
 }
 
-
 \keyword{semiparametric bivariate probit modelling} 
+
 
 
 

@@ -1,3 +1,6 @@
+version 3.2-4
+- plot, predict and summary functions rewritten more efficiently.
+
 version 3.2-3
 - optional prior weight vector to be used in fitting allowed for.
 - prediction function included.

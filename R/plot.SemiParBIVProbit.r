@@ -25,6 +25,7 @@ plot.SemiParBIVProbit <- function(x, eq, select, rug=TRUE, se=TRUE, se.l=1.95996
 
   if(eq==1) ind <- (x$gam1$smooth[[select]]$first.para+Kk1):(x$gam1$smooth[[select]]$last.para+Kk1)
   if(eq==2) ind <- (x$gam2$smooth[[select]]$first.para:x$gam2$smooth[[select]]$last.para+Kk1)+x$X1.d2+Kk2
+  if(eq==1) gam <- x$gam1 else gam <- x$gam2
 
   est.par.c1 <- x$fit$argument
   est.par.c2 <- est.par.c1[-c(1:(x$X1.d2+Kk2))]
@@ -33,21 +34,21 @@ plot.SemiParBIVProbit <- function(x, eq, select, rug=TRUE, se=TRUE, se.l=1.95996
   Vb  <- x$Vb[1:lf,1:lf]
   d.F <- diag(x$F[1:lf,1:lf])
 
-  if(eq==1){edf <- round(sum(d.F[ind]),2)
-         if(x$gam1$smooth[[select]]$dim==1){raw <- x$gam1$model[x$gam1$smooth[[select]]$term] 
+         edf <- round(sum(d.F[ind]),2)
+         if(gam$smooth[[select]]$dim==1){raw <- gam$model[gam$smooth[[select]]$term] 
                                                  xx  <- seq(min(raw), max(raw), length=n) 
-                                                      if(x$gam1$smooth[[select]]$by!= "NA"){by <- rep(1, n)
+                                                      if(gam$smooth[[select]]$by!= "NA"){by <- rep(1, n)
                                                                                                  d  <- data.frame(x = xx, by = by)
-                                                                                                 names(d) <- c(x$gam1$smooth[[select]]$term,x$gam1$smooth[[select]]$by) 
+                                                                                                 names(d) <- c(gam$smooth[[select]]$term,gam$smooth[[select]]$by) 
                                                       }
                                                       else{d <- data.frame(x = xx)
-                                                           names(d) <- x$gam1$smooth[[select]]$term
+                                                           names(d) <- gam$smooth[[select]]$term
                                                       }
          }
-         else if(x$gam1$smooth[[select]]$dim==2){xterm <- x$gam1$smooth[[select]]$term[1]
-                                                      yterm <- x$gam1$smooth[[select]]$term[2]      
-                 						      raw <- data.frame(x = as.numeric(x$gam1$model[xterm][[1]]),
-                              			                        y = as.numeric(x$gam1$model[yterm][[1]]) )
+         else if(gam$smooth[[select]]$dim==2){xterm <- gam$smooth[[select]]$term[1]
+                                                      yterm <- gam$smooth[[select]]$term[2]      
+                 						      raw <- data.frame(x = as.numeric(gam$model[xterm][[1]]),
+                              			                        y = as.numeric(gam$model[yterm][[1]]) )
                						      n2 <- max(10, n2)
                						      xm <- seq(min(raw$x), max(raw$x), length = n2)
                						  	ym <- seq(min(raw$y), max(raw$y), length = n2)
@@ -55,84 +56,46 @@ plot.SemiParBIVProbit <- function(x, eq, select, rug=TRUE, se=TRUE, se.l=1.95996
               						      yy <- rep(ym, rep(n2, n2))
                 					       	   if(too.far > 0) exclude <- exclude.too.far(xx, yy, raw$x, raw$y,dist = too.far)
                                                 	   else exclude <- rep(FALSE, n2 * n2)
-                                                 	   if(x$gam1$smooth[[select]]$by != "NA"){by <- rep(1, n2^2)
+                                                 	   if(gam$smooth[[select]]$by != "NA"){by <- rep(1, n2^2)
                                                  	                                               d  <- data.frame(x = xx, y = yy, by = by)
-                                                 	                                               names(d) <- c(xterm, yterm, x$gam1$smooth[[select]]$by)
+                                                 	                                               names(d) <- c(xterm, yterm, gam$smooth[[select]]$by)
                                                   	   }
                                                    	   else{d <- data.frame(x = xx, y = yy)
                                                     	        names(d) <- c(xterm, yterm)
                                                          } 
               }
-  X <- PredictMat(x$gam1$smooth[[select]], d) 
-  f <- X%*%est.par.c1[ind]
-  }
-
-  if(eq==2){edf <- round(sum(d.F[ind]),2)
-         if(x$gam2$smooth[[select]]$dim==1){raw <- x$gam2$model[x$gam2$smooth[[select]]$term] 
-                                                 xx  <- seq(min(raw), max(raw), length=n) 
-                                                      if(x$gam2$smooth[[select]]$by!= "NA"){by <- rep(1, n)
-                                                                                                 d  <- data.frame(x = xx, by = by)
-                                                                                                 names(d) <- c(x$gam2$smooth[[select]]$term,x$gam2$smooth[[select]]$by) 
-                                                      }
-                                                      else{d <- data.frame(x = xx)
-                                                           names(d) <- x$gam2$smooth[[select]]$term
-                                                      }
-         }
-         else if(x$gam2$smooth[[select]]$dim==2){xterm <- x$gam2$smooth[[select]]$term[1]
-                                                      yterm <- x$gam2$smooth[[select]]$term[2]      
-                 						      raw <- data.frame(x = as.numeric(x$gam2$model[xterm][[1]]),
-                              			                        y = as.numeric(x$gam2$model[yterm][[1]]) )
-               						      n2 <- max(10, n2)
-               						      xm <- seq(min(raw$x), max(raw$x), length = n2)
-               						  	ym <- seq(min(raw$y), max(raw$y), length = n2)
-              						 	xx <- rep(xm, n2)
-              						      yy <- rep(ym, rep(n2, n2))
-                					       	   if(too.far > 0) exclude <- exclude.too.far(xx, yy, raw$x, raw$y,dist = too.far)
-                                                	   else exclude <- rep(FALSE, n2 * n2)
-                                                 	   if(x$gam2$smooth[[select]]$by != "NA"){by <- rep(1, n2^2)
-                                                 	                                               d  <- data.frame(x = xx, y = yy, by = by)
-                                                 	                                               names(d) <- c(xterm, yterm, x$gam2$smooth[[select]]$by)
-                                                  	   }
-                                                   	   else{d <- data.frame(x = xx, y = yy)
-                                                    	        names(d) <- c(xterm, yterm)
-                                                         } 
-              }
-  X <- PredictMat(x$gam2$smooth[[select]], d)
-  f <- X%*%est.par.c2[ind-(x$X1.d2+Kk2)]
-  }
+  X <- PredictMat(gam$smooth[[select]], d) 
+  if(eq==1) f <- X%*%est.par.c1[ind] else f <- X%*%est.par.c2[ind-(x$X1.d2+Kk2)]
+  
 
   if(se){
-      if(eq==1)
-             if(seWithMean==TRUE && x$npRE==FALSE){X1 <- matrix(c(x$gam1$cmX,rep(0,length(est.par.c2))), nrow(X), ncol(Vb), byrow = TRUE)
-                            X1[,ind] <- X
-                            se.fit <- sqrt(rowSums((X1 %*% Vb) * X1))                           
-             }
-             else se.fit <- sqrt(rowSums((X %*% Vb[ind,ind]) * X))
+      if(seWithMean==TRUE && x$npRE==FALSE){
+                if(eq==1) X1 <- matrix(c(gam$cmX,rep(0,length(est.par.c2))), nrow(X), ncol(Vb), byrow = TRUE) else X1 <- matrix(c(rep(0,length(gam$cmX)),gam$cmX,0), nrow(X), ncol(Vb), byrow = TRUE) 
+                X1[,ind] <- X
+                se.fit <- sqrt(rowSums((X1 %*% Vb) * X1))                           
+                                           }
+      else se.fit <- sqrt(rowSums((X %*% Vb[ind,ind]) * X))
          
-      else   if(seWithMean==TRUE && x$npRE==FALSE){X1 <- matrix(c(rep(0,length(x$gam1$cmX)),x$gam2$cmX,0), nrow(X), ncol(Vb), byrow = TRUE)
-                            X1[,ind] <- X
-                            se.fit <- sqrt(rowSums((X1 %*% Vb) * X1))                           
-             }
-             else se.fit <- sqrt(rowSums((X %*% Vb[ind,ind]) * X))      
   ub <- (f+se.l*se.fit)
   lb <- (f-se.l*se.fit) 
-  if(eq==1 && x$gam1$smooth[[select]]$dim==1) if(is.null(ylim)) ylim <- c(min(lb),max(ub))
-  if(eq==2 && x$gam2$smooth[[select]]$dim==1) if(is.null(ylim)) ylim <- c(min(lb),max(ub))
+  if(eq==1 && gam$smooth[[select]]$dim==1) if(is.null(ylim)) ylim <- c(min(lb),max(ub))
+  if(eq==2 && gam$smooth[[select]]$dim==1) if(is.null(ylim)) ylim <- c(min(lb),max(ub))
 
   } 
               
-  if(eq==1){
-         if(x$gam1$smooth[[select]]$dim==1){
-       	   if(is.null(xlab)) x.lab <- x$gam1$smooth[[select]]$term else x.lab <- xlab  
-       	   if(is.null(ylab)) y.lab <- sub.edf(x$gam1$smooth[[select]]$label,edf) else y.lab <- ylab  
+
+
+         if(gam$smooth[[select]]$dim==1){
+       	   if(is.null(xlab)) x.lab <- gam$smooth[[select]]$term else x.lab <- xlab  
+       	   if(is.null(ylab)) y.lab <- sub.edf(gam$smooth[[select]]$label,edf) else y.lab <- ylab  
 
       	 plot(xx,f,type="l",xlab=x.lab,ylim=ylim,ylab=y.lab, main=main, ...)
       	   if(se){lines( xx , ub, lty=2 )
        	          lines( xx , lb, lty=2 )
        	   }
-      	   if(rug) rug(as.numeric(x$gam1$model[x$gam1$smooth[[select]]$term][[1]]))
+      	   if(rug) rug(as.numeric(gam$model[gam$smooth[[select]]$term][[1]]))
          }
-         else{if(x$gam1$smooth[[select]]$dim==2){     if(is.null(zlab)) zlabel <- sub.edf(x$gam1$smooth[[select]]$label, edf) else zlabel <- zlab
+         else{if(gam$smooth[[select]]$dim==2){     if(is.null(zlab)) zlabel <- sub.edf(gam$smooth[[select]]$label, edf) else zlabel <- zlab
                                                       if(is.null(xlab)) xlabel <- xterm else xlabel <- xlab
                                                       if(is.null(ylab)) ylabel <- yterm else ylabel <- ylab
 
@@ -147,34 +110,7 @@ plot.SemiParBIVProbit <- function(x, eq, select, rug=TRUE, se=TRUE, se.l=1.95996
                 
               }
           }
-  }
+ 
           
-  if(eq==2){
-         if(x$gam2$smooth[[select]]$dim==1){
-       	   if(is.null(xlab)) x.lab <- x$gam2$smooth[[select]]$term else x.lab <- xlab  
-               if(is.null(ylab)) y.lab <- sub.edf(x$gam2$smooth[[select]]$label,edf) else y.lab <- ylab  
-
-      	 plot(xx,f,type="l",xlab=x.lab,ylim=ylim,ylab=y.lab, main=main, ...)
-      	   if(se){lines( xx , ub, lty=2 )
-       	          lines( xx , lb, lty=2 )
-       	   }
-      	   if(rug) rug(as.numeric(x$gam2$model[x$gam2$smooth[[select]]$term][[1]]))
-         }
-         else{if(x$gam2$smooth[[select]]$dim==2){     if(is.null(zlab)) zlabel <- sub.edf(x$gam2$smooth[[select]]$label, edf) else zlabel <- zlab
-                                                      if(is.null(xlab)) xlabel <- xterm else xlabel <- xlab
-                                                      if(is.null(ylab)) ylabel <- yterm else ylabel <- ylab
-
-                pd <- list(fit = f, dim = 2, xm = xm, ym = ym, ylab = ylabel, xlab = xlabel, zlab = zlabel, raw = raw)
-                if (is.null(ylim)) pd$ylim <- range(ym) else pd$ylim <- ylim
-                if (is.null(xlim)) pd$xlim <- range(xm) else pd$xlim <- xlim
-                         persp(pd$xm, pd$ym, matrix(trans(pd$fit), n2, n2), xlab = pd$xlab, 
-                               ylab = pd$ylab, zlab = pd$zlab, 
-                               ylim = pd$ylim, xlim = pd$xlim,
-                               theta = theta, phi = phi, main = main, ...)
-                
-              }
-          }
-  }
-
 
 }

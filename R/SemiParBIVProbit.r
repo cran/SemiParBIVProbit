@@ -129,7 +129,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), p.weights=NU
   dat1 <- as.matrix(dat[,3:(X1.d2+2)])
   dat2 <- as.matrix(dat[,(X1.d2+3):(X1.d2+X2.d2+2)])
 
-  if(is.null(start.v)) startvSS <- startSS(gam1, gam2, formula.eq2, data, gamma, p.weights, inde, l.sp1, l.sp2, fp); start.v <- startvSS$start.v 
+  if(is.null(start.v)) startvSS <- startSS(gam1, gam2, formula.eq2, data, gamma, p.weights, inde, l.sp1, l.sp2); start.v <- startvSS$start.v 
 		    	    
 		    
   if(H==TRUE && l.sp1==0 && l.sp2==0) func.opt <- bprobSSH else func.opt <- bprobSS		    
@@ -147,14 +147,10 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), p.weights=NU
                   fterm=fterm, mterm=mterm, iterlim = 1e+4, 
                   K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses)  
 
-    iter.if <- fit$iterations    
+    iter.if <- fit$iterations         
            
-    if(fp==TRUE) aut.sp <- FALSE      
-           
-    if(aut.sp==TRUE){
+    if(aut.sp==TRUE && fp==FALSE && l.sp1!=0 && l.sp2!=0){
 
-      if(l.sp1!=0 && l.sp2!=0){
-      
        j.it <- stoprule.SP <- 1; conv.sp <- TRUE; count.npREsp <- 0  
 
 	  while( stoprule.SP > pr.tol ){ 
@@ -218,7 +214,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), p.weights=NU
              j.it <- j.it + 1      
            
           }
-      }
+      
     }
     
     if(selection==FALSE && npRE==TRUE){
