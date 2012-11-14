@@ -53,6 +53,10 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
       d
 }
   
+  tableN <- list(NULL,NULL)
+  n.sel <- object$n.sel; masses <- object$masses
+  table.R <- table.P <- table.F <- P1 <- P2 <- QPS1 <- QPS2 <- CR1 <- CR1 <- CR2 <- MR <- table.npRE <- NULL  
+
   lf <- length(object$fit$argument)
   F  <- object$F[1:lf,1:lf]
   Vr <- object$Vb[1:lf,1:lf] 
@@ -69,61 +73,51 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
   
   Kk1 <- Kk2 <- 0; if(object$npRE==TRUE){ Kk1 <- object$K - 1; Kk2 <- Kk1 + 1}  
 
-  estimate1 <- object$fit$argument[1:(object$gam1$nsdf+Kk1)]
-  se1       <- SE[1:(object$gam1$nsdf+Kk1)]
-  ratio1    <- estimate1/se1
-  pv1       <- 2*pnorm(abs(ratio1), lower.tail = FALSE)
-  table1    <- cbind(estimate1,se1,ratio1,pv1)
+  table <- list()
+  ind <- list(ind1=1:(object$gam1$nsdf+Kk1),ind2=object$X1.d2+Kk2+(1:(object$gam2$nsdf+Kk1)))
 
-  estimate2 <- object$fit$argument[object$X1.d2+Kk2+(1:(object$gam2$nsdf+Kk1))]
-  se2       <- SE[object$X1.d2+Kk2+(1:(object$gam2$nsdf+Kk1))]
-  ratio2    <- estimate2/se2
-  pv2       <- 2*pnorm(abs(ratio2), lower.tail = FALSE)
-  table2    <- cbind(estimate2,se2,ratio2,pv2)
-
-  dimnames(table1)[[2]] <- c("Estimate", "Std. Error", "z value", "Pr(>|z|)")
-  dimnames(table2)[[2]] <- c("Estimate", "Std. Error", "z value", "Pr(>|z|)")
+  for(i in 1:2){
+  estimate <- object$fit$argument[ind[[1]]]
+  se       <- SE[ind[[1]]]
+  ratio    <- estimate/se
+  pv       <- 2*pnorm(abs(ratio), lower.tail = FALSE)
+  table[[i]] <- cbind(estimate,se,ratio,pv)
+  dimnames(table[[i]])[[2]] <- c("Estimate", "Std. Error", "z value", "Pr(>|z|)")
+  }
 
   if(object$npRE==TRUE){
-  	table.npRE <- cbind(table1[c(1:Kk2),1],table2[c(1:Kk2),1],object$masses)
+  	table.npRE <- cbind(table[[1]][c(1:Kk2),1],table[[2]][c(1:Kk2),1],object$masses)
   	dimnames(table.npRE)[[2]] <- c("Eq. 1", "Eq. 2", "masses")
-  	table1 <- table1[-c(1:Kk2),]; table2 <- table2[-c(1:Kk2),] 
+  	table[[1]] <- table[[1]][-c(1:Kk2),]; table[[2]] <- table[[2]][-c(1:Kk2),] 
                        }
 
   if(object$l.sp1!=0 && object$l.sp2!=0){
-  	pTerms.df1 <- pTerms.chi.sq1 <- pTerms.pv1 <- edf1 <- NA
-  	pTerms.df2 <- pTerms.chi.sq2 <- pTerms.pv2 <- edf2 <- NA
-		for(k in 1:object$l.sp1){
-			ind <- (object$gam1$smooth[[k]]$first.para+Kk1):(object$gam1$smooth[[k]]$last.para+Kk1)
-			edf1[k] <- sum(diag(F)[ind])
-			names(edf1)[k] <- object$gam1$smooth[[k]]$label 
-			b  <- object$fit$argument[ind]
-			V  <- Vr[ind,ind]
-			Xt <- object$X1[, 1:length(ind)+object$gam1$nsdf]
-			pTerms.df1[k] <- min(ncol(Xt), edf1[k])
-			pTerms.chi.sq1[k] <- Tp <- testStat(b, Xt, V, pTerms.df1[k])
-			pTerms.df1[k] <- attr(Tp, "rank")
-                        pTerms.pv1[k] <- pchisq(pTerms.chi.sq1[k], df = pTerms.df1[k], lower.tail = FALSE)
-			                 
-            }
-  	table1.1 <- cbind(edf1, pTerms.df1, pTerms.chi.sq1, pTerms.pv1)
 
-		for(k in 1:object$l.sp2){
-			ind <- (object$gam2$smooth[[k]]$first.para:object$gam2$smooth[[k]]$last.para+Kk1)+object$X1.d2+Kk2
-			edf2[k] <- sum(diag(F)[ind])
-			names(edf2)[k] <- object$gam2$smooth[[k]]$label 
+  	pTerms.df <- pTerms.chi.sq <- pTerms.pv <- edf <- tableN <- list(0,0)
+        
+           for(i in 1:2){
+                if(i==1) mm <- object$l.sp1 else mm <- object$l.sp2
+  
+		for(k in 1:mm){
+
+                        if (i==1) {gam <- object$gam1; ind <- (object$gam1$smooth[[k]]$first.para+Kk1):(object$gam1$smooth[[k]]$last.para+Kk1)} else{gam <- object$gam2; ind <- (object$gam2$smooth[[k]]$first.para:object$gam2$smooth[[k]]$last.para+Kk1)+object$X1.d2+Kk2}
+			edf[[i]][k] <- sum(diag(F)[ind])
+			names(edf[[i]])[k] <- gam$smooth[[k]]$label 
 			b  <- object$fit$argument[ind]
 			V  <- Vr[ind,ind]
-			Xt <- object$X2[, 1:length(ind)+object$gam2$nsdf]
-			pTerms.df2[k] <- min(ncol(Xt), edf2[k])
-			pTerms.chi.sq2[k] <- Tp <- testStat(b, Xt, V, pTerms.df2[k])   
-			pTerms.df2[k] <- attr(Tp, "rank")
-			pTerms.pv2[k] <- pchisq(pTerms.chi.sq2[k], df = pTerms.df2[k], lower.tail = FALSE)
+			if(i==1) Xt <- object$X1[, 1:length(ind)+gam$nsdf] else Xt <- object$X2[, 1:length(ind)+gam$nsdf]
+			pTerms.df[[i]][k] <- min(ncol(Xt), edf[[i]][k])
+			pTerms.chi.sq[[i]][k] <- Tp <- testStat(b, Xt, V, pTerms.df[[i]][k])
+			pTerms.df[[i]][k] <- attr(Tp, "rank")
+                        pTerms.pv[[i]][k] <- pchisq(pTerms.chi.sq[[i]][k], df = pTerms.df[[i]][k], lower.tail = FALSE)
+			                 
+                }
+              tableN[[i]] <- cbind(edf[[i]], pTerms.df[[i]], pTerms.chi.sq[[i]], pTerms.pv[[i]])
+              dimnames(tableN[[i]])[[2]] <- c("edf", "Est.rank", "Chi.sq", "p-value")
             }
-	table2.2 <- cbind(edf2, pTerms.df2, pTerms.chi.sq2, pTerms.pv2)
-  dimnames(table1.1)[[2]] <- c("edf", "Est.rank", "Chi.sq", "p-value")
-  dimnames(table2.2)[[2]] <- c("edf", "Est.rank", "Chi.sq", "p-value")
+
   }
+
 
  if(object$npRE==FALSE){ 
 
@@ -150,6 +144,7 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
  }
 
  matches <- as.numeric(Pre.c[,1]==Pre.c[,2])
+ MR <- mean(matches)*100
 
  c00.p <- c10.p <- c01.p <- c11.p <- 0
 
@@ -180,79 +175,19 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
  }
 
   
-
- if(object$sel==FALSE && object$npRE==FALSE){
-
-
-  if(object$l.sp1!=0 && object$l.sp2!=0){res <- list(tableP1=table1, tableP2=table2, 
-                                           tableNP1=table1.1, tableNP2=table2.2, 
-                                           n=n, rho=object$rho, 
-                                           formula1=object$gam1$formula, formula2=object$gam2$formula, 
-                                           l.sp1=object$l.sp1, l.sp2=object$l.sp2, 
-                                           t.edf=object$t.edf, CIrs=CIrs, sel=object$sel,npRE=object$npRE,
-                   			   table.R=table.R, table.P=table.P, table.F=table.F, MR=mean(matches)*100,
-                   			   P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2
-                                           )
-                               class(res) <- "summary.SemiParBIVProbit"
-  }else{res <- list(tableP1=table1,tableP2=table2, 
-                   n=n, rho=object$rho, 
-                   formula1=object$gam1$formula, formula2=object$gam2$formula, 
-                   l.sp1=0, l.sp2=0, npRE=object$npRE,
-                   t.edf=object$t.edf, CIrs=CIrs, sel=object$sel,
-                   table.R=table.R, table.P=table.P, table.F=table.F, MR=mean(matches)*100,
-                   P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2
-                   )
-       class(res) <- "summary.SemiParBIVProbit"
-         }
-         
-                                        }
-
- if(object$sel==TRUE && object$npRE==FALSE){
-
-
- if(object$l.sp1!=0 && object$l.sp2!=0){res <- list(tableP1=table1, tableP2=table2, 
-                                           tableNP1=table1.1, tableNP2=table2.2, 
-                                           n=n, rho=object$rho, 
-                                           formula1=object$gam1$formula, formula2=object$gam2$formula, 
-                                           l.sp1=object$l.sp1, l.sp2=object$l.sp2, npRE=object$npRE,
-                                           t.edf=object$t.edf, CIrs=CIrs, sel=object$sel, n.sel=object$n.sel, npRE=object$npRE
-                                           )
-                               class(res) <- "summary.SemiParBIVProbit"
-  }else{res <- list(tableP1=table1,tableP2=table2, 
-                   n=n, rho=object$rho, 
-                   formula1=object$gam1$formula, formula2=object$gam2$formula, 
-                   l.sp1=0, l.sp2=0,npRE=object$npRE, 
-                   t.edf=object$t.edf, CIrs=CIrs, sel=object$sel, npRE=object$npRE, n.sel=object$n.sel
-                   )
-       class(res) <- "summary.SemiParBIVProbit"
-       }
-}
-
-
-
- if(object$npRE==TRUE){
-
-
- if(object$l.sp1!=0 && object$l.sp2!=0){res <- list(tableP1=table1, tableP2=table2, 
-                                           tableNP1=table1.1, tableNP2=table2.2, 
-                                           n=n, rho=object$rho, 
-                                           formula1=object$gam1$formula, formula2=object$gam2$formula, 
-                                           l.sp1=object$l.sp1, l.sp2=object$l.sp2, 
-                                           t.edf=object$t.edf, CIrs=CIrs, sel=object$sel, 
-                                           npRE=object$npRE, masses=object$masses, table.npRE=table.npRE
-                                           )
-                               class(res) <- "summary.SemiParBIVProbit"
-  }else{res <- list(tableP1=table1,tableP2=table2, 
-                   n=n, rho=object$rho, 
-                   formula1=object$gam1$formula, formula2=object$gam2$formula, 
-                   l.sp1=0, l.sp2=0, 
-                   t.edf=object$t.edf, CIrs=CIrs, sel=object$sel, 
-                   npRE=object$npRE, masses=object$masses, table.npRE=table.npRE
-                   )
-       class(res) <- "summary.SemiParBIVProbit"
-       }
-
-                    }
+  res <- list(tableP1=table[[1]], tableP2=table[[2]], 
+              tableNP1=tableN[[1]], tableNP2=tableN[[2]], 
+              n=n, rho=object$rho, 
+              formula1=object$gam1$formula, formula2=object$gam2$formula, 
+              l.sp1=object$l.sp1, l.sp2=object$l.sp2, 
+              t.edf=object$t.edf, CIrs=CIrs, sel=object$sel,n.sel=n.sel, npRE=object$npRE,
+              table.R=table.R, table.P=table.P, table.F=table.F, MR=MR,
+              P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2,
+              masses=object$masses, table.npRE=table.npRE
+              )
+  class(res) <- "summary.SemiParBIVProbit"
+      
+                                        
 
 res
 

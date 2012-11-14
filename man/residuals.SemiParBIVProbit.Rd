@@ -68,7 +68,7 @@ Unfortunately residual plots from models fitted to binary data do not contain mu
 the goodness-of-fit of the model. For instance, if one wants to check distributional assumptions 
 from residuals, QQ-plots and/or half-normal plots with simulated envelope 
 provide no useful information (this has also been checked in simulation). For binary data, it is 
-necessary to be able to group the residuals according to some criterion. On top of this, for the sample selection case, such residuals 
+necessary to be able to group the residuals according to some criterion. For the sample selection case, such residuals 
 are not meaningful and alternative definitions have to be employed.       
 
 } 
