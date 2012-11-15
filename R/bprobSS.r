@@ -1,4 +1,4 @@
-bprobSS <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p=NULL, dat2p=NULL, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K=NULL, n=NULL, N=NULL, cuid=NULL, uidf=NULL, masses=NULL){
+bprobSS <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p=NULL, dat2p=NULL, X1.d2, X2.d2, sp=NULL, qu.mag=NULL, gam1, gam2, fp, K=NULL, n=NULL, N=NULL, cuid=NULL, uidf=NULL, masses=NULL){
 
   eta1 <- dat1%*%params[1:X1.d2]
   eta2 <- dat2%*%params[(X1.d2+1):(X1.d2+X2.d2)]
@@ -54,31 +54,46 @@ bprobSS <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p=NULL, da
                    -colSums( c(dl.dbe2)*dat2 ),
                    -sum( dl.drho )  )            
 
-  if( ( length(gam1$smooth)==0 && length(gam2$smooth)==0 ) || fp==TRUE){
+if( ( length(gam1$smooth)==0 && length(gam2$smooth)==0 ) || fp==TRUE) S.h <- S.h1 <- S.h2 <- 0
 
-         list(value=res, gradient=G, hessian=H, l=res, 
-              p11=p11, p10=p10, p0=p0, eta1=eta1, eta2=eta2,
-              dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.drho=dl.drho,
-              d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
-              d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
-              d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho) 
-  }else{
+     else{
+
+       S <- mapply("*", qu.mag$Ss, sp, SIMPLIFY=FALSE)
+       S <- do.call(adiag, lapply(S, unlist)) 
          S.h <- adiag(matrix(0,gam1$nsdf,gam1$nsdf),
-	              S[1:(X1.d2-gam1$nsdf),1:(X1.d2-gam1$nsdf)],
-	              matrix(0,gam2$nsdf,gam2$nsdf),
-	              S[(X1.d2-(gam1$nsdf-1)):dim(S)[2],(X1.d2-(gam1$nsdf-1)):dim(S)[2]],
+                      S[1:(X1.d2-gam1$nsdf),1:(X1.d2-gam1$nsdf)],
+                      matrix(0,gam2$nsdf,gam2$nsdf),
+                      S[(X1.d2-(gam1$nsdf-1)):dim(S)[2],(X1.d2-(gam1$nsdf-1)):dim(S)[2]],
                       0)
+   S.h1 <- 0.5*crossprod(params,S.h)%*%params
+   S.h2 <- S.h%*%params
+         }
+
          S.res <- res
-         res <- S.res + 0.5*crossprod(params,S.h)%*%params
-         G   <- G + S.h%*%params
+         res <- S.res + S.h1
+         G   <- G + S.h2
          H   <- H + S.h  
+
          list(value=res, gradient=G, hessian=H, S.h=S.h, l=S.res, 
               p11=p11, p10=p10, p0=p0, eta1=eta1, eta2=eta2,
               dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.drho=dl.drho,
               d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
               d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
-              d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho)  
-   }     
+              d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho)      
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

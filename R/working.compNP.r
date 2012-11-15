@@ -1,10 +1,9 @@
 working.compNP <- function(x,X1=X1,X2=X2,X1.d2=X1.d2,X2.d2=X2.d2,n=n,K=NULL,dat1=dat1,dat2=dat2){
 
-  W <- c.W <- i.W        <- matrix(0,3,3)
-  X <- rW.X              <- matrix(0,3*n,(X1.d2+X2.d2+1+2*K))
-  D <- iW.D <- Z <- rW.Z <- matrix(0,3*n,1)
-  e.par                  <- x$argument
-  j                      <- 1
+  X <- rW.X <- matrix(0,3*n,(X1.d2+X2.d2+1+2*K))
+  D <- rW.Z <- matrix(0,3*n,1)
+  e.par     <- x$argument
+  j         <- 1
 
   for(i in seq(1,(3*n-2),by=3)) {
 

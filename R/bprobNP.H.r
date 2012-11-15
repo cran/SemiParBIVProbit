@@ -1,4 +1,4 @@
-bprobNP.H <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p=NULL, dat2p=NULL, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N, cuid, uidf, masses){
+bprobNP.H <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p=NULL, dat2p=NULL, X1.d2, X2.d2, sp=NULL, qu.mag=NULL, gam1, gam2, fp, K, n, N, cuid, uidf, masses){
 
   q1 <- 2*dat[,1]-1
   q2 <- 2*dat[,2]-1
@@ -72,24 +72,51 @@ bprobNP.H <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p=NULL, 
   masses <- apply(W,2,sum)/sum(W)
   
   
-   if( ( length(gam1$smooth)==0 && length(gam2$smooth)==0 ) || fp==TRUE){
-  
-         list(value=res, gradient=G, hessian=H, l=res, masses=masses,
-              dl.dbe1=dl.dbe1,dl.dbe2=dl.dbe2,dl.drho=dl.drho,W=W,l.par=l.par,Wp3=Wp3)
-         
-  }else{
+if( ( length(gam1$smooth)==0 && length(gam2$smooth)==0 ) || fp==TRUE) S.h <- S.h1 <- S.h2 <- 0
+
+     else{
+
+       S <- mapply("*", qu.mag$Ss, sp, SIMPLIFY=FALSE)
+       S <- do.call(adiag, lapply(S, unlist)) 
+
          S.h <- adiag(matrix(0,K+gam1$nsdf-1,K+gam1$nsdf-1),
                       S[1:(X1.d2-gam1$nsdf),1:(X1.d2-gam1$nsdf)],
                       matrix(0,K+gam2$nsdf-1,K+gam2$nsdf-1),
                       S[(X1.d2-(gam1$nsdf-1)):dim(S)[2],(X1.d2-(gam1$nsdf-1)):dim(S)[2]],
                       0)
-          
-         S.res <- res 
-         res <- S.res + 0.5*crossprod(params,S.h)%*%params
-         G   <- G + S.h%*%params
-         H   <- H + S.h
+   S.h1 <- 0.5*crossprod(params,S.h)%*%params
+   S.h2 <- S.h%*%params
+         }
+
+         S.res <- res
+         res <- S.res + S.h1
+         G   <- G + S.h2
+         H   <- H + S.h  
+
          list(value=res, gradient=G, hessian=H, S.h=S.h, l=S.res, masses=masses,
               dl.dbe1=dl.dbe1,dl.dbe2=dl.dbe2,dl.drho=dl.drho,W=W,l.par=l.par,Wp3=Wp3)
-   }
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

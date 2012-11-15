@@ -77,8 +77,8 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
   ind <- list(ind1=1:(object$gam1$nsdf+Kk1),ind2=object$X1.d2+Kk2+(1:(object$gam2$nsdf+Kk1)))
 
   for(i in 1:2){
-  estimate <- object$fit$argument[ind[[1]]]
-  se       <- SE[ind[[1]]]
+  estimate <- object$fit$argument[ind[[i]]]
+  se       <- SE[ind[[i]]]
   ratio    <- estimate/se
   pv       <- 2*pnorm(abs(ratio), lower.tail = FALSE)
   table[[i]] <- cbind(estimate,se,ratio,pv)
