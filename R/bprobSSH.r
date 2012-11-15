@@ -1,4 +1,4 @@
-bprobSSH <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p=NULL, dat2p=NULL, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K=NULL, n=NULL, N=NULL, cuid=NULL, uidf=NULL, masses=NULL){
+bprobSSH <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p=NULL, dat2p=NULL, X1.d2, X2.d2, sp=NULL, qu.mag=NULL, gam1, gam2, fp, K=NULL, n=NULL, N=NULL, cuid=NULL, uidf=NULL, masses=NULL){
 
     q1 <- 2*dat[,1]-1
     q2 <- 2*dat[,2]-1 

@@ -1,4 +1,4 @@
-bprobNP <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p, dat2p, X1.d2, X2.d2, S=NULL, gam1, gam2, fp, K, n, N, cuid, uidf, masses){
+bprobNP <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p, dat2p, X1.d2, X2.d2, sp=NULL, qu.mag=NULL, gam1, gam2, fp, K, n, N, cuid, uidf, masses){
 
   corr.st <- params[X1.d2+X2.d2+2*K+1]
   corr    <- tanh(corr.st)
@@ -77,27 +77,27 @@ bprobNP <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p, dat2p, 
 
   #################################################### 
   
-  if( ( length(gam1$smooth)==0 && length(gam2$smooth)==0 ) || fp==TRUE){
-  
-         list(value=res, gradient=G, hessian=H, l=res, masses=masses,
-              eta1=dat1p%*%params[(K+1):(X1.d2+K)], 
-              eta2=dat2p%*%params[(X1.d2+2*K+1):(X1.d2+X2.d2+2*K)],
-              dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.drho=dl.drho,
-              d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
-              d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
-              d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho, We=We)
-         
-  }else{
+if( ( length(gam1$smooth)==0 && length(gam2$smooth)==0 ) || fp==TRUE) S.h <- S.h1 <- S.h2 <- 0
+
+     else{
+
+       S <- mapply("*", qu.mag$Ss, sp, SIMPLIFY=FALSE)
+       S <- do.call(adiag, lapply(S, unlist)) 
+
          S.h <- adiag(matrix(0,K+gam1$nsdf-1,K+gam1$nsdf-1),
                       S[1:(X1.d2-gam1$nsdf),1:(X1.d2-gam1$nsdf)],
                       matrix(0,K+gam2$nsdf-1,K+gam2$nsdf-1),
                       S[(X1.d2-(gam1$nsdf-1)):dim(S)[2],(X1.d2-(gam1$nsdf-1)):dim(S)[2]],
                       0)
-          
-         S.res <- res 
-         res <- S.res + 0.5*crossprod(params,S.h)%*%params
-         G   <- G + S.h%*%params
-         H   <- H + S.h
+   S.h1 <- 0.5*crossprod(params,S.h)%*%params
+   S.h2 <- S.h%*%params
+         }
+
+         S.res <- res
+         res <- S.res + S.h1
+         G   <- G + S.h2
+         H   <- H + S.h  
+
          list(value=res, gradient=G, hessian=H, S.h=S.h, l=S.res, masses=masses,
               eta1=dat1p%*%params[(K+1):(X1.d2+K)], 
               eta2=dat2p%*%params[(X1.d2+2*K+1):(X1.d2+X2.d2+2*K)],
@@ -105,6 +105,30 @@ bprobNP <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p, dat2p, 
               d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
               d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
               d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho, We=We)
-   }
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
