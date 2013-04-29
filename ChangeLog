@@ -1,3 +1,10 @@
+version 3.2-6
+- examples and references in documentation updated.
+- plot and predict functions now based on those available in mgcv.
+- starting value procedure for correlation parameter improved.
+- main model and post fitting functions written more neatly. 
+- AT function updated.
+
 version 3.2-5
 - bug in summary function fixed.
 - call to smoothing penalty matrices made more efficient.

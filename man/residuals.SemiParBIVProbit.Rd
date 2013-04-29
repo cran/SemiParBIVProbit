@@ -55,8 +55,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
-Journal of Statistics}, 39(2), 259-279.
+Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian Journal of Statistics}, 39(2), 259-279.
 
 }
 
@@ -67,8 +66,10 @@ Journal of Statistics}, 39(2), 259-279.
 Unfortunately residual plots from models fitted to binary data do not contain much information about 
 the goodness-of-fit of the model. For instance, if one wants to check distributional assumptions 
 from residuals, QQ-plots and/or half-normal plots with simulated envelope 
-provide no useful information (this has also been checked in simulation). For binary data, it is 
-necessary to be able to group the residuals according to some criterion. For the sample selection case, such residuals 
+provide no useful information (this has been checked in simulation). For binary data, it is 
+necessary to be able to group the residuals according to some criterion. 
+
+For sample selection models, such residuals 
 are not meaningful and alternative definitions have to be employed.       
 
 } 

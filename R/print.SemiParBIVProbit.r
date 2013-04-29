@@ -2,7 +2,7 @@ print.SemiParBIVProbit <- function(x,...){
 
   if(x$sel==FALSE){ 
   re <- ""
-  if(x$npRE==TRUE) re <- "with Random Effects"
+  if(x$RE==TRUE) re <- "with Random Effects"
   cat("\nFamily: BIVARIATE PROBIT",re,"\n\nFormula Eq. 1: ")
   print(x$gam1$formula)
 

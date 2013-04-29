@@ -6,6 +6,7 @@ importFrom(MASS, ginv)
 importFrom(VGAM, pnorm2, dnorm2)
 importFrom(magic, adiag)
 importFrom(statmod, gauss.quad)
+importFrom(polycor, polychor)
 
 S3method(plot, SemiParBIVProbit)
 S3method(summary, SemiParBIVProbit)

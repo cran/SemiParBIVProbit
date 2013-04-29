@@ -3,8 +3,8 @@
 
 \title{Internal Function}
 
-\description{It calcultes sensible starting values, based on a two step procedure, for bivariate probit 
-models with sample selection.}
+\description{It calcultes sensible starting values for bivariate probit 
+models with non-random sample selection. This is based on an adaptation of the Heckman two-step procedure.}
 
 
 
@@ -20,7 +20,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 \references{
 
 
-Marra G. and Radice R., A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modelling. \emph{Submitted}.
+Marra G. and Radice R. (submitted), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, invited revision.
 
 
 }

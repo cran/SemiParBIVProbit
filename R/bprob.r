@@ -1,14 +1,9 @@
-bprob <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p=NULL, dat2p=NULL, X1.d2, X2.d2, sp=NULL, qu.mag=NULL, gam1, gam2, fp, K=NULL, n=NULL, N=NULL, cuid=NULL, uidf=NULL, masses=NULL){
+bprob <- function(params, y1, y2, q1, q2, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, weights=weights, X1.d2, X2.d2, sp=NULL, qu.mag=NULL, gp1, gp2, fp, l.sp1, l.sp2, K=NULL, n=NULL, N=NULL, cuid=NULL, uidf=NULL, masses=NULL, NGQ=NULL, dat1all=NULL, dat2all=NULL, W=NULL){
 
-  eta1 <- dat1%*%params[1:X1.d2]
-  eta2 <- dat2%*%params[(X1.d2+1):(X1.d2+X2.d2)]
+  eta1 <- X1%*%params[1:X1.d2]
+  eta2 <- X2%*%params[(X1.d2+1):(X1.d2+X2.d2)]
   corr.st <- params[(X1.d2+X2.d2+1)]
   corr    <- tanh(corr.st)
-
-  y1.y2   <- dat[,1]*dat[,2]
-  y1.cy2  <- dat[,1]*(1-dat[,2])
-  cy1.y2  <- (1-dat[,1])*dat[,2]
-  cy1.cy2 <- (1-dat[,1])*(1-dat[,2])
 
   d.r <- 1/sqrt( pmax(10000*.Machine$double.eps, 1-corr^2) )
 
@@ -17,35 +12,35 @@ bprob <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p=NULL, dat2
   B   <- pnorm( (eta1-corr*eta2)*d.r )
   B.c <- 1 - B
 
-  p11 <- pmax( pnorm2( eta1, eta2, corr), 1000*.Machine$double.eps )
+  p11 <- pmax( abs(pnorm2( eta1, eta2, cov12=corr)), 1000*.Machine$double.eps )
   p10 <- pmax( pnorm(eta1) - p11, 1000*.Machine$double.eps )
   p01 <- pmax( pnorm(eta2) - p11, 1000*.Machine$double.eps )
   p00 <- pmax( 1- p11 - p10 - p01, 1000*.Machine$double.eps )
 
   d.n1   <- dnorm(eta1) 
   d.n2   <- dnorm(eta2) 
-  d.n1n2 <- dnorm2(eta1,eta2,corr) 
+  d.n1n2 <- dnorm2(eta1,eta2, rho=corr) 
 
-  l.par <- p.weights*(y1.y2*log(p11)+y1.cy2*log(p10)+cy1.y2*log(p01)+cy1.cy2*log(p00)) 
+  l.par <- weights*(y1.y2*log(p11)+y1.cy2*log(p10)+cy1.y2*log(p01)+cy1.cy2*log(p00)) 
 
   drh.drh.st   <- 4*exp(2*corr.st)/(exp(2*corr.st)+1)^2
   
-  dl.dbe1 <- p.weights*d.n1*((y1.y2/p11-cy1.y2/p01)*A+(y1.cy2/p10-cy1.cy2/p00)*A.c)
-  dl.dbe2 <- p.weights*d.n2*((y1.y2/p11-y1.cy2/p10)*B+(cy1.y2/p01-cy1.cy2/p00)*B.c)
-  dl.drho <- p.weights*d.n1n2*(y1.y2/p11-y1.cy2/p10-cy1.y2/p01+cy1.cy2/p00)*drh.drh.st
+  dl.dbe1 <- weights*d.n1*((y1.y2/p11-cy1.y2/p01)*A+(y1.cy2/p10-cy1.cy2/p00)*A.c)
+  dl.dbe2 <- weights*d.n2*((y1.y2/p11-y1.cy2/p10)*B+(cy1.y2/p01-cy1.cy2/p00)*B.c)
+  dl.drho <- weights*d.n1n2*(y1.y2/p11-y1.cy2/p10-cy1.y2/p01+cy1.cy2/p00)*drh.drh.st
 
-  d2l.be1.be1  <- -p.weights*(d.n1^2*(A^2*(-1/p11-1/p01)+A.c^2*(-1/p10-1/p00)))      
-  d2l.be2.be2  <- -p.weights*(d.n2^2*(B^2*(-1/p11-1/p10)+B.c^2*(-1/p01-1/p00)))
-  d2l.be1.be2  <- -p.weights*(d.n1*d.n2*(A*B.c/p01-A*B/p11+A.c*B/p10-A.c*B.c/p00))
-  d2l.be1.rho  <- -p.weights*(-d.n1*d.n1n2*(A*(1/p11+1/p01)-A.c*(1/p10+1/p00)))*drh.drh.st 
-  d2l.be2.rho  <- -p.weights*(-d.n2*d.n1n2*(B*(1/p11+1/p10)-B.c*(1/p01+1/p00)))*drh.drh.st 
-  d2l.rho.rho  <- -p.weights*(-d.n1n2^2*(1/p11+1/p01+1/p10+1/p00))*drh.drh.st^2 
+  d2l.be1.be1  <- -weights*(d.n1^2*(A^2*(-1/p11-1/p01)+A.c^2*(-1/p10-1/p00)))      
+  d2l.be2.be2  <- -weights*(d.n2^2*(B^2*(-1/p11-1/p10)+B.c^2*(-1/p01-1/p00)))
+  d2l.be1.be2  <- -weights*(d.n1*d.n2*(A*B.c/p01-A*B/p11+A.c*B/p10-A.c*B.c/p00))
+  d2l.be1.rho  <- -weights*(-d.n1*d.n1n2*(A*(1/p11+1/p01)-A.c*(1/p10+1/p00)))*drh.drh.st 
+  d2l.be2.rho  <- -weights*(-d.n2*d.n1n2*(B*(1/p11+1/p10)-B.c*(1/p01+1/p00)))*drh.drh.st 
+  d2l.rho.rho  <- -weights*(-d.n1n2^2*(1/p11+1/p01+1/p10+1/p00))*drh.drh.st^2 
                                 
-  be1.be1 <- crossprod(dat1*c(d2l.be1.be1),dat1)
-  be2.be2 <- crossprod(dat2*c(d2l.be2.be2),dat2)
-  be1.be2 <- crossprod(dat1*c(d2l.be1.be2),dat2)
-  be1.rho <- t(t(rowSums(t(dat1*c(d2l.be1.rho)))))
-  be2.rho <- t(t(rowSums(t(dat2*c(d2l.be2.rho)))))
+  be1.be1 <- crossprod(X1*c(d2l.be1.be1),X1)
+  be2.be2 <- crossprod(X2*c(d2l.be2.be2),X2)
+  be1.be2 <- crossprod(X1*c(d2l.be1.be2),X2)
+  be1.rho <- t(t(rowSums(t(X1*c(d2l.be1.rho)))))
+  be2.rho <- t(t(rowSums(t(X2*c(d2l.be2.rho)))))
 
   H <- rbind( cbind( be1.be1    , be1.be2    , be1.rho ), 
               cbind( t(be1.be2) , be2.be2    , be2.rho ), 
@@ -53,24 +48,28 @@ bprob <- function(params, dat, dat1, dat2, p.weights=p.weights, dat1p=NULL, dat2
             ) 
 
          res <- -sum(l.par)
-         G   <- c( -colSums( c(dl.dbe1)*dat1 ),
-                   -colSums( c(dl.dbe2)*dat2 ),
+         G   <- c( -colSums( c(dl.dbe1)*X1 ),
+                   -colSums( c(dl.dbe2)*X2 ),
                    -sum( dl.drho )  )
 
 
 
-if( ( length(gam1$smooth)==0 && length(gam2$smooth)==0 ) || fp==TRUE) S.h <- S.h1 <- S.h2 <- 0
+if( ( l.sp1==0 && l.sp2==0 ) || fp==TRUE) S.h <- S.h1 <- S.h2 <- 0
 
      else{
 
     S <- mapply("*", qu.mag$Ss, sp, SIMPLIFY=FALSE)
     S <- do.call(adiag, lapply(S, unlist))
 
-         S.h <- adiag(matrix(0,gam1$nsdf,gam1$nsdf),
-                      S[1:(X1.d2-gam1$nsdf),1:(X1.d2-gam1$nsdf)],
-                      matrix(0,gam2$nsdf,gam2$nsdf),
-                      S[(X1.d2-(gam1$nsdf-1)):dim(S)[2],(X1.d2-(gam1$nsdf-1)):dim(S)[2]],
-                      0)
+    if(l.sp1!=0 && l.sp2!=0) S.h <- adiag(matrix(0,gp1,gp1),
+                                           S[1:(X1.d2-gp1),1:(X1.d2-gp1)],
+                      			   matrix(0,gp2,gp2),
+                      			   S[(X1.d2-(gp1-1)):dim(S)[2],(X1.d2-(gp1-1)):dim(S)[2]],
+                      			   0)
+
+    if(l.sp1==0 && l.sp2!=0) S.h <- adiag(matrix(0,gp1,gp1), matrix(0,gp2,gp2), S, 0)
+    if(l.sp1!=0 && l.sp2==0) S.h <- adiag(matrix(0,gp1,gp1), S, matrix(0,gp2,gp2), 0)
+
 
    S.h1 <- 0.5*crossprod(params,S.h)%*%params
    S.h2 <- S.h%*%params

@@ -1,4 +1,7 @@
 residuals.SemiParBIVProbit <- function(object,...){
+
+if(object$RE==TRUE) stop("Residuals for models with random effects not implemented yet.")
+if(object$selection==TRUE) stop("Current residual definition for models with non-random sample selection not meaningful.")
   
   der.1 <- object$fit$dl.dbe1
   der.2 <- object$fit$dl.dbe2
@@ -19,7 +22,7 @@ residuals.SemiParBIVProbit <- function(object,...){
                      object$fit$d2l.be1.be2[j],object$fit$d2l.be2.be2[j],object$fit$d2l.be2.rho[j],  
                      object$fit$d2l.be1.rho[j],object$fit$d2l.be2.rho[j],object$fit$d2l.rho.rho[j] ) , 3 , 3 ) 
 
-      W.eig <- eigen(W)
+      W.eig <- eigen(W,symmetric=TRUE)
       W.ins <- W.eig$vec%*%tcrossprod(diag(1/sqrt(pmax(W.eig$val,.Machine$double.eps^0.6))),W.eig$vec) 
       W.inv <- W.eig$vec%*%tcrossprod(diag(1/pmax(W.eig$val,.Machine$double.eps^0.6)),W.eig$vec) 
 

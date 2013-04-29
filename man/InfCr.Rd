@@ -9,7 +9,7 @@
 
 \usage{
 
-InfCr(x,cr="AIC")
+InfCr(x, cr="AIC")
 
 }
 
@@ -54,6 +54,8 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 \keyword{semiparametric bivariate probit modelling} 
 \keyword{bivariate probit model} 
 \keyword{information criterion} 
+\keyword{variable selection} 
+
 
 
 
