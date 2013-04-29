@@ -9,7 +9,7 @@ It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVPro
 for a new set of values of the model covariates or the original values used for the model fit. 
 Standard errors of predictions can be produced. These are based on the posterior distribution of the model coefficients.
 
-This function is based on \code{predict.gam()} in \code{mgcv}. Please see the documentation of \code{mgcv} for full details. 
+This function is based on \code{predict.gam()} in \code{mgcv}. Please see the documentation of \code{predict.gam()} for full details. 
 }
 
 \usage{
@@ -43,8 +43,6 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 }
 
 
-
-\keyword{model}
 \keyword{prediction}
 
 

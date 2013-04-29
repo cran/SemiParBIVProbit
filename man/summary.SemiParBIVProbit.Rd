@@ -9,7 +9,7 @@ It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVPro
 
 \usage{
 
-\method{summary}{SemiParBIVProbit}(object,n.sim=1000,s.meth="svd",sig.lev=0.05,thrs1=0.5,thrs2=0.5,...)
+\method{summary}{SemiParBIVProbit}(object, n.sim=1000, s.meth="svd", sig.lev=0.05, thrs1=0.5, thrs2=0.5,...)
 
                          
 }
@@ -44,7 +44,7 @@ is \eqn{T=\hat{\bf f}^\prime {\bf V}_f^{r-} \hat{\bf f}}. This is
 compared to a chi-squared distribution with degrees of freedom given by \eqn{r}{r}, which is obtained by 
 biased rounding of the estimated degrees of freedom. See Marra (2013) for further details. 
 
-Note that covariate selection can also be achieved using a shrinkage approach as shown in Marra and Wood (2011). 
+Note that covariate selection can also be achieved using a single penalty shrinkage approach as shown in Marra and Wood (2011). 
 
 }
 
@@ -52,24 +52,25 @@ Note that covariate selection can also be achieved using a shrinkage approach as
 
 \value{
 
-\item{tableP1}{It returns a table containing parametric estimates, their standard errors, z-values and p-values for equation 1.}
+\item{tableP1}{Table containing parametric estimates, their standard errors, z-values and p-values for equation 1.}
 \item{tableP2}{As above but for equation 2.}
-\item{tableNP1}{It returns a table of nonparametric summaries for each smooth component including estimated degrees of freedom, estimated rank, 
-                approximate Wald statistic for testing the null hypothesis that the smooth term is zero, and p-value for equation 1.}
+\item{tableNP1}{Table of nonparametric summaries for each smooth component including estimated degrees of freedom, estimated rank, 
+                approximate Wald statistic for testing the null hypothesis that the smooth term is zero and 
+                corresponding p-value, for equation 1.}
 \item{tableNP2}{As above but for equation 2.}
 \item{n}{Sample size.}
 \item{rho}{Estimated correlation parameter between the two equations.} 
-\item{formula1}{The original GAM formula used for equation1.}
-\item{formula2}{The original GAM formula used for equation2.}
+\item{formula1}{Formula used for equation1.}
+\item{formula2}{Formula used for equation2.}
 \item{l.sp1}{Number of smooth components in equation 1.}
 \item{l.sp2}{Number of smooth components in equation 2.}
 \item{t.edf}{Total degrees of freedom of the estimated bivariate probit model.}
-\item{CIrs}{It returns `confidence' intervals for \eqn{\rho}{\rho}.}
+\item{CIrs}{`Confidence' intervals for \eqn{\rho}{\rho}.}
 \item{sel}{This is used for internal calculations.}
 \item{n.sel}{Number of selected observations in the sample selection case.}
-\item{npRE}{This is used for internal calculations.}
-\item{masses}{If \code{npRE=TRUE}, then it returns the probabilities associated with the biavariate mass points.}
-\item{table.npRE}{If \code{npRE=TRUE}, then it returns a table representing the estimated random effect distribution.}
+\item{RE,RE.type}{These are used for internal calculations.}
+\item{masses}{If \code{RE=TRUE} and \code{RE.type="NP"}, then it returns the probabilities associated with the biavariate mass points.}
+\item{table.RE}{If \code{RE=TRUE} then it returns a table representing the estimated parameters for the employed random effect distribution.}
 \item{table.R}{Joint absolute frequency table of observed binary value combinations. This as well as all remaining quantities below are not provided when \code{selection=TRUE}.}
 \item{table.P}{Joint absolute frequency table of predicted binary value combinations. }
 \item{table.F}{It is given by \code{table.P}/\code{table.R}.}
@@ -112,7 +113,6 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 }
 
 
-\keyword{model}
 \keyword{information criteria}
 \keyword{smooth}
 \keyword{regression}

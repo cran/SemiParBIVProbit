@@ -5,8 +5,8 @@
 
 \description{ 
 \code{SemiParBIVProbit} can be used to fit bivariate probit models where the linear predictors can be flexibly specified using parametric and 
-regression spline components, and nonparametric random effects. During the model fitting process, the possible presence of 
-correlated error equations, endogeneity or sample selection is accounted for. Regression 
+regression spline components, and parametric or nonparametric random effects. During the model fitting process, the possible presence of 
+correlated error equations, endogeneity or non-random sample selection is accounted for. Regression 
 spline bases are extracted from the package \code{mgcv}. Multi-dimensional smooths are available 
 via the use of penalized thin plate regression splines (isotropic). The current implementation does not support scale invariant tensor 
 product smooths. 
@@ -16,78 +16,83 @@ product smooths.
 
 
 \usage{
-SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), p.weights=NULL,  
-                 selection=FALSE, H=FALSE, iterlimSP=50, pr.tol=1e-6, 
-                 gamma=1, aut.sp=TRUE, fp=FALSE, start.v=NULL, 
-                 rinit=1, rmax=100, fterm=sqrt(.Machine$double.eps), 
-                 mterm=sqrt(.Machine$double.eps),   
-                 control=list(maxit=50,tol=1e-6,step.half=25,
-                              rank.tol=sqrt(.Machine$double.eps)),
-                 npRE=FALSE, K=3, id=NULL, e.npRE=TRUE, e.npREsp=TRUE)
+SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), weights=NULL,  
+                 start.v=NULL, selection=FALSE, H.pm=FALSE, gamma=1, 
+                 aut.sp=TRUE, fp=FALSE, RE=FALSE, RE.type="N", NGQ=10, 
+                 K=2, id=NULL, e.npRE=TRUE, rinit=1, rmax=100, 
+                 fterm=sqrt(.Machine$double.eps), mterm=sqrt(.Machine$double.eps), 
+                 iterlimsp=50, pr.tolsp=1e-6,    
+                 control.sp=list(maxit=50,tol=1e-6,step.half=25,
+                                 rank.tol=sqrt(.Machine$double.eps)) )
 }
 
 
 \arguments{ 
 
-\item{formula.eq1}{A GAM formula for equation 1. \code{s} terms are used to specify smooth smooth functions of 
+\item{formula.eq1}{A formula for equation 1. \code{s} terms are used to specify smooth smooth functions of 
                   predictors. \code{SemiParBIVProbit} supports the use shrinkage smoothers for variable
-                  selection purposes. See the examples below and the documentation of \code{mgcv} for further details on GAM formula specifications. Note that 
+                  selection purposes. See the examples below and the documentation of \code{mgcv} for further 
+                  details on formula specifications. Note that 
                   if \code{selection=TRUE} then the formula MUST refer to the selection equation.} 
 
-\item{formula.eq2}{A GAM formula for equation 2.} 
+\item{formula.eq2}{A formula for equation 2.} 
 
 \item{data}{An optional data frame, list or environment containing the variables in the model.  If not found in \code{data}, the
             variables are taken from \code{environment(formula)}, typically the environment from which \code{SemiParBIVProbit} is called.} 
 
-\item{p.weights}{Optional vector of prior weights to be used in fitting.} 
+\item{weights}{Optional vector of prior weights to be used in fitting.} 
 
-\item{selection}{If \code{TRUE}, then the numerical routine for bivariate probit modelling in the presence of sample selection is employed.}
+\item{start.v}{Starting values for the parameters of the two equations and correlation coefficient 
+               can be provided here.} 
 
-\item{H}{If \code{TRUE}, then the hessian (rather than the Fisher) information matrix is used for bivariate probit modelling. This option can be used for parametric models only.}
+\item{selection}{If \code{TRUE}, then the numerical routine for bivariate probit modelling in the presence of non-random sample selection is employed.}
 
-\item{iterlimSP}{A positive integer specifying the maximum number of loops to be performed before the smoothing parameter estimation step is terminated.} 
+\item{H.pm}{If \code{TRUE}, then the Hessian (rather than the Fisher) information matrix is used for bivariate probit modelling. This option 
+         is valid ONLY for parametric model specifications.}
 
-\item{pr.tol}{Tolerance to use in judging convergence of the algorithm when automatic smoothing parameter selection is used.} 
-
-\item{gamma}{It is is an inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
+\item{gamma}{Inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
              this parameter to a value greater than 1. Typically \code{gamma=1.4} achieves this.}
 
 \item{aut.sp}{If \code{TRUE}, then automatic multiple smoothing parameter selection is carried out. If \code{FALSE}, then smoothing parameters 
               are set to the values obtained from the univariate fits.}
 
 \item{fp}{If \code{TRUE}, then a fully parametric model with regression splines if fitted. See the example below.}  
+ 
+\item{RE}{If \code{TRUE}, then the routine for bivariate probit modelling with random effects is employed. In this case, 
+            data have to be provided ordered by cluster.}
 
-\item{start.v}{Although not recommended, starting values for the parameters of the two equations and correlation coefficient 
-               can be provided here.}  
+\item{RE.type}{If \code{RE=TRUE}, then two choices are possible: nonparametric random effects ("NP") and bivariate normal random effects ("N").}
+
+\item{NGQ}{Number of quadrature points.}
+
+\item{K}{If \code{RE.type="NP"}, then \code{K} represents the number of bivariate mass points and must be supplied. Default is 3.} 
+
+\item{id}{If \code{RE=TRUE}, then the individual random effect identifier must be supplied.} 
+
+\item{e.npRE}{If \code{RE.type="NP"}, then \code{e.npRE} indicates whether some extra iterations are carried out.}
 
 \item{rinit}{Starting trust region radius. The trust region radius is adjusted as the algorithm proceeds. See the documentation
              of \code{trust} for further details.}
 
 \item{rmax}{Maximum allowed trust region radius. This may be set very large. If set small, the algorithm traces a steepest 
-            descent path.}        
-        
+            descent path.} 
+
 \item{fterm}{Positive scalar giving the tolerance at which the difference in objective function values in a step is considered close 
              enough to zero to terminate the algorithm.}
 
 \item{mterm}{Positive scalar giving the tolerance at which the two-term Taylor-series approximation to the difference in objective 
              function values in a step is considered close enough to zero to terminate the algorithm.}
 
-\item{control}{It is a list containing iteration control constants with the following elements: \code{maxit}: maximum number of iterations of the 
+\item{iterlimsp}{A positive integer specifying the maximum number of loops to be performed before the smoothing parameter estimation step is terminated.} 
+
+\item{pr.tolsp}{Tolerance to use in judging convergence of the algorithm when automatic smoothing parameter selection is used.} 
+
+\item{control.sp}{List containing iteration control constants for the automatic smoothing parameter selection method. These 
+                are: \code{maxit}: maximum number of iterations of the 
                \code{magic} algorithm; \code{tol}: tolerance to use in judging convergence; \code{step.half}: if a trial step fails then 
                the method tries halving it up to a maximum of \code{step.half} times; \code{rank.tol}: constant used to test for numerical rank 
                deficiency of the problem. See the documentation of \code{magic} in \code{mgcv} for further details.}
 
-\item{npRE}{If \code{TRUE}, then the routine for bivariate probit modelling with nonparametric random effects is employed.}
-
-\item{K}{If \code{npRE=TRUE}, then \code{K} represents the number of bivariate mass points and must be supplied. Default is 3.} 
-
-\item{id}{If \code{npRE=TRUE}, then \code{id} represents the individual random effect identifier and must be supplied.} 
-
-\item{e.npRE}{If \code{npRE=TRUE}, then \code{e.npRE} indicates whether some extra iterations in the starting value procedure
-have to be carried out.}
-
-\item{e.npREsp}{If \code{npRE=TRUE}, then \code{e.npREsp} indicates whether some extra iterations in the smoothing 
-parameter selection loop have to be carried out.} 
 
 
 }
@@ -96,22 +101,25 @@ parameter selection loop have to be carried out.}
 \details{
 
 The bivariate probit model has a probit link for each of the two equations, and models the association
-between the responses by the correlation parameter \eqn{\rho}{\rho} of a standardised bivariate normal distribution. In a semiparametric bivariate probit 
+between the responses through the correlation parameter \eqn{\rho}{\rho} of a standardised bivariate normal distribution. In a 
+semiparametric bivariate probit 
 model the linear predictors are flexibly specified using 
 parametric components and smooth functions of covariates. Replacing the smooth components with their regression spline expressions 
 yields a fully parametric bivariate probit model. In principle, classic 
-maximum likelihood estimation can be employed. However, to avoid overfitting, penalized likelihood maximization has to be employed instead. Here the use of 
-penalty matrices allows for the suppression of that part of smooth term complexity which has no support from the data. The trade-off between smoothness 
+maximum likelihood estimation can be employed. However, to avoid overfitting, penalized likelihood maximization has 
+to be employed instead. Here the use of 
+penalty matrices allows for the suppression of that part of smooth term complexity which has no support 
+from the data. The trade-off between smoothness 
 and fitness is controlled by smoothing parameters associated with the penalty matrices. Smoothing parameters are chosen to 
 minimize the approximate Un-Biased Risk Estimator (UBRE).
 
 Automatic smoothing parameter selection is integrated 
 using a performance-oriented iteration approach (Gu, 1992; Wood, 2004). At each iteration, (i) the penalized weighted least squares 
-problem is solved, then (ii) the smoothing parameters of that problem estimated by approximate UBRE. Steps (i) and (ii) are iterated until 
-convergence. Details of the underlying fitting methods are given in Marra and Radice (2011, submitted). 
+problem is solved and (ii) the smoothing parameters of that problem estimated by approximate UBRE. Steps (i) and (ii) are iterated until 
+convergence. Details of the underlying fitting methods are given in Marra and Radice (2011,submitted). 
 
-The use of nonparametric random effects is allowed for via the option \code{npRE} and is 
-illustrated in Example 4 below. See Marra and Papageorgiou (submitted) for full details.
+The use of parametric and nonparametric random effects is allowed for via the option \code{RE}. The nonparametric case
+is illustrated in Example 4 (Marra et al., in press), whereas the parametric one, in Example 5, will be completed soon. 
 
 }
 
@@ -133,12 +141,12 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 Gu C. (1992), Cross validating non-Gaussian data. \emph{Journal of Computational and Graphical Statistics}, 1(2), 169-179.
 
-Marra G. and Papageorgiou G., A semiparametric regression framework with nonparametric mixing for modeling correlated bivariate binary responses. \emph{Submitted}.
+Marra G., Papageorgiou G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit Model with Nonparametric Mixing. \emph{Australian & New Zealand Journal of Statistics}.
 
 Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
 Journal of Statistics}, 39(2), 259-279.
 
-Marra G. and Radice R., A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modelling. \emph{Submitted}.
+Marra G. and Radice R. (submitted), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, invited revision.
 
 Wood S.N. (2004), Stable and efficient multiple smoothing parameter estimation for generalized additive models. \emph{Journal of the American Statistical Association}, 99(467), 673-686.
 
@@ -147,22 +155,18 @@ Wood S.N. (2004), Stable and efficient multiple smoothing parameter estimation f
 
 \section{WARNINGS}{
 
-Any automatic smoothing parameter selection procedure is not likely to work well when the data have low information content. In bivariate probit models, this 
-issue is especially relevant when \eqn{\rho}{\rho} is high and the number of observations low. Here, convergence failure is
-typically associated with an infinite cycling between the two steps detailed above. If this occurs, as some practical solutions, one might 
+In the current context, convergence failure may occur when \eqn{\rho}{\rho} is very high, the number of 
+observations is low, and the data have low information content. When convergence failure is associated 
+with an infinite cycling between the two steps detailed above, several practical solutions are available. For instance, one might 
 either (i) lower the total number of parameters to estimate by reducing the dimension of the regression spline 
 bases, (ii) set the smoothing parameters to the values obtained from the univariate fits (\code{aut.sp=FALSE}), or (iii) set the smoothing 
 parameters to the values obtained from the non-converged algorithm. The default option is (iii).
-
-Fully parametric modelling is allowed for. However, it is not possible to specify one linear predictor as a function of parametric and smooth
-components, and the other as a function of parametric terms only. If continuous covariates are available, then we should let the data determine which
-effects are linear or non-linear and for which equations.
 
 
 } 
 
 \seealso{
-\code{\link{AT}}, \code{\link{InfCr}}, \code{\link{LM.bpm}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}, \code{\link{residuals.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{InfCr}}, \code{\link{LM.bpm}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{sem.checks}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}, \code{\link{residuals.SemiParBIVProbit}}
 }
 
 \examples{
@@ -215,6 +219,7 @@ InfCr(out,cr="BIC")
 out  <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cr",k=10,m=2) + s(x3,bs="cr",k=10), 
                          y2 ~ x1 + s(x2,bs="cr",k=10)     + s(x3,bs="cr",k=10), 
                          data=dataSim)
+sem.checks(out)
 summary(out)
 InfCr(out)
 
@@ -227,19 +232,19 @@ f2.x2 <- f2(x2)[order(x2)]-mean(f2(x2))
 f3.x3 <- rep(0,length(x3))
 
 par(mfrow=c(2,2),mar=c(4.5,4.5,2,2))
-plot(out, eq=1, select=1); lines(x2, f1.x2, col="red")
-plot(out, eq=1, select=2); lines(x3, f3.x3, col="red")
-plot(out, eq=2, select=1); lines(x2, f2.x2, col="red")
-plot(out, eq=2, select=2); lines(x3, f3.x3, col="red")
+plot(out, eq=1, select=1, scale=0); lines(x2, f1.x2, col="red")
+plot(out, eq=1, select=2, scale=0); lines(x3, f3.x3, col="red")
+plot(out, eq=2, select=1, scale=0); lines(x2, f2.x2, col="red")
+plot(out, eq=2, select=2, scale=0); lines(x3, f3.x3, col="red")
 
 #
 ## same plots but CIs 'with intercept' 
 
 par(mfrow=c(2,2),mar=c(4.5,4.5,2,2))
-plot(out, eq=1, select=1, seWithMean=TRUE); lines(x2, f1.x2, col="red")
-plot(out, eq=1, select=2, seWithMean=TRUE); lines(x3, f3.x3, col="red")
-plot(out, eq=2, select=1, seWithMean=TRUE); lines(x2, f2.x2, col="red")
-plot(out, eq=2, select=2, seWithMean=TRUE); lines(x3, f3.x3, col="red")
+plot(out, eq=1, select=1, seWithMean=TRUE, scale=0); lines(x2, f1.x2, col="red")
+plot(out, eq=1, select=2, seWithMean=TRUE, scale=0); lines(x3, f3.x3, col="red")
+plot(out, eq=2, select=1, seWithMean=TRUE, scale=0); lines(x2, f2.x2, col="red")
+plot(out, eq=2, select=2, seWithMean=TRUE, scale=0); lines(x3, f3.x3, col="red")
 
 
 ## p-values suggest to drop x3 from both equations, with a stronger 
@@ -250,9 +255,9 @@ outSS <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cs") + s(x3,bs="cs"),
                           data=dataSim)
 
 par(mfrow=c(2,2),mar=c(4.5,4.5,2,2))
-plot(outSS, eq=1, select=1)
+plot(outSS, eq=1, select=1, scale=0)
 plot(outSS, eq=1, select=2, ylim=c(-0.1,0.1))
-plot(outSS, eq=2, select=1)
+plot(outSS, eq=2, select=1, scale=0)
 plot(outSS, eq=2, select=2, ylim=c(-0.1,0.1))
 
 #
@@ -302,7 +307,7 @@ summary(out)
 # Algorithm based on Newton's method
 out <- SemiParBIVProbit(y1 ~ x1 + x2, 
                         y2 ~ y1 + x2, 
-                        data=dataSim,H=TRUE)
+                        data=dataSim,H.pm=TRUE)
 summary(out)
 
 
@@ -333,7 +338,7 @@ summary(outFP)
 ############
 ## EXAMPLE 3
 ############
-## Generate data with sample selection mechanism and exclusion restriction
+## Generate data with a non-random sample selection mechanism and exclusion restriction
 
 \dontrun{ 
 
@@ -359,7 +364,7 @@ yo <- y*(ys > 0)
   
 dataSim <- data.frame(y,ys,yo,bi,x1,x2)
 
-## Testing the hypothesis of absence of sample selection... 
+## Testing the hypothesis of absence of non-random sample selection... 
 
 LM.bpm(ys ~ bi + s(x1) + s(x2),yo ~ bi + s(x1),dataSim,selection=TRUE)
 
@@ -373,20 +378,50 @@ out <- SemiParBIVProbit(ys ~ bi + s(x1) + s(x2),
                         yo ~ bi + s(x1), 
                         data=dataSim, selection=TRUE)
 
-AT(out,eq=2,nm.bin="bi",E=FALSE) ## ATT
-
 ## compare the two summary outputs
-## the second output produces a summary of the results obtained when only 
-## the outcome equation is fitted, i.e. selection bias is not accounted for
+## the second output produces a summary of the results obtained when
+## selection bias is not accounted for
 
 summary(out)
 summary(out$gam2)
 
-## approximate predicted probability that 'yo' is equal to 1
-## the second predicted probability does not account for selection bias
+## corrected predicted probability that 'yo' is equal to 1
+## ob.pr   is the observed proportion of 1's
+## pred.pr is the mean predicted probability of observing 1, 
+##                       for the sample of non-respondents 
 
-mean(pnorm(out$eta2[out$eta2!=0]))
-mean(pnorm(predict(out$gam2)))
+## simulate from posterior to obtain standard 
+## deviation for pred.pr (this is similar to a parametric 
+## bootstrap procedure)
+
+  pr.prS    <- NA
+  eta1Sim   <- out$eta1S
+  eta2Sim   <- out$eta2S 
+  athrhoSim <- out$athrhoS
+
+for(i in 1:dim(eta1Sim)[2]){
+
+  p0  <- pnorm(-eta1Sim[,i]) 
+  p01 <- pnorm2(-eta1Sim[,i],eta2Sim[,i],cov12=-tanh(athrhoSim[i]))
+  pr.prS[i] <- mean( (p01/p0)[out$y1==0] )
+
+}
+  
+  pred.pr <- mean( (out$p01/out$p0)[out$y1==0] )
+  var.prS <- var(pr.prS)
+  ob.pr   <- mean( out$y2[out$y1==1] ) 
+  var.ob  <- (ob.pr*(1-ob.pr))/out$n.sel
+  we      <- c( out$n.sel,(out$n-out$n.sel) )/out$n
+ 
+  wm <- ob.pr*we[1] + pred.pr*we[2]
+  sv <- sqrt(var.ob*we[1]^2 + var.prS*we[2]^2)
+
+  qz <- qnorm(0.05/2, lower.tail = FALSE)
+  lb <- wm - qz*sv # lower bound
+  ub <- wm + qz*sv # upper bound 
+
+  round(c(lb,wm,ub),2)
+
 
 ## estimated smooth function plots
 ## the red line is the true curve
@@ -395,9 +430,10 @@ mean(pnorm(predict(out$gam2)))
 x1.s <- sort(x1[dataSim$ys>0])
 f21.x1 <- f21(x1.s)[order(x1.s)]-mean(f21(x1.s))
 
-plot(out, eq=2, select=1,ylim=c(-1.2,1)); lines(x1.s, f21.x1, col="red")
+x11()
+plot(out, eq=2, ylim=c(-1.2,1)); lines(x1.s, f21.x1, col="red")
 par(new=TRUE)
-plot(out$gam2, select=1, se=FALSE, col="blue",ylim=c(-1.2,1),ylab="",rug=FALSE)
+plot(out$gam2, se=FALSE, col="blue",ylim=c(-1.2,1),ylab="",rug=FALSE)
 
 #
 #
@@ -452,8 +488,8 @@ dataSim <- data.frame(id,y1,y2,x1,x2,x3)
 
 out <- SemiParBIVProbit(y1 ~      x1 + s(x2) + x3,
                         y2 ~ y1 + x1 + s(x2), 
-                        data=dataSim,
-                        npRE=TRUE, K=3, id=dataSim$id)
+                        data=dataSim, RE=TRUE, RE.type="NP",
+                        K=3, id=dataSim$id)
 
 summary(out)
 AT(out,eq=2,nm.bin="y1",E=FALSE)
@@ -463,8 +499,63 @@ f1.x2 <- f1.x2[order(x2)]
 f2.x2 <- f2.x2[order(x2)]
 
 par(mfrow=c(1,2))
-plot(out, eq=1, select=1); lines(x2s, f1.x2, col="red")
-plot(out, eq=2, select=1); lines(x2s, f2.x2, col="red")
+plot(out, eq=1, scale=0); lines(x2s, f1.x2, col="red")
+plot(out, eq=2, scale=0); lines(x2s, f2.x2, col="red")
+
+
+
+############
+## EXAMPLE 5
+############
+## Generate data for bivariate normal random effect case
+
+set.seed(0) 
+
+# clusters; obs per cluster; total obs
+
+N   <- 500
+rps <-round(runif(N,4,7))
+n   <- sum(rps)
+
+# cluster identifier
+
+id <- rep(seq(1,N),rps)
+
+# normal error terms: eps
+
+Sigma.e <- matrix(c(1,0.5,0.5,1),2,2)
+eps     <- rmvnorm(n,rep(0,2),Sigma.e)
+
+# normal random effects: u
+# s1^2, rho*s1*s2,rho*s1*s2,s2^2
+
+s1 <- 0.3; s2 <- 1.5; rho <- -0.5
+Sigma.u <- matrix(c(s1^2,rho*s1*s2,rho*s1*s2,s2^2),2,2)
+u       <- rmvnorm(N,rep(0,2),Sigma.u)
+
+u1 <- rep(u[,1],rps)
+u2 <- rep(u[,2],rps)
+
+# predictors
+
+x1 <- runif(n)-0.5
+
+# responses
+
+y1 <- rep(0,n)
+y2 <- rep(0,n)
+
+y1 <- replace(y1, u1 + 0.3*x1 + eps[,1] > 0, 1)
+y2 <- replace(y2, u2 + 1.3*x1 + eps[,2] > 0, 1)
+
+dataSim <- data.frame(id,y1,y2,x1)
+
+out <- SemiParBIVProbit(y1 ~ x1,
+                        y2 ~ x1, 
+                        data=dataSim, RE=TRUE, RE.type="N",
+                        id=dataSim$id)
+sem.checks(out)
+summary(out)
 
 }
 
@@ -473,7 +564,7 @@ plot(out, eq=2, select=1); lines(x2s, f2.x2, col="red")
 }
 
 
-\keyword{sample selection}
+\keyword{non-random sample selection}
 \keyword{semiparametric bivariate probit modelling} 
 \keyword{bivariate probit model} 
 \keyword{nonparametric random effects} 

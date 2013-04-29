@@ -9,7 +9,7 @@ predictors, including linear, nonlinear and random effects.
 }
 
 \details{\code{SemiParBIVProbit} provides a function for flexible bivariate probit modelling, in the presence of 
-correlated error equations, endogeneity or sample selection. The underlying representation and 
+correlated error equations, endogeneity or non-random sample selection. The underlying representation and 
 estimation of the model is based on a penalized regression spline approach, with automatic smoothness selection. The 
 numerical routine carries out function minimization using a trust region algorithm from the package \code{trust} in combination with
 an adaptation of a low level smoothness selection fitting procedure from the package \code{mgcv}. 
@@ -23,7 +23,7 @@ individual smooth terms for equality to the zero function are also provided. Fun
 \code{\link{summary.SemiParBIVProbit}} extract such information from a fitted \code{\link{SemiParBIVProbitObject}}. Model/variable 
 selection is also possible via the use of shrinakge smoothers or information criteria. 
 
-The use of nonparametric random effects is also allowed for.
+The use of parametric or nonparametric random effects is also allowed for.
 
 }
 
@@ -37,12 +37,11 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Marra G. and Papageorgiou G., A semiparametric regression framework with nonparametric mixing for modeling correlated bivariate binary responses. \emph{Submitted}.
+Marra G., Papageorgiou G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit Model with Nonparametric Mixing. \emph{Australian & New Zealand Journal of Statistics}.
 
-Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
-Journal of Statistics}, 39(2), 259-279.
+Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian Journal of Statistics}, 39(2), 259-279.
 
-Marra G. and Radice R., A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modelling. \emph{Submitted}.
+Marra G. and Radice R. (submitted), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, invited revision.
 
 
 }
@@ -56,10 +55,10 @@ Marra G. and Radice R., A Penalized Likelihood Estimation Approach to Semiparame
 
 \keyword{endogeneity} 
 \keyword{package}
-\keyword{sample selection} 
+\keyword{non-random sample selection} 
 \keyword{semiparametric bivariate probit modelling} 
 \keyword{smooth} 
 \keyword{nonparametric random effects}
 \keyword{regression}
-\keyword{model selection}
+\keyword{variable selection}
 

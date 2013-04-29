@@ -16,7 +16,7 @@ working.comp <- function(x,X1=X1,X2=X2,X1.d2=X1.d2,X2.d2=X2.d2,n=n){
                      x$d2l.be1.be2[j],x$d2l.be2.be2[j],x$d2l.be2.rho[j],  
                      x$d2l.be1.rho[j],x$d2l.be2.rho[j],x$d2l.rho.rho[j] ) , 3 , 3 ) 
 
-      W.eig <- eigen(W)
+      W.eig <- eigen(W,symmetric=TRUE)
       c.W   <- W.eig$vec%*%tcrossprod(diag(sqrt(pmax(W.eig$val,sqrt(.Machine$double.eps)))),W.eig$vec) 
       W.inv <- W.eig$vec%*%tcrossprod(diag(1/pmax(W.eig$val,sqrt(.Machine$double.eps))),W.eig$vec) 
       rW.X[i:(i+2),1:(X1.d2+X2.d2+1)] <- c.W%*%X[i:(i+2),1:(X1.d2+X2.d2+1)]
