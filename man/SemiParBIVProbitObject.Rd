@@ -22,7 +22,7 @@
 \item{coefficients}{The coefficients of the fitted semiparametric sample selection model. They are given in the following 
                     order: parametric and regression spline (if present)
                     coefficients for the first equation, parametric and regression spline
-                    coefficients for the second equation, and correlation coefficient. If \code{RE=TRUE} and \code{RE.type="N"}, then
+                    coefficients for the second equation, and association coefficient. If \code{RE=TRUE} and \code{RE.type="N"}, then
                     the paramaters of the bivariate normal random effect distribution are also given. }
 
 \item{weights}{Prior weights used during model fitting.}
@@ -31,11 +31,15 @@
 
 \item{iter.sp}{Number of iterations performed for the smoothing parameter estimation step.}
 
-\item{iter.if}{Number of iterations performed in the initial step of the Fisher scoring algorithm.}
+\item{iter.if}{Number of iterations performed in the initial step of the algorithm.}
 
 \item{iter.inner}{Number of iterations performed inside smoothing parameter estimation step.}
 
-\item{rho}{Estimated correlation coefficient between the two equations.}
+\item{rho}{Estimated correlation coefficient between the two equations, when a bivariate normal model is employed.}
+
+\item{theta}{Estimated copula parameter linking the two equations.}
+
+\item{KeT}{Estimated Kendall's tau coefficient between the two equations.}
 
 \item{sigma1,rho.u,sigma2}{If \code{RE=TRUE} and \code{RE.type="N"} then these are the paramaters of the bivariate normal random effect distribution.}
 
@@ -43,23 +47,17 @@
 
 \item{n.sel}{Number of selected observations in the sample selection case.}
 
-\item{X1}{Design matrix associated with the first linear predictor.}
+\item{X1,X2}{Design matrices associated with the first and second linear predictors.}
 
-\item{X2}{Design matrix associated with the second linear predictor.} 
+\item{X1.d2,X2.d2}{Number of columns of the design matrices for equations 1 and 2.}
 
-\item{X1.d2}{Number of columns of the design matrix for equation 1.}
-
-\item{X2.d2}{Number of columns of the design matrix for equation 2.} 
-
-\item{l.sp1}{Number of smooth components in equation 1.}
-
-\item{l.sp2}{Number of smooth components in equation 2.}
+\item{l.sp1,l.sp2}{Number of smooth components in equations 1 and 2.}
 
 \item{He}{Penalized hessian. This is the same as \code{HeSh} for unpenalized models.}
 
 \item{HeSh}{Unpenalized hessian.}
 
-\item{Vb}{Inverse of the penalized hessian. This corresponds to the Bayesian variance-covariance matrix 
+\item{Vb}{Inverse of \code{He}. This corresponds to the Bayesian variance-covariance matrix 
           used for `confidence' interval calculations.}
 
 \item{F}{This is given by \code{Vb*HeSh}.} 
@@ -68,7 +66,9 @@
 
 \item{aut.sp}{If \code{FALSE}, then a fully parametric model with regression splines was fitted.}  
  
-\item{t.edf}{Total degrees of freedom of the estimated bivariate probit model. It is calculated as \code{sum(diag(F))}.}
+\item{t.edf}{Total degrees of freedom of the estimated bivariate model. It is calculated as \code{sum(diag(F))}.}
+
+\item{edf1,edf2}{Degrees of freedom for the two equations of the estimated bivariate model. It is calculated when splines are used.}
 
 \item{bs.mgfit}{List of values and diagnostics extracted from \code{magic}.}
 
@@ -80,7 +80,7 @@
 \item{p11,p10,p01,p00}{Distribution function of a bivariate normal with zero means, unit variances and correlation \code{rho} evaluated 
                        at (y1=1,y2=1), (y1=1,y2=0), (y1=0,y2=1) and (y1=0,y2=0).}
                        
-\item{p0}{Distribution function of a standardised univariate normal evaluated at y1=0. This is provided when \code{selection=TRUE}.}                       
+\item{p0}{Distribution function of a standardised univariate normal evaluated at y1=0. This is only provided when \code{selection=TRUE}.}                       
 
 \item{eta1,eta2}{Estimated linear predictors for the two equations.}
 
@@ -92,14 +92,14 @@
 
 \item{masses}{Probabilities associated with the \code{K} biavariate mass points in a random effect model.}
 
-\item{RE,RE.type}{These are used for internal calculations.}
+\item{RE,RE.type,BivD,nu}{These are used for internal calculations.}
 
-\item{logL}{Value of the (unpenalized) log-likelihood evaluated at the (penalized or unpenalized) parameter 
+\item{logLik}{Value of the (unpenalized) log-likelihood evaluated at the (penalized or unpenalized) parameter 
             estimates.}
 
-\item{eb.u1,eb.u2}{Estimated nonparametric random effects for each identifier.}
+\item{eb.u1,eb.u2}{Estimated random effects for each identifier.}
 
-\item{Eb.u1,Eb.u2}{Estimated nonparametric random effects for each observation.}
+\item{Eb.u1,Eb.u2}{Estimated random effects for each observation.}
 
 \item{id}{Individual identifier.}
 
@@ -107,9 +107,14 @@
 
 \item{T.sv}{This is used for internal calculations.}
 
-\item{eta1S,eta2S,athrhoS}{Simulated \code{eta1}, \code{eta2} and transformed \code{rho}. This is useful for calculating standard errors of predictions in the sample selection case.}
+\item{eta1S,eta2S,ass.pS}{Simulated \code{eta1}, \code{eta2} and transformed \code{rho} or \code{theta}. This is useful for calculating standard errors of predictions in the sample selection case.}
 
-\item{H.pm}{This is used for internal calculations.}
+\item{nC}{Copula identifier. This is used for internal calculations.}
+
+\item{H.n}{This is used for internal calculations.}
+
+\item{pPen1,pPen2}{This is used for internal calculations. List specifying any penalties to be applied to the parametric model terms of the model equations.}
+
 
 }
 

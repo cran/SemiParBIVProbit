@@ -1,4 +1,4 @@
-bprobNP <- function(params, y1, y2, q1, q2, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, weights=weights, X1.d2, X2.d2, sp=NULL, qu.mag=NULL, gp1, gp2, fp, l.sp1, l.sp2, K, n, N, cuid, uidf, masses, NGQ=NULL, dat1all=NULL, dat2all=NULL, W=NULL){
+bprobNP <- function(params, BivD=NULL, nC=NULL, nu=NULL, H.n=NULL, y1, y2, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, weights=weights, X1.d2, X2.d2, pPen1=NULL, pPen2=NULL, sp=NULL, qu.mag=NULL, gp1, gp2, fp, l.sp1, l.sp2, K, n, N, cuid, uidf, masses, NGQ=NULL, dat1all=NULL, dat2all=NULL, W=NULL){
 
   corr.st <- params[X1.d2+X2.d2+2*K+1]
   corr    <- tanh(corr.st)
@@ -105,6 +105,7 @@ if( ( l.sp1==0 && l.sp2==0 ) || fp==TRUE) S.h <- S.h1 <- S.h2 <- 0
               d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
               d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
               d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho, We=We)
+
 
 
 }

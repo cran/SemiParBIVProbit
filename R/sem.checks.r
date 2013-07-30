@@ -4,7 +4,7 @@ e.v <- eigen(x$He)$values
 
 cat("\nLargest absolute gradient value:",max(abs(x$fit$gradient)))
 
-if(x$H.pm==TRUE) mv <- "Observed" else mv <- "Expected" 
+if(x$H.n==TRUE) mv <- "Observed" else mv <- "Expected" 
 
 if (min(e.v) > 0) cat("\n",mv," information matrix is positive definite\n",sep="")
 else cat("\nEigenvalue range of the information matrix: [",min(e.v),",",max(e.v),"]\n", sep = "")

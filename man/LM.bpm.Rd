@@ -37,7 +37,9 @@ not require an estimate of the model parameter vector under the alternative hypo
 with one degree of freedom. Full details can be found in Marra et al. (submitted).
 
 Note that, when \code{selection=FALSE} and \code{FI=TRUE}, a convenient simplification based on the result that 
-the Fisher information matrix becomes block diagonal is employed (Marra et al., submitted).
+the Fisher information matrix becomes block diagonal is employed (Marra et al., submitted). Also, the current version of the Fisher information is
+not realiable for the sample selection and endogeneity cases.
+
 
 
 }
@@ -59,7 +61,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Marra G., Radice R. and Missiroli S., Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Submitted}.
+Marra G., Radice R. and Missiroli S. (submitted), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models.
 
 
 }
@@ -68,7 +70,7 @@ Marra G., Radice R. and Missiroli S., Testing the Hypothesis of Absence of Unobs
 
 
 \seealso{
-\code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}
+\code{\link{SemiParBIVProbit}}
 }
 
 \examples{

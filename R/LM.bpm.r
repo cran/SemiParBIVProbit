@@ -1,5 +1,6 @@
 LM.bpm <- function(formula.eq1,formula.eq2,data=list(),selection=FALSE,FI=FALSE){
 
+
 G.Eh.E <- function(params,y1,y2,X1,X2,X1.d2,X2.d2,gam1,gam2,selection,FI){
 
   S.h <- 0; l.sp1 <- length(gam1$smooth); l.sp2 <- length(gam2$smooth) 
@@ -52,8 +53,9 @@ G.Eh.E <- function(params,y1,y2,X1,X2,X1.d2,X2.d2,gam1,gam2,selection,FI){
   
   	dl.drho      <- d.n1n2*(y1.y2/p11-y1.cy2/p10-cy1.y2/p01+cy1.cy2/p00)
   	d2l.rho.rho  <- -(-d.n1n2^2*(1/p11+1/p01+1/p10+1/p00))
-  	
-   }else{
+  	               }
+  	               
+   if(selection==TRUE){
 
   	dl.drho      <- d.n1n2*(y1.y2/p11 - y1.cy2/p10) 
         
@@ -75,50 +77,199 @@ G.Eh.E <- function(params,y1,y2,X1,X2,X1.d2,X2.d2,gam1,gam2,selection,FI){
 
   }
   
+
+
+
+
+
+
   if(FI==FALSE){
-  
-   yy1  <- 1             
-   cyy1 <- CYy1 <- 0       
-              
-  q1 <- 2*y1-1
-  q2 <- 2*y2-1
+
+   y1.y2  <- y1*y2
+   y1.cy2 <- y1*(1-y2)
+
   eta1 <- X1%*%params[1:X1.d2]
   eta2 <- X2%*%params[(X1.d2+1):(X1.d2+X2.d2)]
   corr <- params[(X1.d2+X2.d2+1)]
-  corr.sq <- q1*q2*corr
-  delta <- 1/sqrt( pmax(10000*.Machine$double.eps, 1-corr.sq ^2) )
-
-  w1 <- q1*eta1
-  w2 <- q2*eta2
+    
+  p1 <- pnorm(eta1)
+  p2 <- pnorm(eta2)
   
-  g1 <- dnorm(w1)*pnorm( (w2-corr.sq*w1) * delta )
-  g2 <- dnorm(w2)*pnorm( (w1-corr.sq*w2) * delta )
-  
-  PHI2   <- pmax(abs(pnorm2( w1, w2, cov12=corr.sq)),1000*.Machine$double.eps)
-  phi2   <- dnorm2( w1, w2, rho=corr.sq)
-  
-  v1 <- delta*( w2 - corr.sq*w1 )
-  v2 <- delta*( w1 - corr.sq*w2 )
+  C.copula <- pnorm2( eta1, eta2, cov12=corr)
+
+  p11 <- pmax( C.copula, 1000*.Machine$double.eps )
+  p10 <- pmax( p1 - p11, 1000*.Machine$double.eps )
+
+  d.r    <- 1/sqrt( pmax(10000*.Machine$double.eps, 1-corr^2) )
+  d.n1   <- dnorm(eta1) 
+  d.n2   <- dnorm(eta2) 
+  d.n1n2 <- dnorm2(eta1,eta2, rho=corr) 
+
+  A   <- pnorm( (eta2-corr*eta1)*d.r )
+  B   <- pnorm( (eta1-corr*eta2)*d.r )
+
+  c.copula.be1 <- A  
+  c.copula.be2 <- B
+  c.copula.theta <- d.n1n2
+  c.copula2.be1 <- dnorm((eta2-corr*eta1)*d.r)*-corr*d.r*sqrt(2*pi)/exp(-eta1^2/2)  
+  c.copula2.be2 <- dnorm((eta1-corr*eta2)*d.r)*-corr*d.r*sqrt(2*pi)/exp(-eta2^2/2)
+  c.copula2.be1be2 <- d.r*exp( -(  corr^2*(eta1^2+eta2^2)-2*corr*eta1*eta2     )/(2*(1-corr^2))          )
+  c.copula2.be1th <- -(dnorm((eta2 - corr * eta1)/sqrt(1 - corr^2)) * (eta1/sqrt(1 - 
+    corr^2) - (eta2 - corr * eta1) * (0.5 * (2 * corr * (1 - 
+    corr^2)^-0.5))/sqrt(1 - corr^2)^2)) 
+  c.copula2.be2th <- -(dnorm((eta1 - corr * eta2)/sqrt(1 - corr^2)) * (eta2/sqrt(1 - 
+    corr^2) - (eta1 - corr * eta2) * (0.5 * (2 * corr * (1 - 
+    corr^2)^-0.5))/sqrt(1 - corr^2)^2))
+  bit1.th2 <- 2 * pi * (0.5 * (2 * corr * (1 - corr^2)^-0.5))/(2 * pi * sqrt(1 - 
+    corr^2))^2 * exp(-1/(2 * (1 - corr^2)) * (eta1^2 + eta2^2 - 
+    2 * corr * eta1 * eta2)) - 1/(2 * pi * sqrt(1 - corr^2)) * 
+    (exp(-1/(2 * (1 - corr^2)) * (eta1^2 + eta2^2 - 2 * corr * 
+        eta1 * eta2)) * (-1/(2 * (1 - corr^2)) * (2 * eta1 * 
+        eta2) + 2 * (2 * corr)/(2 * (1 - corr^2))^2 * (eta1^2 + 
+        eta2^2 - 2 * corr * eta1 * eta2))) 
 
 
-   if(selection==TRUE){
-       yy1  <- y1 
-       cyy1 <- (1-yy1)  	
-       d.n1 <- dnorm(eta1) 
-       p0   <- pmax( pnorm(-eta1), 1000*.Machine$double.eps )
-       CYy1  <- cyy1*(-(d.n1/p0)^2 + d.n1*eta1/p0) 
-                      }
 
-  dl.drho <- yy1*(q1*q2*phi2/PHI2) 
-  
-  d2l.be1.be1  <- -yy1*((-w1*g1 - corr.sq*phi2 - g1^2/PHI2)/PHI2) - CYy1
-  d2l.be2.be2  <- -yy1*((-w2*g2 - corr.sq*phi2 - g2^2/PHI2)/PHI2)
-  d2l.be1.be2  <- -yy1*((phi2/PHI2 - g1*g2/PHI2^2)*q1*q2)
-  d2l.be1.rho  <- -yy1*((corr.sq*delta*v1 - w1 - g1/PHI2)*phi2/PHI2*q2)
-  d2l.be2.rho  <- -yy1*((corr.sq*delta*v2 - w2 - g2/PHI2)*phi2/PHI2*q1)
-  d2l.rho.rho  <- -yy1*(( phi2/PHI2*( delta^2*corr.sq*( 1 - delta^2*(w1^2+w2^2 - 2*corr.sq*w1*w2) ) + delta^2*w1*w2 - phi2/PHI2 ) ))
+    if(selection==FALSE){
+
+    cy1.y2 <- (1-y1)*y2
+    cy1.cy2 <- (1-y1)*(1-y2)
+
+
+    p01 <- pmax( p2 - p11, 1000*.Machine$double.eps )
+    p00 <- pmax( 1- p11 - p10 - p01, 1000*.Machine$double.eps )
+
+    dl.drho <- y1.y2*c.copula.theta/p11 + y1.cy2*(-c.copula.theta)/p10 + cy1.y2*(-c.copula.theta)/p01 + cy1.cy2*c.copula.theta/p00  
+ 
+bit1.b1b1 <- c.copula2.be1*(d.n1)^2-c.copula.be1*d.n1*eta1
+bit2.b1b1 <- -d.n1*eta1-bit1.b1b1
+bit3.b1b1 <- -bit1.b1b1
+bit4.b1b1 <- -bit2.b1b1
+
+bit1.b2b2 <- c.copula2.be2*(d.n2)^2-c.copula.be2*d.n2*eta2
+bit2.b2b2 <- -bit1.b2b2
+bit3.b2b2 <- -d.n2*eta2-bit1.b2b2
+bit4.b2b2 <- -bit3.b2b2
+
+bit1.b1b2 <- c.copula2.be1be2 * d.n1 *d.n2
+bit2.b1b2 <- -bit1.b1b2
+bit3.b1b2 <- -bit1.b1b2
+bit4.b1b2 <- bit1.b1b2
+       
+bit1.b1th <- c.copula2.be1th*d.n1
+
+bit2.b1th <- -bit1.b1th 
+bit3.b1th <- -bit1.b1th 
+bit4.b1th <- bit1.b1th 
+
+
+bit1.b2th <- c.copula2.be2th*d.n2
+bit2.b2th <- -bit1.b2th 
+bit3.b2th <- -bit1.b2th 
+bit4.b2th <- bit1.b2th 
+
+bit2.th2 <- -bit1.th2 
+bit3.th2 <- -bit1.th2 
+bit4.th2 <- bit1.th2 
+
+
+  d2l.be1.be1  <- -(y1.y2*(bit1.b1b1*p11-(c.copula.be1*d.n1)^2)/p11^2+
+                              y1.cy2*(bit2.b1b1*p10-((1-c.copula.be1)*d.n1)^2)/p10^2+
+                              cy1.y2*(bit3.b1b1*p01-(-c.copula.be1*d.n1)^2)/p01^2+
+                              cy1.cy2*(bit4.b1b1*p00-((c.copula.be1-1)*d.n1)^2)/p00^2 )
+
+  d2l.be2.be2  <- -(y1.y2*(bit1.b2b2*p11 - (c.copula.be2*d.n2)^2 )/p11^2+
+                              y1.cy2*(bit2.b2b2*p10-(-c.copula.be2*d.n2)^2)/p10^2+
+                              cy1.y2*(bit3.b2b2*p01- ((1-c.copula.be2)*d.n2)^2 )/p01^2+
+                              cy1.cy2*(bit4.b2b2*p00-((c.copula.be2-1)*d.n2)^2)/p00^2 )
+
+  d2l.be1.be2  <- -(y1.y2*(bit1.b1b2*p11-(c.copula.be1*d.n1*c.copula.be2*d.n2))/p11^2+
+                              y1.cy2*(bit2.b1b2*p10-((1-c.copula.be1)*d.n1)*(-c.copula.be2*d.n2))/p10^2+
+                              cy1.y2*(bit3.b1b2*p01-(-c.copula.be1*d.n1*(1-c.copula.be2)*d.n2))/p01^2+
+                              cy1.cy2*(bit4.b1b2*p00-((c.copula.be1-1)*d.n1*((c.copula.be2-1)*d.n2)))/p00^2 )
+
+  d2l.be1.rho  <- -(y1.y2*(bit1.b1th*p11-(c.copula.be1*d.n1*c.copula.theta))/p11^2+
+                              y1.cy2*(bit2.b1th*p10-((1-c.copula.be1)*d.n1)*(-c.copula.theta))/p10^2+
+                              cy1.y2*(bit3.b1th*p01-(-c.copula.be1*d.n1)*(-c.copula.theta))/p01^2+
+                              cy1.cy2*(bit4.b1th*p00-((c.copula.be1-1)*d.n1)*c.copula.theta)/p00^2 )
+
+  d2l.be2.rho  <- -(y1.y2*(bit1.b2th*p11-(c.copula.be2*d.n2*c.copula.theta))/p11^2+
+                              y1.cy2*(bit2.b2th*p10-(-c.copula.be2*d.n2)*(-c.copula.theta))/p10^2+
+                              cy1.y2*(bit3.b2th*p01-((1-c.copula.be2)*d.n2)*(-c.copula.theta))/p01^2+
+                              cy1.cy2*(bit4.b2th*p00-((c.copula.be2-1)*d.n2)*c.copula.theta)/p00^2 )
+
+  d2l.rho.rho  <- -(y1.y2*(bit1.th2*p11-c.copula.theta^2)/p11^2+
+                              y1.cy2*(bit2.th2*p10-(-c.copula.theta)^2)/p10^2+
+                              cy1.y2*(bit3.th2*p01-(-c.copula.theta)^2)/p01^2+
+                              cy1.cy2*(bit4.th2*p00-c.copula.theta^2)/p00^2 )
+
+
+
+}
+
+
+if(selection==TRUE){
+
+
+  cy1 <- (1-y1)
+
+  p0  <- pmax( pnorm(-eta1), 1000*.Machine$double.eps )
+
+  dl.drho <-  y1.y2*c.copula.theta/p11 + y1.cy2*(-c.copula.theta)/p10 
+     
+bit1.b1b1 <- c.copula2.be1*(d.n1)^2-c.copula.be1*d.n1*eta1
+bit2.b1b1 <- -d.n1*eta1-bit1.b1b1
+bit3.b1b1 <- d.n1*(eta1*p0-d.n1)/p0^2
+bit1.b2b2 <- c.copula2.be2*(d.n2)^2-c.copula.be2*d.n2*eta2
+bit2.b2b2 <- -bit1.b2b2
+
+bit1.b1b2 <- c.copula2.be1be2 * d.n1 *d.n2
+bit2.b1b2 <- -bit1.b1b2
+
+bit1.b1th <- c.copula2.be1th*d.n1
+bit2.b1th <- -bit1.b1th 
+
+
+bit1.b2th <- c.copula2.be2th*d.n2
+bit2.b2th <- -bit1.b2th 
+bit1.th2 <- 2 * pi * (0.5 * (2 * corr * (1 - corr^2)^-0.5))/(2 * pi * sqrt(1 - 
+    corr^2))^2 * exp(-1/(2 * (1 - corr^2)) * (eta1^2 + eta2^2 - 
+    2 * corr * eta1 * eta2)) - 1/(2 * pi * sqrt(1 - corr^2)) * 
+    (exp(-1/(2 * (1 - corr^2)) * (eta1^2 + eta2^2 - 2 * corr * 
+        eta1 * eta2)) * (-1/(2 * (1 - corr^2)) * (2 * eta1 * 
+        eta2) + 2 * (2 * corr)/(2 * (1 - corr^2))^2 * (eta1^2 + 
+        eta2^2 - 2 * corr * eta1 * eta2))) 
+
+bit2.th2 <- -bit1.th2
+
+
+
+  d2l.be1.be1  <- -(y1.y2*(bit1.b1b1*p11-(c.copula.be1*d.n1)^2)/p11^2+
+                              y1.cy2*(bit2.b1b1*p10-((1-c.copula.be1)*d.n1)^2)/p10^2+
+                              cy1*bit3.b1b1 )
+
+  d2l.be2.be2  <- -(y1.y2*(bit1.b2b2*p11 - (c.copula.be2*d.n2)^2 )/p11^2+
+                              y1.cy2*(bit2.b2b2*p10-(-c.copula.be2*d.n2)^2)/p10^2 )
+
+  d2l.be1.be2  <- -(y1.y2*(bit1.b1b2*p11-(c.copula.be1*d.n1*c.copula.be2*d.n2))/p11^2+
+                              y1.cy2*(bit2.b1b2*p10-((1-c.copula.be1)*d.n1)*(-c.copula.be2*d.n2))/p10^2)
+
+  d2l.be1.rho  <- -(y1.y2*(bit1.b1th*p11-(c.copula.be1*d.n1*c.copula.theta))/p11^2+
+                              y1.cy2*(bit2.b1th*p10-((1-c.copula.be1)*d.n1)*(-c.copula.theta))/p10^2 )
+
+  d2l.be2.rho  <- -(y1.y2*(bit1.b2th*p11-(c.copula.be2*d.n2*c.copula.theta))/p11^2+
+                              y1.cy2*(bit2.b2th*p10-(-c.copula.be2*d.n2)*(-c.copula.theta))/p10^2 )
+
+  d2l.rho.rho  <- -(y1.y2*(bit1.th2*p11-c.copula.theta^2)/p11^2+
+                              y1.cy2*(bit2.th2*p10-(-c.copula.theta)^2)/p10^2 )
+
+}
+
 
   }  
+
+
+
   
   if(FI==FALSE || selection==TRUE){
   

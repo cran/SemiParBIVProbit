@@ -1,6 +1,12 @@
-bprobNRE <- function(params, y1, y2, q1, q2, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, weights=weights, X1.d2, X2.d2, sp=NULL, qu.mag=NULL, gp1, gp2, fp, 
+bprobNRE <- function(params, BivD=NULL, nC=NULL, nu=NULL, H.n=NULL, y1, y2, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, weights=weights, X1.d2, X2.d2, sp=NULL, qu.mag=NULL, gp1, gp2, fp, 
                       l.sp1, l.sp2, K=NULL, n, N, cuid, uidf, masses=NULL, NGQ, dat1all, dat2all, W){
 
+  y1e <- rep(y1,each=NGQ^2)
+  y2e <- rep(y2,each=NGQ^2)
+
+  q1 <- 2*y1e-1
+  q2 <- 2*y2e-1
+  
   sigma1.st <- params[X1.d2+1]
   corr.st.u <- params[X1.d2+X2.d2+2]
   sigma2.st <- params[X1.d2+X2.d2+3]

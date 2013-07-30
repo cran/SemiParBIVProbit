@@ -78,7 +78,7 @@ are not meaningful and alternative definitions have to be employed.
 
 
 \seealso{
-\code{\link{InfCr}}, \code{\link{SemiParBIVProbit}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}   
+\code{\link{SemiParBIVProbit}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}   
 }
 
 

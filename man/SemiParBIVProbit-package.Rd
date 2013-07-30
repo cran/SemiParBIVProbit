@@ -5,12 +5,13 @@
 \title{Semiparametric Bivariate Probit Modelling}
 
 \description{\code{SemiParBIVProbit} provides a function for bivariate probit modelling with semiparametric 
-predictors, including linear, nonlinear and random effects.
+predictors, including linear, nonlinear and random effects. The use of several bivariate copula distributions is also supported.
 }
 
 \details{\code{SemiParBIVProbit} provides a function for flexible bivariate probit modelling, in the presence of 
 correlated error equations, endogeneity or non-random sample selection. The underlying representation and 
-estimation of the model is based on a penalized regression spline approach, with automatic smoothness selection. The 
+estimation of the model is based on a penalized regression spline approach, with automatic smoothness selection. The use of several
+bivariate copula distributions is supported. The 
 numerical routine carries out function minimization using a trust region algorithm from the package \code{trust} in combination with
 an adaptation of a low level smoothness selection fitting procedure from the package \code{mgcv}. 
  
@@ -41,7 +42,11 @@ Marra G., Papageorgiou G. and Radice R. (in press), Estimation of a Semiparametr
 
 Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian Journal of Statistics}, 39(2), 259-279.
 
-Marra G. and Radice R. (submitted), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, invited revision.
+Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, 7, 1432-1455.
+
+Marra G., Radice R. and Missiroli S. (submitted), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models.
+
+Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes with Application in Health Care Utilization.
 
 
 }
