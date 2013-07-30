@@ -1,12 +1,36 @@
-exportPattern(".")
+export(AT,
+bprobgHs,copgHs,bprobgHsSS,
+bprobNP,bprobNRE,
+EBNormal,
+extraiterNP,
+logLik.SemiParBIVProbit,
+LM.bpm,
+VuongClarke.bcm,
+NP.qu,
+plot.SemiParBIVProbit,
+predict.SemiParBIVProbit,
+print.AT,
+print.SemiParBIVProbit,
+print.summary.SemiParBIVProbit,
+residuals.SemiParBIVProbit,
+S.m,
+sem.checks,
+SemiParBIVProbit.fit.post,
+SemiParBIVProbit.fit,
+SemiParBIVProbit,
+startSS,
+summary.SemiParBIVProbit,
+working.comp,
+working.compNP)
 
-import(mgcv, trust, mvtnorm)
 
+import(trust)
 importFrom(MASS, ginv)
-importFrom(VGAM, pnorm2, dnorm2)
 importFrom(magic, adiag)
 importFrom(statmod, gauss.quad)
 importFrom(polycor, polychor)
+importFrom(VineCopula, BiCopHfuncDeriv)
+
 
 S3method(plot, SemiParBIVProbit)
 S3method(summary, SemiParBIVProbit)

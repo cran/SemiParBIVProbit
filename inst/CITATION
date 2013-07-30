@@ -13,24 +13,24 @@ paste("Marra G. and Radice R. with contributions from Papageorgiou G. (",year,")
 
 citEntry(
  entry="Article",
- title="Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity",
+ title="Estimation of a semiparametric recursive bivariate probit model in the presence of endogeneity",
  journal="Canadian Journal of Statistics",
  volume= "39",
  number="2",
  pages="259-279",
  year="2011",
  author="Marra G. and Radice R.",
- textVersion="Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. Canadian Journal of Statistics, 39(2), 259-279."
+ textVersion="Marra G. and Radice R. (2011), Estimation of a semiparametric recursive bivariate probit model in the presence of endogeneity. Canadian Journal of Statistics, 39(2), 259-279."
  )
  
 citEntry(
   entry="Article",
-  title="A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modelling",
-  journal="X",
-  volume= "X",
-  number="X",
-  pages="X",
-  year="X", 
+  title="A penalized likelihood estimation approach to semiparametric sample selection binary response modeling",
+  journal="Electronic Journal of Statistics",
+  volume= "7",
+  number="",
+  pages="1432-1455",
+  year="2013", 
   author="Marra G. and Radice R.",
-  textVersion="Marra G. and Radice R., A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modelling. Submitted."
+  textVersion="Marra G. and Radice R. (2013), A penalized likelihood estimation approach to semiparametric sample selection binary response modeling. Electronic Journal of Statistics, 7, 1432-1455."
  )

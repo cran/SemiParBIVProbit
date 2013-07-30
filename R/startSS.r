@@ -1,9 +1,9 @@
-startSS <- function(gam1, gam2, formula.eq2, data, gamma, weights, inde, l.sp1, l.sp2){
+startSS <- function(gam1, gam2, formula.eq2, data, gamma, weights, inde, l.sp1, l.sp2, pPen2){
 
     p.g1 <- predict(gam1)
     imr <- data$imr <- dnorm(p.g1)/pnorm(p.g1)
     formula.eq2.1 <- update.formula(formula.eq2, ~. + imr)
-    ols <- eval(substitute(gam(formula.eq2.1, data=data, gamma=gamma, weights=weights, subset=inde),list(weights=weights,inde=inde)))
+    ols <- eval(substitute(gam(formula.eq2.1, data=data, gamma=gamma, weights=weights, subset=inde, paraPen=pPen2),list(weights=weights,inde=inde)))
     rhi <- coef(ols)["imr"]/sqrt(ols$sig2)
     ta2 <- (1 + rhi^2*imr*(-p.g1-imr))[inde]
 
@@ -26,7 +26,7 @@ startSS <- function(gam1, gam2, formula.eq2, data, gamma, weights, inde, l.sp1, 
 
     fw <- as.formula(fw)  
 
-gam2.1 <- suppressWarnings(try(eval(substitute(gam(fw, binomial(link="probit"), gamma=gamma, weights=weights[inde], data=data.r),list(weights=weights,inde=inde))),silent=TRUE))
+gam2.1 <- suppressWarnings(try(eval(substitute(gam(fw, binomial(link="probit"), gamma=gamma, weights=weights[inde], data=data.r, paraPen=pPen2),list(weights=weights,inde=inde))),silent=TRUE))
 
                                environment(gam2.1$formula) <- environment(gam2$formula) 
 

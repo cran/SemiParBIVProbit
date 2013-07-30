@@ -56,7 +56,7 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
   tableN <- list(NULL,NULL)
   table <- list()
   n.sel <- object$n.sel; masses <- object$masses
-  table.R <- table.P <- table.F <- P1 <- P2 <- QPS1 <- QPS2 <- CR1 <- CR1 <- CR2 <- MR <- table.npRE <- NULL  
+  table.R <- table.P <- table.F <- P1 <- P2 <- QPS1 <- QPS2 <- CR1 <- CR1 <- CR2 <- MR <- table.npRE <- CIkt <- NULL  
 
   lf <- length(coef(object))
   F  <- object$F[1:lf,1:lf]
@@ -65,17 +65,37 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
   SE <- sqrt(diag(object$Vb[1:lf,1:lf]))
   n  <- object$n 
 
-  if(object$RE.type!="NP") bs <- rmvnorm(n.sim, mean = coef(object), sigma=object$Vb, method=s.meth)
-  else bs <- rmvnorm(n.sim, mean = c(coef(object),object$fit$masses[1:(object$K-1)]), sigma=object$Vb, method=s.meth)
+  if(object$RE==TRUE && object$RE.type=="NP") bs <- rmvnorm(n.sim, mean = c(coef(object),object$fit$masses[1:(object$K-1)]), sigma=object$Vb, method=s.meth)
+  else bs <- rmvnorm(n.sim, mean = coef(object), sigma=object$Vb, method=s.meth)
 
-  est.RHOb <- rep(NA,n.sim)
-  for(i in 1:n.sim) est.RHOb[i] <- tanh(bs[i,lf])
-  CIrs <- as.numeric(quantile(est.RHOb,c(sig.lev/2,1-sig.lev/2)))
-  
+
+  epsilon <- .Machine$double.eps*10^6
+  est.RHOb <- est.KeTb <- rep(NA,n.sim) 
+
+  for(i in 1:n.sim){ 
+
+   if(object$BivD %in% c("N","T"))      {est.RHOb[i] <- tanh(bs[i,lf]); if(est.RHOb[i] %in% c(-1,1)) est.RHOb[i] <- sign(est.RHOb[i])*0.9999999}
+   if(object$BivD=="F")                  est.RHOb[i] <- bs[i,lf] + epsilon
+
+   if(object$BivD %in% c("C0", "C180") ) est.RHOb[i] <-   exp(bs[i,lf]) + epsilon  
+   if(object$BivD %in% c("C90","C270") ) est.RHOb[i] <- -(exp(bs[i,lf]) + epsilon) 
+
+   if(object$BivD %in% c("J0", "J180") ) est.RHOb[i] <-   1+exp(bs[i,lf]) + epsilon  
+   if(object$BivD %in% c("J90","J270") ) est.RHOb[i] <- -(1+exp(bs[i,lf]) + epsilon) 
+
+   if(object$BivD %in% c("G0", "G180") ) est.RHOb[i] <-   1+exp(bs[i,lf])  
+   if(object$BivD %in% c("G90","G270") ) est.RHOb[i] <- -(1+exp(bs[i,lf])) 
+   
+   est.KeTb[i] <- BiCopPar2Tau(object$nC,est.RHOb[i],par2=object$nu)
+   
+                   }
+
+  CIrs <- as.numeric(quantile(est.RHOb,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
+  CIkt <- as.numeric(quantile(est.KeTb,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
+
+
   Kk1 <- Kk2 <- 0; if(object$RE==TRUE && object$RE.type=="NP"){ Kk1 <- object$K - 1; Kk2 <- Kk1 + 1}  
   Ks1 <- Ks2 <- 0; if(object$RE==TRUE && object$RE.type=="N"){  Ks1 <- 1; Ks2 <- 2}  
-
-  # ind <- list(ind1=1:(object$gam1$nsdf+Kk1+Ks1),ind2=object$X1.d2+Kk2+Ks1+(1:(object$gam2$nsdf+Kk1+Ks2)))
 
   ind <- list(ind1=1:(object$gam1$nsdf+Kk1),ind2=object$X1.d2+Kk2+Ks1+(1:(object$gam2$nsdf+Kk1)))
 
@@ -92,11 +112,13 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
   	table.npRE <- cbind(table[[1]][c(1:Kk2),1],table[[2]][c(1:Kk2),1],object$masses)
   	dimnames(table.npRE)[[2]] <- c("Eq. 1", "Eq. 2", "masses")
   	table[[1]] <- table[[1]][-c(1:Kk2),]; table[[2]] <- table[[2]][-c(1:Kk2),] 
+        if(is.vector(table[[1]])==TRUE){ table[[1]] <- t(as.matrix(table[[1]])); dimnames(table[[1]])[[1]] <- dimnames(object$X1)[[2]][2]} 
+        if(is.vector(table[[2]])==TRUE){ table[[2]] <- t(as.matrix(table[[2]])); dimnames(table[[2]])[[1]] <- dimnames(object$X2)[[2]][2]} 
+   
                        }
 
   if(object$RE==TRUE && object$RE.type=="N"){
 
-  # might better to use delta method and display on the original scale...
   
   p.i <- which( names(coef(object)) %in% c("log.sigma1","athrho.u","log.sigma2"))
   estimate <- c(  exp( coef(object)[p.i[1]] ), tanh( coef(object)[p.i[2]] ), exp( coef(object)[p.i[3]] ) )  
@@ -111,14 +133,17 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
 
                        }
 
-  if( (object$l.sp1!=0 || object$l.sp2!=0) ){
+  l.sp11 <- length(object$gam1$smooth)
+  l.sp22 <- length(object$gam2$smooth) 
+  if( (l.sp11!=0 || l.sp22!=0) ){
 
   	pTerms.df <- pTerms.chi.sq <- pTerms.pv <- edf <- tableN <- list(0,0)
+        XX <- cbind(object$X1,object$X2)
         
            for(i in 1:2){
 
-             if(i==1) {mm <- object$l.sp1; if(mm==0) next}
-             if(i==2) {mm <- object$l.sp2; if(mm==0) break} 
+             if(i==1) {mm <- l.sp11; if(mm==0) next}
+             if(i==2) {mm <- l.sp22; if(mm==0) break} 
   
 		for(k in 1:mm){
 
@@ -128,7 +153,7 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
 			names(edf[[i]])[k] <- gam$smooth[[k]]$label 
 			b  <- coef(object)[ind]
 			V  <- Vr[ind,ind]
-			if(i==1) Xt <- object$X1[, 1:length(ind)+gam$nsdf] else Xt <- object$X2[, 1:length(ind)+gam$nsdf]
+			Xt <- XX[, ind]
 			pTerms.df[[i]][k] <- min(ncol(Xt), edf[[i]][k])
 			pTerms.chi.sq[[i]][k] <- Tp <- testStat(b, Xt, V, pTerms.df[[i]][k])
 			pTerms.df[[i]][k] <- attr(Tp, "rank")
@@ -200,10 +225,11 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
   
   res <- list(tableP1=table[[1]], tableP2=table[[2]], 
               tableNP1=tableN[[1]], tableNP2=tableN[[2]], 
-              n=n, rho=object$rho, 
+              n=n, rho=object$rho, theta=object$theta, KeT=object$KeT,   
               formula1=object$gam1$formula, formula2=object$gam2$formula, 
-              l.sp1=object$l.sp1, l.sp2=object$l.sp2, 
-              t.edf=object$t.edf, CIrs=CIrs, sel=object$sel,n.sel=n.sel, RE=object$RE, RE.type=object$RE.type,
+              l.sc1=l.sp11, l.sc2=l.sp22, pPen1=object$pPen1, pPen2=object$pPen2,  
+              t.edf=object$t.edf, CIrs=CIrs, CIkt=CIkt, sel=object$sel,n.sel=n.sel, 
+              RE=object$RE, RE.type=object$RE.type, BivD=object$BivD,nu=object$nu,
               table.R=table.R, table.P=table.P, table.F=table.F, MR=MR,
               P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2,
               masses=object$masses, table.RE=table.npRE

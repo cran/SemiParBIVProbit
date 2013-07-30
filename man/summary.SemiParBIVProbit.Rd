@@ -44,7 +44,9 @@ is \eqn{T=\hat{\bf f}^\prime {\bf V}_f^{r-} \hat{\bf f}}. This is
 compared to a chi-squared distribution with degrees of freedom given by \eqn{r}{r}, which is obtained by 
 biased rounding of the estimated degrees of freedom. See Marra (2013) for further details. 
 
-Note that covariate selection can also be achieved using a single penalty shrinkage approach as shown in Marra and Wood (2011). 
+Covariate selection can also be achieved using a single penalty shrinkage approach as shown in Marra and Wood (2011).
+
+For details on all model summaries see Radice, Marra and Wojtys (submitted).  
 
 }
 
@@ -60,17 +62,19 @@ Note that covariate selection can also be achieved using a single penalty shrink
 \item{tableNP2}{As above but for equation 2.}
 \item{n}{Sample size.}
 \item{rho}{Estimated correlation parameter between the two equations.} 
-\item{formula1}{Formula used for equation1.}
-\item{formula2}{Formula used for equation2.}
-\item{l.sp1}{Number of smooth components in equation 1.}
-\item{l.sp2}{Number of smooth components in equation 2.}
+\item{theta}{Estimated copula parameter linking the two equations.}
+\item{KeT}{Estimated Kendall's tau coefficient between the two equations.}
+\item{formula1,formula2}{Formulas used for equations 1 and 2.}
+\item{l.sc1,l.sc2}{Number of smooth components in equations 1 and 2.}
 \item{t.edf}{Total degrees of freedom of the estimated bivariate probit model.}
-\item{CIrs}{`Confidence' intervals for \eqn{\rho}{\rho}.}
+\item{CIrs}{`Confidence' intervals for either \eqn{\rho}{\rho} or \eqn{\theta}{\theta}, depending of the model fitted.}
+\item{CIkt}{`Confidence' intervals for Kendall's tau.}
 \item{sel}{This is used for internal calculations.}
 \item{n.sel}{Number of selected observations in the sample selection case.}
-\item{RE,RE.type}{These are used for internal calculations.}
+\item{RE,RE.type,BivD}{These are used for internal calculations.}
 \item{masses}{If \code{RE=TRUE} and \code{RE.type="NP"}, then it returns the probabilities associated with the biavariate mass points.}
-\item{table.RE}{If \code{RE=TRUE} then it returns a table representing the estimated parameters for the employed random effect distribution.}
+\item{table.RE}{If \code{RE=TRUE} then it returns a table representing the estimated parameters for the employed random effect distribution. For bivariate normal random effects, the parameters of the 
+              distribution are reported on their original scale and standard errors calculated using the delta method.}
 \item{table.R}{Joint absolute frequency table of observed binary value combinations. This as well as all remaining quantities below are not provided when \code{selection=TRUE}.}
 \item{table.P}{Joint absolute frequency table of predicted binary value combinations. }
 \item{table.F}{It is given by \code{table.P}/\code{table.R}.}
@@ -86,6 +90,8 @@ Note that covariate selection can also be achieved using a single penalty shrink
 Diebold F.X. and Rudebusch G.D. (1989), Scoring the Leading Indicators. \emph{Journal of Business}, 62(3), 369-391. 
 
 Marra G. (2013), On P-values for Semiparametric Bivariate Probit Models. \emph{Statistical Methodology}, 10(1), 23-28.
+
+Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes with Application in Health Care Utilization.
 
 Marra G. and Wood S.N. (2011), Practical Variable Selection for Generalized Additive Models. \emph{Computational Statistics and Data Analysis}, 55(7), 2372-2387.
 
@@ -105,7 +111,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 
 \seealso{
-\code{\link{AT}}, \code{\link{InfCr}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
 }
 
 \examples{

@@ -20,7 +20,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 \references{
 
 
-Marra G. and Radice R. (submitted), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, invited revision.
+Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, 7, 1432-1455.
 
 
 }

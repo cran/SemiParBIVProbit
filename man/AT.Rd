@@ -4,9 +4,7 @@
 \title{Average treatment effect of a binary endogenous variable}
 
 \description{ 
-\code{AT} can be used to calculate the unconditional average treatment effect (ATE) and 
-average treatment effect on the treated (ATT) of a binary endogenous predictor/treatment, with corresponding confidence intervals 
-calculated either using the delta method or via posterior simulation.}
+\code{AT} can be used to calculate the average treatment effect of a binary endogenous predictor/treatment, with corresponding confidence intervals calculated either using the delta method or via posterior simulation.}
 
 
 
@@ -25,9 +23,9 @@ AT(x, eq, nm.bin="", E=TRUE, treat=TRUE, delta=TRUE, sig.lev=0.05,
 
 \item{nm.bin}{Name of the binary endogenous variable.} 
 
-\item{E}{If \code{TRUE}, then \code{AT} calculates the ATE. If \code{FALSE}, then it calculates the ATT.}  
+\item{E}{If \code{TRUE}, then \code{AT} calculates the ATE. If \code{FALSE}, then it calculates the AT for the treated individuals only.}  
 
-\item{treat}{If \code{TRUE}, then \code{AT} calculates the ATT. If \code{FALSE}, then it calculates the average treatment effect on 
+\item{treat}{If \code{TRUE}, then \code{AT} calculates the AT using the treated only. If \code{FALSE}, then it calculates the effect on 
 the control group. This only makes sense if used jointly with \code{E=FALSE}.}  
 
 \item{delta}{If \code{TRUE} then the delta method is used for confidence interval calculation, otherwise Bayesian posterior simulation 
@@ -39,7 +37,7 @@ the control group. This only makes sense if used jointly with \code{E=FALSE}.}
              when \code{delta=FALSE}.} 
 
 \item{s.meth}{Matrix decomposition used to determine the matrix root of the covariance 
-              matrix. This is used when \code{delta=FALSE}.See the documentation of the \code{mvtnorm} package for further details.}
+              matrix. This is used when \code{delta=FALSE}. See the documentation of the \code{mvtnorm} package for further details.}
 
 
 
@@ -83,12 +81,14 @@ Journal of Statistics}, 39(2), 259-279.
 
 Marra G., Papageorgiou G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit Model with Nonparametric Mixing. \emph{Australian & New Zealand Journal of Statistics}.
 
+Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes with Application in Health Care Utilization.
+
 
 }
 
 
 \seealso{
-\code{\link{InfCr}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}  
+\code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}  
 }
 
 \examples{
@@ -98,10 +98,8 @@ Marra G., Papageorgiou G. and Radice R. (in press), Estimation of a Semiparametr
 \keyword{semiparametric bivariate probit modelling} 
 \keyword{bivariate probit model} 
 \keyword{ATE} 
-\keyword{ATT} 
 \keyword{delta method} 
 \keyword{average treatment effect} 
-\keyword{average treatment effect on the treated} 
 \keyword{bayesian posterior simulation}
 
 

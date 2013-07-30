@@ -5,7 +5,7 @@
 
 \description{
 
-It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVProbit()} and produces predictions 
+It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVProbit()} and, for each equation, produces predictions 
 for a new set of values of the model covariates or the original values used for the model fit. 
 Standard errors of predictions can be produced. These are based on the posterior distribution of the model coefficients.
 

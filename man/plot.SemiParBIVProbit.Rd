@@ -75,7 +75,7 @@ The function can not deal with smooths of more than 2 variables.
 
 
 \seealso{
-\code{\link{AT}}, \code{\link{InfCr}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
 }
 
 
