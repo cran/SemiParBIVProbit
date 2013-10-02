@@ -44,7 +44,9 @@ Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariat
 
 Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, 7, 1432-1455.
 
-Marra G., Radice R. and Missiroli S. (submitted), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models.
+Marra G., Radice R. and Missiroli S. (in press), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}.
+
+Marra G., Radice R. and Filippou P. (submitted), Testing the Hypothesis of Exogeneity in Regression Spline Bivariate Probit Models.
 
 Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes with Application in Health Care Utilization.
 

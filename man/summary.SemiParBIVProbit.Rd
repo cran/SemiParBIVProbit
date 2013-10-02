@@ -72,6 +72,7 @@ For details on all model summaries see Radice, Marra and Wojtys (submitted).
 \item{sel}{This is used for internal calculations.}
 \item{n.sel}{Number of selected observations in the sample selection case.}
 \item{RE,RE.type,BivD}{These are used for internal calculations.}
+\item{nu,gev.eq1,gev.eq2}{These are used for internal calculations.}
 \item{masses}{If \code{RE=TRUE} and \code{RE.type="NP"}, then it returns the probabilities associated with the biavariate mass points.}
 \item{table.RE}{If \code{RE=TRUE} then it returns a table representing the estimated parameters for the employed random effect distribution. For bivariate normal random effects, the parameters of the 
               distribution are reported on their original scale and standard errors calculated using the delta method.}

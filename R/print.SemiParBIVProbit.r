@@ -1,6 +1,6 @@
 print.SemiParBIVProbit <- function(x,...){
 
-  if(x$BivD=="N")    cop <- "BIVARIATE PROBIT"
+  if(x$BivD=="N")    cop <- "BIVARIATE NORMAL"
   if(x$BivD=="F")    cop <- "BIVARIATE FRANK COPULA"
   if(x$BivD=="T")    cop <- paste("BIVARIATE STUDENT-T COPULA (",x$nu," DEGREES OF FREEDOM)",sep="")
   if(x$BivD=="C0")   cop <- "BIVARIATE CLAYTON COPULA"
@@ -14,35 +14,25 @@ print.SemiParBIVProbit <- function(x,...){
   if(x$BivD=="G0")   cop <- "BIVARIATE GUMBEL COPULA"
   if(x$BivD=="G90")  cop <- "BIVARIATE ROTATED GUMBEL COPULA (90 DEGREES)"
   if(x$BivD=="G180") cop <- "BIVARIATE SURVIVAL GUMBEL COPULA"
-  if(x$BivD=="G270") cop <- "BIVARIATE ROTATED GUMBEL COPULA (270 DEGREES)"  
+  if(x$BivD=="G270") cop <- "BIVARIATE ROTATED GUMBEL COPULA (270 DEGREES)"   
 
   if(x$BivD %in% c("N","T") ) {cp <- "  rho = "; as.p <- x$rho} else{ cp <- "  theta = "; as.p <- x$theta}
 
-  if(x$sel==FALSE){ 
-  re <- ""
-  if(x$RE==TRUE && x$BivD=="N") re <- "with Random Effects"
-  cat("\nFamily:",cop,re,"\n\nFormula Eq. 1: ")
+  if(x$RE==TRUE){ if(x$RE.type=="NP") re <- "Bivariate Nonparametric Random Effects in linear predictors"; if(x$RE.type=="N") re <- "Bivariate Normal Random Effects in linear predictors"}
+
+  cat("\nERRORS' DISTRIBUTION:",cop)
+  if(x$RE==TRUE) cat("\n",re,sep ="")  
+
+  cat("\n\nEQUATION 1")
+  if(x$gev.eq1==FALSE) cat("\nLink function: probit\n") else cat("\nLink function: gev\n")
   print(x$gam1$formula)
 
-  cat("Formula Eq. 2: ")
+  cat("\nEQUATION 2")
+  if(x$gev.eq2==FALSE) cat("\nLink function: probit\n") else cat("\nLink function: gev\n")
   print(x$gam2$formula)
   cat("\n")
 
-  cat("n = ",x$n,cp,format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
-
-
-  }else{
-
-  cat("\nFamily:",cop,"\n\nSELECTION EQ.: ")
-  print(x$gam1$formula)
-
-  cat("OUTCOME   EQ.: ")
-  print(x$gam2$formula)
-  cat("\n")
-
-  cat("n = ",x$n,"  n.sel = ",x$n.sel,cp,format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
-  }
-
+  if(x$sel==FALSE) cat("n = ",x$n,cp,format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="") else cat("n = ",x$n,"  n.sel = ",x$n.sel,cp,format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
 
 invisible(x)
 

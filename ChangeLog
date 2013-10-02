@@ -1,3 +1,9 @@
+version 3.2-8
+- gradient test for the hypothesis of exogeneity (or absence of endogeneity).
+- post estimation function for sandwich adjustment of the covariance matrix.
+- post estimation function for adjustment of the covariance matrix based on a complex survey design.
+- bivariate copula models with nonparametric random effects allowed for.
+
 version 3.2-7
 - several bivariate copula models implemented.
 

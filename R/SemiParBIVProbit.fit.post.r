@@ -1,4 +1,4 @@
-SemiParBIVProbit.fit.post <- function(SemiParFit, formula.eq2, selection, data, RE, RE.type, BivD, nu, nC, y1, y2, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, X1.d2, X2.d2, l.sp1, l.sp2,
+SemiParBIVProbit.fit.post <- function(SemiParFit, formula.eq2, selection, data, RE, RE.type, BivD, nu, gev.eq1, gev.eq2, shape1, shape2, nC, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, X1.d2, X2.d2, pPen1, pPen2, l.sp1, l.sp2,
                                       qu.mag=NULL, gam1, gam2, gp1, gp2, fp, weights, K=NULL, n, N=NULL, cuid=NULL, uidf=NULL){
 
 
@@ -6,8 +6,8 @@ SemiParBIVProbit.fit.post <- function(SemiParFit, formula.eq2, selection, data, 
 
     if(selection==FALSE && RE==TRUE && RE.type=="NP"){
     
-    	NP.qu.int <- NP.qu(SemiParFit, y1, y2, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, X1.d2, X2.d2, qu.mag, gp1, gp2, fp, l.sp1, l.sp2, weights, K, n, N, cuid, uidf)
-    	He <- NP.qu.int$He; logLik <- -NP.qu.int$logLik
+    	NP.qu.int <- NP.qu(SemiParFit, BivD, nC, nu, gev.eq1, gev.eq2, shape1, shape2, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, X1.d2, X2.d2, pPen1, pPen2, qu.mag, gp1, gp2, fp, l.sp1, l.sp2, weights, K, n, N, cuid, uidf)
+    	He <- NP.qu.int$He; logLik <- NP.qu.int$logLik 
 
     	SemiParFit$fit$eta1 <- NP.qu.int$Eb.u1 + SemiParFit$fit$eta1 
     	SemiParFit$fit$eta2 <- NP.qu.int$Eb.u2 + SemiParFit$fit$eta2
@@ -19,7 +19,7 @@ SemiParBIVProbit.fit.post <- function(SemiParFit, formula.eq2, selection, data, 
                                            }
     
 
-    if(selection==FALSE && RE==TRUE && RE.type=="N") NP.qu.int <- EBNormal(SemiParFit$fit$argument,y1,y2,X1,X2,X1.d2,X2.d2,N,cuid,uidf,tol=1e-6,M=50)
+    if(selection==FALSE && RE==TRUE && RE.type=="N") NP.qu.int <- EBNormal(SemiParFit$fit$argument,X1,X2,X1.d2,X2.d2,N,cuid,uidf,tol=1e-6,M=50)
 
 
     He.eig <- eigen(He,symmetric=TRUE)
@@ -76,21 +76,26 @@ SemiParBIVProbit.fit.post <- function(SemiParFit, formula.eq2, selection, data, 
   if(selection==TRUE){
 
   eta1      <- SemiParFit$fit$eta1
-  fs        <- as.formula( paste("y2","~",formula.eq2[3],sep="") ) 
-  non.sel.d <- gam(fs, data=data, fit = FALSE)$X
+  resp      <- rep(1,length(eta1))
+  fs        <- as.formula( paste("resp","~",formula.eq2[3],sep="") ) 
+  non.sel.d <- gam(fs, data=data[SemiParFit$fit$good,], fit = FALSE)$X
   param     <- SemiParFit$fit$argument[-c(1:length(gam1$coef),length(SemiParFit$fit$argument))]
   eta2      <- non.sel.d%*%param
 
-  if(BivD=="N") {SemiParFit$fit$p00 <- abs(pnorm2(-eta1,-eta2,cov12=rho)); SemiParFit$fit$p01 <- abs(pnorm2(-eta1,eta2,cov12=-rho))}
-  else{ 
+  if(gev.eq1==FALSE && gev.eq2==TRUE) {p1 <- pnorm(eta1);             p2 <- 1-pgev(-eta2,shape=shape2)}   
+  if(gev.eq1==TRUE  && gev.eq2==FALSE){p1 <- 1-pgev(-eta1,shape=shape1); p2 <- pnorm(eta2)            }
+  if(gev.eq1==TRUE  && gev.eq2==TRUE) {p1 <- 1-pgev(-eta1,shape=shape1); p2 <- 1-pgev(-eta2,shape=shape2)}
+  if(gev.eq1==FALSE && gev.eq2==FALSE){p1 <- pnorm(eta1);             p2 <- pnorm(eta2)            } 
 
+  if(BivD=="N") p11 <- pmax( abs(pbinorm( qnorm(p1), qnorm(p2), cov12=rho)), 1000*.Machine$double.eps ) 
+  else{ 
    if(BivD=="T") theta <- rho
-   p1 <- pnorm(eta1); p2 <- pnorm(eta2); p11 <- BiCopCDF(p1,p2, nC, par=theta,par2=nu)
-   SemiParFit$fit$p00 <- pnorm(-eta2) - ( p1 - p11 )
+   p11 <- BiCopCDF(p1,p2, nC, par=theta,par2=nu)
+   }
+
+   SemiParFit$fit$p00 <- (1-p2) - ( p1 - p11 )
    SemiParFit$fit$p01 <- p2 - p11
 
-}
-  
   bs    <- rmvnorm(1000, mean = SemiParFit$fit$argument, sigma=Vb, method="svd")
   eta1S <- X1%*%t(bs[,1:length(gam1$coef)]) 
   eta2S <- non.sel.d%*%t(bs[,-c(1:length(gam1$coef),length(SemiParFit$fit$argument))]) 

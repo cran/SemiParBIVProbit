@@ -1,5 +1,7 @@
 SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL,  
-                             start.v=NULL, BivD="N", nu=3, selection=FALSE, H.n=TRUE, gamma=1, aut.sp=TRUE, fp=FALSE,
+                             start.v=NULL, BivD="N", nu=3,  
+                             gev.eq1=FALSE, gev.eq2=FALSE, shape1=0.25, shape2=0.25,
+                             selection=FALSE, H.n=TRUE, gamma=1, aut.sp=TRUE, fp=FALSE,
                              RE=FALSE, RE.type="N", NGQ=10, K=2, id=NULL, e.npRE=TRUE, pPen1 = NULL, pPen2 = NULL, 
                              rinit=1, rmax=100, fterm=sqrt(.Machine$double.eps), mterm=sqrt(.Machine$double.eps), 
         		     iterlimsp=50, pr.tolsp=1e-6, 
@@ -8,12 +10,12 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL
   ##########################################################################################################################
   # model set up and starting values
   ##########################################################################################################################
-
-  # if(RE==TRUE && RE.type=="N") stop("Bivariate normal random effect case not finished yet. Check the next release.")
-
+  if(gev.eq1==TRUE || gev.eq2==TRUE) stop("Models with GEV link function(s) not ready yet.")
+  if(RE==TRUE && RE.type=="N") stop("Models with bivariate normal random effects not ready yet.")
   if(!(RE.type %in% c("N", "NP"))) stop("Error in parameter RE.type value. It should be one of: NP or N.")
-  if(BivD!="N" && RE==TRUE) stop("Bivariate copula models with random effects not implemented yet.")
-  if(!(BivD %in% c("N","C0","C90","C180","C270","J0","J90","J180","J270","G0","G90","G180","G270","F","T"))) stop("Error in parameter BivD value. It should be one of: N,C0,C90,C180,C270,J0,J90,J180,J270,G0,G90,G180,G270,F,T")
+  if(!(BivD %in% c("N","C0","C90","C180","C270",
+                       "J0","J90","J180","J270",
+                       "G0","G90","G180","G270","F","T"))) stop("Error in parameter BivD value. It should be one of: N,C0,C90,C180,C270,J0,J90,J180,J270,G0,G90,G180,G270,F,T")
   if(BivD!="N" && H.n==FALSE) stop("Bivariate copula models based on expected information not implemented.")
 
    ct <- data.frame( c("N","C0","C90","C180","C270","J0","J90","J180","J270","G0","G90","G180","G270","F","T"),
@@ -33,6 +35,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL
   gam2  <- eval(substitute(gam(formula.eq2, binomial(link="probit"), gamma=gamma, weights=weights, data=data, paraPen=pPen2),list(weights=weights)))
   y2 <- gam2$y 
   if(n!=length(y2)) stop("The dimensions of the two responses (and respective design matrices) do not match.")
+  if(RE==TRUE && RE.type=="N") weights <- rep(weights,each=NGQ^2)
   X2 <- model.matrix(gam2); X2.d2 <- dim(X2)[2]
   l.sp2 <- length(gam2$sp); n.sel <- NULL
   gp1 <- gam1$nsdf; gp2 <- gam2$nsdf    
@@ -44,7 +47,10 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL
 
   if(is.null(start.v)){
 
-  if(BivD %in% c("N","F","T")){i.rho <- polychor(y1,y2); i.rho <- atanh( ifelse( abs(i.rho) > 0.90, sign(i.rho)*0.90, i.rho) ); if(BivD %in% c("N","T")) names(i.rho) <- "athrho" else names(i.rho) <- "theta.star"}
+  if(BivD %in% c("N","F","T")){i.rho <- polychor(y1,y2)
+                               i.rho <- atanh( ifelse( abs(i.rho) > 0.90, sign(i.rho)*0.90, i.rho) )
+                               if(BivD %in% c("N","T")) names(i.rho) <- "athrho" else names(i.rho) <- "theta.star"
+                              }
   else{ if(BivD %in% c("C0", "C180","J0", "J180","G0", "G180")) i.rho <-  log(3) else i.rho <- -log(3)
                                                                 names(i.rho) <- "theta.star"
       }
@@ -54,12 +60,12 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL
                       }
 
   cy1 <- NULL
+  # if(RE==FALSE || (RE==TRUE && RE.type=="NP")) 
   y1.y2 <- y1*y2; y1.cy2 <- y1*(1-y2); cy1.y2 <- (1-y1)*y2; cy1.cy2 <- (1-y1)*(1-y2)
   
-  if(RE==TRUE && RE.type=="N") func.opt <- bprobNRE else func.opt <- bprobgHs  
+  if(RE==TRUE && RE.type=="N") func.opt <- bprobgHs.NRE else func.opt <- bprobgHs  
 
        
-
 
     if(RE==TRUE){
      
@@ -71,10 +77,11 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL
       
            	if(is.null(start.v)){ 
            		start.v <- c(coef(gam1),coef(gam2),i.rho)
-           		fit     <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, BivD=BivD, nC=nC, H.n=H.n, y1=y1, y2=y2, 
+           		fit     <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, BivD=BivD, nC=nC, nu=nu, gev.eq1=gev.eq1, gev.eq2=gev.eq2, shape1=shape1, shape2=shape2, H.n=H.n, 
                                          y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,
                                          X1=X1, X2=X2,
-                		         X1.d2=X1.d2, X2.d2=X2.d2, sp=sp, qu.mag=qu.mag, gp1=gp1, gp2=gp2, fp=fp, l.sp1=l.sp1, l.sp2=l.sp2, blather=TRUE, 
+                		         X1.d2=X1.d2, X2.d2=X2.d2, sp=sp, qu.mag=qu.mag, gp1=gp1, gp2=gp2, fp=fp, 
+                		         l.sp1=l.sp1, l.sp2=l.sp2, blather=TRUE, 
                         		 fterm=fterm, mterm=mterm, iterlim = 1e+4, weights=weights,
                          		K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses, NGQ=NGQ, dat1all=dat1all, dat2all=dat2all, W=W) 
            		start.v <- fit$argument }
@@ -94,17 +101,18 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL
       		cuid <- c(0,cumsum(uidf))
 
       		masses <- rep(1/K,K) 
-      		func.opt <- bprobNP
+      		func.opt <- bprobgHs.NPRE
 
                 xx1 <- as.matrix(X1[,-1]); xx2 <- as.matrix(X2[,-1])
           	X1 <- function(u) cbind(matrix(replace(rep(0,K),u,1),ncol=K,nrow=n,byrow=TRUE),xx1)
           	X2 <- function(u) cbind(matrix(replace(rep(0,K),u,1),ncol=K,nrow=n,byrow=TRUE),xx2)
 
 	        	if(e.npRE==TRUE){
-		     		start.ve <- extraiterNP(paramNP=start.v, y1, y2, 
+		     		start.ve <- extraiterNP(paramNP=start.v, BivD, nC, nu,  gev.eq1, gev.eq2, shape1, shape2, 
                                                         y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1,
                                                         X1, X2, X1.d2, X2.d2, pPen1, pPen2, sp, qu.mag, gp1, gp2,
-		     		                        fp, l.sp1, l.sp2, weights, K, n, N, cuid, uidf, masses, pr.tolsp, NGQ, dat1all, dat2all, W)                
+		     		                        fp, l.sp1, l.sp2, weights, K, n, N, cuid, uidf, masses, pr.tolsp, NGQ, 
+		     		                        dat1all, dat2all, W)                
              	     		start.v <- start.ve$paramNP; masses <- start.ve$masses} 
                      }
 
@@ -139,10 +147,8 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL
 
                 y1e <- rep(y1,each=NGQ^2)
                 y2e <- rep(y2,each=NGQ^2)
-                # REPLACE DERIVATIVES WITH NEW ONES
-
-                #q1 <- 2*y1e-1
-                #q2 <- 2*y2e-1
+                          
+                y1.y2 <- y1e*y2e; y1.cy2 <- y1e*(1-y2e); cy1.y2 <- (1-y1e)*y2e; cy1.cy2 <- (1-y1e)*(1-y2e)
 
     
                        }
@@ -165,7 +171,7 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL
   y2 <- rep(0,length(inde)); y2[inde] <- gam2$y; n.sel <- length(gam2$y)
   l.sp2 <- length(gam2$sp)
 
-  if(is.null(start.v)){startvSS <- startSS(gam1, gam2, formula.eq2, data, gamma, weights, inde, l.sp1, l.sp2, pPen2)
+  if(is.null(start.v)){startvSS <- startSS(gam1, gam2, formula.eq2, data, gamma, weights, inde, l.sp1, l.sp2, pPen2, fp)
                        start.v <- startvSS$start.v
 
   
@@ -202,10 +208,13 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL
   # model fitting
   ##########################################################################################################################
 
-  SemiParFit <- SemiParBIVProbit.fit(func.opt=func.opt, start.v=start.v, rinit=rinit, rmax=rmax, BivD=BivD, nu=nu,nC=nC, H.n=H.n, y1=y1, y2=y2, 
+  SemiParFit <- SemiParBIVProbit.fit(func.opt=func.opt, start.v=start.v, rinit=rinit, rmax=rmax, BivD=BivD, nu=nu, 
+                                     gev.eq1=gev.eq1, gev.eq2=gev.eq2, shape1=shape1, shape2=shape2, 
+                                     nC=nC, H.n=H.n, 
                                      y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,
                                      X1=X1, X2=X2,  
-                                     X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, sp=sp, qu.mag=qu.mag, gp1=gp1, gp2=gp2, fp=fp, RE=RE, RE.type=RE.type,
+                                     X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, sp=sp, qu.mag=qu.mag, gp1=gp1, gp2=gp2, 
+                                     fp=fp, RE=RE, RE.type=RE.type,
                                      aut.sp=aut.sp, iterlimsp=iterlimsp, l.sp1=l.sp1, l.sp2=l.sp2, pr.tolsp=pr.tolsp,
                                      weights=weights, fterm=fterm, mterm=mterm, iterlim = 1e+4, e.npRE=e.npRE, gamma=gamma,
                                      K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses, control.sp=control.sp,NGQ=NGQ,
@@ -216,10 +225,11 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL
   ##########################################################################################################################
 
   SemiParFit.p <- SemiParBIVProbit.fit.post(SemiParFit=SemiParFit, formula.eq2=formula.eq2, data=data, selection=selection, 
-                                            RE=RE, RE.type=RE.type, BivD=BivD, nu=nu, nC=nC, y1=y1, y2=y2, 
+                                            RE=RE, RE.type=RE.type, BivD=BivD, nu=nu, gev.eq1=gev.eq1, gev.eq2=gev.eq2, 
+                                            shape1=shape1, shape2=shape2, nC=nC,
                                             y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,
                                             X1=X1, X2=X2,
-                                            X1.d2=X1.d2, X2.d2=X2.d2, qu.mag=qu.mag, gam1=gam1, gam2=gam2, gp1=gp1, gp2=gp2, 
+                                            X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, qu.mag=qu.mag, gam1=gam1, gam2=gam2, gp1=gp1, gp2=gp2, 
                                             fp=fp, l.sp1=l.sp1, l.sp2=l.sp2, 
                                             weights=weights, K=K, n=n, N=N, cuid=cuid, uidf=uidf)
 
@@ -237,10 +247,12 @@ L <- list(fit=SemiParFit$fit, gam1=gam1, gam2=gam2, gam2.1=startvSS$gam2.1,
           X1=SemiParFit.p$X1, X2=SemiParFit.p$X2, X1.d2=X1.d2, X2.d2=X2.d2, 
           l.sp1=l.sp1, l.sp2=l.sp2, He=SemiParFit.p$He, HeSh=SemiParFit.p$HeSh, Vb=SemiParFit.p$Vb, F=SemiParFit.p$F, 
           fp=fp, aut.sp=aut.sp,
-          t.edf=SemiParFit.p$t.edf, edf1=SemiParFit.p$edf1, edf2=SemiParFit.p$edf2, bs.mgfit=SemiParFit$bs.mgfit, conv.sp=SemiParFit$conv.sp, wor.c=SemiParFit$wor.c,
+          t.edf=SemiParFit.p$t.edf, edf1=SemiParFit.p$edf1, edf2=SemiParFit.p$edf2, bs.mgfit=SemiParFit$bs.mgfit, conv.sp=SemiParFit$conv.sp, 
+          wor.c=SemiParFit$wor.c,
           p11=SemiParFit$fit$p11, p10=SemiParFit$fit$p10, p01=SemiParFit$fit$p01, p00=SemiParFit$fit$p00, p0=SemiParFit$fit$p0,  
           eta1=SemiParFit$fit$eta1, eta2=SemiParFit$fit$eta2, 
-          y1=y1,y2=y2,sel=selection, K=SemiParFit.p$K, masses=SemiParFit$fit$masses, RE=RE, RE.type=RE.type, BivD=BivD, nu=nu, logLik=SemiParFit.p$logLik,
+          y1=y1,y2=y2,sel=selection, K=SemiParFit.p$K, masses=SemiParFit$fit$masses, RE=RE, RE.type=RE.type, BivD=BivD, nu=nu, 
+          gev.eq1=gev.eq1, gev.eq2=gev.eq2, shape1=shape1, shape2=shape2, logLik=SemiParFit.p$logLik,
           eb.u1=SemiParFit.p$NP.qu.int$eb.u1, eb.u2=SemiParFit.p$NP.qu.int$eb.u2, 
           Eb.u1=SemiParFit.p$NP.qu.int$Eb.u1, Eb.u2=SemiParFit.p$NP.qu.int$Eb.u2, 
           id=id, uidf=uidf, T.sv=SemiParFit.p$NP.qu.int$T.sv,

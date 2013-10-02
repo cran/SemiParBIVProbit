@@ -1,5 +1,7 @@
-working.compNP <- function(x,X1=X1,X2=X2,X1.d2=X1.d2,X2.d2=X2.d2,n=n,K=NULL){
+working.compNP <- function(x,X1=X1,X2=X2,X1.d2=X1.d2,X2.d2=X2.d2,K=NULL){
 
+  good <- x$good
+  n <- length(good)
   X <- rW.X <- matrix(0,2*n,(X1.d2+X2.d2+2*K))
   D <- rW.Z <- matrix(0,2*n,1)
   e.par     <- x$argument
@@ -10,8 +12,11 @@ working.compNP <- function(x,X1=X1,X2=X2,X1.d2=X1.d2,X2.d2=X2.d2,n=n,K=NULL){
 
   	for(u in 1:K){
 
- 	 X[i,1:(X1.d2+K)]                     <- X1(u)[j,]
-  	 X[i+1,(X1.d2+1+K):(X1.d2+X2.d2+2*K)] <- X2(u)[j,]
+         X1u <- X1(u)[good,]
+         X2u <- X2(u)[good,]
+         
+ 	 X[i,1:(X1.d2+K)]                     <- X1u[j,]
+  	 X[i+1,(X1.d2+1+K):(X1.d2+X2.d2+2*K)] <- X2u[j,]
   	 D[i,1]   <- x$dl.dbe1[j,u]
   	 D[i+1,1] <- x$dl.dbe2[j,u]
 

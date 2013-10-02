@@ -1,9 +1,9 @@
 VuongClarke.bcm <- function(obj1,obj2,sig.lev=0.05){
 
-l1 <- -obj1$logL
-l2 <- -obj2$logL
+l1 <- obj1$logLik
+l2 <- obj2$logLik
 
-if(l1==l2) stop("The two competing models are the same!")
+if(l1==l2) stop("The two competing models have identical log-likelihoods!")
 
 p1 <- obj1$t.edf
 p2 <- obj2$t.edf

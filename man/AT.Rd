@@ -4,7 +4,8 @@
 \title{Average treatment effect of a binary endogenous variable}
 
 \description{ 
-\code{AT} can be used to calculate the average treatment effect of a binary endogenous predictor/treatment, with corresponding confidence intervals calculated either using the delta method or via posterior simulation.}
+\code{AT} can be used to calculate the average treatment effect of a binary endogenous predictor/treatment, with corresponding confidence intervals calculated either using the delta 
+method or via posterior simulation.}
 
 
 
@@ -29,7 +30,7 @@ AT(x, eq, nm.bin="", E=TRUE, treat=TRUE, delta=TRUE, sig.lev=0.05,
 the control group. This only makes sense if used jointly with \code{E=FALSE}.}  
 
 \item{delta}{If \code{TRUE} then the delta method is used for confidence interval calculation, otherwise Bayesian posterior simulation 
-             is employed.}  
+             is employed. Note that for models including random effects posterior simulation is allowed only.}  
 
 \item{sig.lev}{Significance level.} 
 

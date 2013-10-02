@@ -38,10 +38,10 @@ G.Eh.E <- function(params,y1,y2,X1,X2,X1.d2,X2.d2,gam1,gam2,selection,FI){
   y1.y2   <- y1*y2
   y1.cy2  <- y1*(1-y2)
   
-  p11 <- pmax( abs(pnorm2( eta1, eta2, cov12=corr)), 1000*.Machine$double.eps )
+  p11 <- pmax( abs(pbinorm( eta1, eta2, cov12=corr)), 1000*.Machine$double.eps )
   p10 <- pmax( pnorm(eta1) - p11, 1000*.Machine$double.eps )
   
-  d.n1n2 <- dnorm2(eta1,eta2,rho=corr) 
+  d.n1n2 <- dbinorm(eta1,eta2,cov12=corr) 
   
   
    if(selection==FALSE){
@@ -95,7 +95,7 @@ G.Eh.E <- function(params,y1,y2,X1,X2,X1.d2,X2.d2,gam1,gam2,selection,FI){
   p1 <- pnorm(eta1)
   p2 <- pnorm(eta2)
   
-  C.copula <- pnorm2( eta1, eta2, cov12=corr)
+  C.copula <- pbinorm( eta1, eta2, cov12=corr)
 
   p11 <- pmax( C.copula, 1000*.Machine$double.eps )
   p10 <- pmax( p1 - p11, 1000*.Machine$double.eps )
@@ -103,7 +103,7 @@ G.Eh.E <- function(params,y1,y2,X1,X2,X1.d2,X2.d2,gam1,gam2,selection,FI){
   d.r    <- 1/sqrt( pmax(10000*.Machine$double.eps, 1-corr^2) )
   d.n1   <- dnorm(eta1) 
   d.n2   <- dnorm(eta2) 
-  d.n1n2 <- dnorm2(eta1,eta2, rho=corr) 
+  d.n1n2 <- dbinorm(eta1,eta2, cov12=corr) 
 
   A   <- pnorm( (eta2-corr*eta1)*d.r )
   B   <- pnorm( (eta1-corr*eta2)*d.r )

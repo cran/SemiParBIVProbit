@@ -148,12 +148,12 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
 		for(k in 1:mm){
 
                         if(i==1){gam <- object$gam1; ind <- (gam$smooth[[k]]$first.para+Kk1+Ks1):(gam$smooth[[k]]$last.para+Kk1+Ks1)} 
-                        else{gam <- object$gam2; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para+Kk1+Ks1)+object$X1.d2+Kk2+Ks2} # CHECK THIS!!! Ks2
+                        else{gam <- object$gam2; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para+Kk1+Ks1)+object$X1.d2+Kk2+Ks2} # CHECK THIS for Ks2
 			edf[[i]][k] <- sum(diag(F)[ind])
 			names(edf[[i]])[k] <- gam$smooth[[k]]$label 
 			b  <- coef(object)[ind]
 			V  <- Vr[ind,ind]
-			Xt <- XX[, ind]
+			if(object$RE==TRUE && object$RE.type=="NP"){if(i==1) Xt <- XX[, ind-Kk1] else Xt <- XX[, ind-Kk1*2] } else Xt <- XX[, ind] 
 			pTerms.df[[i]][k] <- min(ncol(Xt), edf[[i]][k])
 			pTerms.chi.sq[[i]][k] <- Tp <- testStat(b, Xt, V, pTerms.df[[i]][k])
 			pTerms.df[[i]][k] <- attr(Tp, "rank")
@@ -174,7 +174,8 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
  Pre.p <- matrix(NA,n,8)
  Pre.c <- matrix(NA,n,2)
 
- Pre.p[,1:6] <- cbind(object$y1,object$y2,object$p11,object$p10,object$p01,object$p00)
+
+ Pre.p[,1:6] <- cbind(object$y1[object$fit$good],object$y2[object$fit$good],object$p11,object$p10,object$p01,object$p00)
 
  for(i in 1:n) {
    ind <- sort(Pre.p[i,3:6],index.return=TRUE)$ix[4]
@@ -229,7 +230,8 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
               formula1=object$gam1$formula, formula2=object$gam2$formula, 
               l.sc1=l.sp11, l.sc2=l.sp22, pPen1=object$pPen1, pPen2=object$pPen2,  
               t.edf=object$t.edf, CIrs=CIrs, CIkt=CIkt, sel=object$sel,n.sel=n.sel, 
-              RE=object$RE, RE.type=object$RE.type, BivD=object$BivD,nu=object$nu,
+              RE=object$RE, RE.type=object$RE.type, BivD=object$BivD,nu=object$nu, 
+              gev.eq1=object$gev.eq1, gev.eq2=object$gev.eq2, 
               table.R=table.R, table.P=table.P, table.F=table.F, MR=MR,
               P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2,
               masses=object$masses, table.RE=table.npRE

@@ -17,7 +17,9 @@ product smooths.
 
 \usage{
 SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), weights=NULL,  
-                 start.v=NULL, BivD="N", nu=3, selection=FALSE, H.n=TRUE, 
+                 start.v=NULL, BivD="N", nu=3, 
+                 gev.eq1=FALSE, gev.eq2=FALSE, shape1=0.25, shape2=0.25,
+                 selection=FALSE, H.n=TRUE, 
                  gamma=1, aut.sp=TRUE, fp=FALSE, RE=FALSE, RE.type="N", 
                  NGQ=10, K=2, id=NULL, e.npRE=TRUE, pPen1 = NULL, pPen2 = NULL, 
                  rinit=1, rmax=100, fterm=sqrt(.Machine$double.eps), 
@@ -51,6 +53,10 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), weights=NULL,
              Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Student-t.} 
 
 \item{nu}{Degrees of freedom for Student-t.}
+
+\item{gev.eq1,gev.eq2}{They indicate whether a GEV link function should be employed.}
+
+\item{shape1,shape2}{Shape parameters of the GEV distribution for the two equations.}
 
 \item{selection}{If \code{TRUE}, then the numerical routine for bivariate probit modelling in the presence of non-random sample selection is employed.}
 
@@ -159,7 +165,9 @@ Journal of Statistics}, 39(2), 259-279.
 
 Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, 7, 1432-1455.
 
-Marra G., Radice R. and Missiroli S. (submitted), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models.
+Marra G., Radice R. and Missiroli S. (in press), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}.
+
+Marra G., Radice R. and Filippou P. (submitted), Testing the Hypothesis of Exogeneity in Regression Spline Bivariate Probit Models.
 
 Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes with Application in Health Care Utilization.
 
@@ -326,6 +334,12 @@ out <- SemiParBIVProbit(y1 ~ x1 + s(x2),
 summary(out)
 
 #
+
+## Testing the hypothesis of absence of endogeneity post estimation... 
+
+gt.bpm(out)
+
+#
 ## average treatment effect with CIs
 
 AT(out,eq=2,nm.bin="y1") 
@@ -347,6 +361,8 @@ outJ <- SemiParBIVProbit(y1 ~ x1 + s(x2),
 summary(outJ)
 AT(outJ,eq=2,nm.bin="y1") 
 
+
+VuongClarke.bcm(out,outJ)
 
 #
 ## recursive bivariate probit modelling with unpenalized splines 
@@ -402,6 +418,7 @@ LM.bpm(ys ~ bi + s(x1) + s(x2),yo ~ bi + s(x1),dataSim,selection=TRUE)
 out <- SemiParBIVProbit(ys ~ bi + s(x1) + s(x2), 
                         yo ~ bi + s(x1), 
                         data=dataSim, selection=TRUE)
+gt.bpm(out)                        
 
 ## compare the two summary outputs
 ## the second output produces a summary of the results obtained when
@@ -427,7 +444,7 @@ summary(out$gam2)
 for(i in 1:dim(eta1Sim)[2]){
 
   p0  <- pnorm(-eta1Sim[,i]) 
-  p01 <- pnorm2(-eta1Sim[,i],eta2Sim[,i],cov12=-tanh(athrhoSim[i]))
+  p01 <- pbinorm(-eta1Sim[,i],eta2Sim[,i],cov12=-tanh(athrhoSim[i]))
   pr.prS[i] <- mean( (p01/p0)[out$y1==0] )
 
 }
