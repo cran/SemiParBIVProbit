@@ -1,7 +1,7 @@
 print.summary.SemiParBIVProbit <- function(x,digits = max(3, getOption("digits") - 3),
                                              signif.stars = getOption("show.signif.stars"),...){
 
-  if(x$BivD=="N")    cop <- "BIVARIATE PROBIT"
+  if(x$BivD=="N")    cop <- "BIVARIATE NORMAL"
   if(x$BivD=="F")    cop <- "BIVARIATE FRANK COPULA"
   if(x$BivD=="T")    cop <- paste("BIVARIATE STUDENT-T COPULA (",x$nu," DEGREES OF FREEDOM)",sep="")
   if(x$BivD=="C0")   cop <- "BIVARIATE CLAYTON COPULA"
@@ -16,10 +16,13 @@ print.summary.SemiParBIVProbit <- function(x,digits = max(3, getOption("digits")
   if(x$BivD=="G90")  cop <- "BIVARIATE ROTATED GUMBEL COPULA (90 DEGREES)"
   if(x$BivD=="G180") cop <- "BIVARIATE SURVIVAL GUMBEL COPULA"
   if(x$BivD=="G270") cop <- "BIVARIATE ROTATED GUMBEL COPULA (270 DEGREES)"  
+  main.t <- "\nERRORS' DISTRIBUTION:" 
 
-  re <- ""
-  if(x$RE==TRUE && x$BivD=="N"){ if(x$RE.type=="NP") re <- "with NP Random Effects (RE)"; if(x$RE.type=="N") re <- "with N Random Effects"}
-  if(x$sel==FALSE) cat("\nFamily:",cop,re,"\n\nEQUATION 1: ") else cat("\nFamily",cop,"\n\nSELECTION EQ.: ") 
+  if(x$RE==TRUE){ if(x$RE.type=="NP") re <- "\nBivariate Nonparametric Random Effects (RE) in linear predictors"; if(x$RE.type=="N") re <- "\nBivariate Normal Random Effects in linear predictors"}
+  cat(main.t,cop)
+  if(x$RE==TRUE) cat(re)  
+  if(x$sel==FALSE) cat("\n\nEQUATION 1") else cat("\n\nSELECTION EQ.") 
+  if(x$gev.eq1==FALSE) cat("\nLink function: probit\n") else cat("\nLink function: gev\n") 
   print(x$formula1)
   cat("\n") 
   cat("Parametric coefficients:\n")
@@ -35,7 +38,8 @@ print.summary.SemiParBIVProbit <- function(x,digits = max(3, getOption("digits")
     cat("\n")
     }
 
-  if(x$sel==FALSE) cat("\nEQUATION 2: ") else cat("\nOUTCOME EQ.: ")
+  if(x$sel==FALSE) cat("\nEQUATION 2") else cat("\nOUTCOME EQ.")
+  if(x$gev.eq2==FALSE) cat("\nLink function: probit\n") else cat("\nLink function: gev\n") 
   print(x$formula2)
   cat("\n")
   cat("Parametric coefficients:\n")

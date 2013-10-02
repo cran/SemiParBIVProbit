@@ -1,46 +1,64 @@
-copgHs <- function(eta1,eta2,p1,p2,teta,teta.st,BivD,nC,nu){
+copgHs <- function(p1,p2,teta,teta.st,BivD,nC,nu){
 
 epsilon <- .Machine$double.eps*10^6
 
 if(BivD=="N"){
 
-c.copula.be1 <- pnorm( (eta2-teta*eta1)*(1/sqrt( pmax(10000*.Machine$double.eps, 1-teta^2) )) )
-c.copula.be2 <- pnorm( (eta1-teta*eta2)*(1/sqrt( pmax(10000*.Machine$double.eps, 1-teta^2) )) )
-c.copula.theta <- dnorm2(eta1,eta2, rho=teta)*(1/cosh(teta.st)^2) 
-
-c.copula2.be1 <- dnorm((eta2-teta*eta1)*(1/sqrt( pmax(10000*.Machine$double.eps, 1-teta^2) )))*-teta*(1/sqrt( pmax(10000*.Machine$double.eps, 1-teta^2) ))*sqrt(2*pi)/exp(-eta1^2/2)  
-
-c.copula2.be2 <- dnorm((eta1-teta*eta2)*(1/sqrt( pmax(10000*.Machine$double.eps, 1-teta^2) )))*-teta*(1/sqrt( pmax(10000*.Machine$double.eps, 1-teta^2) ))*sqrt(2*pi)/exp(-eta2^2/2)
+#c.copula.be1 <- pnorm( (eta2-teta*eta1)*(1/sqrt( pmax(10000*.Machine$double.eps, 1-teta^2) )) )
+#c.copula.be2 <- pnorm( (eta1-teta*eta2)*(1/sqrt( pmax(10000*.Machine$double.eps, 1-teta^2) )) )
+#c.copula.theta <- dbinorm(eta1,eta2, cov12=teta)*(1/cosh(teta.st)^2) 
 
 
-c.copula2.be1be2 <- (1/sqrt( pmax(10000*.Machine$double.eps, 1-teta^2) ))*exp( -(  teta^2*(eta1^2+eta2^2)-2*teta*eta1*eta2     )/(2*(1-teta^2))          )
+c.copula.be1 <- BiCopHfunc(p1, p2, family=1, par=teta)$hfunc1
+c.copula.be2 <- BiCopHfunc(p1, p2, family=1, par=teta)$hfunc2
+c.copula.theta <- dbinorm(qnorm(p1),qnorm(p2), cov12=teta)*(1/cosh(teta.st)^2) 
 
-c.copula2.be1th <- -(dnorm((eta2 - tanh(teta.st) * eta1)/sqrt(1 - tanh(teta.st)^2)) * 
-     (1/cosh(teta.st)^2 * eta1/sqrt(1 - tanh(teta.st)^2) - (eta2 - 
-         tanh(teta.st) * eta1) * (0.5 * (2 * (1/cosh(teta.st)^2 * 
+
+
+
+#c.copula2.be1 <- dnorm((eta2-teta*eta1)*(1/sqrt( pmax(10000*.Machine$double.eps, 1-teta^2) )))*-teta*(1/sqrt( pmax(10000*.Machine$double.eps, 1-teta^2) ))*sqrt(2*pi)/exp(-eta1^2/2)  
+#c.copula2.be2 <- dnorm((eta1-teta*eta2)*(1/sqrt( pmax(10000*.Machine$double.eps, 1-teta^2) )))*-teta*(1/sqrt( pmax(10000*.Machine$double.eps, 1-teta^2) ))*sqrt(2*pi)/exp(-eta2^2/2)
+
+
+
+c.copula2.be1 <- BiCopHfuncDeriv(p2, p1, 1, par=teta, deriv="u2")                
+c.copula2.be2 <- BiCopHfuncDeriv(p1, p2, 1, par=teta, deriv="u2")
+
+
+#c.copula2.be1be2 <- (1/sqrt( pmax(10000*.Machine$double.eps, 1-teta^2) ))*exp( -(  teta^2*(eta1^2+eta2^2)-2*teta*eta1*eta2     )/(2*(1-teta^2))  )
+
+
+c.copula2.be1be2 <- BiCopPDF(p1, p2, 1, par=teta)
+
+
+
+
+c.copula2.be1th <- -(dnorm((qnorm(p2) - tanh(teta.st) * qnorm(p1))/sqrt(1 - tanh(teta.st)^2)) * 
+     (1/cosh(teta.st)^2 * qnorm(p1)/sqrt(1 - tanh(teta.st)^2) - (qnorm(p2) - 
+         tanh(teta.st) * qnorm(p1)) * (0.5 * (2 * (1/cosh(teta.st)^2 * 
          tanh(teta.st)) * (1 - tanh(teta.st)^2)^-0.5))/sqrt(1 - 
          tanh(teta.st)^2)^2)) 
 
 
-c.copula2.be2th <- -(dnorm((eta1 - tanh(teta.st) * eta2)/sqrt(1 - tanh(teta.st)^2)) * 
-    (1/cosh(teta.st)^2 * eta2/sqrt(1 - tanh(teta.st)^2) - (eta1 - 
-        tanh(teta.st) * eta2) * (0.5 * (2 * (1/cosh(teta.st)^2 * 
+c.copula2.be2th <- -(dnorm((qnorm(p1) - tanh(teta.st) * qnorm(p2))/sqrt(1 - tanh(teta.st)^2)) * 
+    (1/cosh(teta.st)^2 * qnorm(p2)/sqrt(1 - tanh(teta.st)^2) - (qnorm(p1) - 
+        tanh(teta.st) * qnorm(p2)) * (0.5 * (2 * (1/cosh(teta.st)^2 * 
         tanh(teta.st)) * (1 - tanh(teta.st)^2)^-0.5))/sqrt(1 - 
         tanh(teta.st)^2)^2))
  
 
 bit1.th2 <- (2 * pi * (0.5 * (2 * (1/cosh(teta.st)^2 * tanh(teta.st)) * (1 - 
     tanh(teta.st)^2)^-0.5))/(2 * pi * sqrt(1 - tanh(teta.st)^2))^2 * 
-    exp(-1/(2 * (1 - tanh(teta.st)^2)) * (eta1^2 + eta2^2 - 2 * 
-        tanh(teta.st) * eta1 * eta2)) - 1/(2 * pi * sqrt(1 - 
+    exp(-1/(2 * (1 - tanh(teta.st)^2)) * (qnorm(p1)^2 + qnorm(p2)^2 - 2 * 
+        tanh(teta.st) * qnorm(p1) * qnorm(p2))) - 1/(2 * pi * sqrt(1 - 
     tanh(teta.st)^2)) * (exp(-1/(2 * (1 - tanh(teta.st)^2)) * 
-    (eta1^2 + eta2^2 - 2 * tanh(teta.st) * eta1 * eta2)) * (-1/(2 * 
-    (1 - tanh(teta.st)^2)) * (2 * (1/cosh(teta.st)^2) * eta1 * 
-    eta2) + 2 * (2 * (1/cosh(teta.st)^2 * tanh(teta.st)))/(2 * 
-    (1 - tanh(teta.st)^2))^2 * (eta1^2 + eta2^2 - 2 * tanh(teta.st) * 
-    eta1 * eta2))))/cosh(teta.st)^2 - 1/(2 * pi * sqrt(1 - tanh(teta.st)^2)) * 
-    exp(-1/(2 * (1 - tanh(teta.st)^2)) * (eta1^2 + eta2^2 - 2 * 
-        tanh(teta.st) * eta1 * eta2)) * 1 * (2 * (sinh(teta.st) * 
+    (qnorm(p1)^2 + qnorm(p2)^2 - 2 * tanh(teta.st) * qnorm(p1) * qnorm(p2))) * (-1/(2 * 
+    (1 - tanh(teta.st)^2)) * (2 * (1/cosh(teta.st)^2) * qnorm(p1) * 
+    qnorm(p2)) + 2 * (2 * (1/cosh(teta.st)^2 * tanh(teta.st)))/(2 * 
+    (1 - tanh(teta.st)^2))^2 * (qnorm(p1)^2 + qnorm(p2)^2 - 2 * tanh(teta.st) * 
+    qnorm(p1) * qnorm(p2)))))/cosh(teta.st)^2 - 1/(2 * pi * sqrt(1 - tanh(teta.st)^2)) * 
+    exp(-1/(2 * (1 - tanh(teta.st)^2)) * (qnorm(p1)^2 + qnorm(p2)^2 - 2 * 
+        tanh(teta.st) * qnorm(p1) * qnorm(p2))) * 1 * (2 * (sinh(teta.st) * 
     cosh(teta.st)))/(cosh(teta.st)^2)^2 
 
 

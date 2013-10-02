@@ -1,7 +1,7 @@
 \name{predict.SemiParBIVProbit}
 \alias{predict.SemiParBIVProbit}
 
-\title{Prediction from fitted SemiParBIVProbit model}
+\title{Prediction from a fitted SemiParBIVProbit model}
 
 \description{
 

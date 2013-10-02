@@ -1,9 +1,9 @@
-SemiParBIVProbit.fit <- function(func.opt, start.v, rinit, rmax, BivD, nu, nC, H.n, y1, y2, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, RE, RE.type, e.npRE, control.sp, gamma,
+SemiParBIVProbit.fit <- function(func.opt, start.v, rinit, rmax, BivD, nu, gev.eq1, gev.eq2, shape1, shape2, nC, H.n, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, RE, RE.type, e.npRE, control.sp, gamma,
                 X1.d2, X2.d2, pPen1=NULL, pPen2=NULL, sp=NULL, qu.mag=NULL, gp1, gp2, fp, aut.sp, l.sp1, l.sp2, pr.tolsp, weights, iterlimsp, 
                 fterm, mterm, iterlim, K=NULL, n=NULL, N=NULL, cuid=NULL, uidf=NULL, masses=NULL, NGQ=NULL, dat1all=NULL, dat2all=NULL, W=NULL){ 
 
 
-  fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, BivD=BivD, nu=nu, nC=nC, H.n=H.n, y1=y1, y2=y2, 
+  fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, BivD=BivD, nu=nu, gev.eq1=gev.eq1, gev.eq2=gev.eq2, shape1=shape1, shape2=shape2, nC=nC, H.n=H.n, 
                 y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,
                 X1=X1, X2=X2,  
                 X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, sp=sp, qu.mag=qu.mag, gp1=gp1, gp2=gp2, fp=fp, l.sp1=l.sp1, l.sp2=l.sp2, blather=TRUE, weights=weights, 
@@ -24,7 +24,7 @@ SemiParBIVProbit.fit <- function(func.opt, start.v, rinit, rmax, BivD, nu, nC, H
              coefo <- fit$argument
              spo <- sp    
   
-		 if(RE!=TRUE) wor.c <- try(working.comp(fit,X1,X2,X1.d2,X2.d2,n)) else wor.c <- try(working.compNP(fit,X1,X2,X1.d2,X2.d2,n,K)) 
+		 if(RE!=TRUE) wor.c <- try(working.comp(fit,X1,X2,X1.d2,X2.d2)) else wor.c <- try(working.compNP(fit,X1,X2,X1.d2,X2.d2,K)) 
                  if(class(wor.c)=="try-error") break
              
                 	bs.mgfit <- try(magic(y=wor.c$rW.Z,X=wor.c$rW.X,sp=sp,S = qu.mag$Ss,
@@ -36,19 +36,19 @@ SemiParBIVProbit.fit <- function(func.opt, start.v, rinit, rmax, BivD, nu, nC, H
              o.ests <- c(fit$argument)
             
                if(RE==TRUE && RE.type=="NP" && e.npRE==TRUE){
-		     up.ve <- extraiterNP(paramNP=o.ests, y1, y2, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, X1.d2, X2.d2, pPen1, pPen2, sp, qu.mag, gp1, gp2, fp, l.sp1, l.sp2, weights, 
+		     up.ve <- extraiterNP(paramNP=o.ests, BivD, nC, nu, gev.eq1, gev.eq2, shape1, shape2, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, X1.d2, X2.d2, pPen1, pPen2, sp, qu.mag, gp1, gp2, fp, l.sp1, l.sp2, weights, 
                 	                     K, n, N, cuid, uidf, masses, pr.tolsp, NGQ, dat1all, dat2all, W) 
                      fit$argument <- up.ve$paramNP; masses <- up.ve$masses
                              		     }
 
-             fit <- try(trust(func.opt, fit$argument, rinit=rinit, rmax=rmax, BivD=BivD, nu=nu, nC=nC, H.n=H.n, y1=y1, y2=y2, 
+             fit <- try(trust(func.opt, fit$argument, rinit=rinit, rmax=rmax, BivD=BivD, nu=nu, gev.eq1=gev.eq1, gev.eq2=gev.eq2, shape1=shape1, shape2=shape2, nC=nC, H.n=H.n, 
                               y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,   
                              X1=X1, X2=X2,  
                               X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, sp=sp, qu.mag=qu.mag, gp1=gp1, gp2=gp2, fp=fp, l.sp1=l.sp1, l.sp2=l.sp2, weights=weights, blather=TRUE, 
                               iterlim=1e+4, fterm=fterm, mterm=mterm, K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses,NGQ=NGQ, dat1all=dat1all, dat2all=dat2all, W=W),silent=TRUE)
 
               			if(class(fit)=="try-error"){ 
-              	 			fit  <- trust(func.opt, coefo, rinit=rinit, rmax=rmax, BivD=BivD, nu=nu, nC=nC, H.n=H.n, y1=y1, y2=y2, 
+              	 			fit  <- trust(func.opt, coefo, rinit=rinit, rmax=rmax, BivD=BivD, nu=nu, gev.eq1=gev.eq1, gev.eq2=gev.eq2, shape1=shape1, shape2=shape2, nC=nC, H.n=H.n,  
                                                       y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,
                                                       X1=X1, X2=X2,  
                 		              	      X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, sp=spo, qu.mag=qu.mag, gp1=gp1, gp2=gp2, 

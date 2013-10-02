@@ -34,11 +34,11 @@ LM.bpm(formula.eq1, formula.eq2, data, selection=FALSE, FI=FALSE)
 This Lagrange multiplier test (also known as score test) is used here for testing the null 
 hypothesis \eqn{\rho}{\rho=0} (i.e. no endogeneity or non-random sample selection, depending on the model being fitted). Its main advantage is that it does 
 not require an estimate of the model parameter vector under the alternative hypothesis. Asymptotically, it takes a Chi-squared distribution 
-with one degree of freedom. Full details can be found in Marra et al. (submitted).
+with one degree of freedom. Full details can be found in Marra et al. (in press).
 
 Note that, when \code{selection=FALSE} and \code{FI=TRUE}, a convenient simplification based on the result that 
-the Fisher information matrix becomes block diagonal is employed (Marra et al., submitted). Also, the current version of the Fisher information is
-not realiable for the sample selection and endogeneity cases.
+the Fisher information matrix becomes block diagonal is employed (Marra et al., in press). Also, the current version of the Fisher information is
+not adequate for the sample selection and endogeneity cases.
 
 
 
@@ -61,7 +61,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Marra G., Radice R. and Missiroli S. (submitted), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models.
+Marra G., Radice R. and Missiroli S. (in press), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}.
 
 
 }

@@ -40,7 +40,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 
 \keyword{semiparametric bivariate probit modelling} 
-
+\keyword{diagnostics} 
 
 
 

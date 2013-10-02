@@ -1,6 +1,6 @@
-export(AT,
+export(AT,adjCov,adjCovSD,gt.bpm,
 bprobgHs,copgHs,bprobgHsSS,
-bprobNP,bprobNRE,
+bprobgHs.NPRE,bprobgHs.NRE,
 EBNormal,
 extraiterNP,
 logLik.SemiParBIVProbit,
@@ -23,14 +23,17 @@ summary.SemiParBIVProbit,
 working.comp,
 working.compNP)
 
-
-import(trust)
 importFrom(MASS, ginv)
 importFrom(magic, adiag)
 importFrom(statmod, gauss.quad)
 importFrom(polycor, polychor)
+importFrom(survey, svyrecvar, twophasevar, twophase2var, svyCprod)
+importFrom(trust,trust)
+importFrom(mvtnorm,rmvnorm)
+importFrom(VGAM,pbinorm,dbinorm,pgev,dgev)
 importFrom(VineCopula, BiCopHfuncDeriv)
-
+importFrom(CDVine,BiCopCDF,BiCopPar2Tau)
+importFrom(mgcv)
 
 S3method(plot, SemiParBIVProbit)
 S3method(summary, SemiParBIVProbit)
