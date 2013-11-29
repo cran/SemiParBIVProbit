@@ -1,5 +1,8 @@
-export(AT,adjCov,adjCovSD,gt.bpm,
-bprobgHs,copgHs,bprobgHsSS,
+export(AT,est.prev,adjCov,adjCovSD,gt.bpm,
+bprobgHs,bprobgHsBB,
+bprobgHsPL,
+copgHs,copgHsBB,
+bprobgHsSS,bprobgHsSSBB,bprobgHsSSPL,
 bprobgHs.NPRE,bprobgHs.NRE,
 EBNormal,
 extraiterNP,
@@ -9,7 +12,7 @@ VuongClarke.bcm,
 NP.qu,
 plot.SemiParBIVProbit,
 predict.SemiParBIVProbit,
-print.AT,
+print.AT,print.est.prev,
 print.SemiParBIVProbit,
 print.summary.SemiParBIVProbit,
 residuals.SemiParBIVProbit,
@@ -34,6 +37,7 @@ importFrom(VGAM,pbinorm,dbinorm,pgev,dgev)
 importFrom(VineCopula, BiCopHfuncDeriv)
 importFrom(CDVine,BiCopCDF,BiCopPar2Tau)
 importFrom(mgcv)
+importFrom(matrixStats,rowVars)
 
 S3method(plot, SemiParBIVProbit)
 S3method(summary, SemiParBIVProbit)

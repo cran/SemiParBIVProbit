@@ -1,4 +1,4 @@
-NP.qu <- function(SemiParFit, BivD, nC, nu, gev.eq1, gev.eq2, shape1, shape2, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, X1.d2, X2.d2, pPen1=NULL, pPen2=NULL, qu.mag=NULL, gp1, gp2, 
+NP.qu <- function(SemiParFit, BivD, nC, nu, xi1, xi2, PL, eqPL, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, X1.d2, X2.d2, pPen1=NULL, pPen2=NULL, qu.mag=NULL, gp1, gp2, 
                     fp, l.sp1, l.sp2, weights, K, n, N, cuid, uidf, NGQ=NULL, dat1all=NULL, dat2all=NULL, W=NULL){
                             
   params <- SemiParFit$fit$argument   
@@ -25,20 +25,8 @@ NP.qu <- function(SemiParFit, BivD, nC, nu, gev.eq1, gev.eq2, shape1, shape2, y1
   eta1 <- X1(u)%*%params[1:(X1.d2+K)]
   eta2 <- X2(u)%*%params[(X1.d2+K+1):(X1.d2+X2.d2+2*K)]
   
-
-if(gev.eq1==FALSE && gev.eq2==TRUE) {p1 <- pnorm(eta1); d.n1 <- dnorm(eta1)
-                                       p2 <- 1-pgev(-eta2,shape=shape2); d.n2 <- dgev(-eta2,shape=shape2)}   
-
-  if(gev.eq1==TRUE && gev.eq2==FALSE) {p1 <- 1-pgev(-eta1,shape=shape1); d.n1 <- dgev(-eta1,shape=shape1)
-                                       p2 <- pnorm(eta2); d.n2 <- dnorm(eta2)}
-
-
-  if(gev.eq1==TRUE && gev.eq2==TRUE) {p1 <- 1-pgev(-eta1,shape=shape1); d.n1 <- dgev(-eta1,shape=shape1)
-                                      p2 <- 1-pgev(-eta2,shape=shape2); d.n2 <- dgev(-eta2,shape=shape2)}
-
-
-  if(gev.eq1==FALSE && gev.eq2==FALSE) { p1 <- pnorm(eta1); d.n1 <- dnorm(eta1)
-                                         p2 <- pnorm(eta2); d.n2 <- dnorm(eta2) } 
+p1 <- pnorm(eta1); d.n1 <- dnorm(eta1)
+p2 <- pnorm(eta2); d.n2 <- dnorm(eta2)  
 
   criteria <- c(0,1)
   no.good <- apply(apply(cbind(p1,p2), c(1,2), `%in%`, criteria), 1, any)
@@ -68,7 +56,7 @@ if(gev.eq1==FALSE && gev.eq2==TRUE) {p1 <- pnorm(eta1); d.n1 <- dnorm(eta1)
   l.par[,u] <- weights*( y1.y2*log(p11)+y1.cy2*log(p10)+cy1.y2*log(p01)+cy1.cy2*log(p00) )
   
   
-  dH <- copgHs(p1,p2,teta,teta.st,BivD,nC,nu)
+  dH <- copgHs(p1,p2,eta1=NULL,eta2=NULL,teta,teta.st,xi1=NULL,xi1.st=NULL,xi2=NULL,xi2.st=NULL,BivD,nC,nu,PL,eqPL)
   
   
   c.copula.be1   <- dH$c.copula.be1
@@ -79,7 +67,7 @@ c.copula2.be1 <- dH$c.copula2.be1
 c.copula2.be2 <- dH$c.copula2.be2 
 
 
-if(gev.eq1==FALSE && gev.eq2==FALSE){
+
 
 bit1.b1b1 <- c.copula2.be1*(d.n1)^2-c.copula.be1*d.n1*eta1
 bit2.b1b1 <- -d.n1*eta1-bit1.b1b1
@@ -90,78 +78,6 @@ bit1.b2b2 <- c.copula2.be2*(d.n2)^2-c.copula.be2*d.n2*eta2
 bit2.b2b2 <- -bit1.b2b2
 bit3.b2b2 <- -d.n2*eta2-bit1.b2b2
 bit4.b2b2 <- -bit3.b2b2
-
-}
-
-if(gev.eq1==FALSE && gev.eq2==TRUE){
-
-bit1.b1b1 <- c.copula2.be1*(d.n1)^2-c.copula.be1*d.n1*eta1
-bit2.b1b1 <- -d.n1*eta1-bit1.b1b1
-bit3.b1b1 <- -bit1.b1b1
-bit4.b1b1 <- -bit2.b1b1
-
-
-d1_d.n2 <- (1 + shape2 * (-eta2))^(-1/shape2 - 1) * (exp(-(1 + shape2 * (-eta2))^(-1/shape2)) * 
-    ((1 + shape2 * (-eta2))^((-1/shape2) - 1) * ((-1/shape2) * shape2))) - (1 + 
-    shape2 * (-eta2))^((-1/shape2 - 1) - 1) * ((-1/shape2 - 1) * shape2) * exp(-(1 + 
-    shape2 * (-eta2))^(-1/shape2))
-
-bit1.b2b2 <- c.copula2.be2*(d.n2)^2+c.copula.be2*d1_d.n2
-bit2.b2b2 <- -bit1.b2b2
-bit3.b2b2 <- d1_d.n2-bit1.b2b2
-bit4.b2b2 <- -bit3.b2b2
-
-
-}
-
-
-if(gev.eq1==TRUE && gev.eq2==FALSE){
-
-
-
-d1_d.n1 <- (1 + shape1 * (-eta1))^(-1/shape1 - 1) * (exp(-(1 + shape1 * (-eta1))^(-1/shape1)) * 
-    ((1 + shape1 * (-eta1))^((-1/shape1) - 1) * ((-1/shape1) * shape1))) - (1 + 
-    shape1 * (-eta1))^((-1/shape1 - 1) - 1) * ((-1/shape1 - 1) * shape1) * exp(-(1 + 
-    shape1 * (-eta1))^(-1/shape1))
-
-bit1.b1b1 <- c.copula2.be1*(d.n1)^2+c.copula.be1*d1_d.n1 
-bit2.b1b1 <- d1_d.n1-bit1.b1b1 
-bit3.b1b1 <- -bit1.b1b1
-bit4.b1b1 <- -bit2.b1b1
-
-
-bit1.b2b2 <- c.copula2.be2*(d.n2)^2-c.copula.be2*d.n2*eta2 
-bit2.b2b2 <- -bit1.b2b2 
-bit3.b2b2 <- -d.n2*eta2-bit1.b2b2
-bit4.b2b2 <- -bit3.b2b2
-
-
-}
-
-if(gev.eq1==TRUE && gev.eq2==TRUE){
-
-d1_d.n1 <- (1 + shape1 * (-eta1))^(-1/shape1 - 1) * (exp(-(1 + shape1 * (-eta1))^(-1/shape1)) * 
-    ((1 + shape1 * (-eta1))^((-1/shape1) - 1) * ((-1/shape1) * shape1))) - (1 + 
-    shape1 * (-eta1))^((-1/shape1 - 1) - 1) * ((-1/shape1 - 1) * shape1) * exp(-(1 + 
-    shape1 * (-eta1))^(-1/shape1))
-
-bit1.b1b1 <- c.copula2.be1*(d.n1)^2+c.copula.be1*d1_d.n1 
-bit2.b1b1 <- d1_d.n1-bit1.b1b1 
-bit3.b1b1 <- -bit1.b1b1
-bit4.b1b1 <- -bit2.b1b1
-
-
-d1_d.n2 <- (1 + shape2 * (-eta2))^(-1/shape2 - 1) * (exp(-(1 + shape2 * (-eta2))^(-1/shape2)) * 
-    ((1 + shape2 * (-eta2))^((-1/shape2) - 1) * ((-1/shape2) * shape2))) - (1 + 
-    shape2 * (-eta2))^((-1/shape2 - 1) - 1) * ((-1/shape2 - 1) * shape2) * exp(-(1 + 
-    shape2 * (-eta2))^(-1/shape2))
-
-bit1.b2b2 <- c.copula2.be2*(d.n2)^2+c.copula.be2*d1_d.n2
-bit2.b2b2 <- -bit1.b2b2
-bit3.b2b2 <- d1_d.n2-bit1.b2b2
-bit4.b2b2 <- -bit3.b2b2
-
-}
 
 
   
@@ -313,7 +229,7 @@ if( ( l.sp1==0 && l.sp2==0 ) || fp==TRUE) S.h <- S.h1 <- S.h2 <- 0
     if(length(pPen2)!=0){ 
                           indP2 <- (qu.mag$off[l.sp1+1]-X1.d2):(-X1.d2+qu.mag$off[l.sp1+1]+qu.mag$rank[l.sp1+1]-1)
                           dimP2 <- length(indP2)
-                          ma2[indP2,indP2] <- S[indP2+X1.d2,indP2+X1.d2]
+                          ma2[indP2,indP2] <- S[(dimP1+1):(length(indP2)+dimP1),(dimP1+1):(length(indP2)+dimP1)]
                                 }                                 
     
     lP1 <- length(pPen1); lP2 <- length(pPen2) 

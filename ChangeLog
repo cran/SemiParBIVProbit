@@ -1,3 +1,7 @@
+version 3.2-9
+- power probit and reciprocal power probit links.
+- function to estimate adjusted prevalence from a sample selection model.
+
 version 3.2-8
 - gradient test for the hypothesis of exogeneity (or absence of endogeneity).
 - post estimation function for sandwich adjustment of the covariance matrix.

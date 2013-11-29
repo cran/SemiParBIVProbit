@@ -15,6 +15,26 @@ print.SemiParBIVProbit <- function(x,...){
   if(x$BivD=="G90")  cop <- "BIVARIATE ROTATED GUMBEL COPULA (90 DEGREES)"
   if(x$BivD=="G180") cop <- "BIVARIATE SURVIVAL GUMBEL COPULA"
   if(x$BivD=="G270") cop <- "BIVARIATE ROTATED GUMBEL COPULA (270 DEGREES)"   
+  
+  if(x$BivD=="BB1.0")   cop <- "BIVARIATE CLAYTON-GUMBEL COPULA" 
+  if(x$BivD=="BB1.90")  cop <- "BIVARIATE ROTATED CLAYTON-GUMBEL COPULA (90 DEGREES)"  
+  if(x$BivD=="BB1.180") cop <- "BIVARIATE ROTATED CLAYTON-GUMBEL COPULA (180 DEGREES)"  
+  if(x$BivD=="BB1.270") cop <- "BIVARIATE ROTATED CLAYTON-GUMBEL COPULA (270 DEGREES)"  
+  
+  if(x$BivD=="BB6.0")   cop <- "BIVARIATE JOE-GUMBEL COPULA" 
+  if(x$BivD=="BB6.90")  cop <- "BIVARIATE ROTATED JOE-GUMBEL COPULA (90 DEGREES)"  
+  if(x$BivD=="BB6.180") cop <- "BIVARIATE ROTATED JOE-GUMBEL COPULA (180 DEGREES)"  
+  if(x$BivD=="BB6.270") cop <- "BIVARIATE ROTATED JOE-GUMBEL COPULA (270 DEGREES)"  
+  
+  if(x$BivD=="BB7.0")   cop <- "BIVARIATE JOE-GUMBEL COPULA" 
+  if(x$BivD=="BB7.90")  cop <- "BIVARIATE ROTATED JOE-CLAYTON COPULA (90 DEGREES)"  
+  if(x$BivD=="BB7.180") cop <- "BIVARIATE ROTATED JOE-CLAYTON COPULA (180 DEGREES)"  
+  if(x$BivD=="BB7.270") cop <- "BIVARIATE ROTATED JOE-CLAYTON COPULA (270 DEGREES)"  
+  
+  if(x$BivD=="BB8.0")   cop <- "BIVARIATE JOE-FRANK COPULA" 
+  if(x$BivD=="BB8.90")  cop <- "BIVARIATE ROTATED JOE-FRANK COPULA (90 DEGREES)"  
+  if(x$BivD=="BB8.180") cop <- "BIVARIATE ROTATED JOE-FRANK COPULA (180 DEGREES)"  
+  if(x$BivD=="BB8.270") cop <- "BIVARIATE ROTATED JOE-FRANK COPULA (270 DEGREES)"  
 
   if(x$BivD %in% c("N","T") ) {cp <- "  rho = "; as.p <- x$rho} else{ cp <- "  theta = "; as.p <- x$theta}
 
@@ -24,34 +44,41 @@ print.SemiParBIVProbit <- function(x,...){
   if(x$RE==TRUE) cat("\n",re,sep ="")  
 
   cat("\n\nEQUATION 1")
-  if(x$gev.eq1==FALSE) cat("\nLink function: probit\n") else cat("\nLink function: gev\n")
+  if(x$PL=="P") cat("\nLink function: probit\n")
+
+  if(x$PL!="P"){ 
+    if(x$xi1==1) cat("\nLink function: probit\n") else{ 
+  if(x$PL=="PP") cat("\nLink function: power probit\n") 
+  if(x$PL=="RPP") cat("\nLink function: reciprocal power probit\n") }
+  }
+
+
   print(x$gam1$formula)
 
   cat("\nEQUATION 2")
-  if(x$gev.eq2==FALSE) cat("\nLink function: probit\n") else cat("\nLink function: gev\n")
+  if(x$PL=="P") cat("\nLink function: probit\n")
+  if(x$PL!="P"){ 
+    if(x$xi2==1) cat("\nLink function: probit\n") else{  
+  if(x$PL=="PP") cat("\nLink function: power probit\n") 
+  if(x$PL=="RPP") cat("\nLink function: reciprocal power probit\n") }
+}
   print(x$gam2$formula)
   cat("\n")
 
-  if(x$sel==FALSE) cat("n = ",x$n,cp,format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="") else cat("n = ",x$n,"  n.sel = ",x$n.sel,cp,format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
+  del <- ""
+
+  if(x$BivD %in% c("BB1.0","BB1.180","BB1.90","BB1.270",
+                   "BB6.0","BB6.180","BB6.90","BB6.270",
+                   "BB7.0","BB7.180","BB7.90","BB7.270",
+                   "BB8.0","BB8.180","BB8.90","BB8.270") ) del <- paste("  delta = ",format(x$delta, digits=3)) 
+                   
+  if(x$sel==FALSE) cat("n = ",x$n,cp,format(as.p, digits=3),del,"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
+  
+  if(x$sel==TRUE)  cat("n = ",x$n,"  n.sel = ",x$n.sel,cp,format(as.p, digits=3),del,"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
+  
+  
 
 invisible(x)
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

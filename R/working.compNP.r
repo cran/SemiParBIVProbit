@@ -1,7 +1,7 @@
 working.compNP <- function(x,X1=X1,X2=X2,X1.d2=X1.d2,X2.d2=X2.d2,K=NULL){
 
   good <- x$good
-  n <- length(good)
+  n <- sum(as.numeric(good==TRUE))
   X <- rW.X <- matrix(0,2*n,(X1.d2+X2.d2+2*K))
   D <- rW.Z <- matrix(0,2*n,1)
   e.par     <- x$argument

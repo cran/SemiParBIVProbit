@@ -1,9 +1,18 @@
 working.comp <- function(x,X1=X1,X2=X2,X1.d2=X1.d2,X2.d2=X2.d2){
 
   e.par <- x$argument
-  e.par <- e.par[-length(e.par)]
+  ll <- length(e.par) 
+  
+  #if(x$PL != "P") { if(x$eqPL=="both") ll <- (ll-2):ll else ll <- (ll-1):ll  } 
+  
+  if(x$BivD %in% c("BB1.0","BB1.180","BB1.90","BB1.270",
+                   "BB6.0","BB6.180","BB6.90","BB6.270",
+                   "BB7.0","BB7.180","BB7.90","BB7.270",
+                   "BB8.0","BB8.180","BB8.90","BB8.270") ) ll <- (ll-1):ll
+ 
+  e.par <- e.par[-c(ll)]
   good <- x$good
-  n <- length(good)
+  n <- sum(as.numeric(good==TRUE))
   X <- rW.X <- matrix(0,2*n,(X1.d2+X2.d2))
   D <- rW.Z <- matrix(0,2*n,1)
   j <- 1

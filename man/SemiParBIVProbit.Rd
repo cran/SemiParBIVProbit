@@ -5,7 +5,8 @@
 
 \description{ 
 \code{SemiParBIVProbit} can be used to fit bivariate probit models where the linear predictors can be flexibly specified using parametric and 
-regression spline components, and parametric or nonparametric random effects. The use of several bivariate copula distributions is supported. During the model fitting process, the possible presence of 
+regression spline components, and parametric or nonparametric random effects. The use of several 
+bivariate copula distributions and of asymmetric link functions is supported. During the model fitting process, the possible presence of 
 correlated error equations, endogeneity or non-random sample selection is accounted for. Regression 
 spline bases are extracted from the package \code{mgcv}. Multi-dimensional smooths are available 
 via the use of penalized thin plate regression splines (isotropic). The current implementation does not support scale invariant tensor 
@@ -17,8 +18,7 @@ product smooths.
 
 \usage{
 SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), weights=NULL,  
-                 start.v=NULL, BivD="N", nu=3, 
-                 gev.eq1=FALSE, gev.eq2=FALSE, shape1=0.25, shape2=0.25,
+                 start.v=NULL, BivD="N", nu=3, PL="P", eqPL="both", xi1=1, xi2=1,
                  selection=FALSE, H.n=TRUE, 
                  gamma=1, aut.sp=TRUE, fp=FALSE, RE=FALSE, RE.type="N", 
                  NGQ=10, K=2, id=NULL, e.npRE=TRUE, pPen1 = NULL, pPen2 = NULL, 
@@ -50,13 +50,18 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), weights=NULL,
 \item{BivD}{Type of bivariate error distribution employed. Possible choices are "N", "C0", "C90", "C180", "C270", "J0", "J90", "J180", "J270", 
             "G0", "G90", "G180", "G270", "F", "T" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
-             Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Student-t.} 
+             Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Student-t.
+             Archimedean copulas with two parameters are also implemented; these are the Clayton-Gumbel and its rotated 
+             versions ("BB1.0","BB1.90","BB1.180","BB1.270"), Joe-Gumbel ("BB6.0","BB6.90","BB6.180","BB6.270"), 
+             Joe-Clayton ("BB7.0","BB7.90","BB7.180","BB7.270") and Joe-Frank ("BB8.0","BB8.90","BB8.180","BB8.270").} 
 
 \item{nu}{Degrees of freedom for Student-t.}
 
-\item{gev.eq1,gev.eq2}{They indicate whether a GEV link function should be employed.}
+\item{PL}{Power link function to be employed. Possible choices are "P" (classic probit), "PP" (power probit) and "RPP" (reciprocal power probit).}
 
-\item{shape1,shape2}{Shape parameters of the GEV distribution for the two equations.}
+\item{eqPL}{Equation(s) on which the power link function approach should be applied. Possible choices are "both", "first" and "second".}
+
+\item{xi1,xi2}{Power or shape parameters of the link functions of the two equations if a power link approach is used.}
 
 \item{selection}{If \code{TRUE}, then the numerical routine for bivariate probit modelling in the presence of non-random sample selection is employed.}
 
@@ -136,7 +141,8 @@ convergence. Details of the underlying fitting methods are given in Radice, Marr
 were based on the algorithms detailed in Marra and Radice (2011, 2013). 
 
 The use of parametric and nonparametric random effects is allowed for via the option \code{RE}. The nonparametric case
-is illustrated in Example 4 (Marra et al., in press), whereas the parametric one, in Example 5, will be completed soon. 
+is illustrated in Example 4 (Marra et al., in press), whereas the parametric one, in Example 5, will be completed soon. Asymmetric link functions
+are also available; see Marra and Radice (submitted) for details.
 
 }
 
@@ -165,6 +171,8 @@ Journal of Statistics}, 39(2), 259-279.
 
 Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, 7, 1432-1455.
 
+Marra G. and Radice R. (submitted), On the Use of Asymmetric Link Functions in Copula Regression Spline Models for Bivariate Binary Responses.
+
 Marra G., Radice R. and Missiroli S. (in press), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}.
 
 Marra G., Radice R. and Filippou P. (submitted), Testing the Hypothesis of Exogeneity in Regression Spline Bivariate Probit Models.
@@ -189,7 +197,7 @@ parameters to the values obtained from the non-converged algorithm. The default 
 } 
 
 \seealso{
-\code{\link{AT}}, \code{\link{LM.bpm}}, \code{\link{VuongClarke.bcm}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{sem.checks}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}, \code{\link{residuals.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{est.prev}}, \code{\link{LM.bpm}}, \code{\link{VuongClarke.bcm}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{sem.checks}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}, \code{\link{residuals.SemiParBIVProbit}}
 }
 
 \examples{
@@ -428,42 +436,8 @@ summary(out)
 summary(out$gam2)
 
 ## corrected predicted probability that 'yo' is equal to 1
-## ob.pr   is the observed proportion of 1's
-## pred.pr is the mean predicted probability of observing 1, 
-##                       for the sample of non-respondents 
 
-## simulate from posterior to obtain standard 
-## deviation for pred.pr (this is similar to a parametric 
-## bootstrap procedure)
-
-  pr.prS    <- NA
-  eta1Sim   <- out$eta1S
-  eta2Sim   <- out$eta2S 
-  athrhoSim <- out$ass.pS
-
-for(i in 1:dim(eta1Sim)[2]){
-
-  p0  <- pnorm(-eta1Sim[,i]) 
-  p01 <- pbinorm(-eta1Sim[,i],eta2Sim[,i],cov12=-tanh(athrhoSim[i]))
-  pr.prS[i] <- mean( (p01/p0)[out$y1==0] )
-
-}
-  
-  pred.pr <- mean( (out$p01/out$p0)[out$y1==0] )
-  var.prS <- var(pr.prS)
-  ob.pr   <- mean( out$y2[out$y1==1] ) 
-  var.ob  <- (ob.pr*(1-ob.pr))/out$n.sel
-  we      <- c( out$n.sel,(out$n-out$n.sel) )/out$n
- 
-  wm <- ob.pr*we[1] + pred.pr*we[2]
-  sv <- sqrt(var.ob*we[1]^2 + var.prS*we[2]^2)
-
-  qz <- qnorm(0.05/2, lower.tail = FALSE)
-  lb <- wm - qz*sv # lower bound
-  ub <- wm + qz*sv # upper bound 
-
-  round(c(lb,wm,ub),2)
-
+est.prev(out)
 
 ## estimated smooth function plots
 ## the red line is the true curve
@@ -486,35 +460,7 @@ outC <- SemiParBIVProbit(ys ~ bi + s(x1) + s(x2),
                          data=dataSim, selection=TRUE, BivD="C0")
 sem.checks(outC)
 summary(outC)
-
-  pr.prS    <- NA
-  eta1Sim   <- outC$eta1S
-  eta2Sim   <- outC$eta2S 
-  s.thetSim <- outC$ass.pS
-
-for(i in 1:dim(eta1Sim)[2]){
-
-  p0  <- pnorm(-eta1Sim[,i]) 
-  p01 <- pnorm(eta2Sim[,i]) - BiCopCDF(pnorm(eta1Sim[,i]),pnorm(eta2Sim[,i]), 
-                                       outC$nC, par=exp(s.thetSim[i]))
-  pr.prS[i] <- mean( (p01/p0)[out$y1==0] )
-
-}
-  
-  pred.pr <- mean( (outC$p01/outC$p0)[outC$y1==0] )
-  var.prS <- var(pr.prS)
-  ob.pr   <- mean( outC$y2[outC$y1==1] ) 
-  var.ob  <- (ob.pr*(1-ob.pr))/outC$n.sel
-  we      <- c( outC$n.sel,(outC$n-outC$n.sel) )/outC$n
- 
-  wm <- ob.pr*we[1] + pred.pr*we[2]
-  sv <- sqrt(var.ob*we[1]^2 + var.prS*we[2]^2)
-
-  qz <- qnorm(0.05/2, lower.tail = FALSE)
-  lb <- wm - qz*sv # lower bound
-  ub <- wm + qz*sv # upper bound 
-
-  round(c(lb,wm,ub),2)
+est.prev(outC)
 
 #
 #
@@ -522,8 +468,7 @@ for(i in 1:dim(eta1Sim)[2]){
 ############
 ## EXAMPLE 4
 ############
-## Generate data with one endogenous variable, exclusion restriction
-## and subject specific features 
+## Generate data with subject specific features 
 
 set.seed(0)
 
@@ -561,19 +506,18 @@ f2 <- function(x) 1.8*(0.25*exp(x) - x^3)
 f1.x2 <- f1(x2) - mean(f1(x2)) 
 f2.x2 <- f2(x2) - mean(f2(x2))  
 
-y1 <- ifelse(u[,1] +        -0.75*x1 + f1.x2 + x3 + eps[,1] > 0, 1, 0)
-y2 <- ifelse(u[,2] +  -1.5*y1 + 1*x1 + f2.x2      + eps[,2] > 0, 1, 0)
+y1 <- ifelse(u[,1] - 0.75*x1 + f1.x2 + x3 + eps[,1] > 0, 1, 0)
+y2 <- ifelse(u[,2] + 1*x1    + f2.x2      + eps[,2] > 0, 1, 0)
 
 dataSim <- data.frame(id,y1,y2,x1,x2,x3)
 
 
-out <- SemiParBIVProbit(y1 ~      x1 + s(x2) + x3,
-                        y2 ~ y1 + x1 + s(x2), 
+out <- SemiParBIVProbit(y1 ~ x1 + s(x2) + x3,
+                        y2 ~ x1 + s(x2), 
                         data=dataSim, RE=TRUE, RE.type="NP",
                         K=3, id=dataSim$id)
 
 summary(out)
-AT(out,eq=2,nm.bin="y1")
 
 x2s <- sort(x2)
 f1.x2 <- f1.x2[order(x2)]
@@ -631,12 +575,12 @@ x3 <- runif(n)
 # responses
 
 y1 <- ifelse(-1.15 + 2*x1 - x2 + x3 + u1 + eps[,1] > 0, 1, 0)
-y2 <- ifelse(1.55 - 1.5*y1 - 1.5*x1 + 1.1*x2 + 0.5*x3 + u2 + eps[,2] > 0, 1, 0)
+y2 <- ifelse(1.55 - 1.5*x1 + 1.1*x2 + 0.5*x3 + u2 + eps[,2] > 0, 1, 0)
 
 dataSim <- data.frame(id,y1,y2,x1,x2,x3)
 
 out <- SemiParBIVProbit(y1 ~ x1 + x2 + x3,
-                        y2 ~ y1 + x1 + x2 + x3, 
+                        y2 ~ x1 + x2 + x3, 
                         data=dataSim, RE=TRUE, RE.type="N",
                         id=dataSim$id)
 sem.checks(out)
@@ -648,7 +592,7 @@ summary(out)
 #
 }
 
-
+\keyword{asymmetric link function}
 \keyword{non-random sample selection}
 \keyword{semiparametric bivariate probit modelling} 
 \keyword{bivariate probit model} 

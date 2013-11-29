@@ -1,6 +1,6 @@
 gt.bpm <- function(object) {
 
-if(object$BivD!="N") stop("This test's implementation is valid for bivariate normal models only.")
+if(object$BivD!="N" || object$PL!="P") stop("This test's implementation is valid for bivariate probit models only.")
 
 corr <- 0
 

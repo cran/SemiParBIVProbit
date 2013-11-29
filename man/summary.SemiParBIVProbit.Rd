@@ -63,16 +63,19 @@ For details on all model summaries see Radice, Marra and Wojtys (submitted).
 \item{n}{Sample size.}
 \item{rho}{Estimated correlation parameter between the two equations.} 
 \item{theta}{Estimated copula parameter linking the two equations.}
+\item{delta}{Estimate of the additional association parameter if a two-parameter copula is employed.}
 \item{KeT}{Estimated Kendall's tau coefficient between the two equations.}
 \item{formula1,formula2}{Formulas used for equations 1 and 2.}
 \item{l.sc1,l.sc2}{Number of smooth components in equations 1 and 2.}
 \item{t.edf}{Total degrees of freedom of the estimated bivariate probit model.}
 \item{CIrs}{`Confidence' intervals for either \eqn{\rho}{\rho} or \eqn{\theta}{\theta}, depending of the model fitted.}
 \item{CIkt}{`Confidence' intervals for Kendall's tau.}
+\item{CId}{`Confidence' intervals for the additional association parameter if a two-parameter copula is employed.}
 \item{sel}{This is used for internal calculations.}
 \item{n.sel}{Number of selected observations in the sample selection case.}
 \item{RE,RE.type,BivD}{These are used for internal calculations.}
-\item{nu,gev.eq1,gev.eq2}{These are used for internal calculations.}
+\item{nu,PL}{These are used for internal calculations.}
+\item{xi1,xi2}{Power or shape parameters of the link functions of the two equations if a power link approach is used.}
 \item{masses}{If \code{RE=TRUE} and \code{RE.type="NP"}, then it returns the probabilities associated with the biavariate mass points.}
 \item{table.RE}{If \code{RE=TRUE} then it returns a table representing the estimated parameters for the employed random effect distribution. For bivariate normal random effects, the parameters of the 
               distribution are reported on their original scale and standard errors calculated using the delta method.}
@@ -83,6 +86,8 @@ For details on all model summaries see Radice, Marra and Wojtys (submitted).
 \item{P1,P2}{Marginal probabilities for the two binary outcomes y1=1 and y2=1.}
 \item{QPS1,QPS2}{Quadratic probability scores for the two binary responses as suggested by Diebold and Rudebusch (1989). Values are on the interval [0,2], with 0 indicating a perfect fit.}
 \item{CR1,CR2}{Correct prediction ratios for the two binary responses as percentage.}
+\item{good}{Indicator variable indicating the observations actually used in model fitting.}
+
 
 }
 
@@ -112,7 +117,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 
 \seealso{
-\code{\link{AT}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{est.prev}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
 }
 
 \examples{
