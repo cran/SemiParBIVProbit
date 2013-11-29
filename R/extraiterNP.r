@@ -1,9 +1,9 @@
-extraiterNP <- function(paramNP, BivD, nC, nu,  gev.eq1, gev.eq2, shape1, shape2, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, X1.d2, X2.d2, pPen1, pPen2, sp, qu.mag=NULL, gp1, gp2, fp, l.sp1, l.sp2, weights, 
+extraiterNP <- function(paramNP, BivD, nC, nu, xi1, xi2, PL, eqPL, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, X1.d2, X2.d2, pPen1, pPen2, sp, qu.mag=NULL, gp1, gp2, fp, l.sp1, l.sp2, weights, 
                          K, n, N, cuid, uidf, masses, pr.tolsp, NGQ=NULL, dat1all=NULL, dat2all=NULL, W=NULL){
           
         nsv <- names(paramNP); count.npRE <- 0   
                    
-        T.sv <- bprobgHs.NPRE(paramNP, BivD=BivD, nC=nC, nu=nu, gev.eq1=gev.eq1, gev.eq2=gev.eq2, shape1=shape1, shape2=shape2, 
+        T.sv <- bprobgHs.NPRE(paramNP, BivD=BivD, nC=nC, nu=nu, xi1=xi1, xi2=xi2, PL=PL, eqPL=eqPL,  
                          y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,
                          X1=X1, X2=X2,  
                          X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, sp=sp, 
@@ -16,7 +16,7 @@ extraiterNP <- function(paramNP, BivD, nC, nu,  gev.eq1, gev.eq2, shape1, shape2
             	starm.v <- paramNP 
 	    	paramNP <- paramNP - ginv(T.sv$hessian)%*%T.sv$gradient 
 	    	masses <- T.sv$masses; count.npRE <- count.npRE + 1
-	    	T.sv <- bprobgHs.NPRE(paramNP, BivD=BivD, nC=nC, nu=nu, gev.eq1=gev.eq1, gev.eq2=gev.eq2, shape1=shape1, shape2=shape2, 
+	    	T.sv <- bprobgHs.NPRE(paramNP, BivD=BivD, nC=nC, nu=nu, xi1=xi1, xi2=xi2, PL=PL, eqPL=eqPL, 
                                 y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,
                                      X1=X1, X2=X2,  
                 	             X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, sp=sp, 

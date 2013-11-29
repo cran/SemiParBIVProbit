@@ -2,6 +2,8 @@ sem.checks <- function(x){
 
 e.v <- eigen(x$He)$values
 
+n.drop <- x$n-sum(as.numeric(x$good==TRUE))
+
 cat("\nLargest absolute gradient value:",max(abs(x$fit$gradient)))
 
 if(x$H.n==TRUE) mv <- "Observed" else mv <- "Expected" 
@@ -15,5 +17,8 @@ cat("\nTrust region iterations before smoothing parameter selection:",x$iter.if)
 cat("\nLoops for smoothing parameter selection:",x$iter.sp)
 cat("\nTrust region iterations within smoothing parameter selection loops:",x$iter.inner,"\n\n")}
                         else{cat("\nTrust region iterations:",x$iter.if,"\n\n")}
+
+if(n.drop > 0) cat("Number of observations dropped during fitting:",n.drop,"\n\n")
+
 
 }

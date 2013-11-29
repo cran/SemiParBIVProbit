@@ -1,9 +1,9 @@
-SemiParBIVProbit.fit <- function(func.opt, start.v, rinit, rmax, BivD, nu, gev.eq1, gev.eq2, shape1, shape2, nC, H.n, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, RE, RE.type, e.npRE, control.sp, gamma,
+SemiParBIVProbit.fit <- function(func.opt, start.v, rinit, rmax, BivD, nC, nu, xi1, xi2, PL, eqPL, H.n, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, RE, RE.type, e.npRE, control.sp, gamma,
                 X1.d2, X2.d2, pPen1=NULL, pPen2=NULL, sp=NULL, qu.mag=NULL, gp1, gp2, fp, aut.sp, l.sp1, l.sp2, pr.tolsp, weights, iterlimsp, 
                 fterm, mterm, iterlim, K=NULL, n=NULL, N=NULL, cuid=NULL, uidf=NULL, masses=NULL, NGQ=NULL, dat1all=NULL, dat2all=NULL, W=NULL){ 
 
 
-  fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, BivD=BivD, nu=nu, gev.eq1=gev.eq1, gev.eq2=gev.eq2, shape1=shape1, shape2=shape2, nC=nC, H.n=H.n, 
+  fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, BivD=BivD, nC=nC, nu=nu, xi1=xi1, xi2=xi2, PL=PL, eqPL=eqPL, H.n=H.n, 
                 y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,
                 X1=X1, X2=X2,  
                 X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, sp=sp, qu.mag=qu.mag, gp1=gp1, gp2=gp2, fp=fp, l.sp1=l.sp1, l.sp2=l.sp2, blather=TRUE, weights=weights, 
@@ -36,19 +36,19 @@ SemiParBIVProbit.fit <- function(func.opt, start.v, rinit, rmax, BivD, nu, gev.e
              o.ests <- c(fit$argument)
             
                if(RE==TRUE && RE.type=="NP" && e.npRE==TRUE){
-		     up.ve <- extraiterNP(paramNP=o.ests, BivD, nC, nu, gev.eq1, gev.eq2, shape1, shape2, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, X1.d2, X2.d2, pPen1, pPen2, sp, qu.mag, gp1, gp2, fp, l.sp1, l.sp2, weights, 
+		     up.ve <- extraiterNP(paramNP=o.ests, BivD, nC, nu, xi1, xi2, PL, eqPL, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, X1.d2, X2.d2, pPen1, pPen2, sp, qu.mag, gp1, gp2, fp, l.sp1, l.sp2, weights, 
                 	                     K, n, N, cuid, uidf, masses, pr.tolsp, NGQ, dat1all, dat2all, W) 
                      fit$argument <- up.ve$paramNP; masses <- up.ve$masses
                              		     }
 
-             fit <- try(trust(func.opt, fit$argument, rinit=rinit, rmax=rmax, BivD=BivD, nu=nu, gev.eq1=gev.eq1, gev.eq2=gev.eq2, shape1=shape1, shape2=shape2, nC=nC, H.n=H.n, 
+             fit <- try(trust(func.opt, fit$argument, rinit=rinit, rmax=rmax, BivD=BivD, nC=nC, nu=nu, xi1=xi1, xi2=xi2, PL=PL, eqPL=eqPL, H.n=H.n, 
                               y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,   
                              X1=X1, X2=X2,  
                               X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, sp=sp, qu.mag=qu.mag, gp1=gp1, gp2=gp2, fp=fp, l.sp1=l.sp1, l.sp2=l.sp2, weights=weights, blather=TRUE, 
                               iterlim=1e+4, fterm=fterm, mterm=mterm, K=K, n=n, N=N, cuid=cuid, uidf=uidf, masses=masses,NGQ=NGQ, dat1all=dat1all, dat2all=dat2all, W=W),silent=TRUE)
 
               			if(class(fit)=="try-error"){ 
-              	 			fit  <- trust(func.opt, coefo, rinit=rinit, rmax=rmax, BivD=BivD, nu=nu, gev.eq1=gev.eq1, gev.eq2=gev.eq2, shape1=shape1, shape2=shape2, nC=nC, H.n=H.n,  
+              	 			fit  <- trust(func.opt, coefo, rinit=rinit, rmax=rmax, BivD=BivD, nu=nu, xi1=xi1, xi2=xi2, nC=nC, PL=PL, eqPL=eqPL, H.n=H.n,  
                                                       y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,
                                                       X1=X1, X2=X2,  
                 		              	      X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, sp=spo, qu.mag=qu.mag, gp1=gp1, gp2=gp2, 

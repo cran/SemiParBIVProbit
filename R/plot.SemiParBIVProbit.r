@@ -16,7 +16,7 @@ if(x$RE==TRUE && x$RE.type=="N"){  Kk1 <- 0; k.n <- 1}
            ss.plot$Vp <- x$Vb[ind,ind]
            ss.plot$edf <- diag(x$F)[ind]
 
-  plot.gam(ss.plot, ...)  # recall that with GEV this function is not good when plotting on the response scale
+  plot.gam(ss.plot, ...)  # recall that with PL this function is not good when plotting on the response scale
        
 }
 
