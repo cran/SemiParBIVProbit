@@ -71,14 +71,11 @@ For details on all model summaries see Radice, Marra and Wojtys (submitted).
 \item{CIrs}{`Confidence' intervals for either \eqn{\rho}{\rho} or \eqn{\theta}{\theta}, depending of the model fitted.}
 \item{CIkt}{`Confidence' intervals for Kendall's tau.}
 \item{CId}{`Confidence' intervals for the additional association parameter if a two-parameter copula is employed.}
+\item{CIl1,CIl2}{`Confidence' intervals for the shape parameters when a power link approach is employed.}
 \item{sel}{This is used for internal calculations.}
 \item{n.sel}{Number of selected observations in the sample selection case.}
-\item{RE,RE.type,BivD}{These are used for internal calculations.}
-\item{nu,PL}{These are used for internal calculations.}
+\item{BivD,nu,PL}{These are used for internal calculations.}
 \item{xi1,xi2}{Power or shape parameters of the link functions of the two equations if a power link approach is used.}
-\item{masses}{If \code{RE=TRUE} and \code{RE.type="NP"}, then it returns the probabilities associated with the biavariate mass points.}
-\item{table.RE}{If \code{RE=TRUE} then it returns a table representing the estimated parameters for the employed random effect distribution. For bivariate normal random effects, the parameters of the 
-              distribution are reported on their original scale and standard errors calculated using the delta method.}
 \item{table.R}{Joint absolute frequency table of observed binary value combinations. This as well as all remaining quantities below are not provided when \code{selection=TRUE}.}
 \item{table.P}{Joint absolute frequency table of predicted binary value combinations. }
 \item{table.F}{It is given by \code{table.P}/\code{table.R}.}

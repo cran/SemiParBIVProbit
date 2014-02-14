@@ -1,14 +1,10 @@
 plot.SemiParBIVProbit <- function(x, eq, ...){
 
-if(x$RE==FALSE) Kk1 <- k.n <- 0
-if(x$RE==TRUE && x$RE.type=="NP"){ Kk1 <- x$K - 1; k.n <- 0}
-if(x$RE==TRUE && x$RE.type=="N"){  Kk1 <- 0; k.n <- 1}
-
  if(eq==1){ ss.plot <- x$gam1
-            ind <- (1:length(ss.plot$coefficients))+Kk1 
+            ind <- (1:length(ss.plot$coefficients)) 
             } 
  if(eq==2){ ss.plot <- x$gam2
-            fir <- length(x$gam1$coefficients) + 1 + 2*Kk1 + k.n
+            fir <- length(x$gam1$coefficients) + 1 
             sec <- fir - 1 + length(ss.plot$coefficients)
             ind <- fir:sec }
                                    

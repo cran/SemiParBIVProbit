@@ -8,7 +8,7 @@ author = "Marra G. and Radice R.",
 year = year,
 note = vers,
 textVersion =
-paste("Marra G. and Radice R. with contributions from Papageorgiou G. (",year,"). SemiParBIVProbit: Semiparametric Bivariate Probit Modelling.",vers, ".", sep="")
+paste("Marra G. and Radice R. (",year,"). SemiParBIVProbit: Semiparametric Bivariate Probit Modelling.",vers, ".", sep="")
 )
 
 citEntry(

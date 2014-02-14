@@ -1,4 +1,4 @@
-bprobgHsSS <- function(params, BivD, nC, nu, xi1, xi2, PL, eqPL, H.n, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, weights=weights, X1.d2, X2.d2, pPen1=NULL, pPen2=NULL, sp=NULL, qu.mag=NULL, gp1, gp2, fp, l.sp1, l.sp2, K=NULL, n=NULL, N=NULL, cuid=NULL, uidf=NULL, masses=NULL, NGQ=NULL, dat1all=NULL, dat2all=NULL, W=NULL){
+bprobgHsSS <- function(params, BivD, nC, nu, sp.xi1, sp.xi2, PL, eqPL, H.n, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, weights=weights, X1.d2, X2.d2, pPen1=NULL, pPen2=NULL, sp=NULL, qu.mag=NULL, gp1, gp2, fp, l.sp1, l.sp2){
 
   eta1 <- X1%*%params[1:X1.d2]
   eta2 <- X2%*%params[(X1.d2+1):(X1.d2+X2.d2)]
@@ -165,11 +165,13 @@ if( ( l.sp1==0 && l.sp2==0 ) || fp==TRUE) S.h <- S.h1 <- S.h2 <- 0
     S <- do.call(adiag, lapply(S, unlist))
 
     ma1 <- matrix(0,gp1,gp1) 
+    ma2 <- matrix(0,gp2,gp2)
+
     if(length(pPen1)!=0){ indP1 <- qu.mag$off[1]:(qu.mag$off[1]+qu.mag$rank[1]-1)
                           dimP1 <- length(indP1)
                           ma1[indP1,indP1] <- S[1:dimP1,1:dimP1]
                                 } 
-    ma2 <- matrix(0,gp2,gp2)
+
     if(length(pPen2)!=0){ 
                           indP2 <- (qu.mag$off[l.sp1+1]-X1.d2):(-X1.d2+qu.mag$off[l.sp1+1]+qu.mag$rank[l.sp1+1]-1)
                           dimP2 <- length(indP2)

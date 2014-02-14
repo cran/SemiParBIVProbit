@@ -5,7 +5,7 @@
 \title{Semiparametric Bivariate Probit Modelling}
 
 \description{\code{SemiParBIVProbit} provides a function for bivariate probit modelling with semiparametric 
-predictors, including linear, nonlinear and random effects. The use of several bivariate copula distributions and of asymmetric link 
+predictors, including linear and nonlinear effects. The use of several bivariate copula distributions and of asymmetric link 
 functions is also supported.
 }
 
@@ -25,21 +25,18 @@ individual smooth terms for equality to the zero function are also provided. Fun
 \code{\link{summary.SemiParBIVProbit}} extract such information from a fitted \code{\link{SemiParBIVProbitObject}}. Model/variable 
 selection is also possible via the use of shrinakge smoothers or information criteria. 
 
-Parametric or nonparametric random effects, and asymmetric link functions are also available. 
+Asymmetric link functions are also available. 
 
 }
 
 
 \author{
-Giampiero Marra (University College London, Department of Statistical Science) and Rosalba Radice (Birkbeck, University of London, Department of Economics, Mathematics and Statistics) with contributions 
-from Georgios Papageorgiou (Imperial College London, Department of Epidemiology and Biostatistics)
+Giampiero Marra (University College London, Department of Statistical Science) and Rosalba Radice (Birkbeck, University of London, Department of Economics, Mathematics and Statistics)
 
 Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 }
 
 \references{
-
-Marra G., Papageorgiou G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit Model with Nonparametric Mixing. \emph{Australian & New Zealand Journal of Statistics}.
 
 Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian Journal of Statistics}, 39(2), 259-279.
 
@@ -68,7 +65,6 @@ Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models f
 \keyword{non-random sample selection} 
 \keyword{semiparametric bivariate probit modelling} 
 \keyword{smooth} 
-\keyword{nonparametric random effects}
 \keyword{regression}
 \keyword{variable selection}
 

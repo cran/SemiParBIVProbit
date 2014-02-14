@@ -38,10 +38,7 @@ print.SemiParBIVProbit <- function(x,...){
 
   if(x$BivD %in% c("N","T") ) {cp <- "  rho = "; as.p <- x$rho} else{ cp <- "  theta = "; as.p <- x$theta}
 
-  if(x$RE==TRUE){ if(x$RE.type=="NP") re <- "Bivariate Nonparametric Random Effects in linear predictors"; if(x$RE.type=="N") re <- "Bivariate Normal Random Effects in linear predictors"}
-
   cat("\nERRORS' DISTRIBUTION:",cop)
-  if(x$RE==TRUE) cat("\n",re,sep ="")  
 
   cat("\n\nEQUATION 1")
   if(x$PL=="P") cat("\nLink function: probit\n")

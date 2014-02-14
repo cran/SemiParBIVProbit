@@ -4,13 +4,14 @@
 \title{Estimated overall prevalence from sample selection models}
 
 \description{ 
-\code{est.prev} can be used to calculate the overall estimated prevalence from a sample selection model, with corresponding confidence intervals.}
+\code{est.prev} can be used to calculate the overall estimated prevalence from a sample selection model, with corresponding confidence intervals
+obtained using the delta method.}
 
 
 
 \usage{
 
-est.prev(x, sig.lev=0.05)
+est.prev(x, sig.lev=0.05, sw=NULL, naive=FALSE)
 
 }
 
@@ -19,6 +20,10 @@ est.prev(x, sig.lev=0.05)
 \item{x}{A fitted \code{SemiParBIVProbit} object as produced by \code{SemiParBIVProbit()}.}
  
 \item{sig.lev}{Significance level.} 
+
+\item{sw}{Survey weights.} 
+
+\item{naive}{It indicates whether the prevalence is calculated using the (naive/classic imputation) probit or sample selection model. This option has been introduced to compared adjusted and unadjusted estimates.} 
 
 
 }

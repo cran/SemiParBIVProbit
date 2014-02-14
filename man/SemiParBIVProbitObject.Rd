@@ -22,8 +22,7 @@
 \item{coefficients}{The coefficients of the fitted semiparametric sample selection model. They are given in the following 
                     order: parametric and regression spline (if present)
                     coefficients for the first equation, parametric and regression spline
-                    coefficients for the second equation, and association coefficient. If \code{RE=TRUE} and \code{RE.type="N"}, then
-                    the paramaters of the bivariate normal random effect distribution are also given. }
+                    coefficients for the second equation, and association coefficient.}
 
 \item{weights}{Prior weights used during model fitting.}
 
@@ -43,8 +42,6 @@
              is employed.}
 
 \item{KeT}{Estimated Kendall's tau coefficient between the two equations.}
-
-\item{sigma1,rho.u,sigma2}{If \code{RE=TRUE} and \code{RE.type="N"} then these are the paramaters of the bivariate normal random effect distribution.}
 
 \item{n}{Sample size.}
 
@@ -91,30 +88,12 @@
 
 \item{sel}{This is used for internal calculations.}
 
-\item{K}{Number of bivariate mass points.}
-
-\item{masses}{Probabilities associated with the \code{K} biavariate mass points in a random effect model.}
-
-\item{RE,RE.type,BivD,nu,PL,eqPL}{These are used for internal calculations.}
+\item{BivD,nu,PL,eqPL}{These are used for internal calculations.}
 
 \item{xi1,xi2}{Power or shape parameters of the link functions of the two equations if a power link approach is used.}
 
 \item{logLik}{Value of the (unpenalized) log-likelihood evaluated at the (penalized or unpenalized) parameter 
             estimates.}
-
-\item{eb.u1,eb.u2}{Estimated random effects for each identifier.}
-
-\item{Eb.u1,Eb.u2}{Estimated random effects for each observation.}
-
-\item{id}{Individual identifier.}
-
-\item{uidf}{Number of observations within each group.}
-
-\item{T.sv}{This is used for internal calculations.}
-
-\item{eta1S,eta2S,ass.pS}{Simulated \code{eta1}, \code{eta2} and transformed \code{rho} or \code{theta}. These are useful for calculating standard errors of predictions in the sample selection case.}
-
-\item{deltaS}{Simulated transformed \code{delta} (for two-parameter copulas). This is useful for calculating standard errors of predictions in the sample selection case.}
 
 \item{nC}{Copula identifier. This is used for internal calculations.}
 
@@ -127,6 +106,8 @@
 \item{y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1}{These are used for internal calculations.}
 
 \item{qu.mag, gp1, gp2}{These are used for internal calculations.}
+
+\item{X2s}{Full design matrix of second equation in sample selection case.}
 
 
 }

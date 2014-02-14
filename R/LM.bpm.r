@@ -7,7 +7,7 @@ G.Eh.E <- function(params,y1,y2,X1,X2,X1.d2,X2.d2,gam1,gam2,selection,FI){
   
   if( (l.sp1!=0 || l.sp2!=0) && FI==FALSE){
   
-      qu.mag <- S.m(gam1,gam2,l.sp1,l.sp2,K=0,RE=FALSE)
+      qu.mag <- S.m(gam1,gam2,l.sp1,l.sp2)
 
   	if(l.sp1!=0 && l.sp2!=0) sp <- c(gam1$sp,gam2$sp)
   	if(l.sp1==0 && l.sp2!=0) sp <- c(gam2$sp)
@@ -284,16 +284,19 @@ bit2.th2 <- -bit1.th2
               cbind( t(be1.rho) , t(be2.rho) , sum(d2l.rho.rho) ) 
              ) + S.h 
                                      
+  #H.eig <- eigen(nearPD(H)$mat,symmetric=TRUE)
   H.eig <- eigen(H,symmetric=TRUE)
-  k.e <- sum(as.numeric(H.eig$val<sqrt(.Machine$double.eps)))
-     if(k.e!=0){
-       ind.e <- (length(H.eig$val)-(k.e-1)):length(H.eig$val)
-       min.e <- min(H.eig$val[1:(ind.e[1]-1)])
-       for(i in 1:k.e) H.eig$val[ind.e[i]] <- min.e/10^i  
-       H.inv <- H.eig$vec%*%tcrossprod(diag(1/H.eig$val),H.eig$vec)      
-               }else{
-       H.inv <- H.eig$vec%*%tcrossprod(diag(1/H.eig$val),H.eig$vec) 
-                    }           
+  H.inv <- H.eig$vec%*%tcrossprod(diag(1/H.eig$val),H.eig$vec)
+
+  #k.e <- sum(as.numeric(H.eig$val<sqrt(.Machine$double.eps)))
+  #   if(k.e!=0){
+  #     ind.e <- (length(H.eig$val)-(k.e-1)):length(H.eig$val)
+  #     min.e <- min(H.eig$val[1:(ind.e[1]-1)])
+  #     for(i in 1:k.e) H.eig$val[ind.e[i]] <- min.e/10^i  
+  #     H.inv <- H.eig$vec%*%tcrossprod(diag(1/H.eig$val),H.eig$vec)      
+  #             }else{
+  #     H.inv <- H.eig$vec%*%tcrossprod(diag(1/H.eig$val),H.eig$vec) 
+  #                  }           
     
   }
   
