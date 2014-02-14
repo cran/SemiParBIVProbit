@@ -52,15 +52,20 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
       attr(d, "rank") <- rank
       d
 }
+
   good <- object$fit$good
   n.good <- sum(as.numeric(good))
   tableN <- list(NULL,NULL)
   table <- list()
   n.sel <- object$n.sel; masses <- object$masses
-  table.R <- table.P <- table.F <- P1 <- P2 <- QPS1 <- QPS2 <- CR1 <- CR1 <- CR2 <- MR <- table.npRE <- CIkt <- CId <- NULL  
-  # CIl1 <- CIl2
+  CIl1 <- CIl2 <- table.R <- table.P <- table.F <- P1 <- P2 <- QPS1 <- QPS2 <- CR1 <- CR1 <- CR2 <- MR <- CIkt <- CId <- NULL  
+  epsilon <- .Machine$double.eps*10^6
+  est.RHOb <- est.KeTb <- est.l1 <- est.l2 <- ass.ps2 <- rep(NA,n.sim) 
+  bb <- c("BB1.0","BB1.180","BB1.90","BB1.270",
+          "BB6.0","BB6.180","BB6.90","BB6.270",
+          "BB7.0","BB7.180","BB7.90","BB7.270",
+          "BB8.0","BB8.180","BB8.90","BB8.270")
  
-
   lf.n <- lf <- length(coef(object))
   F  <- object$F[1:lf,1:lf]
   Vr <- object$Vb[1:lf,1:lf] 
@@ -78,73 +83,58 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
   SE <- sqrt(diag(object$Vb[1:lf,1:lf]))
   n  <- object$n 
 
-  if(object$RE==TRUE && object$RE.type=="NP") bs <- rmvnorm(n.sim, mean = c(coef(object),object$fit$masses[1:(object$K-1)]), sigma=object$Vb, method=s.meth)
-  else bs <- rmvnorm(n.sim, mean = coef(object), sigma=object$Vb, method=s.meth)
 
+  bs <- rmvnorm(n.sim, mean = coef(object), sigma=object$Vb, method=s.meth)
 
-  epsilon <- .Machine$double.eps*10^6
-  est.RHOb <- est.KeTb <- est.l1 <- est.l2 <- ass.ps2 <- rep(NA,n.sim) 
+  if(object$BivD %in% bb ) lf.n <- lf-1
 
-  if(object$BivD %in% c("BB1.0","BB1.180","BB1.90","BB1.270",
-                   "BB6.0","BB6.180","BB6.90","BB6.270",
-                   "BB7.0","BB7.180","BB7.90","BB7.270",
-                 "BB8.0","BB8.180","BB8.90","BB8.270") ) lf.n <- lf-1
+  if(object$PL != "P") { if(object$eqPL=="both") lf.n <- lf-2 else lf.n <- lf-1 }
 
-  #if(object$PL != "P") { if(object$eqPL=="both") lf.n <- lf-2 else lf.n <- lf-1 }
+   if(object$BivD %in% c("N","T"))      {est.RHOb <- tanh(bs[,lf.n ]); est.RHOb <- ifelse(est.RHOb %in% c(-1,1), sign(est.RHOb)*0.9999999, est.RHOb)}
+   if(object$BivD=="F")                  est.RHOb <- bs[,lf.n ] + epsilon
 
-  for(i in 1:n.sim){ 
+   if(object$BivD %in% c("C0", "C180") ) est.RHOb <-   exp(bs[,lf.n ]) + epsilon  
+   if(object$BivD %in% c("C90","C270") ) est.RHOb <- -(exp(bs[,lf.n ]) + epsilon) 
 
-   if(object$BivD %in% c("N","T"))      {est.RHOb[i] <- tanh(bs[i,lf.n ]); if(est.RHOb[i] %in% c(-1,1)) est.RHOb[i] <- sign(est.RHOb[i])*0.9999999}
-   if(object$BivD=="F")                  est.RHOb[i] <- bs[i,lf.n ] + epsilon
+   if(object$BivD %in% c("J0", "J180") ) est.RHOb <-   1+exp(bs[,lf.n]) + epsilon  
+   if(object$BivD %in% c("J90","J270") ) est.RHOb <- -(1+exp(bs[,lf.n]) + epsilon) 
 
-   if(object$BivD %in% c("C0", "C180") ) est.RHOb[i] <-   exp(bs[i,lf.n ]) + epsilon  
-   if(object$BivD %in% c("C90","C270") ) est.RHOb[i] <- -(exp(bs[i,lf.n ]) + epsilon) 
-
-   if(object$BivD %in% c("J0", "J180") ) est.RHOb[i] <-   1+exp(bs[i,lf.n]) + epsilon  
-   if(object$BivD %in% c("J90","J270") ) est.RHOb[i] <- -(1+exp(bs[i,lf.n]) + epsilon) 
-
-   if(object$BivD %in% c("G0", "G180") ) est.RHOb[i] <-   1+exp(bs[i,lf.n])  
-   if(object$BivD %in% c("G90","G270") ) est.RHOb[i] <- -(1+exp(bs[i,lf.n])) 
+   if(object$BivD %in% c("G0", "G180") ) est.RHOb <-   1+exp(bs[,lf.n])  
+   if(object$BivD %in% c("G90","G270") ) est.RHOb <- -(1+exp(bs[,lf.n])) 
    
-   if(object$BivD %in% c("BB1.0", "BB1.180")){est.RHOb[i] <-   exp(bs[i,lf.n]) + epsilon;  ass.ps2[i] <-   exp(bs[i,lf]) + 1}
-   if(object$BivD %in% c("BB1.90","BB1.270")){est.RHOb[i] <- -(exp(bs[i,lf.n]) + epsilon); ass.ps2[i] <- -(exp(bs[i,lf]) + 1)}
+   if(object$BivD %in% c("BB1.0", "BB1.180")){est.RHOb <-   exp(bs[,lf.n]) + epsilon;  ass.ps2 <-   exp(bs[,lf]) + 1}
+   if(object$BivD %in% c("BB1.90","BB1.270")){est.RHOb <- -(exp(bs[,lf.n]) + epsilon); ass.ps2 <- -(exp(bs[,lf]) + 1)}
    
-   if(object$BivD %in% c("BB6.0", "BB6.180")){est.RHOb[i] <-   exp(bs[i,lf.n]) + 1; ass.ps2[i] <-   exp(bs[i,lf]) + 1}
-   if(object$BivD %in% c("BB6.90","BB6.270")){est.RHOb[i] <- -(exp(bs[i,lf.n]) + 1);ass.ps2[i] <- -(exp(bs[i,lf]) + 1)}
+   if(object$BivD %in% c("BB6.0", "BB6.180")){est.RHOb <-   exp(bs[,lf.n]) + 1; ass.ps2 <-   exp(bs[,lf]) + 1}
+   if(object$BivD %in% c("BB6.90","BB6.270")){est.RHOb <- -(exp(bs[,lf.n]) + 1);ass.ps2 <- -(exp(bs[,lf]) + 1)}
    
-   if(object$BivD %in% c("BB7.0", "BB7.180")){est.RHOb[i] <-   exp(bs[i,lf.n]) + 1; ass.ps2[i] <-   exp(bs[i,lf]) + epsilon}
-   if(object$BivD %in% c("BB7.90","BB7.270")){est.RHOb[i] <- -(exp(bs[i,lf.n]) + 1);ass.ps2[i] <- -(exp(bs[i,lf]) + epsilon)}
+   if(object$BivD %in% c("BB7.0", "BB7.180")){est.RHOb <-   exp(bs[,lf.n]) + 1; ass.ps2 <-   exp(bs[,lf]) + epsilon}
+   if(object$BivD %in% c("BB7.90","BB7.270")){est.RHOb <- -(exp(bs[,lf.n]) + 1);ass.ps2 <- -(exp(bs[,lf]) + epsilon)}
    
-   if(object$BivD %in% c("BB8.0", "BB8.180")){est.RHOb[i] <-   exp(bs[i,lf.n]) + 1; ass.ps2[i] <-  pnorm(bs[i,lf]);if(ass.ps2[i]==0) ass.ps2[i] <- epsilon}
-   if(object$BivD %in% c("BB8.90","BB8.270")){est.RHOb[i] <- -(exp(bs[i,lf.n]) + 1);ass.ps2[i] <- -pnorm(bs[i,lf]);if(ass.ps2[i]==0) ass.ps2[i] <- -epsilon}  
+   if(object$BivD %in% c("BB8.0", "BB8.180")){est.RHOb <-   exp(bs[,lf.n]) + 1; ass.ps2 <-  pnorm(bs[,lf]); ass.ps2 <- ifelse(ass.ps2==0, epsilon, ass.ps2)}
+   if(object$BivD %in% c("BB8.90","BB8.270")){est.RHOb <- -(exp(bs[,lf.n]) + 1);ass.ps2 <- -pnorm(bs[,lf]); ass.ps2 <- ifelse(ass.ps2==0, -epsilon, ass.ps2)}  
    
    
-   if(object$BivD=="T") asp2 <- object$nu else asp2 <- ass.ps2[i]
+   if(object$BivD=="T") asp2 <- rep(object$nu,n.sim) else asp2 <- ass.ps2
    
-   est.KeTb[i] <- BiCopPar2Tau(object$nC,est.RHOb[i],par2=asp2)
+   for(i in 1:n.sim) est.KeTb[i] <- BiCopPar2Tau(object$nC,est.RHOb[i],par2=asp2[i]) # this is not efficient but the function gives problems with vectors...
 
-   #if(object$PL!="P") est.l1[i] <- exp(bs[i, lf.n+1 ]) + epsilon; est.l2[i] <- exp(bs[i,lf ]) + epsilon  
+   if(object$PL!="P"){ if(object$eqPL=="both"){   est.l1 <- exp(bs[, lf.n+1 ]) + epsilon; est.l2 <- exp(bs[,lf ]) + epsilon}
+                       if(object$eqPL=="first"){  est.l1 <- exp(bs[, lf ]) + epsilon;     est.l2 <- 1}
+                       if(object$eqPL=="second"){ est.l2 <- exp(bs[, lf ]) + epsilon;     est.l1 <- 1}
+                     }  
 
-
-                   }
-
+             
   CIrs <- as.numeric(quantile(est.RHOb,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
   CIkt <- as.numeric(quantile(est.KeTb,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
-  #if(object$PL != "P"){
-  #                     CIl1 <- as.numeric(quantile(est.l1,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
-  #                     CIl2 <- as.numeric(quantile(est.l2,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
-  #                     }
-  if(object$BivD %in% c("BB1.0","BB1.180","BB1.90","BB1.270",
-                        "BB6.0","BB6.180","BB6.90","BB6.270",
-                        "BB7.0","BB7.180","BB7.90","BB7.270",
-                        "BB8.0","BB8.180","BB8.90","BB8.270") ) CId <- as.numeric(quantile(ass.ps2,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
+  if(object$PL != "P"){
+                       CIl1 <- as.numeric(quantile(est.l1,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
+                       CIl2 <- as.numeric(quantile(est.l2,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
+                       }
+  if(object$BivD %in% bb ) CId <- as.numeric(quantile(ass.ps2,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
 
                      
-
-  Kk1 <- Kk2 <- 0; if(object$RE==TRUE && object$RE.type=="NP"){ Kk1 <- object$K - 1; Kk2 <- Kk1 + 1}  
-  Ks1 <- Ks2 <- 0; if(object$RE==TRUE && object$RE.type=="N"){  Ks1 <- 1; Ks2 <- 2}  
-
-  ind <- list(ind1=1:(object$gam1$nsdf+Kk1),ind2=object$X1.d2+Kk2+Ks1+(1:(object$gam2$nsdf+Kk1)))
+  ind <- list(ind1=1:(object$gam1$nsdf),ind2=object$X1.d2+(1:(object$gam2$nsdf)))
 
   for(i in 1:2){
   estimate <- coef(object)[ind[[i]]]
@@ -155,30 +145,6 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
   dimnames(table[[i]])[[2]] <- c("Estimate", "Std. Error", "z value", "Pr(>|z|)")
   }
 
-  if(object$RE==TRUE && object$RE.type=="NP"){
-  	table.npRE <- cbind(table[[1]][c(1:Kk2),1],table[[2]][c(1:Kk2),1],object$masses)
-  	dimnames(table.npRE)[[2]] <- c("Eq. 1", "Eq. 2", "masses")
-  	table[[1]] <- table[[1]][-c(1:Kk2),]; table[[2]] <- table[[2]][-c(1:Kk2),] 
-        if(is.vector(table[[1]])==TRUE){ table[[1]] <- t(as.matrix(table[[1]])); dimnames(table[[1]])[[1]] <- dimnames(object$X1)[[2]][2]} 
-        if(is.vector(table[[2]])==TRUE){ table[[2]] <- t(as.matrix(table[[2]])); dimnames(table[[2]])[[1]] <- dimnames(object$X2)[[2]][2]} 
-   
-                       }
-
-  if(object$RE==TRUE && object$RE.type=="N"){
-
-  
-  p.i <- which( names(coef(object)) %in% c("log.sigma1","athrho.u","log.sigma2"))
-  estimate <- c(  exp( coef(object)[p.i[1]] ), tanh( coef(object)[p.i[2]] ), exp( coef(object)[p.i[3]] ) )  
-  names(estimate) <- c("sigma1","rho.u","sigma2")
-  se <- sqrt(c( SE[p.i[1]]^2*estimate[1], 
-                SE[p.i[2]]^2*4*exp(2*coef(object)[p.i[2]])/(exp(2*coef(object)[p.i[2]])+1)^2, 
-                SE[p.i[3]]^2*estimate[3] ))
-  ratio    <- estimate/se
-  pv       <- 2*pnorm(abs(ratio), lower.tail = FALSE)
-  table.npRE <- cbind(estimate,se,ratio,pv)
-  dimnames(table.npRE)[[2]] <- c("Estimate", "Std. Error", "z value", "Pr(>|z|)")
-
-                       }
 
   l.sp11 <- length(object$gam1$smooth)
   l.sp22 <- length(object$gam2$smooth) 
@@ -194,13 +160,13 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
   
 		for(k in 1:mm){
 
-                        if(i==1){gam <- object$gam1; ind <- (gam$smooth[[k]]$first.para+Kk1+Ks1):(gam$smooth[[k]]$last.para+Kk1+Ks1)} 
-                        else{gam <- object$gam2; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para+Kk1+Ks1)+object$X1.d2+Kk2+Ks2} # CHECK THIS for Ks2
+                        if(i==1){gam <- object$gam1; ind <- (gam$smooth[[k]]$first.para):(gam$smooth[[k]]$last.para)} 
+                        else{gam <- object$gam2; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para)+object$X1.d2} 
 			edf[[i]][k] <- sum(diag(F)[ind])
 			names(edf[[i]])[k] <- gam$smooth[[k]]$label 
 			b  <- coef(object)[ind]
 			V  <- Vr[ind,ind]
-			if(object$RE==TRUE && object$RE.type=="NP"){if(i==1) Xt <- XX[, ind-Kk1] else Xt <- XX[, ind-Kk1*2] } else Xt <- XX[, ind] 
+			Xt <- XX[, ind] 
 			pTerms.df[[i]][k] <- min(ncol(Xt), edf[[i]][k])
 			pTerms.chi.sq[[i]][k] <- Tp <- testStat(b, Xt, V, pTerms.df[[i]][k])
 			pTerms.df[[i]][k] <- attr(Tp, "rank")
@@ -214,7 +180,7 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
   }
 
 
- if(object$RE==FALSE){ 
+
 
  if(object$sel==FALSE){
  
@@ -268,7 +234,6 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
  CR2 <- mean(as.numeric(object$y2[good]==P2.b))*100
 
  }
- }
 
   
   res <- list(tableP1=table[[1]], tableP2=table[[2]], 
@@ -276,14 +241,14 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
               n=n, rho=object$rho, theta=object$theta, delta=object$delta, KeT=object$KeT,   
               formula1=object$gam1$formula, formula2=object$gam2$formula, 
               l.sc1=l.sp11, l.sc2=l.sp22, pPen1=object$pPen1, pPen2=object$pPen2,  
-              t.edf=object$t.edf, CIrs=CIrs, CIkt=CIkt, #CIl1=CIl1, CIl2=CIl2, 
+              t.edf=object$t.edf, CIrs=CIrs, CIkt=CIkt, CIl1=CIl1, CIl2=CIl2, 
               CId=CId, 
               sel=object$sel,n.sel=n.sel, 
-              RE=object$RE, RE.type=object$RE.type, BivD=object$BivD,nu=object$nu, 
+              BivD=object$BivD,nu=object$nu, 
               PL=object$PL, xi1=object$xi1, xi2=object$xi2,
               table.R=table.R, table.P=table.P, table.F=table.F, MR=MR,
               P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2,
-              masses=object$masses, table.RE=table.npRE, good=good
+              good=good
               )
   class(res) <- "summary.SemiParBIVProbit"
       

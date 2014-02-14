@@ -37,9 +37,7 @@ print.summary.SemiParBIVProbit <- function(x,digits = max(3, getOption("digits")
   if(x$BivD=="BB8.270") cop <- "BIVARIATE ROTATED JOE-FRANK COPULA (270 DEGREES)"  
   main.t <- "\nERRORS' DISTRIBUTION:" 
 
-  if(x$RE==TRUE){ if(x$RE.type=="NP") re <- "\nBivariate Nonparametric Random Effects (RE) in linear predictors"; if(x$RE.type=="N") re <- "\nBivariate Normal Random Effects in linear predictors"}
   cat(main.t,cop)
-  if(x$RE==TRUE) cat(re)  
   if(x$sel==FALSE) cat("\n\nEQUATION 1") else cat("\n\nSELECTION EQ.") 
   if(x$PL=="P") cat("\nLink function: probit\n")
 
@@ -48,7 +46,7 @@ print.summary.SemiParBIVProbit <- function(x,digits = max(3, getOption("digits")
 
 
   if(x$PL!="P"){ 
-    if(x$xi1==1) cat("\nLink function: probit\n") else{ 
+    if(round(x$xi1,3)==1) cat("\nLink function: probit\n") else{ 
   	if(x$PL=="PP") cat("\nLink function: power probit, ",format(x$xi1,digits=3),"\n", sep="") 
   	if(x$PL=="RPP") cat("\nLink function: reciprocal power probit, ",format(x$xi1,digits=3),"\n", sep="") 
                                                           }
@@ -78,7 +76,7 @@ print.summary.SemiParBIVProbit <- function(x,digits = max(3, getOption("digits")
 
 
   if(x$PL!="P"){ 
-    if(x$xi2==1) cat("\nLink function: probit\n") else{  
+    if(round(x$xi2,3)==1) cat("\nLink function: probit\n") else{  
 
   if(x$PL=="PP") cat("\nLink function: power probit, ",format(x$xi2,digits=3),"\n", sep="") 
   if(x$PL=="RPP") cat("\nLink function: reciprocal power probit, ",format(x$xi2,digits=3),"\n", sep="") }
@@ -99,11 +97,6 @@ print.summary.SemiParBIVProbit <- function(x,digits = max(3, getOption("digits")
     cat("\n")
     }
     
-  if(x$RE==TRUE){
-  cat("\nEstimated parameters of RE distribution:\n")
-  printCoefmat(x$table.RE,digits = digits, signif.stars = signif.stars, na.print = "NA",...)
-  cat("\n")
-  }
 
   if(x$BivD %in% c("N","T")) {cp <- "  rho = "; as.p <- x$rho} else{ cp <- "  theta = "; as.p <- x$theta}
 
@@ -118,11 +111,9 @@ print.summary.SemiParBIVProbit <- function(x,digits = max(3, getOption("digits")
                    
 
 
-  if(x$sel==FALSE && x$RE==FALSE) cat("\nn = ",x$n,cp,format(as.p,digits=3),"(",format(x$CIrs[1],digits=3),",",format(x$CIrs[2],digits=3),")",del,"  Kendall's Tau = ",round(x$KeT,3),"(",round(x$CIkt[1],3),",",round(x$CIkt[2],3),")","\ntotal edf = ",format(x$t.edf,digits=3),"  MR = ",format(x$MR,digits=3),"%","  QPS1 = ",format(x$QPS1,digits=3),"  QPS2 = ",format(x$QPS2,digits=3),"\nCR1 = ",format(x$CR1,digits=3),"%  CR2 = ",format(x$CR2,digits=3),"%\n\n", sep="")  
+  if(x$sel==FALSE) cat("\nn = ",x$n,cp,format(as.p,digits=3),"(",format(x$CIrs[1],digits=3),",",format(x$CIrs[2],digits=3),")",del,"  Kendall's Tau = ",round(x$KeT,3),"(",round(x$CIkt[1],3),",",round(x$CIkt[2],3),")","\ntotal edf = ",format(x$t.edf,digits=3),"  MR = ",format(x$MR,digits=3),"%","  QPS1 = ",format(x$QPS1,digits=3),"  QPS2 = ",format(x$QPS2,digits=3),"\nCR1 = ",format(x$CR1,digits=3),"%  CR2 = ",format(x$CR2,digits=3),"%\n\n", sep="")  
      
-  if(x$sel==TRUE  && x$RE==FALSE) cat("\nn = ",x$n,"  n.sel = ",x$n.sel,cp,format(as.p,digits=3),"(",format(x$CIrs[1],digits=3),",",format(x$CIrs[2],digits=3),")",del,"\nKendall's Tau = ",round(x$KeT,3),"(",round(x$CIkt[1],3),",",round(x$CIkt[2],3),")","  total edf = ",format(x$t.edf,digits=3),"\n\n", sep="") 
-
-  if(x$RE==TRUE) cat("\nn = ",x$n,cp,format(as.p,digits=3),"(",format(x$CIrs[1],digits=3),",",format(x$CIrs[2],digits=3),")","\nKendall's Tau = ",round(x$KeT,3),"(",round(x$CIkt[1],3),",",round(x$CIkt[2],3),")","  total edf = ",format(x$t.edf,digits=3),"\n\n", sep="") 
+  if(x$sel==TRUE) cat("\nn = ",x$n,"  n.sel = ",x$n.sel,cp,format(as.p,digits=3),"(",format(x$CIrs[1],digits=3),",",format(x$CIrs[2],digits=3),")",del,"\nKendall's Tau = ",round(x$KeT,3),"(",round(x$CIkt[1],3),",",round(x$CIkt[2],3),")","  total edf = ",format(x$t.edf,digits=3),"\n\n", sep="") 
 
                        
 invisible(x)

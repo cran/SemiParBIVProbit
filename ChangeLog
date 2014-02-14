@@ -1,3 +1,7 @@
+version 3.2-10
+- summary functions improved.
+- function to estimate adjusted prevalence from a sample selection model made more efficient.
+
 version 3.2-9
 - power probit and reciprocal power probit links.
 - function to estimate adjusted prevalence from a sample selection model.

@@ -1,44 +1,113 @@
-working.comp <- function(x,X1=X1,X2=X2,X1.d2=X1.d2,X2.d2=X2.d2){
+working.comp <- function(x,X1=X1,X2=X2,X1.d2=X1.d2,X2.d2=X2.d2,myf=myf){
 
   e.par <- x$argument
   ll <- length(e.par) 
+  p.const <- 2
   
-  #if(x$PL != "P") { if(x$eqPL=="both") ll <- (ll-2):ll else ll <- (ll-1):ll  } 
+  if(x$PL != "P") {   if(x$eqPL=="both"){ ll <- ll-2; p.const <- 4 } else {ll <- ll-1; p.const <- 3}   } 
   
-  if(x$BivD %in% c("BB1.0","BB1.180","BB1.90","BB1.270",
-                   "BB6.0","BB6.180","BB6.90","BB6.270",
-                   "BB7.0","BB7.180","BB7.90","BB7.270",
-                   "BB8.0","BB8.180","BB8.90","BB8.270") ) ll <- (ll-1):ll
- 
   e.par <- e.par[-c(ll)]
   good <- x$good
   n <- sum(as.numeric(good==TRUE))
-  X <- rW.X <- matrix(0,2*n,(X1.d2+X2.d2))
-  D <- rW.Z <- matrix(0,2*n,1)
-  j <- 1
+
+  if(x$PL == "P") X <- rW.X <- Matrix(0,p.const*n,(X1.d2+X2.d2))
+  if(x$PL != "P"){ if(x$eqPL == "both") X <- rW.X <- Matrix(0,p.const*n,(X1.d2+X2.d2+2)) else X <- rW.X <- Matrix(0,p.const*n,(X1.d2+X2.d2+1))   } 
+  D <- rW.Z <- Matrix(0,p.const*n,1)
   X1 <- X1[good,] 
   X2 <- X2[good,] 
 
-    for(i in seq(1,(2*n-1),by=2)) {
-      X[i,1:X1.d2]                   <- X1[j,]
-      X[i+1,(X1.d2+1):(X1.d2+X2.d2)] <- X2[j,]
+  sqq <- seq(1,(p.const*n-(p.const-1)),by=p.const)
 
-      D[i,1]   <- x$dl.dbe1[j]
-      D[i+1,1] <- x$dl.dbe2[j]
+  X[sqq,   1:X1.d2]                <- X1
+  X[sqq+1,(X1.d2+1):(X1.d2+X2.d2)] <- X2
 
-      W <- matrix(c( x$d2l.be1.be1[j],x$d2l.be1.be2[j],     
-                     x$d2l.be1.be2[j],x$d2l.be2.be2[j]), 2 , 2 ) 
+  D[sqq,1]   <- x$dl.dbe1
+  D[sqq+1,1] <- x$dl.dbe2
 
-      W.eig <- eigen(W,symmetric=TRUE)
-      c.W   <- W.eig$vec%*%tcrossprod(diag(sqrt(pmax(W.eig$val,.Machine$double.eps))),W.eig$vec) 
-      W.inv <- W.eig$vec%*%tcrossprod(diag(1/pmax(W.eig$val,.Machine$double.eps)),    W.eig$vec) 
-      rW.X[i:(i+1),]  <- c.W%*%X[i:(i+1),]
-      rW.Z[i:(i+1),1] <- c.W%*%( X[i:(i+1),]%*%e.par + W.inv%*%D[i:(i+1),1] )
+  if(x$PL != "P"){ 
 
-      j <- j + 1
-    }
+    X[sqq+2,X1.d2+X2.d2+1] <- 1 
+
+           if(x$eqPL=="both"){  X[sqq+3,X1.d2+X2.d2+2] <- 1
+                                D[sqq+2,1] <- x$dl.dlambda1.st 
+                                D[sqq+3,1] <- x$dl.dlambda2.st}  
+           if(x$eqPL=="first")  D[sqq+2,1] <- x$dl.dlambda1.st  
+           if(x$eqPL=="second") D[sqq+2,1] <- x$dl.dlambda2.st  
+
+                     }
+
+
+  be1be2 <- cbind(x$d2l.be1.be1, x$d2l.be1.be2, x$d2l.be2.be2)
+
+  if(x$PL != "P"){
+
+       if(x$eqPL=="both")   be1be2 <- cbind(be1be2, x$d2l.be1.lambda1, x$d2l.be1.lambda2, x$d2l.be2.lambda1, x$d2l.be2.lambda2, x$d2l.lambda1.lambda1, 
+                                                    x$d2l.lambda1.lambda2, x$d2l.lambda2.lambda2)
+
+       if(x$eqPL=="first")  be1be2 <- cbind(be1be2, x$d2l.be1.lambda1, x$d2l.be2.lambda1, x$d2l.lambda1.lambda1)
+       if(x$eqPL=="second") be1be2 <- cbind(be1be2, x$d2l.be1.lambda2, x$d2l.be2.lambda2, x$d2l.lambda2.lambda2)
+    
+                 }
+
+
+
+  L.W <- unlist( apply(be1be2, 1, myf ) , recursive = FALSE) 
+
+  W.inv <- c.W <- list()
+
+    for(i in 1:n) {
+
+      W.eig <- eigen(L.W[[i]], symmetric=TRUE)  
+
+      if(min(W.eig$values) < .Machine$double.eps){ L.W[[i]] <- nearPD( L.W[[i]], ensureSymmetry = FALSE )$mat
+                                                   W.eig <- eigen(L.W[[i]], symmetric=TRUE) 
+                                                 }
+      
+      c.W[[i]]   <- W.eig$vec%*%tcrossprod(diag(sqrt(W.eig$val)),W.eig$vec) 
+      W.inv[[i]] <- W.eig$vec%*%tcrossprod(diag(1/W.eig$val    ),W.eig$vec)       
+
+                  }
+
+      c.W <- bdiag(c.W)
+      W.inv <- bdiag(W.inv)
+
+## alternative ## but is slower ... 
+#
+#  L.W <- bdiag( unlist( apply(be1be2, 1, myf ) , recursive = FALSE) ) 
+#  W.eig <- eigen(L.W, symmetric=TRUE) 
+#  c.W   <- Matrix( W.eig$vec%*%tcrossprod(diag(sqrt(W.eig$val)),W.eig$vec) )
+#  W.inv <- Matrix( W.eig$vec%*%tcrossprod(diag(1/W.eig$val    ),W.eig$vec) )
+#
+##################
+
+      rW.X <- as.matrix(c.W%*%X) 
+      rW.Z <- as.matrix(c.W%*%( X%*%e.par + W.inv%*%D )) 
+
+                   
  list( rW.X=rW.X , rW.Z=rW.Z )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

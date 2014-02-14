@@ -4,8 +4,7 @@
 \title{Semiparametric Bivariate Probit Modelling}
 
 \description{ 
-\code{SemiParBIVProbit} can be used to fit bivariate probit models where the linear predictors can be flexibly specified using parametric and 
-regression spline components, and parametric or nonparametric random effects. The use of several 
+\code{SemiParBIVProbit} can be used to fit bivariate probit models where the linear predictors can be flexibly specified using parametric and regression spline components. The use of several 
 bivariate copula distributions and of asymmetric link functions is supported. During the model fitting process, the possible presence of 
 correlated error equations, endogeneity or non-random sample selection is accounted for. Regression 
 spline bases are extracted from the package \code{mgcv}. Multi-dimensional smooths are available 
@@ -18,10 +17,10 @@ product smooths.
 
 \usage{
 SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), weights=NULL,  
-                 start.v=NULL, BivD="N", nu=3, PL="P", eqPL="both", xi1=1, xi2=1,
+                 start.v=NULL, BivD="N", nu=3, PL="P", eqPL="both", 
                  selection=FALSE, H.n=TRUE, 
-                 gamma=1, aut.sp=TRUE, fp=FALSE, RE=FALSE, RE.type="N", 
-                 NGQ=10, K=2, id=NULL, e.npRE=TRUE, pPen1 = NULL, pPen2 = NULL, 
+                 gamma=1, aut.sp=TRUE, fp=FALSE,  
+                 pPen1 = NULL, pPen2 = NULL, 
                  rinit=1, rmax=100, fterm=sqrt(.Machine$double.eps), 
                  mterm=sqrt(.Machine$double.eps), iterlimsp=50, pr.tolsp=1e-6,    
                  control.sp=list(maxit=50,tol=1e-6,step.half=25,
@@ -51,17 +50,17 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), weights=NULL,
             "G0", "G90", "G180", "G270", "F", "T" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
              Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Student-t.
-             Archimedean copulas with two parameters are also implemented; these are the Clayton-Gumbel and its rotated 
-             versions ("BB1.0","BB1.90","BB1.180","BB1.270"), Joe-Gumbel ("BB6.0","BB6.90","BB6.180","BB6.270"), 
-             Joe-Clayton ("BB7.0","BB7.90","BB7.180","BB7.270") and Joe-Frank ("BB8.0","BB8.90","BB8.180","BB8.270").} 
+             Archimedean copulas with two parameters are the Clayton-Gumbel and its rotated 
+             versions ("BB1.0","BB1.90","BB1.180","BB1.270"), 
+             Joe-Gumbel ("BB6.0","BB6.90","BB6.180","BB6.270"), 
+             Joe-Clayton ("BB7.0","BB7.90","BB7.180","BB7.270") and 
+             Joe-Frank ("BB8.0","BB8.90","BB8.180","BB8.270").} 
 
 \item{nu}{Degrees of freedom for Student-t.}
 
 \item{PL}{Power link function to be employed. Possible choices are "P" (classic probit), "PP" (power probit) and "RPP" (reciprocal power probit).}
 
 \item{eqPL}{Equation(s) on which the power link function approach should be applied. Possible choices are "both", "first" and "second".}
-
-\item{xi1,xi2}{Power or shape parameters of the link functions of the two equations if a power link approach is used.}
 
 \item{selection}{If \code{TRUE}, then the numerical routine for bivariate probit modelling in the presence of non-random sample selection is employed.}
 
@@ -75,19 +74,6 @@ is employed.}
               are set to the values obtained from the univariate fits.}
 
 \item{fp}{If \code{TRUE}, then a fully parametric model with regression splines if fitted. See the example below.}  
- 
-\item{RE}{If \code{TRUE}, then the routine for bivariate probit modelling with random effects is employed. In this case, 
-            data have to be provided ordered by cluster.}
-
-\item{RE.type}{If \code{RE=TRUE}, then two choices are possible: nonparametric random effects ("NP") and bivariate normal random effects ("N").}
-
-\item{NGQ}{Number of quadrature points.}
-
-\item{K}{If \code{RE.type="NP"}, then \code{K} represents the number of bivariate mass points and must be supplied. Default is 3.} 
-
-\item{id}{If \code{RE=TRUE}, then the individual random effect identifier must be supplied.} 
-
-\item{e.npRE}{If \code{RE.type="NP"}, then \code{e.npRE} indicates whether some extra iterations are carried out.}
 
 \item{pPen1,pPen2}{Optional list specifying any penalties to be applied to the parametric model terms of equations 1 and 2.}
 
@@ -140,9 +126,8 @@ problem is solved and (ii) the smoothing parameters of that problem estimated by
 convergence. Details of the underlying fitting methods are given in Radice, Marra and Wojtys (submitted). Releases previous to 3.2-7
 were based on the algorithms detailed in Marra and Radice (2011, 2013). 
 
-The use of parametric and nonparametric random effects is allowed for via the option \code{RE}. The nonparametric case
-is illustrated in Example 4 (Marra et al., in press), whereas the parametric one, in Example 5, will be completed soon. Asymmetric link functions
-are also available; see Marra and Radice (submitted) for details.
+
+Asymmetric link functions are available; see Marra and Radice (submitted) for details.
 
 }
 
@@ -163,8 +148,6 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 \references{
 
 Gu C. (1992), Cross validating non-Gaussian data. \emph{Journal of Computational and Graphical Statistics}, 1(2), 169-179.
-
-Marra G., Papageorgiou G. and Radice R. (in press), Estimation of a Semiparametric Recursive Bivariate Probit Model with Nonparametric Mixing. \emph{Australian & New Zealand Journal of Statistics}.
 
 Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
 Journal of Statistics}, 39(2), 259-279.
@@ -464,139 +447,13 @@ est.prev(outC)
 
 #
 #
-
-############
-## EXAMPLE 4
-############
-## Generate data with subject specific features 
-
-set.seed(0)
-
-n.cl <- 100
-n.ob.cl <- 13
-
-sre <- round( runif(n.cl,n.ob.cl,n.ob.cl+2) ) 
-t.n <- sum(sre) 
-id  <- rep(seq(1,n.cl),sre) 
-
-sigma1 <- 1
-sigma2 <- 2
-rho <- rho.re <- 0.5
-
-SigmaRE <- matrix(c(sigma1^2,            sigma1*sigma2*rho.re,
-                    sigma1*sigma2*rho.re,sigma2^2             ),2,2)
-                    
-u1 <- rmvnorm(n.cl,rep(0,2),SigmaRE,method="svd")
-u  <- cbind(rep(u1[,1],sre),rep(u1[,2],sre))
-
-
-Sigma  <- matrix(rho, 2, 2); diag(Sigma) <- 1
-eps    <- rmvnorm(t.n,rep(0,2),Sigma)
-
-SigmaC <- matrix(0.5, 3, 3); diag(SigmaC) <- 1
-cov    <- rmvnorm(t.n,rep(0,3),SigmaC, method="svd")
-
-x1 <- round(pnorm(cov[,1]))
-x2 <- pnorm(cov[,2])
-x3 <- cov[,3]
-
-f1 <- function(x) 0.5*(exp(x) + sin(2.9*x))
-f2 <- function(x) 1.8*(0.25*exp(x) - x^3)
-
-f1.x2 <- f1(x2) - mean(f1(x2)) 
-f2.x2 <- f2(x2) - mean(f2(x2))  
-
-y1 <- ifelse(u[,1] - 0.75*x1 + f1.x2 + x3 + eps[,1] > 0, 1, 0)
-y2 <- ifelse(u[,2] + 1*x1    + f2.x2      + eps[,2] > 0, 1, 0)
-
-dataSim <- data.frame(id,y1,y2,x1,x2,x3)
-
-
-out <- SemiParBIVProbit(y1 ~ x1 + s(x2) + x3,
-                        y2 ~ x1 + s(x2), 
-                        data=dataSim, RE=TRUE, RE.type="NP",
-                        K=3, id=dataSim$id)
-
-summary(out)
-
-x2s <- sort(x2)
-f1.x2 <- f1.x2[order(x2)]
-f2.x2 <- f2.x2[order(x2)]
-
-par(mfrow=c(1,2))
-plot(out, eq=1, scale=0); lines(x2s, f1.x2, col="red")
-plot(out, eq=2, scale=0); lines(x2s, f2.x2, col="red")
-
-
-
-############
-## EXAMPLE 5
-############
-## Generate data for bivariate normal random effect case
-
-set.seed(0) 
-
-# clusters; obs per cluster; total obs
-
-N   <- 200
-rps <- round(runif(N,4,7))
-n   <- sum(rps)
-
-# cluster identifier
-
-id <- rep(seq(1,N),rps)
-
-# normal error terms: eps
-
-Sigma.e <- matrix(c(1,0.5,0.5,1),2,2)
-eps     <- rmvnorm(n,rep(0,2),Sigma.e)
-
-# normal random effects: u
-# s1^2, rho*s1*s2,rho*s1*s2,s2^2
-
-s1 <- 0.5; s2 <- 1.25; rho <- -0.4
-
-Sigma.u <- matrix(c(s1^2,rho*s1*s2,rho*s1*s2,s2^2),2,2)
-u       <- rmvnorm(N,rep(0,2),Sigma.u)
-
-u1 <- rep(u[,1],rps)
-u2 <- rep(u[,2],rps)
-
-# predictors
-
-SigmaC <- matrix(0.5, 3, 3); diag(SigmaC) <- 1
-cov    <- rmvnorm(n,rep(0,3),SigmaC, method="svd")
-cov    <- pnorm(cov)
-
-x1 <- round(runif(n))
-x2 <- runif(n)
-x3 <- runif(n)
-
-# responses
-
-y1 <- ifelse(-1.15 + 2*x1 - x2 + x3 + u1 + eps[,1] > 0, 1, 0)
-y2 <- ifelse(1.55 - 1.5*x1 + 1.1*x2 + 0.5*x3 + u2 + eps[,2] > 0, 1, 0)
-
-dataSim <- data.frame(id,y1,y2,x1,x2,x3)
-
-out <- SemiParBIVProbit(y1 ~ x1 + x2 + x3,
-                        y2 ~ x1 + x2 + x3, 
-                        data=dataSim, RE=TRUE, RE.type="N",
-                        id=dataSim$id)
-sem.checks(out)
-summary(out)
-
 }
-
-#
-#
 }
 
 \keyword{asymmetric link function}
 \keyword{non-random sample selection}
 \keyword{semiparametric bivariate probit modelling} 
 \keyword{bivariate probit model} 
-\keyword{nonparametric random effects} 
 \keyword{endogeneity} 
 \keyword{smooth} 
 \keyword{regression spline}

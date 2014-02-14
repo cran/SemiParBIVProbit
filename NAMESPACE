@@ -3,32 +3,26 @@ bprobgHs,bprobgHsBB,
 bprobgHsPL,
 copgHs,copgHsBB,
 bprobgHsSS,bprobgHsSSBB,bprobgHsSSPL,
-bprobgHs.NPRE,bprobgHs.NRE,
-EBNormal,
-extraiterNP,
 logLik.SemiParBIVProbit,
 LM.bpm,
 VuongClarke.bcm,
-NP.qu,
 plot.SemiParBIVProbit,
 predict.SemiParBIVProbit,
 print.AT,print.est.prev,
 print.SemiParBIVProbit,
 print.summary.SemiParBIVProbit,
 residuals.SemiParBIVProbit,
-S.m,
+S.m,S.mPL,
 sem.checks,
 SemiParBIVProbit.fit.post,
 SemiParBIVProbit.fit,
 SemiParBIVProbit,
 startSS,
 summary.SemiParBIVProbit,
-working.comp,
-working.compNP)
+working.comp)
 
 importFrom(MASS, ginv)
 importFrom(magic, adiag)
-importFrom(statmod, gauss.quad)
 importFrom(polycor, polychor)
 importFrom(survey, svyrecvar, twophasevar, twophase2var, svyCprod)
 importFrom(trust,trust)
@@ -38,6 +32,7 @@ importFrom(VineCopula, BiCopHfuncDeriv)
 importFrom(CDVine,BiCopCDF,BiCopPar2Tau)
 importFrom(mgcv)
 importFrom(matrixStats,rowVars)
+importFrom(Matrix,nearPD,bdiag,chol,chol2inv,Matrix)
 
 S3method(plot, SemiParBIVProbit)
 S3method(summary, SemiParBIVProbit)

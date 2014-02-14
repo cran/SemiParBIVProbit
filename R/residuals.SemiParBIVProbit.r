@@ -1,6 +1,5 @@
 residuals.SemiParBIVProbit <- function(object,...){
 
-if(object$RE==TRUE) stop("Residuals for models with random effects not implemented yet.")
 if(object$selection==TRUE) stop("Current residual definition for models with non-random sample selection not meaningful.")
   
   der.1 <- object$fit$dl.dbe1
