@@ -1,4 +1,4 @@
-bprobgHsPL <- function(params, BivD, nC, nu, sp.xi1, sp.xi2, PL, eqPL, H.n, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, weights=weights, X1.d2, X2.d2, pPen1=NULL, pPen2=NULL, sp=NULL, qu.mag=NULL, gp1, gp2, fp, l.sp1, l.sp2){
+bprobgHsPL <- function(params, BivD, nC, nu, sp.xi1, sp.xi2, PL, eqPL, valPL, fitPL, H.n, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, weights=weights, X1.d2, X2.d2, pPen1=NULL, pPen2=NULL, sp=NULL, qu.mag=NULL, gp1, gp2, fp, l.sp1, l.sp2){
 
 dl.dlambda1.st <- dl.dlambda2.st <- d2l.be1.lambda1 <- d2l.be1.lambda2 <- d2l.be2.lambda1 <- d2l.be2.lambda2 <- d2l.rho.lambda1 <- d2l.rho.lambda2 <- d2l.lambda1.lambda1 <- d2l.lambda2.lambda2 <- d2l.lambda1.lambda2 <- NA 
 
@@ -7,6 +7,18 @@ dl.dlambda1.st <- dl.dlambda2.st <- d2l.be1.lambda1 <- d2l.be1.lambda2 <- d2l.be
   eta1 <- X1%*%params[1:X1.d2]
   eta2 <- X2%*%params[(X1.d2+1):(X1.d2+X2.d2)]
   teta.st    <- params[(X1.d2+X2.d2+1)]
+  
+  
+if(PL=="PP" || PL=="RPP"){  
+  
+if(fitPL=="fixed"){
+
+  lambda1.st <- valPL[1]
+  lambda2.st <- valPL[2]
+  lambda1 <- exp(lambda1.st)+ epsilon  
+  lambda2 <- exp(lambda2.st)+ epsilon
+
+}else{
   
 if(eqPL=="both"){  
   lambda1.st <- params[(X1.d2+X2.d2+2)]
@@ -27,8 +39,52 @@ if(eqPL=="second"){
   lambda2 <- exp(lambda2.st)+ epsilon
 }
 
-  #lambda1 <- xi1 
-  #lambda2 <- xi2
+}
+
+
+}
+
+if(PL=="SN"){  
+
+if(fitPL=="fixed"){
+
+  lambda1.st <- valPL[1]
+  lambda2.st <- valPL[2]
+  lambda1 <- lambda1.st
+  lambda2 <- lambda2.st
+  del1 <- -lambda1/sqrt(1+lambda1^2)
+  del2 <- -lambda2/sqrt(1+lambda2^2)
+
+}else{
+
+if(eqPL=="both"){  
+  lambda1.st <- params[(X1.d2+X2.d2+2)]
+  lambda2.st <- params[(X1.d2+X2.d2+3)]
+  lambda1 <- lambda1.st
+  lambda2 <- lambda2.st
+  del1 <- -lambda1/sqrt(1+lambda1^2)
+  del2 <- -lambda2/sqrt(1+lambda2^2)
+}
+if(eqPL=="first"){  
+  lambda1.st <- params[(X1.d2+X2.d2+2)]
+  lambda2.st <- 0 
+  lambda1 <- lambda1.st
+  lambda2 <- lambda2.st
+  del1 <- -lambda1/sqrt(1+lambda1^2)
+
+}
+if(eqPL=="second"){  
+  lambda1.st <- 0
+  lambda2.st <- params[(X1.d2+X2.d2+2)]
+  lambda1 <- lambda1.st 
+  lambda2 <- lambda2.st
+  del2 <- -lambda2/sqrt(1+lambda2^2)
+}
+
+}
+
+
+}
 
   
   if(PL=="PP"){
@@ -96,6 +152,42 @@ if(eqPL=="second"){
   
   }
   
+  
+  
+  if(PL=="SN"){  
+  
+      if(eqPL=="both"){
+  
+      p1 <- 2*pbinorm( eta1, 0, cov12=del1)
+      p2 <- 2*pbinorm( eta2, 0, cov12=del2)
+      d.n1 <- 2*dnorm(eta1)*pnorm(lambda1*eta1)
+      d.n2 <- 2*dnorm(eta2)*pnorm(lambda2*eta2)
+    
+      }
+    
+      if(eqPL=="first"){
+    
+      p1 <- 2*pbinorm( eta1, 0, cov12=del1)
+      p2 <- pnorm(eta2)
+      d.n1 <- 2*dnorm(eta1)*pnorm(lambda1*eta1)
+      d.n2 <- dnorm(eta2)
+      
+      }
+      
+      if(eqPL=="second"){
+    
+      p1 <- pnorm(eta1)
+      p2 <- 2*pbinorm( eta2, 0, cov12=del2)
+      d.n1 <- dnorm(eta1)
+      d.n2 <- 2*dnorm(eta2)*pnorm(lambda2*eta2)
+      
+      }    
+    
+   
+  }
+  
+
+  
 
   criteria <- c(0,1)
   no.good <- apply(apply(cbind(p1,p2), c(1,2), `%in%`, criteria), 1, any)
@@ -145,10 +237,14 @@ c.copula.be1   <- dH$c.copula.be1
 c.copula.be2   <- dH$c.copula.be2
 c.copula.theta <- dH$c.copula.theta 
 
+if(fitPL!="fixed"){
+
 if(eqPL=="both"){c.copula.lambda1 <- dH$c.copula.lambda1
                  c.copula.lambda2 <- dH$c.copula.lambda2}
 if(eqPL=="first")  c.copula.lambda1 <- dH$c.copula.lambda1
 if(eqPL=="second") c.copula.lambda2 <- dH$c.copula.lambda2
+
+}
 
 
 c.copula2.be1    <- dH$c.copula2.be1   
@@ -160,6 +256,8 @@ bit1.th2         <- dH$bit1.th2
 der.d.n1.be1     <- dH$der.d.n1.be1     
 der.d.n2.be2     <- dH$der.d.n2.be2  
 
+
+if(fitPL!="fixed"){
 
 if(eqPL=="both"){
 bit1.lambda1.2       <- dH$bit1.lambda1.2
@@ -201,7 +299,7 @@ der2.p2.lambda2  <- dH$der2.p2.lambda2
 der.d.n2.lambda2 <- dH$der.d.n2.lambda2
 }
 
-
+}
 
 
 
@@ -233,6 +331,11 @@ bit4.b2th <- bit1.b2th
 bit2.th2 <- -bit1.th2 
 bit3.th2 <- -bit1.th2 
 bit4.th2 <- bit1.th2 
+
+
+
+if(fitPL!="fixed"){
+
 
 if(eqPL=="both"){  
 
@@ -320,6 +423,8 @@ bit4.thlambda2 <- bit1.thlambda2
 
 }
 
+}
+
 
 
   dl.dbe1 <-  weights*d.n1*( (y1.y2*c.copula.be1/p11)  +
@@ -334,6 +439,13 @@ bit4.thlambda2 <- bit1.thlambda2
 
   dl.drho <- weights*( y1.y2*c.copula.theta/p11+y1.cy2*(-c.copula.theta)/p10 + 
                        cy1.y2*(-c.copula.theta)/p01+cy1.cy2*c.copula.theta/p00 ) 
+
+
+
+
+if(fitPL!="fixed"){
+
+
 
 if(eqPL=="both"){ 
 
@@ -356,6 +468,8 @@ if(eqPL=="second"){
   
   dl.dlambda2.st <- weights*(y1.y2*c.copula.lambda2/p11+y1.cy2*(-c.copula.lambda2)/p10 + 
                        cy1.y2*(der.p2.lambda2-c.copula.lambda2)/p01+cy1.cy2*(c.copula.lambda2-der.p2.lambda2)/p00)
+
+}
 
 }
 
@@ -389,6 +503,11 @@ if(eqPL=="second"){
                               y1.cy2*(bit2.th2*p10-(-c.copula.theta)^2)/p10^2+
                               cy1.y2*(bit3.th2*p01-(-c.copula.theta)^2)/p01^2+
                               cy1.cy2*(bit4.th2*p00-c.copula.theta^2)/p00^2 )
+
+
+
+if(fitPL!="fixed"){
+
 
 
 if(eqPL=="both"){  
@@ -500,11 +619,18 @@ if(eqPL=="second"){
 }
 
 
+}
+
+
   be1.be1 <- crossprod(X1*c(d2l.be1.be1),X1)
   be2.be2 <- crossprod(X2*c(d2l.be2.be2),X2)
   be1.be2 <- crossprod(X1*c(d2l.be1.be2),X2)
   be1.rho <- t(t(rowSums(t(X1*c(d2l.be1.rho)))))
   be2.rho <- t(t(rowSums(t(X2*c(d2l.be2.rho)))))
+  
+  
+  
+if(fitPL!="fixed"){  
   
 if(eqPL=="both"){ 
   be1.lambda1 <- t(t(rowSums(t(X1*c(d2l.be1.lambda1)))))
@@ -521,7 +647,7 @@ if(eqPL=="second"){
   be1.lambda2 <- t(t(rowSums(t(X1*c(d2l.be1.lambda2)))))
 }
 
-
+}
 
 
   H <- rbind( cbind( be1.be1    , be1.be2    , be1.rho ), 
@@ -534,7 +660,7 @@ if(eqPL=="second"){
                    sum( dl.drho )  ) 
 
 
-
+if(fitPL!="fixed"){
 
 
 if(eqPL=="both"){  
@@ -588,6 +714,17 @@ G <- -c(G, sum( dl.dlambda2.st ) )
 
 }
 
+
+
+
+}
+
+
+
+
+
+
+
     res <- -sum(l.par)
 
     if(eqPL=="both"){   add.z <- diag(c(1,1)); add.z <- add.z*c(sp.xi1,sp.xi2); nsh <- 2  } 
@@ -596,8 +733,10 @@ G <- -c(G, sum( dl.dlambda2.st ) )
 
 
 if( ( l.sp1==0 && l.sp2==0 ) || fp==TRUE){ 
+
     lps <- length(params) - nsh 
     S.h <- adiag( matrix(0,lps,lps), add.z) 
+    
                                          }else{
         
     dimP1 <- dimP2 <- 0     
@@ -628,20 +767,38 @@ if( ( l.sp1==0 && l.sp2==0 ) || fp==TRUE){
     
     lS1 <- length(S1); lS2 <- length(S2) 
 
+if(fitPL!="fixed"){
+
     if(lS1==1 && lS2==1) S.h <- adiag(ma1, ma2, 0, add.z)
     if(lS1 >1 && lS2==1) S.h <- adiag(ma1, S1, ma2, 0, add.z)
     if(lS1==1 && lS2 >1) S.h <- adiag(ma1, ma2, S2, 0, add.z)
     if(lS1 >1 && lS2 >1) S.h <- adiag(ma1, S1, ma2, S2, 0, add.z)
         
+  }else{
+  
+    if(lS1==1 && lS2==1) S.h <- adiag(ma1, ma2, 0)
+    if(lS1 >1 && lS2==1) S.h <- adiag(ma1, S1, ma2, 0)
+    if(lS1==1 && lS2 >1) S.h <- adiag(ma1, ma2, S2, 0)
+    if(lS1 >1 && lS2 >1) S.h <- adiag(ma1, S1, ma2, S2, 0)
+  
+  }
+        
+        
          }
+         
+         
+         
+         
+         
 
    S.h1 <- 0.5*crossprod(params,S.h)%*%params
    S.h2 <- S.h%*%params
 
-
+         if(fitPL=="fixed") G <- -G
          S.res <- res
          res <- S.res + S.h1
          G   <- G + S.h2
+        
          H   <- H + S.h  
 
          list(value=res, gradient=G, hessian=H, S.h=S.h, l=S.res, l.par=l.par, 

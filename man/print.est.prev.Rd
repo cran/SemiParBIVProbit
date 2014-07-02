@@ -8,7 +8,7 @@
 \usage{
 
 
-\method{print}{est.prev}(x,...)
+\method{print}{est.prev}(x, ...)
 
 
 }

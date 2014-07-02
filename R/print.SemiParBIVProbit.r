@@ -43,10 +43,15 @@ print.SemiParBIVProbit <- function(x,...){
   cat("\n\nEQUATION 1")
   if(x$PL=="P") cat("\nLink function: probit\n")
 
-  if(x$PL!="P"){ 
-    if(x$xi1==1) cat("\nLink function: probit\n") else{ 
+  if(x$PL=="PP" || x$PL=="RPP"){ 
+    if(round(x$xi1,3)==1) cat("\nLink function: probit\n") else{ 
   if(x$PL=="PP") cat("\nLink function: power probit\n") 
   if(x$PL=="RPP") cat("\nLink function: reciprocal power probit\n") }
+  }
+  
+    if(x$PL=="SN"){ 
+      if(round(x$xi1,3)==0) cat("\nLink function: probit\n") else 
+    cat("\nLink function: skew normal\n") 
   }
 
 
@@ -54,11 +59,20 @@ print.SemiParBIVProbit <- function(x,...){
 
   cat("\nEQUATION 2")
   if(x$PL=="P") cat("\nLink function: probit\n")
-  if(x$PL!="P"){ 
-    if(x$xi2==1) cat("\nLink function: probit\n") else{  
+  
+  if(x$PL=="PP" || x$PL=="RPP"){ 
+    if(round(x$xi2,3)==1) cat("\nLink function: probit\n") else{  
   if(x$PL=="PP") cat("\nLink function: power probit\n") 
   if(x$PL=="RPP") cat("\nLink function: reciprocal power probit\n") }
 }
+
+    if(x$PL=="SN"){ 
+      if(round(x$xi2,3)==0) cat("\nLink function: probit\n") else 
+    cat("\nLink function: skew normal\n") 
+  }
+
+
+
   print(x$gam2$formula)
   cat("\n")
 

@@ -9,7 +9,7 @@ The Vuong and Clarke tests are likelihood-ratio-based tests that can be used for
 
 \usage{
 
-VuongClarke.bcm(obj1, obj2, sig.lev=0.05)
+VuongClarke.bcm(obj1, obj2, sig.lev = 0.05)
 
 }
 
@@ -55,7 +55,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 Clarke K. (2007), A Simple Distribution-Free Test for Non-Nested Model Selection. \emph{Political Analysis}, 15, 347-363.
 
-Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes with Application in Health Care Utilization.
+Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes.
 
 Vuong Q.H. (1989), Likelihood Ratio Tests for Model Selection and Non-Nested Hypotheses. \emph{Econometrica}, 57(2), 307-333. 
 

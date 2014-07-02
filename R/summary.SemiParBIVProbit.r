@@ -1,4 +1,4 @@
-summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05,thrs1=0.5,thrs2=0.5,...){
+summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",prob.lev=0.05,thrs1=0.5,thrs2=0.5,...){
 
   testStat <- function (p, X, V, rank = NULL) {
       qrx <- qr(X)
@@ -88,7 +88,7 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
 
   if(object$BivD %in% bb ) lf.n <- lf-1
 
-  if(object$PL != "P") { if(object$eqPL=="both") lf.n <- lf-2 else lf.n <- lf-1 }
+  if(object$PL != "P" && object$fitPL!="fixed") { if(object$eqPL=="both") lf.n <- lf-2 else lf.n <- lf-1 }
 
    if(object$BivD %in% c("N","T"))      {est.RHOb <- tanh(bs[,lf.n ]); est.RHOb <- ifelse(est.RHOb %in% c(-1,1), sign(est.RHOb)*0.9999999, est.RHOb)}
    if(object$BivD=="F")                  est.RHOb <- bs[,lf.n ] + epsilon
@@ -119,19 +119,25 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",sig.lev=0.05
    
    for(i in 1:n.sim) est.KeTb[i] <- BiCopPar2Tau(object$nC,est.RHOb[i],par2=asp2[i]) # this is not efficient but the function gives problems with vectors...
 
-   if(object$PL!="P"){ if(object$eqPL=="both"){   est.l1 <- exp(bs[, lf.n+1 ]) + epsilon; est.l2 <- exp(bs[,lf ]) + epsilon}
+   if((object$PL=="PP" || object$PL=="RPP") && object$fitPL!="fixed"){ if(object$eqPL=="both"){   est.l1 <- exp(bs[, lf.n+1 ]) + epsilon; est.l2 <- exp(bs[,lf ]) + epsilon}
                        if(object$eqPL=="first"){  est.l1 <- exp(bs[, lf ]) + epsilon;     est.l2 <- 1}
                        if(object$eqPL=="second"){ est.l2 <- exp(bs[, lf ]) + epsilon;     est.l1 <- 1}
                      }  
+                     
+   if(object$PL=="SN" && object$fitPL!="fixed"){ if(object$eqPL=="both"){   est.l1 <- bs[, lf.n+1 ]; est.l2 <- bs[,lf ]}
+                       if(object$eqPL=="first"){  est.l1 <- bs[, lf ];     est.l2 <- 0}
+                       if(object$eqPL=="second"){ est.l2 <- bs[, lf ];     est.l1 <- 0}
+                     }                       
 
              
-  CIrs <- as.numeric(quantile(est.RHOb,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
-  CIkt <- as.numeric(quantile(est.KeTb,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
-  if(object$PL != "P"){
-                       CIl1 <- as.numeric(quantile(est.l1,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
-                       CIl2 <- as.numeric(quantile(est.l2,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
+  CIrs <- as.numeric(quantile(est.RHOb,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
+  CIkt <- as.numeric(quantile(est.KeTb,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
+  
+  if(object$PL != "P" && object$fitPL!="fixed"){
+                       CIl1 <- as.numeric(quantile(est.l1,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
+                       CIl2 <- as.numeric(quantile(est.l2,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
                        }
-  if(object$BivD %in% bb ) CId <- as.numeric(quantile(ass.ps2,c(sig.lev/2,1-sig.lev/2),na.rm=TRUE))
+  if(object$BivD %in% bb ) CId <- as.numeric(quantile(ass.ps2,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
 
                      
   ind <- list(ind1=1:(object$gam1$nsdf),ind2=object$X1.d2+(1:(object$gam2$nsdf)))

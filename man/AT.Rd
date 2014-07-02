@@ -10,8 +10,8 @@
 
 \usage{
 
-AT(x, eq, nm.bin="", E=TRUE, treat=TRUE, delta=FALSE, sig.lev=0.05, 
-   s.meth="svd", n.sim=1000)
+AT(x, eq, nm.bin = "", E = TRUE, treat = TRUE, delta = FALSE, prob.lev = 0.05, 
+   s.meth = "svd", n.sim = 1000)
 
 }
 
@@ -26,18 +26,18 @@ AT(x, eq, nm.bin="", E=TRUE, treat=TRUE, delta=FALSE, sig.lev=0.05,
 \item{E}{If \code{TRUE}, then \code{AT} calculates the sample ATE. If \code{FALSE}, then it calculates the sample AT for the treated individuals only.}  
 
 \item{treat}{If \code{TRUE}, then \code{AT} calculates the AT using the treated only. If \code{FALSE}, then it calculates the effect on 
-the control group. This only makes sense if used jointly with \code{E=FALSE}.}  
+the control group. This only makes sense if used jointly with \code{E = FALSE}.}  
 
 \item{delta}{If \code{TRUE} then an approximate delta method is used for confidence interval calculation, otherwise Bayesian posterior simulation (the most reliable option, despite a bit slower) 
-             is employed. Note that for models including random effects in the linear predictors or power link functions only posterior simulation is allowed for.}  
+             is employed. Note that for models involving asymmetric link functions only posterior simulation is allowed for.}  
 
-\item{sig.lev}{Significance level.} 
+\item{prob.lev}{Probability of the left and right tails of the posterior distribution used for interval calculations.} 
 
 \item{n.sim}{Number of simulated coefficient vectors from the posterior distribution of the estimated model parameters. This is used 
-             when \code{delta=FALSE}.} 
+             when \code{delta = FALSE}.} 
 
 \item{s.meth}{Matrix decomposition used to determine the matrix root of the covariance 
-              matrix. This is used when \code{delta=FALSE}. See the documentation of the \code{mvtnorm} package for further details.}
+              matrix. This is used when \code{delta = FALSE}. See the documentation of the \code{mvtnorm} package for further details.}
 
 
 
@@ -59,7 +59,7 @@ control (the binary treatment assumes value 0). See the references below for det
 
 \item{res}{It returns three values: lower confidence interval limit, estimated AT and upper confidence interval limit.}
 \item{sig.lev}{Significance level used.}
-\item{est.ATb}{When \code{delta=FALSE} it returns a vector containing simulated values of the average treatment effect. This is used to calculate intervals.}
+\item{est.ATb}{When \code{delta = FALSE} it returns a vector containing simulated values of the average treatment effect. This is used to calculate intervals.}
 
 }
 
@@ -78,7 +78,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
 Journal of Statistics}, 39(2), 259-279.
 
-Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes with Application in Health Care Utilization.
+Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes.
 
 
 }

@@ -8,7 +8,7 @@
 \usage{
 
 
-\method{print}{SemiParBIVProbit}(x,...)
+\method{print}{SemiParBIVProbit}(x, ...)
 
 
 }

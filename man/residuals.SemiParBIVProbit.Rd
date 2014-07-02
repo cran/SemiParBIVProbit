@@ -11,7 +11,7 @@
 \usage{
 
 
-\method{residuals}{SemiParBIVProbit}(object,...)
+\method{residuals}{SemiParBIVProbit}(object, ...)
 
 }
 

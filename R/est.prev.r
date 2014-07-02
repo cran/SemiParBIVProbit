@@ -1,6 +1,6 @@
 est.prev <- function(x, sig.lev=0.05, sw=NULL, naive=FALSE){
 
-if(x$sel!=TRUE) stop("This function is suitable for sample selection models only.")
+if(x$sel!=TRUE || x$PL!="P") stop("This function is suitable only for sample selection models with probit links.")
 
 good <- x$good
 eta2 <- x$eta2[good]

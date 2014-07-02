@@ -16,15 +16,16 @@ product smooths.
 
 
 \usage{
-SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), weights=NULL,  
-                 start.v=NULL, BivD="N", nu=3, PL="P", eqPL="both", 
-                 selection=FALSE, H.n=TRUE, 
-                 gamma=1, aut.sp=TRUE, fp=FALSE,  
-                 pPen1 = NULL, pPen2 = NULL, 
-                 rinit=1, rmax=100, fterm=sqrt(.Machine$double.eps), 
-                 mterm=sqrt(.Machine$double.eps), iterlimsp=50, pr.tolsp=1e-6,    
-                 control.sp=list(maxit=50,tol=1e-6,step.half=25,
-                                 rank.tol=sqrt(.Machine$double.eps)) )
+SemiParBIVProbit(formula.eq1, formula.eq2, data = list(), weights = NULL,  
+                 start.v = NULL, BivD = "N", nu = 3, PL = "P", eqPL = "both", 
+                 valPL=c(0,0), fitPL="pLiksp", spPL=c(0.01,0.01), 
+                 selection = FALSE, H.n = TRUE, gamma = 1, aut.sp = TRUE, 
+                 fp = FALSE, pPen1 = NULL, pPen2 = NULL, rinit = 1, rmax = 100, 
+                 fterm = sqrt(.Machine$double.eps), 
+                 mterm = sqrt(.Machine$double.eps), 
+                 iterlimsp = 50, pr.tolsp = 1e-6,    
+                 control.sp = list(maxit = 50, tol = 1e-6, step.half = 25,
+                                   rank.tol = sqrt(.Machine$double.eps)) )
 }
 
 
@@ -50,25 +51,30 @@ SemiParBIVProbit(formula.eq1, formula.eq2, data=list(), weights=NULL,
             "G0", "G90", "G180", "G270", "F", "T" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
              Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Student-t.
-             Archimedean copulas with two parameters are the Clayton-Gumbel and its rotated 
-             versions ("BB1.0","BB1.90","BB1.180","BB1.270"), 
-             Joe-Gumbel ("BB6.0","BB6.90","BB6.180","BB6.270"), 
-             Joe-Clayton ("BB7.0","BB7.90","BB7.180","BB7.270") and 
-             Joe-Frank ("BB8.0","BB8.90","BB8.180","BB8.270").} 
+             Archimedean copulas with two parameters are the Clayton-Gumbel and its rotated versions ("BB1.0", "BB1.90", "BB1.180", "BB1.270"), Joe-Gumbel ("BB6.0", "BB6.90", "BB6.180", "BB6.270"), Joe-Clayton ("BB7.0", "BB7.90", "BB7.180", "BB7.270") and Joe-Frank ("BB8.0", "BB8.90", "BB8.180", "BB8.270").} 
 
 \item{nu}{Degrees of freedom for Student-t.}
 
-\item{PL}{Power link function to be employed. Possible choices are "P" (classic probit), "PP" (power probit) and "RPP" (reciprocal power probit).}
+\item{PL}{Link function to be employed. Possible choices are "P" (classic probit), "PP" (power probit), "RPP" (reciprocal power probit) and "SN" (skew normal).}
 
-\item{eqPL}{Equation(s) on which the power link function approach should be applied. Possible choices are "both", "first" and "second".}
+\item{eqPL}{Equation(s) on which the asymmetric link function approach should be applied. Possible choices are "both", "first" and "second".}
+
+\item{valPL}{Initial values for link function shape parameters when an asymmetric link fucntion approach is employed.}
+
+\item{fitPL}{Fitting approach for shape parameters of the asymmetric link functions employed. Possible choices 
+             are "fixed", "unpLik", "pLik" and "pLiksp" which stand for fixed shape parameters, classic likelihood optimization, penalized likelihood with fixed
+             smoothing parameters and penalized likelihood with automatic smoothing parameter selection.}
+             
+\item{spPL}{Values for the smoothing parameters of the ridge penalties associated with the shape parameteres of the asymmetric 
+            link functions.}             
 
 \item{selection}{If \code{TRUE}, then the numerical routine for bivariate probit modelling in the presence of non-random sample selection is employed.}
 
-\item{H.n}{For \code{BivD="N"} only, if \code{FALSE} then the expected (rather than observed) information matrix 
+\item{H.n}{For \code{BivD = "N"} only, if \code{FALSE} then the expected (rather than observed) information matrix 
 is employed.}
 
 \item{gamma}{Inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
-             this parameter to a value greater than 1. Typically \code{gamma=1.4} achieves this.}
+             this parameter to a value greater than 1. Typically \code{gamma = 1.4} achieves this.}
 
 \item{aut.sp}{If \code{TRUE}, then automatic multiple smoothing parameter selection is carried out. If \code{FALSE}, then smoothing parameters 
               are set to the values obtained from the univariate fits.}
@@ -156,11 +162,11 @@ Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Sem
 
 Marra G. and Radice R. (submitted), On the Use of Asymmetric Link Functions in Copula Regression Spline Models for Bivariate Binary Responses.
 
-Marra G., Radice R. and Missiroli S. (in press), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}.
+Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}, 29(3-4), 715-741.
 
 Marra G., Radice R. and Filippou P. (submitted), Testing the Hypothesis of Exogeneity in Regression Spline Bivariate Probit Models.
 
-Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes with Application in Health Care Utilization.
+Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes.
 
 Wood S.N. (2004), Stable and efficient multiple smoothing parameter estimation for generalized additive models. \emph{Journal of the American Statistical Association}, 99(467), 673-686.
 
@@ -198,7 +204,7 @@ set.seed(0)
 n <- 400
 
 Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
-u     <- rmvnorm(n,rep(0,2),Sigma)
+u     <- rmvnorm(n, rep(0,2), Sigma)
 
 x1 <- round(runif(n)); x2 <- runif(n); x3 <- runif(n)
 
@@ -208,7 +214,7 @@ f2   <- function(x) x+exp(-30*(x-0.5)^2)
 y1 <- ifelse(-1.55 + 2*x1    + f1(x2) + u[,1] > 0, 1, 0)
 y2 <- ifelse(-0.25 - 1.25*x1 + f2(x2) + u[,2] > 0, 1, 0)
 
-dataSim <- data.frame(y1,y2,x1,x2,x3)
+dataSim <- data.frame(y1, y2, x1, x2, x3)
 
 #
 #
@@ -217,7 +223,7 @@ dataSim <- data.frame(y1,y2,x1,x2,x3)
 
 out  <- SemiParBIVProbit(y1 ~ x1 + x2 + x3, 
                          y2 ~ x1 + x2 + x3, 
-                         data=dataSim)
+                         data = dataSim)
 summary(out)
 AIC(out)
 BIC(out)
@@ -230,9 +236,9 @@ BIC(out)
 ## k is the basis dimension - default is 10
 ## m is the order of the penalty for the specific term - default is 2
 
-out  <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cr",k=10,m=2) + s(x3,bs="cr",k=10), 
-                         y2 ~ x1 + s(x2,bs="cr",k=10)     + s(x3,bs="cr",k=10), 
-                         data=dataSim)
+out  <- SemiParBIVProbit(y1 ~ x1 + s(x2, bs = "tp", k = 10, m = 2) + s(x3), 
+                         y2 ~ x1 + s(x2) + s(x3), 
+                         data = dataSim)
 sem.checks(out)
 summary(out)
 AIC(out)
@@ -241,38 +247,38 @@ AIC(out)
 ## estimated smooth function plots - red lines are true curves
 
 x2 <- sort(x2)
-f1.x2 <- f1(x2)[order(x2)]-mean(f1(x2))
-f2.x2 <- f2(x2)[order(x2)]-mean(f2(x2))
-f3.x3 <- rep(0,length(x3))
+f1.x2 <- f1(x2)[order(x2)] - mean(f1(x2))
+f2.x2 <- f2(x2)[order(x2)] - mean(f2(x2))
+f3.x3 <- rep(0, length(x3))
 
 par(mfrow=c(2,2),mar=c(4.5,4.5,2,2))
-plot(out, eq=1, select=1, scale=0); lines(x2, f1.x2, col="red")
-plot(out, eq=1, select=2, scale=0); lines(x3, f3.x3, col="red")
-plot(out, eq=2, select=1, scale=0); lines(x2, f2.x2, col="red")
-plot(out, eq=2, select=2, scale=0); lines(x3, f3.x3, col="red")
+plot(out, eq = 1, select = 1, scale = 0); lines(x2, f1.x2, col = "red")
+plot(out, eq = 1, select = 2, scale = 0); lines(x3, f3.x3, col = "red")
+plot(out, eq = 2, select = 1, scale = 0); lines(x2, f2.x2, col = "red")
+plot(out, eq = 2, select = 2, scale = 0); lines(x3, f3.x3, col = "red")
 
 #
 ## same plots but CIs 'with intercept' 
 
 par(mfrow=c(2,2),mar=c(4.5,4.5,2,2))
-plot(out, eq=1, select=1, seWithMean=TRUE, scale=0); lines(x2, f1.x2, col="red")
-plot(out, eq=1, select=2, seWithMean=TRUE, scale=0); lines(x3, f3.x3, col="red")
-plot(out, eq=2, select=1, seWithMean=TRUE, scale=0); lines(x2, f2.x2, col="red")
-plot(out, eq=2, select=2, seWithMean=TRUE, scale=0); lines(x3, f3.x3, col="red")
+plot(out, eq = 1, select = 1, seWithMean = TRUE, scale = 0); lines(x2, f1.x2, col = "red")
+plot(out, eq = 1, select = 2, seWithMean = TRUE, scale = 0); lines(x3, f3.x3, col = "red")
+plot(out, eq = 2, select = 1, seWithMean = TRUE, scale = 0); lines(x2, f2.x2, col = "red")
+plot(out, eq = 2, select = 2, seWithMean = TRUE, scale = 0); lines(x3, f3.x3, col = "red")
 
 
 ## p-values suggest to drop x3 from both equations, with a stronger 
 ## evidence for eq. 2. This can be also achieved using shrinkage smoothers
 
-outSS <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cs") + s(x3,bs="cs"), 
-                          y2 ~ x1 + s(x2,bs="cs") + s(x3,bs="cs"), 
-                          data=dataSim)
+outSS <- SemiParBIVProbit(y1 ~ x1 + s(x2, bs = "cs") + s(x3, bs = "cs"), 
+                          y2 ~ x1 + s(x2, bs = "cs") + s(x3, bs = "cs"), 
+                          data = dataSim)
 
-par(mfrow=c(2,2),mar=c(4.5,4.5,2,2))
-plot(outSS, eq=1, select=1, scale=0)
-plot(outSS, eq=1, select=2, ylim=c(-0.1,0.1))
-plot(outSS, eq=2, select=1, scale=0)
-plot(outSS, eq=2, select=2, ylim=c(-0.1,0.1))
+par(mfrow = c(2,2), mar = c(4.5,4.5,2,2))
+plot(outSS, eq = 1, select = 1, scale = 0)
+plot(outSS, eq = 1, select = 2, ylim = c(-0.1,0.1))
+plot(outSS, eq = 2, select = 1, scale = 0)
+plot(outSS, eq = 2, select = 2, ylim = c(-0.1,0.1))
 
 #
 #
@@ -282,14 +288,16 @@ plot(outSS, eq=2, select=2, ylim=c(-0.1,0.1))
 ############
 ## Generate data with one endogenous variable and exclusion restriction
 
+\dontrun{ 
+
 set.seed(0)
 
 n <- 300
 
 Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
-u     <- rmvnorm(n,rep(0,2),Sigma)
+u     <- rmvnorm(n, rep(0,2), Sigma)
 
-cov   <- rmvnorm(n,rep(0,2),Sigma, method="svd")
+cov   <- rmvnorm(n, rep(0,2), Sigma, method = "svd")
 cov   <- pnorm(cov)
 x1 <- round(cov[,1]); x2 <- cov[,2]
 
@@ -299,13 +307,13 @@ f2   <- function(x) x+exp(-30*(x-0.5)^2)
 y1 <- ifelse(-1.55 + 2*x1    + f1(x2) + u[,1] > 0, 1, 0)
 y2 <- ifelse(-0.25 - 1.25*y1 + f2(x2) + u[,2] > 0, 1, 0)
 
-dataSim <- data.frame(y1,y2,x1,x2)
+dataSim <- data.frame(y1, y2, x1, x2)
 
 #
 
 ## Testing the hypothesis of absence of endogeneity... 
 
-LM.bpm(y1 ~ x1 + s(x2),y2 ~ y1 + s(x2),dataSim)
+LM.bpm(y1 ~ x1 + s(x2), y2 ~ y1 + s(x2), dataSim)
 
 # p-value suggests presence of endogeneity, hence fit a bivariate model
 
@@ -314,14 +322,14 @@ LM.bpm(y1 ~ x1 + s(x2),y2 ~ y1 + s(x2),dataSim)
 
 out <- SemiParBIVProbit(y1 ~ x1 + x2, 
                         y2 ~ y1 + x2, 
-                        data=dataSim)
+                        data = dataSim)
 summary(out)
 
 ## SEMIPARAMETRIC RECURSIVE BIVARIATE PROBIT
 
 out <- SemiParBIVProbit(y1 ~ x1 + s(x2), 
                         y2 ~ y1 + s(x2), 
-                        data=dataSim)
+                        data = dataSim)
 summary(out)
 
 #
@@ -333,35 +341,35 @@ gt.bpm(out)
 #
 ## average treatment effect with CIs
 
-AT(out,eq=2,nm.bin="y1") 
+AT(out, eq = 2, nm.bin = "y1") 
 
 
 ## try a Clayton copula model... 
 
 outC <- SemiParBIVProbit(y1 ~ x1 + s(x2), 
                          y2 ~ y1 + s(x2), 
-                         data=dataSim, BivD="C0")
+                         data = dataSim, BivD = "C0")
 summary(outC)
-AT(outC,eq=2,nm.bin="y1") 
+AT(outC, eq = 2, nm.bin = "y1") 
 
 ## try a Joe copula model... 
 
 outJ <- SemiParBIVProbit(y1 ~ x1 + s(x2), 
                          y2 ~ y1 + s(x2), 
-                         data=dataSim, BivD="J0")
+                         data = dataSim, BivD = "J0")
 summary(outJ)
-AT(outJ,eq=2,nm.bin="y1") 
+AT(outJ, eq = 2, nm.bin = "y1") 
 
 
-VuongClarke.bcm(out,outJ)
+VuongClarke.bcm(out, outJ)
 
 #
 ## recursive bivariate probit modelling with unpenalized splines 
 ## can be achieved as follows
 
-outFP <- SemiParBIVProbit(y1 ~ x1 + s(x2,bs="cr",k=5), 
-                          y2 ~ y1 + s(x2,bs="cr",k=6), fp=TRUE, 
-                          data=dataSim)
+outFP <- SemiParBIVProbit(y1 ~ x1 + s(x2, bs = "cr", k = 5), 
+                          y2 ~ y1 + s(x2, bs = "cr", k = 6), fp = TRUE, 
+                          data = dataSim)
 summary(outFP)
 
 #
@@ -372,17 +380,15 @@ summary(outFP)
 ############
 ## Generate data with a non-random sample selection mechanism and exclusion restriction
 
-\dontrun{ 
-
 set.seed(0)
 
 n <- 1100
 
 Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
-u     <- rmvnorm(n,rep(0,2),Sigma)
+u     <- rmvnorm(n, rep(0,2), Sigma)
 
 SigmaC <- matrix(0.5, 3, 3); diag(SigmaC) <- 1
-cov    <- rmvnorm(n,rep(0,3),SigmaC, method="svd")
+cov    <- rmvnorm(n, rep(0,3), SigmaC, method = "svd")
 cov    <- pnorm(cov)
 bi <- round(cov[,1]); x1 <- cov[,2]; x2 <- cov[,3]
   
@@ -394,11 +400,11 @@ ys <-  0.58 + 2.5*bi + f11(x1) + f12(x2) + u[, 1] > 0
 y  <- -0.68 - 1.5*bi + f21(x1) +         + u[, 2] > 0
 yo <- y*(ys > 0)
   
-dataSim <- data.frame(y,ys,yo,bi,x1,x2)
+dataSim <- data.frame(y, ys, yo, bi, x1, x2)
 
 ## Testing the hypothesis of absence of non-random sample selection... 
 
-LM.bpm(ys ~ bi + s(x1) + s(x2),yo ~ bi + s(x1),dataSim,selection=TRUE)
+LM.bpm(ys ~ bi + s(x1) + s(x2), yo ~ bi + s(x1), dataSim, selection = TRUE)
 
 # p-value suggests presence of sample selection, hence fit a bivariate model
 
@@ -408,7 +414,7 @@ LM.bpm(ys ~ bi + s(x1) + s(x2),yo ~ bi + s(x1),dataSim,selection=TRUE)
 
 out <- SemiParBIVProbit(ys ~ bi + s(x1) + s(x2), 
                         yo ~ bi + s(x1), 
-                        data=dataSim, selection=TRUE)
+                        data = dataSim, selection = TRUE)
 gt.bpm(out)                        
 
 ## compare the two summary outputs
@@ -430,9 +436,9 @@ x1.s <- sort(x1[dataSim$ys>0])
 f21.x1 <- f21(x1.s)[order(x1.s)]-mean(f21(x1.s))
 
 x11()
-plot(out, eq=2, ylim=c(-1.65,0.95)); lines(x1.s, f21.x1, col="red")
-par(new=TRUE)
-plot(out$gam2, se=FALSE, col="blue",ylim=c(-1.65,0.95),ylab="",rug=FALSE)
+plot(out, eq = 2, ylim = c(-1.65,0.95)); lines(x1.s, f21.x1, col="red")
+par(new = TRUE)
+plot(out$gam2, se = FALSE, col = "blue", ylim = c(-1.65,0.95), ylab = "", rug = FALSE)
 
 #
 #
@@ -440,7 +446,7 @@ plot(out$gam2, se=FALSE, col="blue",ylim=c(-1.65,0.95),ylab="",rug=FALSE)
 
 outC <- SemiParBIVProbit(ys ~ bi + s(x1) + s(x2), 
                          yo ~ bi + s(x1), 
-                         data=dataSim, selection=TRUE, BivD="C0")
+                         data = dataSim, selection = TRUE, BivD = "C0")
 sem.checks(outC)
 summary(outC)
 est.prev(outC)

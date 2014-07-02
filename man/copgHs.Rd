@@ -3,7 +3,8 @@
 
 \title{Internal Function}
 
-\description{This function evaluates the first and second derivatives with respect to the margins and association parameter of a given bivariate copula.
+\description{This function evaluates the first and second derivatives with respect to the margins and association 
+parameter of a given bivariate copula.
 
 
 }

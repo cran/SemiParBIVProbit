@@ -1,4 +1,4 @@
-SemiParBIVProbit.fit.post <- function(SemiParFit, formula.eq2, selection, data, BivD, nu, PL, eqPL, nC, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, X1.d2, X2.d2, pPen1, pPen2, l.sp1, l.sp2,
+SemiParBIVProbit.fit.post <- function(SemiParFit, formula.eq2, selection, data, BivD, nu, PL, eqPL, valPL, fitPL, nC, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, X1.d2, X2.d2, pPen1, pPen2, l.sp1, l.sp2,
                                       qu.mag=NULL, gam1, gam2, gp1, gp2, fp, weights){
 
  non.sel.dd <- lambda1s <- lambda2s <- eta1S <- eta2S <- athrhoS <- deltaS <- sigma1 <- rho.u <- sigma2 <- rho <- theta <- delta <- NULL
@@ -13,8 +13,23 @@ SemiParBIVProbit.fit.post <- function(SemiParFit, formula.eq2, selection, data, 
 He <- SemiParFit$fit$hessian
 logLik <- -SemiParFit$fit$l
                                            
-He.eig <- eigen(He,symmetric=TRUE)
-Vb <- He.eig$vec%*%tcrossprod(diag(1/He.eig$val),He.eig$vec)
+#He.eig <- eigen(He,symmetric=TRUE)
+#Vb <- He.eig$vec%*%tcrossprod(diag(1/He.eig$val),He.eig$vec)
+
+    He.eig <- eigen(He,symmetric=TRUE)
+    k.e <- sum(as.numeric(He.eig$val<sqrt(.Machine$double.eps)))
+    
+     if(k.e!=0){
+      ind.e <- (length(He.eig$val)-(k.e-1)):length(He.eig$val)
+      min.e <- min(He.eig$val[1:(ind.e[1]-1)])
+      for(i in 1:k.e) He.eig$val[ind.e[i]] <- min.e/10^i
+     }
+      Vb <- He.eig$vec%*%tcrossprod(diag(1/He.eig$val),He.eig$vec)      
+     #}else{
+     # Vb <- He.eig$vec%*%tcrossprod(diag(1/He.eig$val),He.eig$vec) 
+    #}
+
+
 
                                      
 if( (l.sp1!=0 || l.sp2!=0) && fp==FALSE){ HeSh <- He - SemiParFit$fit$S.h
@@ -62,7 +77,16 @@ if( (l.sp1!=0 || l.sp2!=0) && fp==FALSE){ HeSh <- He - SemiParFit$fit$S.h
    }
 
   names(KeT) <- "k.tau"
-  if(PL!="P"){
+  
+  if((PL=="PP" || PL=="RPP")){
+  
+       if(fitPL=="fixed"){
+                     xi1 <- exp(valPL[1])
+                     xi2 <- exp(valPL[2])
+                       }else{
+  
+  
+  
               if(eqPL=="both"){
               xi1 <- exp(SemiParFit$fit$argument["xi1.star"])
               xi2 <- exp(SemiParFit$fit$argument["xi2.star"])
@@ -74,11 +98,52 @@ if( (l.sp1!=0 || l.sp2!=0) && fp==FALSE){ HeSh <- He - SemiParFit$fit$S.h
               if(eqPL=="second"){
               xi1 <- 1
               xi2 <- exp(SemiParFit$fit$argument["xi2.star"])
-              }              
+              }   
+              
+              }
+              
+              
+              
+              
   names(xi1) <- "xi1"; names(xi2) <- "xi2"            
            
-
               }
+
+  if(PL=="SN"){
+  
+     if(fitPL=="fixed"){
+                   xi1 <- valPL[1]
+                   xi2 <- valPL[2]
+                       }else{
+  
+  
+              if(eqPL=="both"){
+              xi1 <- SemiParFit$fit$argument["xi1.star"]
+              xi2 <- SemiParFit$fit$argument["xi2.star"]
+              }
+              if(eqPL=="first"){
+              xi1 <- SemiParFit$fit$argument["xi1.star"]
+              xi2 <- 0
+              }
+              if(eqPL=="second"){
+              xi1 <- 0
+              xi2 <- SemiParFit$fit$argument["xi2.star"]
+              } 
+              
+              }
+              
+              
+              
+              
+  names(xi1) <- "xi1"; names(xi2) <- "xi2"            
+           
+              }
+
+
+
+
+
+
 
   if(selection==TRUE){
 
@@ -122,7 +187,18 @@ if( (l.sp1!=0 || l.sp2!=0) && fp==FALSE){ HeSh <- He - SemiParFit$fit$S.h
                if(eqPL=="second"){p1 <- pnorm(eta1);        p2 <- 1-pnorm(-eta2)^xi2}
               }
   
+   if(PL=="SN"){
+   
+  del1 <- -xi1/sqrt(1+xi1^2)
+  del2 <- -xi2/sqrt(1+xi2^2)
   
+               if(eqPL=="both"){  p1 <- 2*pbinorm( eta1, 0, cov12=del1); p2 <- 2*pbinorm( eta2, 0, cov12=del2)}
+               if(eqPL=="first"){ p1 <- 2*pbinorm( eta1, 0, cov12=del1); p2 <- pnorm(eta2)} 
+               if(eqPL=="second"){p1 <- pnorm(eta1);                     p2 <- 2*pbinorm( eta2, 0, cov12=del2)}
+               
+               
+              }
+   
   
   
   p1 <- ifelse(p1==0,0.000000001,p1)

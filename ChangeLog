@@ -1,3 +1,7 @@
+version 3.2-11
+- post estimation function for sandwich adjustment of the covariance matrix fixed. Thanks to Mark McGovern for reporting the bug.
+- asymmetric link functions and penalized fitting implemented.
+
 version 3.2-10
 - summary functions improved.
 - function to estimate adjusted prevalence from a sample selection model made more efficient.

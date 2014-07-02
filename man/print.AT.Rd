@@ -8,7 +8,7 @@
 \usage{
 
 
-\method{print}{AT}(x,...)
+\method{print}{AT}(x, ...)
 
 
 }

@@ -1,7 +1,5 @@
 adjCov <- function(object,id){
 
-if(object$RE==TRUE) stop("It does not make sense to use this correction when a random effect model is employed.")
-
 # this does not work with power links and two-parameter copulas
 
 Vb     <- object$Vb 

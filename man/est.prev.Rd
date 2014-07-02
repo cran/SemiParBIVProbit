@@ -11,7 +11,7 @@ obtained using the delta method.}
 
 \usage{
 
-est.prev(x, sig.lev=0.05, sw=NULL, naive=FALSE)
+est.prev(x, sig.lev = 0.05, sw = NULL, naive = FALSE)
 
 }
 

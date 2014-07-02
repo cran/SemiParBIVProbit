@@ -1,5 +1,6 @@
 SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL,  
-                             start.v=NULL, BivD="N", nu=3, PL="P", eqPL="both",
+                             start.v=NULL, BivD="N", nu=3, PL="P", eqPL="both", valPL=c(0,0), fitPL="pLiksp", # 
+                             spPL=c(0.01,0.01),
                              selection=FALSE, H.n=TRUE, gamma=1, aut.sp=TRUE, fp=FALSE,
                              pPen1 = NULL, pPen2 = NULL, 
                              rinit=1, rmax=100, fterm=sqrt(.Machine$double.eps), mterm=sqrt(.Machine$double.eps), 
@@ -18,22 +19,24 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL
   bb7 <- c("BB7.0","BB7.90","BB7.180","BB7.270")
   bb8 <- c("BB8.0","BB8.90","BB8.180","BB8.270")
   tpc <- c(bb1,bb6,bb7,bb8) 
-  ppl <- c("P", "PP", "RPP")    
+  ppl <- c("P", "PP", "RPP", "SN")    
+  pplf <- c("fixed","unpLik","pLik","pLiksp")
   scc <- c("C0","C180","J0","J180","G0","G180",
            "BB1.0","BB1.180","BB6.0","BB6.180",
            "BB7.0","BB7.180","BB8.0","BB8.180")
-  
-  if(!(PL %in% ppl)) stop("Error in parameter PL value. It should be one of: P, PP or RPP.")
+
+  #if(PL!="P") stop("Power link function approach not completed yet.")  
+  if(!(PL %in% ppl)) stop("Error in parameter PL value. It should be one of: P, PP, RPP or SN.")
   if(BivD %in% tpc ) stop("Archimedean copulas with two parameters not ready yet.") 
-  if(PL!="P") stop("Power link function approach not completed yet.")
-  if(PL!="P" && BivD %in% tpc ) stop("Models with power link functions and Archimedean copulas with two parameters not available.")
+  if(!(fitPL %in% pplf)) stop("Error in parameter fitPL value. It should be one of: fixed, unpLik, pLik or pLiksp.")
+  if(PL!="P" && BivD %in% tpc ) stop("Models with power link functions and Archimedean copulas with two parameters not available yet.")
   if(!(BivD %in% c(opc,tpc))) stop("Error in parameter BivD value. It should be one of: N,C0,C90,C180,C270,J0,J90,J180,J270,G0,G90,G180,G270,F,T,BB1.0,BB1.90,BB1.180,BB1.270,BB6.0,BB6.90,BB6.180,BB6.270,BB7.0,BB7.90,BB7.180,BB7.270,BB8.0,BB8.90,BB8.180,BB8.270.")
   if(BivD!="N" && H.n==FALSE) stop("Bivariate copula models based on expected information not implemented.")
    
    if(PL!="P"){
-      if(eqPL=="both")  {la1 <- la2 <- 0; names(la1) <- "xi1.star"; names(la2) <- "xi2.star" }
-      if(eqPL=="first") {la1 <- 0;        names(la1) <- "xi1.star"}
-      if(eqPL=="second"){la2 <- 0;        names(la2) <- "xi2.star"}   
+      if(eqPL=="both")  {la1 <- valPL[1]; la2 <- valPL[2]; names(la1) <- "xi1.star"; names(la2) <- "xi2.star" }
+      if(eqPL=="first") {la1 <- valPL[1];        names(la1) <- "xi1.star"}
+      if(eqPL=="second"){la2 <- valPL[2];        names(la2) <- "xi2.star"}   
    } 
    
   if(is.null(start.v)){
@@ -98,9 +101,17 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL
                  if(PL=="P"){
                  if(BivD %in% tpc) start.v <- c(coef(gam1),coef(gam2),i.rho,delta.st) else start.v <- c(coef(gam1),coef(gam2),i.rho) 
                             } else{
+                            
+                            
+                              if(fitPL=="fixed") start.v <- c(coef(gam1),coef(gam2),i.rho) else{  
+                            
                  		if(eqPL=="both")   start.v <- c(coef(gam1),coef(gam2),i.rho,la1,la2)         
                  		if(eqPL=="first")  start.v <- c(coef(gam1),coef(gam2),i.rho,la1)           
-                 		if(eqPL=="second") start.v <- c(coef(gam1),coef(gam2),i.rho,la2)                           
+                 		if(eqPL=="second") start.v <- c(coef(gam1),coef(gam2),i.rho,la2)  
+                 		
+                 		                                                                }
+                 		
+                 		
                       		  }
 
 
@@ -141,9 +152,13 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL
 
   if(PL=="P"){ if(BivD %in% tpc) start.v <- c(start.v,delta.st) else start.v <- start.v          
              }else{
+             
+                if(fitPL=="fixed") start.v <- c(coef(gam1),coef(gam2),i.rho) else{ 
+                
   		if(eqPL=="both")   start.v <- c(start.v,la1,la2)  
   		if(eqPL=="first")  start.v <- c(start.v,la1)           
   		if(eqPL=="second") start.v <- c(start.v,la2)   
+  		                                                                  }
                    }
 
 		      }
@@ -166,7 +181,8 @@ SemiParBIVProbit <- function(formula.eq1, formula.eq2, data=list(), weights=NULL
 
 if(PL!="P"){
 
-  sp.xi1 <- sp.xi2 <- 1
+  if(fitPL=="fixed" || fitPL=="unpLik") sp.xi1 <- sp.xi2 <- 0 else{ sp.xi1 <- spPL[1]; sp.xi2 <- spPL[2]} 
+
   names(sp.xi1) <- "xi1" 
   names(sp.xi2) <- "xi2"
 
@@ -182,8 +198,8 @@ if(PL!="P"){
  }
 
 
-  if( (l.sp1!=0 || l.sp2!=0) && fp==FALSE) qu.mag <- S.m(gam1,gam2,l.sp1,l.sp2) 
-                               if(PL!="P") qu.mag <- S.mPL(qu.mag,eqPL,start.v) 
+  if( (l.sp1!=0 || l.sp2!=0) ) qu.mag <- S.m(gam1,gam2,l.sp1,l.sp2) 
+                   if(PL!="P") qu.mag <- S.mPL(qu.mag,eqPL,start.v) 
 
   
 
@@ -193,7 +209,7 @@ if(PL!="P"){
   ##########################################################################################################################
 
   SemiParFit <- SemiParBIVProbit.fit(func.opt=func.opt, start.v=start.v, rinit=rinit, rmax=rmax, BivD=BivD, nC=nC, nu=nu,
-                                     PL=PL, eqPL=eqPL, H.n=H.n, 
+                                     PL=PL, eqPL=eqPL, valPL=valPL, fitPL=fitPL, H.n=H.n, 
                                      y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,
                                      X1=X1, X2=X2,  
                                      X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, sp=sp, qu.mag=qu.mag, gp1=gp1, gp2=gp2, 
@@ -207,7 +223,7 @@ if(PL!="P"){
   ##########################################################################################################################
 
   SemiParFit.p <- SemiParBIVProbit.fit.post(SemiParFit=SemiParFit, formula.eq2=formula.eq2, data=data, selection=selection, 
-                                            BivD=BivD, nC=nC, nu=nu, PL=PL, eqPL=eqPL, 
+                                            BivD=BivD, nC=nC, nu=nu, PL=PL, eqPL=eqPL, valPL=valPL, fitPL=fitPL, 
                                             y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,
                                             X1=X1, X2=X2,
                                             X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, qu.mag=qu.mag, 
@@ -230,7 +246,7 @@ L <- list(fit=SemiParFit$fit, gam1=gam1, gam2=gam2, gam2.1=startvSS$gam2.1,
           p11=SemiParFit$fit$p11, p10=SemiParFit$fit$p10, p01=SemiParFit$fit$p01, p00=SemiParFit$fit$p00, p0=SemiParFit$fit$p0,  
           eta1=SemiParFit$fit$eta1, eta2=SemiParFit$fit$eta2, 
           y1=y1,y2=y2,sel=selection, BivD=BivD, nu=nu, 
-          PL=PL, eqPL=eqPL, xi1=SemiParFit.p$xi1, xi2=SemiParFit.p$xi2, logLik=SemiParFit.p$logLik,
+          PL=PL, eqPL=eqPL, valPL=valPL, fitPL=fitPL, spPL=spPL, xi1=SemiParFit.p$xi1, xi2=SemiParFit.p$xi2, logLik=SemiParFit.p$logLik,
           nC=SemiParFit.p$nC,H.n=H.n,pPen1 = pPen1, pPen2 = pPen2, 
           good=SemiParFit$fit$good,
           y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,qu.mag=qu.mag, gp1=gp1, gp2=gp2, 

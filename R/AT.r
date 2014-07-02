@@ -1,4 +1,4 @@
-AT <- function(x,eq,nm.bin="",E=TRUE,treat=TRUE,delta=FALSE, sig.lev=0.05,s.meth="svd",n.sim=1000){
+AT <- function(x,eq,nm.bin="",E=TRUE,treat=TRUE,delta=FALSE, prob.lev=0.05,s.meth="svd",n.sim=1000){
 
 
 tpc <- c("BB1.0","BB1.180","BB1.90","BB1.270",
@@ -18,7 +18,7 @@ ind <- list()
 p.rho <- length(coef(x))
 if(x$BivD %in% tpc ) p.rho <- p.rho - 1
 
-if(x$PL!="P"){if(x$eqPL=="both") p.rho <- p.rho - 2 else p.rho <- p.rho - 1} 
+if(x$PL!="P" && x$fitPL!="fixed"){if(x$eqPL=="both") p.rho <- p.rho - 2 else p.rho <- p.rho - 1} 
 
 good <- x$fit$good
 epsilon <- .Machine$double.eps*10^6
@@ -144,10 +144,41 @@ d.etn  <- pnorm(-etno)^(x$xi1 - 1) * (x$xi1 * dnorm(-etno))
 }
 
 
+  if(x$PL=="SN"){  
+  
+  del1 <- -x$xi1/sqrt(1+x$xi1^2)
+  del2 <- -x$xi2/sqrt(1+x$xi2^2)
 
 
+  if(eq==1){
 
+p.int1 <- 2*pbinorm( eti1, 0, cov12=del1)
+p.int0 <- 2*pbinorm( eti0, 0, cov12=del1)
 
+d.int1 <- 2*dnorm(eti1)*pnorm(x$xi1*eti1)
+d.int0 <- 2*dnorm(eti0)*pnorm(x$xi1*eti0)
+
+p.etn  <- 2*pbinorm( etno, 0, cov12=del2)
+d.etn  <- 2*dnorm(etno)*pnorm(x$xi2*etno)
+
+         }   
+
+if(eq==2){
+
+p.int1 <- 2*pbinorm( eti1, 0, cov12=del2)
+p.int0 <- 2*pbinorm( eti0, 0, cov12=del2)
+
+d.int1 <- 2*dnorm(eti1)*pnorm(x$xi2*eti1)
+d.int0 <- 2*dnorm(eti0)*pnorm(x$xi2*eti0)
+
+p.etn  <- 2*pbinorm( etno, 0, cov12=del1)
+d.etn  <- 2*dnorm(etno)*pnorm(x$xi1*etno)
+        }    
+      
+  
+   
+  }
+  
 
 if(x$BivD %in% c("N", "T") ) {ass.p <- x$rho; ass.pst <- coef(x)["athrho"] } else{ ass.p <- x$theta; ass.pst <- coef(x)["theta.star"]; 
                                                                                    ass.p2 <- x$delta} 
@@ -295,6 +326,67 @@ if(x$PL=="RPP"){
 }
 
 
+
+#if(x$PL=="SN"){  
+#      
+#dim1 <- dim(eti1s)[1]
+#dim2 <- dim(eti1s)[2]
+#      
+#      
+#  if(eq==1){
+#
+#p.int1s <- matrix(psn(eti1s, alpha=x$xi1),dim1,dim2)
+#p.int0s <- matrix(psn(eti0s, alpha=x$xi1),dim1,dim2)
+#p.etns  <- matrix(psn(etnos, alpha=x$xi2),dim1,dim2)
+#
+#         }   
+#
+#if(eq==2){
+#
+#p.int1s <- matrix(psn(eti1s, alpha=x$xi2),dim1,dim2)
+#p.int0s <- matrix(psn(eti0s, alpha=x$xi2),dim1,dim2)
+#p.etns  <- matrix(psn(etnos, alpha=x$xi1),dim1,dim2)
+#
+#        }    
+#   
+#  }
+  
+  
+  
+  
+if(x$PL=="SN"){  
+
+dim1 <- dim(eti1s)[1]
+dim2 <- dim(eti1s)[2]
+      
+  if(eq==1){
+
+p.int1s <- matrix(2*pbinorm( as.vector(eti1s), 0, cov12=del1),dim1,dim2)
+p.int0s <- matrix(2*pbinorm( as.vector(eti0s), 0, cov12=del1),dim1,dim2)
+p.etns  <- matrix(2*pbinorm( as.vector(etnos), 0, cov12=del2),dim1,dim2)
+
+         }   
+
+if(eq==2){
+
+p.int1s <- matrix(2*pbinorm( as.vector(eti1s), 0, cov12=del2),dim1,dim2)
+p.int0s <- matrix(2*pbinorm( as.vector(eti0s), 0, cov12=del2),dim1,dim2)
+p.etns  <- matrix(2*pbinorm( as.vector(etnos), 0, cov12=del1),dim1,dim2)
+
+        }    
+   
+  }  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
   #p.int1s <- ifelse(p.int1s==0,0.000000001,p.int1s)
   #p.int1s <- ifelse(p.int1s==1,0.999999999,p.int1s)
   #p.int0s <- ifelse(p.int0s==0,0.000000001,p.int0s)
@@ -370,12 +462,12 @@ est.ATb[i] <- mean(   (abs(pbinorm(pn.int1s,pn.etns,cov12=tanh(bs[i,p.rho])))/p.
 
             
 
-if(delta==TRUE){esd.AT <- delta.AT*qnorm(sig.lev/2,lower.tail = FALSE) 
+if(delta==TRUE){esd.AT <- delta.AT*qnorm(prob.lev/2,lower.tail = FALSE) 
                    CIs <- c(est.AT - esd.AT, est.AT + esd.AT)
-               }else CIs <- as.numeric(quantile(est.ATb,c(sig.lev/2,1-sig.lev/2),na.rm = TRUE))
+               }else CIs <- as.numeric(quantile(est.ATb,c(prob.lev/2,1-prob.lev/2),na.rm = TRUE))
 
 res <- c(CIs[1],est.AT,CIs[2])
-out <- list(res=res, sig.lev=sig.lev, est.ATb=est.ATb)
+out <- list(res=res, prob.lev=prob.lev, est.ATb=est.ATb)
  
 class(out) <- "AT"
 

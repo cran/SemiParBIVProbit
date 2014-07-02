@@ -3,7 +3,7 @@ copgHs <- function(p1,p2,eta1=NULL,eta2=NULL,teta,teta.st,xi1,xi1.st=NULL,xi2,xi
 epsilon <- 0 # .Machine$double.eps*10^6
 c.copula.lambda1 <- c.copula.lambda2 <- bit1.lambda1.2 <- bit1.lambda2.2 <- c.copula2.be1lambda1 <- c.copula2.be2lambda2 <- c.copula2.be1lambda2 <- c.copula2.be2lambda1 <- bit1.thlambda1 <- bit1.thlambda2 <- bit1.lambda1lambda2 <- NULL
 der.p1.lambda1 <- der.p2.lambda2 <- der.d.n1.be1 <- der.d.n2.be2 <- der.der.p1.lam1.der.p1 <- der.der.p2.lam2.der.p2 <- der2.p1.lambda1 <- der2.p2.lambda2 <- der.d.n1.lambda1 <- der.d.n2.lambda2 <- der.p1.lambda1 <- der.p2.lambda2 <- NULL
-
+eps <- 1e-4
 
 if(BivD=="N"){
 
@@ -2293,6 +2293,198 @@ der.d.n2.lambda2 <- (p2.2^(xi2 - 1) * log(p2.2) * (xi2 * d2.2) +
 
 
 
+
+if(PL=="SN"){
+
+
+der.d.n1.be1 <- 2 * dnorm(eta1) * (dnorm(xi1 * eta1) * xi1) - 2 * (eta1 * 
+    dnorm(eta1)) * pnorm(xi1 * eta1) 
+   
+der.d.n2.be2 <- 2 * dnorm(eta2) * (dnorm(xi2 * eta2) * xi2) - 2 * (eta2 * 
+    dnorm(eta2)) * pnorm(xi2 * eta2) 
+
+
+if(eqPL=="both"){
+
+del1 <- -xi1/sqrt(1+xi1^2)
+
+del2 <- -xi2/sqrt(1+xi2^2)
+
+der.p1.lambda1 <- 2*dbinorm(eta1,0, cov12=del1)*(-(1/sqrt(1 + xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + xi1^2)^2))
+
+der.p2.lambda2 <- 2*dbinorm(eta2,0, cov12=del2)*(-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + xi2^2)^2))
+
+#
+#der.der.p1.lam1.der.p1 <- ((2*dbinorm(qsn(p1),0, cov12=del1)*(-(1/sqrt(1 + xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + xi1^2)^2)))-
+#(2*dbinorm(qsn(p1+eps),0, cov12=del1)*(-(1/sqrt(1 + xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + xi1^2)^2))))/eps
+#
+#der.der.p2.lam2.der.p2 <- ((2*dbinorm(qsn(p2),0, cov12=del2)*(-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + xi2^2)^2)))-
+#(2*dbinorm(qsn(p2+eps),0, cov12=del2)*(-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + xi2^2)^2))))/eps
+#
+
+
+der.der.p1.lam1.der.p1 <- der.p1.lambda1*(-eta1/(1-del1^2))*((qsn(p1+eps,alpha=xi1)-qsn(p1,alpha=xi1))/eps)
+der.der.p2.lam2.der.p2 <- der.p2.lambda2*(-eta2/(1-del2^2))*((qsn(p2+eps,alpha=xi2)-qsn(p2,alpha=xi2))/eps)
+
+
+#der.der.p1.lam1.der.p1 <- (( 2*dbinorm(qsn(p1+eps,alpha=xi1),0, cov12=del1)*(-(1/sqrt(1 + xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + xi1^2)^2)) )-
+#( 2*dbinorm(qsn(p1,    alpha=xi1),0, cov12=del1)*(-(1/sqrt(1 + xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + xi1^2)^2)) ) )/eps
+#der.der.p2.lam2.der.p2 <- (( 2*dbinorm(qsn(p2+eps,alpha=xi2),0, cov12=del2)*(-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + xi2^2)^2)) )-
+#( 2*dbinorm(qsn(p2,    alpha=xi2),0, cov12=del2)*(-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + xi2^2)^2)) ) )/eps
+
+
+#func1 <- function(p1,xi1){
+#2*dbinorm(qsn(p1,alpha=xi1),0, cov12=(-xi1/sqrt(1+xi1^2)))*(-(1/sqrt(1 + xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + xi1^2)^2))
+#}
+
+#func2 <- function(p2,xi2){
+#2*dbinorm(qsn(p2,alpha=xi2),0, cov12=(-xi2/sqrt(1+xi2^2)))*(-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + xi2^2)^2))
+#}
+
+#der.der.p1.lam1.der.p1 <- grad(func1,p1,xi1=xi1)
+#der.der.p2.lam2.der.p2 <- grad(func2,p2,xi2=xi2)
+
+
+
+der2.p1.lambda1 <- 2 * ((1/(2 * pi * sqrt(1 - (-xi1/sqrt(1 + xi1^2))^2)) * (exp(-1/(2 * 
+    (1 - (-xi1/sqrt(1 + xi1^2))^2)) * eta1^2) * (2 * (2 * ((1/sqrt(1 + 
+    xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + 
+    xi1^2)^2) * (-xi1/sqrt(1 + xi1^2))))/(2 * (1 - (-xi1/sqrt(1 + 
+    xi1^2))^2))^2 * eta1^2)) - 2 * pi * (0.5 * (2 * ((1/sqrt(1 + 
+    xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + 
+    xi1^2)^2) * (-xi1/sqrt(1 + xi1^2))) * (1 - (-xi1/sqrt(1 + 
+    xi1^2))^2)^-0.5))/(2 * pi * sqrt(1 - (-xi1/sqrt(1 + xi1^2))^2))^2 * 
+    exp(-1/(2 * (1 - (-xi1/sqrt(1 + xi1^2))^2)) * eta1^2)) * 
+    (-(1/sqrt(1 + xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + 
+        xi1^2)^2)) + 1/(2 * pi * sqrt(1 - (-xi1/sqrt(1 + xi1^2))^2)) * 
+    exp(-1/(2 * (1 - (-xi1/sqrt(1 + xi1^2))^2)) * eta1^2) * (0.5 * 
+    (2 * xi1 * (1 + xi1^2)^-0.5)/sqrt(1 + xi1^2)^2 + (((0.5 * 
+    (2 * xi1 * (1 + xi1^2)^-0.5)) + xi1 * (0.5 * (2 * (1 + xi1^2)^-0.5 - 
+    2 * xi1 * ((1 + xi1^2)^-(0.5 + 1) * (0.5 * (2 * xi1))))))/sqrt(1 + 
+    xi1^2)^2 - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5)) * (2 * 
+    (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5) * sqrt(1 + xi1^2)))/(sqrt(1 + 
+    xi1^2)^2)^2)))
+
+  
+der2.p2.lambda2 <- 2 * ((1/(2 * pi * sqrt(1 - (-xi2/sqrt(1 + xi2^2))^2)) * (exp(-1/(2 * 
+    (1 - (-xi2/sqrt(1 + xi2^2))^2)) * eta2^2) * (2 * (2 * ((1/sqrt(1 + 
+    xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + 
+    xi2^2)^2) * (-xi2/sqrt(1 + xi2^2))))/(2 * (1 - (-xi2/sqrt(1 + 
+    xi2^2))^2))^2 * eta2^2)) - 2 * pi * (0.5 * (2 * ((1/sqrt(1 + 
+    xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + 
+    xi2^2)^2) * (-xi2/sqrt(1 + xi2^2))) * (1 - (-xi2/sqrt(1 + 
+    xi2^2))^2)^-0.5))/(2 * pi * sqrt(1 - (-xi2/sqrt(1 + xi2^2))^2))^2 * 
+    exp(-1/(2 * (1 - (-xi2/sqrt(1 + xi2^2))^2)) * eta2^2)) * 
+    (-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + 
+        xi2^2)^2)) + 1/(2 * pi * sqrt(1 - (-xi2/sqrt(1 + xi2^2))^2)) * 
+    exp(-1/(2 * (1 - (-xi2/sqrt(1 + xi2^2))^2)) * eta2^2) * (0.5 * 
+    (2 * xi2 * (1 + xi2^2)^-0.5)/sqrt(1 + xi2^2)^2 + (((0.5 * 
+    (2 * xi2 * (1 + xi2^2)^-0.5)) + xi2 * (0.5 * (2 * (1 + xi2^2)^-0.5 - 
+    2 * xi2 * ((1 + xi2^2)^-(0.5 + 1) * (0.5 * (2 * xi2))))))/sqrt(1 + 
+    xi2^2)^2 - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5)) * (2 * 
+    (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5) * sqrt(1 + xi2^2)))/(sqrt(1 + 
+    xi2^2)^2)^2)))
+
+        
+
+der.d.n1.lambda1 <- 2 * dnorm(eta1) * (dnorm(xi1 * eta1) * eta1) 
+     
+der.d.n2.lambda2 <- 2 * dnorm(eta2) * (dnorm(xi2 * eta2) * eta2)    
+
+
+}
+
+
+
+
+if(eqPL=="first"){
+
+
+del1 <- -xi1/sqrt(1+xi1^2)
+
+
+der.p1.lambda1 <- 2*dbinorm(eta1,0, cov12=del1)*(-(1/sqrt(1 + xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + xi1^2)^2))
+
+
+der.der.p1.lam1.der.p1 <- der.p1.lambda1*(-eta1/(1-del1^2))*((qsn(p1+eps,alpha=xi1)-qsn(p1,alpha=xi1))/eps)
+
+
+der2.p1.lambda1 <- 2 * ((1/(2 * pi * sqrt(1 - (-xi1/sqrt(1 + xi1^2))^2)) * (exp(-1/(2 * 
+    (1 - (-xi1/sqrt(1 + xi1^2))^2)) * eta1^2) * (2 * (2 * ((1/sqrt(1 + 
+    xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + 
+    xi1^2)^2) * (-xi1/sqrt(1 + xi1^2))))/(2 * (1 - (-xi1/sqrt(1 + 
+    xi1^2))^2))^2 * eta1^2)) - 2 * pi * (0.5 * (2 * ((1/sqrt(1 + 
+    xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + 
+    xi1^2)^2) * (-xi1/sqrt(1 + xi1^2))) * (1 - (-xi1/sqrt(1 + 
+    xi1^2))^2)^-0.5))/(2 * pi * sqrt(1 - (-xi1/sqrt(1 + xi1^2))^2))^2 * 
+    exp(-1/(2 * (1 - (-xi1/sqrt(1 + xi1^2))^2)) * eta1^2)) * 
+    (-(1/sqrt(1 + xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + 
+        xi1^2)^2)) + 1/(2 * pi * sqrt(1 - (-xi1/sqrt(1 + xi1^2))^2)) * 
+    exp(-1/(2 * (1 - (-xi1/sqrt(1 + xi1^2))^2)) * eta1^2) * (0.5 * 
+    (2 * xi1 * (1 + xi1^2)^-0.5)/sqrt(1 + xi1^2)^2 + (((0.5 * 
+    (2 * xi1 * (1 + xi1^2)^-0.5)) + xi1 * (0.5 * (2 * (1 + xi1^2)^-0.5 - 
+    2 * xi1 * ((1 + xi1^2)^-(0.5 + 1) * (0.5 * (2 * xi1))))))/sqrt(1 + 
+    xi1^2)^2 - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5)) * (2 * 
+    (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5) * sqrt(1 + xi1^2)))/(sqrt(1 + 
+    xi1^2)^2)^2)))
+
+ 
+der.d.n1.lambda1 <- 2 * dnorm(eta1) * (dnorm(xi1 * eta1) * eta1) 
+     
+     
+}
+
+
+
+
+if(eqPL=="second"){
+
+
+
+del2 <- -xi2/sqrt(1+xi2^2)
+
+
+der.p2.lambda2 <- 2*dbinorm(eta2,0, cov12=del2)*(-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + xi2^2)^2))
+
+
+der.der.p2.lam2.der.p2 <- der.p2.lambda2*(-eta2/(1-del2^2))*((qsn(p2+eps,alpha=xi2)-qsn(p2,alpha=xi2))/eps)
+
+  
+der2.p2.lambda2 <- 2 * ((1/(2 * pi * sqrt(1 - (-xi2/sqrt(1 + xi2^2))^2)) * (exp(-1/(2 * 
+    (1 - (-xi2/sqrt(1 + xi2^2))^2)) * eta2^2) * (2 * (2 * ((1/sqrt(1 + 
+    xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + 
+    xi2^2)^2) * (-xi2/sqrt(1 + xi2^2))))/(2 * (1 - (-xi2/sqrt(1 + 
+    xi2^2))^2))^2 * eta2^2)) - 2 * pi * (0.5 * (2 * ((1/sqrt(1 + 
+    xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + 
+    xi2^2)^2) * (-xi2/sqrt(1 + xi2^2))) * (1 - (-xi2/sqrt(1 + 
+    xi2^2))^2)^-0.5))/(2 * pi * sqrt(1 - (-xi2/sqrt(1 + xi2^2))^2))^2 * 
+    exp(-1/(2 * (1 - (-xi2/sqrt(1 + xi2^2))^2)) * eta2^2)) * 
+    (-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + 
+        xi2^2)^2)) + 1/(2 * pi * sqrt(1 - (-xi2/sqrt(1 + xi2^2))^2)) * 
+    exp(-1/(2 * (1 - (-xi2/sqrt(1 + xi2^2))^2)) * eta2^2) * (0.5 * 
+    (2 * xi2 * (1 + xi2^2)^-0.5)/sqrt(1 + xi2^2)^2 + (((0.5 * 
+    (2 * xi2 * (1 + xi2^2)^-0.5)) + xi2 * (0.5 * (2 * (1 + xi2^2)^-0.5 - 
+    2 * xi2 * ((1 + xi2^2)^-(0.5 + 1) * (0.5 * (2 * xi2))))))/sqrt(1 + 
+    xi2^2)^2 - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5)) * (2 * 
+    (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5) * sqrt(1 + xi2^2)))/(sqrt(1 + 
+    xi2^2)^2)^2)))
+
+        
+     
+der.d.n2.lambda2 <- 2 * dnorm(eta2) * (dnorm(xi2 * eta2) * eta2)   
+
+
+
+}
+
+
+
+}
+
+
+
+
+
 if(PL!="P"){
 
 c.copula.lambda1 <- c.copula.be1*der.p1.lambda1 
@@ -2301,8 +2493,8 @@ c.copula.lambda2 <- c.copula.be2*der.p2.lambda2
 
 if(eqPL=="both"){
 
-bit1.lambda1.2 <- (c.copula2.be1*der.p1.lambda1+c.copula.be1*der.der.p1.lam1.der.p1)*der.p1.lambda1
-bit1.lambda2.2 <- (c.copula2.be2*der.p2.lambda2+c.copula.be2*der.der.p2.lam2.der.p2)*der.p2.lambda2       
+bit1.lambda1.2 <- c.copula2.be1*der.p1.lambda1^2+c.copula.be1*der2.p1.lambda1
+bit1.lambda2.2 <- c.copula2.be2*der.p2.lambda2^2+c.copula.be2*der2.p2.lambda2       
 c.copula2.be1lambda1 <- c.copula2.be1*der.p1.lambda1
 c.copula2.be2lambda2 <- c.copula2.be2*der.p2.lambda2       
 c.copula2.be1lambda2 <- c.copula2.be1be2*der.p2.lambda2       
@@ -2315,7 +2507,7 @@ bit1.lambda1lambda2 <- c.copula2.be1be2*der.p1.lambda1*der.p2.lambda2
 
 if(eqPL=="first"){
   
-bit1.lambda1.2 <- (c.copula2.be1*der.p1.lambda1+c.copula.be1*der.der.p1.lam1.der.p1)*der.p1.lambda1  
+bit1.lambda1.2 <- c.copula2.be1*der.p1.lambda1^2+c.copula.be1*der2.p1.lambda1
 c.copula2.be1lambda1 <- c.copula2.be1*der.p1.lambda1
 c.copula2.be2lambda1 <- c.copula2.be1be2*der.p1.lambda1       
 bit1.thlambda1 <- c.copula2.be1th* der.p1.lambda1
@@ -2325,7 +2517,7 @@ bit1.thlambda1 <- c.copula2.be1th* der.p1.lambda1
 
 if(eqPL=="second"){
 
-bit1.lambda2.2 <- (c.copula2.be2*der.p2.lambda2+c.copula.be2*der.der.p2.lam2.der.p2)*der.p2.lambda2       
+bit1.lambda2.2 <- c.copula2.be2*der.p2.lambda2^2+c.copula.be2*der2.p2.lambda2        
 c.copula2.be2lambda2 <- c.copula2.be2*der.p2.lambda2        
 c.copula2.be1lambda2 <- c.copula2.be1be2*der.p2.lambda2         
 bit1.thlambda2 <- c.copula2.be2th* der.p2.lambda2

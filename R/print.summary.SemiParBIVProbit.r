@@ -45,11 +45,17 @@ print.summary.SemiParBIVProbit <- function(x,digits = max(3, getOption("digits")
   #if(x$PL=="RPP") cat("\nLink function: reciprocal power probit, ",format(x$lambda1,digits=3),"(",format(x$CIl1[1],digits=3),",",format(x$CIl1[2],digits=3),")\n",sep="") 
 
 
-  if(x$PL!="P"){ 
+  if(x$PL=="PP" || x$PL=="RPP"){ 
     if(round(x$xi1,3)==1) cat("\nLink function: probit\n") else{ 
   	if(x$PL=="PP") cat("\nLink function: power probit, ",format(x$xi1,digits=3),"\n", sep="") 
   	if(x$PL=="RPP") cat("\nLink function: reciprocal power probit, ",format(x$xi1,digits=3),"\n", sep="") 
                                                           }
+  }
+  
+    if(x$PL=="SN"){ 
+      if(round(x$xi1,3)==0) cat("\nLink function: probit\n") else 
+      cat("\nLink function: skew normal, ",format(x$xi1,digits=3),"\n", sep="") 
+
   }
 
 
@@ -75,12 +81,18 @@ print.summary.SemiParBIVProbit <- function(x,digits = max(3, getOption("digits")
   #if(x$PL=="RPP") cat("\nLink function: reciprocal power probit, ",format(x$xi2,digits=3),"(",format(x$CIl2[1],digits=3),",",format(x$CIl2[2],digits=3),")\n",sep="") 
 
 
-  if(x$PL!="P"){ 
+  if(x$PL=="PP" || x$PL=="RPP"){ 
     if(round(x$xi2,3)==1) cat("\nLink function: probit\n") else{  
 
   if(x$PL=="PP") cat("\nLink function: power probit, ",format(x$xi2,digits=3),"\n", sep="") 
   if(x$PL=="RPP") cat("\nLink function: reciprocal power probit, ",format(x$xi2,digits=3),"\n", sep="") }
 }
+
+    if(x$PL=="SN"){ 
+      if(round(x$xi2,3)==0) cat("\nLink function: probit\n") else 
+      cat("\nLink function: skew normal, ",format(x$xi2,digits=3),"\n", sep="") 
+
+  }
 
 
 

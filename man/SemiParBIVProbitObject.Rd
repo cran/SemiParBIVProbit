@@ -17,7 +17,7 @@
 
 \item{gam2}{Univariate fit for equation 2.}
 
-\item{gam2.1}{Univariate fit for equation 2, estimated using an adaptation of the Heckman sample selection correction procedure when \code{selection=TRUE}.}
+\item{gam2.1}{Univariate fit for equation 2, estimated using an adaptation of the Heckman sample selection correction procedure when \code{selection = TRUE}.}
 
 \item{coefficients}{The coefficients of the fitted semiparametric sample selection model. They are given in the following 
                     order: parametric and regression spline (if present)
@@ -47,11 +47,11 @@
 
 \item{n.sel}{Number of selected observations in the sample selection case.}
 
-\item{X1,X2}{Design matrices associated with the first and second linear predictors.}
+\item{X1, X2}{Design matrices associated with the first and second linear predictors.}
 
-\item{X1.d2,X2.d2}{Number of columns of the design matrices for equations 1 and 2.}
+\item{X1.d2, X2.d2}{Number of columns of the design matrices for equations 1 and 2.}
 
-\item{l.sp1,l.sp2}{Number of smooth components in equations 1 and 2.}
+\item{l.sp1, l.sp2}{Number of smooth components in equations 1 and 2.}
 
 \item{He}{Penalized hessian. This is the same as \code{HeSh} for unpenalized models.}
 
@@ -68,7 +68,7 @@
  
 \item{t.edf}{Total degrees of freedom of the estimated bivariate model. It is calculated as \code{sum(diag(F))}.}
 
-\item{edf1,edf2}{Degrees of freedom for the two equations of the estimated bivariate model. It is calculated when splines are used.}
+\item{edf1, edf2}{Degrees of freedom for the two equations of the estimated bivariate model. It is calculated when splines are used.}
 
 \item{bs.mgfit}{List of values and diagnostics extracted from \code{magic}.}
 
@@ -77,20 +77,21 @@
 \item{wor.c}{Working model quantities given by the square root of 
              the weight matrix times the pseudo-data vector and design matrix, \code{rW.Z} and \code{rW.X}.}                
 
-\item{p11,p10,p01,p00}{Distribution function of a bivariate normal with zero means, unit variances and correlation \code{rho} evaluated 
-                       at (y1=1,y2=1), (y1=1,y2=0), (y1=0,y2=1) and (y1=0,y2=0).}
+\item{p11, p10, p01, p00}{Distribution function of a bivariate normal with zero means, unit variances and correlation \code{rho} evaluated at (y1 = 1, y2 = 1), (y1 = 1, y2 = 0), (y1 = 0, y2 = 1) and (y1 = 0, y2 = 0).}
                        
-\item{p0}{Distribution function of a standardised univariate normal evaluated at y1=0. This is only provided when \code{selection=TRUE}.}                       
+\item{p0}{Distribution function of a standardised univariate normal evaluated at y1 = 0. This is only provided when \code{selection = TRUE}.}                       
 
-\item{eta1,eta2}{Estimated linear predictors for the two equations.}
+\item{eta1, eta2}{Estimated linear predictors for the two equations.}
 
-\item{y1,y2}{Responses of the two equations.}
+\item{y1, y2}{Responses of the two equations.}
 
 \item{sel}{This is used for internal calculations.}
 
-\item{BivD,nu,PL,eqPL}{These are used for internal calculations.}
+\item{BivD, nu}{These are used for internal calculations.}
 
-\item{xi1,xi2}{Power or shape parameters of the link functions of the two equations if a power link approach is used.}
+\item{PL, eqPL, valPL, fitPL, spPL}{These are used for internal calculations.}
+
+\item{xi1, xi2}{Shape parameters of the link functions of the two equations if an asymmetric link approach is used.}
 
 \item{logLik}{Value of the (unpenalized) log-likelihood evaluated at the (penalized or unpenalized) parameter 
             estimates.}
@@ -99,7 +100,7 @@
 
 \item{H.n}{This is used for internal calculations.}
 
-\item{pPen1,pPen2}{This is used for internal calculations. List specifying any penalties to be applied to the parametric model terms of the model equations.}
+\item{pPen1, pPen2}{This is used for internal calculations. List specifying any penalties to be applied to the parametric model terms of the model equations.}
 
 \item{good}{Indicator variable indicating the observations actually used in model fitting.}
 

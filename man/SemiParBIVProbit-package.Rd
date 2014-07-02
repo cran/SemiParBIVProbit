@@ -25,7 +25,7 @@ individual smooth terms for equality to the zero function are also provided. Fun
 \code{\link{summary.SemiParBIVProbit}} extract such information from a fitted \code{\link{SemiParBIVProbitObject}}. Model/variable 
 selection is also possible via the use of shrinakge smoothers or information criteria. 
 
-Asymmetric link functions are also available. 
+Asymmetric link functions and tools for testing the hypothesis of absence of unobserved confounding are also available. 
 
 }
 
@@ -42,13 +42,11 @@ Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariat
 
 Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, 7, 1432-1455.
 
-Marra G. and Radice R. (submitted), On the Use of Asymmetric Link Functions in Copula Regression Spline Models for Bivariate Binary Responses.
-
-Marra G., Radice R. and Missiroli S. (in press), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}.
+Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}, 29(3-4), 715-741.
 
 Marra G., Radice R. and Filippou P. (submitted), Testing the Hypothesis of Exogeneity in Regression Spline Bivariate Probit Models.
 
-Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes with Application in Health Care Utilization.
+Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes.
 
 
 }

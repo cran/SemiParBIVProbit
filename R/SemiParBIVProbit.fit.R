@@ -1,4 +1,4 @@
-SemiParBIVProbit.fit <- function(func.opt, start.v, rinit, rmax, BivD, nC, nu, PL, eqPL, H.n, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, control.sp, gamma, X1.d2, X2.d2, pPen1=NULL, pPen2=NULL, sp=NULL, qu.mag=NULL, gp1, gp2, fp, aut.sp, l.sp1, l.sp2, pr.tolsp, weights, iterlimsp, 
+SemiParBIVProbit.fit <- function(func.opt, start.v, rinit, rmax, BivD, nC, nu, PL, eqPL, valPL, fitPL, H.n, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, control.sp, gamma, X1.d2, X2.d2, pPen1=NULL, pPen2=NULL, sp=NULL, qu.mag=NULL, gp1, gp2, fp, aut.sp, l.sp1, l.sp2, pr.tolsp, weights, iterlimsp, 
 fterm, mterm, iterlim){ 
 
 spE <- sp
@@ -10,7 +10,7 @@ if( PL!="P" && (l.sp1!=0 || l.sp2!=0) ){
     qu.mag$exclu <- exclu
 }
 
-  fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, BivD=BivD, nC=nC, nu=nu, sp.xi1=sp["xi1"], sp.xi2=sp["xi2"], PL=PL, eqPL=eqPL, H.n=H.n, 
+  fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, BivD=BivD, nC=nC, nu=nu, sp.xi1=sp["xi1"], sp.xi2=sp["xi2"], PL=PL, eqPL=eqPL, valPL=valPL, fitPL=fitPL, H.n=H.n, 
                 y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,
                 X1=X1, X2=X2,  
                 X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, sp=spE, qu.mag=qu.mag, gp1=gp1, gp2=gp2, fp=fp, l.sp1=l.sp1, l.sp2=l.sp2, blather=TRUE, weights=weights, 
@@ -20,6 +20,7 @@ if( PL!="P" && (l.sp1!=0 || l.sp2!=0) ){
 
   conv.sp <- iter.sp <- iter.inner <- bs.mgfit <- wor.c <- NULL
 
+if( PL!="P" && fitPL!="pLiksp" ) list(fit=fit, iter.if=iter.if, conv.sp=conv.sp, iter.sp=iter.sp, iter.inner=iter.inner, bs.mgfit=bs.mgfit, wor.c=wor.c, sp=sp) else{
        
     if((aut.sp==TRUE && fp==FALSE && (l.sp1!=0 || l.sp2!=0)) || PL!="P"){
 
@@ -61,19 +62,19 @@ if( PL!="P" && (l.sp1!=0 || l.sp2!=0) ){
                            
              o.ests <- c(fit$argument)
 
-             fit <- try(trust(func.opt, fit$argument, rinit=rinit, rmax=rmax, BivD=BivD, nC=nC, nu=nu, sp.xi1=sp["xi1"], sp.xi2=sp["xi2"], PL=PL, eqPL=eqPL, H.n=H.n, 
+             fit <- try(trust(func.opt, fit$argument, rinit=rinit, rmax=rmax, BivD=BivD, nC=nC, nu=nu, sp.xi1=sp["xi1"], sp.xi2=sp["xi2"], PL=PL, eqPL=eqPL, valPL=valPL, fitPL=fitPL, H.n=H.n, 
                               y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,   
                              X1=X1, X2=X2,  
                               X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, sp=spE, qu.mag=qu.mag, gp1=gp1, gp2=gp2, fp=fp, l.sp1=l.sp1, l.sp2=l.sp2, weights=weights, blather=TRUE, 
-                              iterlim=1e+4, fterm=fterm, mterm=mterm),silent=TRUE)
+                              iterlim=1, fterm=fterm, mterm=mterm),silent=TRUE) # 1e+4
 
               			if(class(fit)=="try-error"){ 
-              	 			fit  <- trust(func.opt, coefo, rinit=rinit, rmax=rmax, BivD=BivD, nu=nu, sp.xi1=spo["xi1"], sp.xi2=spo["xi2"], nC=nC, PL=PL, eqPL=eqPL, H.n=H.n,  
+              	 			fit  <- trust(func.opt, coefo, rinit=rinit, rmax=rmax, BivD=BivD, nu=nu, sp.xi1=spo["xi1"], sp.xi2=spo["xi2"], nC=nC, PL=PL, eqPL=eqPL, fitPL=fitPL, H.n=H.n,  
                                                       y1.y2=y1.y2, y1.cy2=y1.cy2, cy1.y2=cy1.y2, cy1.cy2=cy1.cy2, cy1=cy1,
                                                       X1=X1, X2=X2,  
                 		              	      X1.d2=X1.d2, X2.d2=X2.d2, pPen1=pPen1, pPen2=pPen2, sp=spEo, qu.mag=qu.mag, gp1=gp1, gp2=gp2, 
                                                       fp=fp, l.sp1=l.sp1, l.sp2=l.sp2, blather=TRUE, weights=weights,
-                        		              iterlim=1e+4, fterm=fterm, mterm=mterm)
+                        		              iterlim=1, fterm=fterm, mterm=mterm)
                		        conv.sp <- FALSE; break
                 	                                    } 
              iter.inner <- iter.inner + fit$iterations   	                                    
@@ -91,8 +92,15 @@ if( PL!="P" && (l.sp1!=0 || l.sp2!=0) ){
     }
 
 
+
+
+
+
+
                   list(fit=fit, iter.if=iter.if, conv.sp=conv.sp, iter.sp=iter.sp, 
                        iter.inner=iter.inner, bs.mgfit=bs.mgfit, wor.c=wor.c, sp=sp)
+                       
+}                       
 
 
 }

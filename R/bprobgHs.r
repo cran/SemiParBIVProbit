@@ -1,4 +1,4 @@
-bprobgHs <- function(params, BivD, nC, nu, sp.xi1, sp.xi2, PL, eqPL, H.n, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, weights=weights, X1.d2, X2.d2, pPen1=NULL, pPen2=NULL, sp=NULL, qu.mag=NULL, gp1, gp2, fp, l.sp1, l.sp2, AT=FALSE){
+bprobgHs <- function(params, BivD, nC, nu, sp.xi1, sp.xi2, PL, eqPL, valPL, fitPL, H.n, y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1, X1, X2, weights=weights, X1.d2, X2.d2, pPen1=NULL, pPen2=NULL, sp=NULL, qu.mag=NULL, gp1, gp2, fp, l.sp1, l.sp2, AT=FALSE){
 
   eta1 <- X1%*%params[1:X1.d2]
   eta2 <- X2%*%params[(X1.d2+1):(X1.d2+X2.d2)]
