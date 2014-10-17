@@ -46,7 +46,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 \references{
 
 
-Marra G., Radice R. and Filippou P. (submitted), Testing the Hypothesis of Exogeneity in Regression Spline Bivariate Probit Models.
+Marra G., Radice R. and Filippou P. (submitted), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity.
 
 Terrell G. (2002), The Gradient Statistic. \emph{Computing Science and Statistics}, 34, 206-215.
 

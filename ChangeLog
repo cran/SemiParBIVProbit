@@ -1,3 +1,8 @@
+version 3.2-12
+- manual updated and namespace fixed.
+- equations have to be provided using a list of two formulas. See examples.
+- selection option suppressed and replaced with Model. See documentation. 
+
 version 3.2-11
 - post estimation function for sandwich adjustment of the covariance matrix fixed. Thanks to Mark McGovern for reporting the bug.
 - asymmetric link functions and penalized fitting implemented.

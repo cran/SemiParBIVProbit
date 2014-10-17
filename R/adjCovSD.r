@@ -1,7 +1,6 @@
-adjCovSD <- function(object,design){
+adjCovSD <- function(object, design){
 
-# this does not work with power links and two-parameter copulas
-
+if(object$PL!="P") stop("This correction does not currently work for models with asymmetric links.")
 
     Ainv <- object$Vb 
     estfun <- cbind( c(object$fit$dl.dbe1)*object$X1, c(object$fit$dl.dbe2)*object$X2, object$fit$dl.drho )

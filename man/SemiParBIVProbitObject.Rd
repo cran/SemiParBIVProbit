@@ -17,7 +17,7 @@
 
 \item{gam2}{Univariate fit for equation 2.}
 
-\item{gam2.1}{Univariate fit for equation 2, estimated using an adaptation of the Heckman sample selection correction procedure when \code{selection = TRUE}.}
+\item{gam2.1}{Univariate fit for equation 2, estimated using an adaptation of the Heckman sample selection correction procedure when \code{Method = "BSS"}.}
 
 \item{coefficients}{The coefficients of the fitted semiparametric sample selection model. They are given in the following 
                     order: parametric and regression spline (if present)
@@ -37,9 +37,6 @@
 \item{rho}{Estimated correlation coefficient between the two equations, when a bivariate normal model is employed.}
 
 \item{theta}{Estimated copula parameter linking the two equations.}
-
-\item{delta}{This is an additional estimated copula parameter linking the two equations and is provided when an archimedean copula with two parameters 
-             is employed.}
 
 \item{KeT}{Estimated Kendall's tau coefficient between the two equations.}
 
@@ -63,8 +60,6 @@
 \item{F}{This is given by \code{Vb*HeSh}.} 
 
 \item{fp}{If \code{TRUE}, then a fully parametric model was fitted.} 
-
-\item{aut.sp}{If \code{FALSE}, then a fully parametric model with regression splines was fitted.}  
  
 \item{t.edf}{Total degrees of freedom of the estimated bivariate model. It is calculated as \code{sum(diag(F))}.}
 
@@ -77,9 +72,10 @@
 \item{wor.c}{Working model quantities given by the square root of 
              the weight matrix times the pseudo-data vector and design matrix, \code{rW.Z} and \code{rW.X}.}                
 
-\item{p11, p10, p01, p00}{Distribution function of a bivariate normal with zero means, unit variances and correlation \code{rho} evaluated at (y1 = 1, y2 = 1), (y1 = 1, y2 = 0), (y1 = 0, y2 = 1) and (y1 = 0, y2 = 0).}
+\item{p11, p10, p01, p00}{Distribution function of a bivariate normal with zero means, unit variances and 
+                          correlation \code{rho} evaluated at (y_1 = 1, y_2 = 1), (y_1 = 1, y_2 = 0), (y_1 = 0, y_2 = 1) and (y_1 = 0, y_2 = 0).}
                        
-\item{p0}{Distribution function of a standardised univariate normal evaluated at y1 = 0. This is only provided when \code{selection = TRUE}.}                       
+\item{p0}{Distribution function of a standardised univariate normal evaluated at y_1 = 0. This is only provided when \code{Method = "BSS"}.}                       
 
 \item{eta1, eta2}{Estimated linear predictors for the two equations.}
 
@@ -104,11 +100,11 @@
 
 \item{good}{Indicator variable indicating the observations actually used in model fitting.}
 
-\item{y1.y2, y1.cy2, cy1.y2, cy1.cy2, cy1}{These are used for internal calculations.}
+\item{respvec}{List containing response vectors. These are used for internal calculations.}
 
-\item{qu.mag, gp1, gp2}{These are used for internal calculations.}
+\item{qu.mag, gp1, gp2, VC, Model, ig}{These are used for internal calculations.}
 
-\item{X2s}{Full design matrix of second equation in sample selection case.}
+\item{X2s}{Full design matrix of outcome equation in sample selection case.}
 
 
 }

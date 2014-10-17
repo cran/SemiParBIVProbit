@@ -6,7 +6,7 @@ predict.SemiParBIVProbit <- function(object, eq, ...){
                                     ind <- fir:sec }
                                    
            ss.pred$coefficients <- object$coefficients[ind]
-           ss.pred$Vp <- object$Vb[ind,ind] # recall that with PL this function is not good when predicting on the response scale
+           ss.pred$Vp <- object$Vb[ind,ind] # with asymmetric links this function is not good when predicting on the response scale
 
   predict.gam(ss.pred, ...)
 

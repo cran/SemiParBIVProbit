@@ -53,6 +53,12 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 }
 
+\references{
+
+McGovern M.E., Barnighausen T., Marra G. and Radice R. (forthcoming), On the Assumption of Joint Normality in Selection Models: A Copula Based Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}.
+
+}
+
 
 
 

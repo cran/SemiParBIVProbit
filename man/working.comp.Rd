@@ -4,7 +4,7 @@
 \title{Internal Function}
 
 \description{It efficiently calculates the working model quantities needed to implement the automatic multiple smoothing parameter 
-procedure by exploiting the band structure of the weight matrix.}
+procedure by exploiting the band structure of the matrices involved in the calculations.}
 
 
 

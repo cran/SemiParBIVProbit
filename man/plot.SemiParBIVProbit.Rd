@@ -68,7 +68,9 @@ Marra G. and Wood S.N. (2012), Coverage Properties of Confidence Intervals for G
 
 \section{WARNING}{ 
 
-The function can not deal with smooths of more than 2 variables.
+The function can not deal with smooths of more than 2 variables. 
+
+With asymmetric link functions this function is currently not suitable when plotting on the response scale.
 
 } 
 

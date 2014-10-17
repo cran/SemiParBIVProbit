@@ -1,4 +1,4 @@
-print.AT <- function(x,...){
+print.AT <- function(x, ...){
 
 es <- format(x$res*100, digits = 3, trim=TRUE)
 

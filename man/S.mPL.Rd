@@ -3,7 +3,8 @@
 
 \title{Internal Function}
 
-\description{It provides penalty matrices in a format suitable for the automatic smoothness selection procedure when an asymmetric link approach is used.}
+\description{It provides penalty matrices in a format suitable for the automatic smoothness estimation 
+procedure when an asymmetric link approach is used.}
 
 
 \author{

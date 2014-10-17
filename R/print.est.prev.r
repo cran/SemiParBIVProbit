@@ -1,4 +1,4 @@
-print.est.prev <- function(x,...){
+print.est.prev <- function(x, ...){
 
 es <- format(x$res*100, digits = 3, trim=TRUE)
 

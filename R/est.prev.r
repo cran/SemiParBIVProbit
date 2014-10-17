@@ -1,29 +1,31 @@
-est.prev <- function(x, sig.lev=0.05, sw=NULL, naive=FALSE){
+est.prev <- function(x, sig.lev = 0.05, sw = NULL, naive = FALSE){
 
-if(x$sel!=TRUE || x$PL!="P") stop("This function is suitable only for sample selection models with probit links.")
+if(x$Model=="B" || x$Model=="BPO") stop("This function is suitable for sample selection models only.")
 
 good <- x$good
-eta2 <- x$eta2[good]
 X2sg <- x$X2s[good,]
 
-
-if(naive==TRUE) eta2 <- X2sg%*%coef(x$gam2) 
+if(naive==TRUE)  eta2 <- X2sg%*%coef(x$gam2) 
+if(naive==FALSE) eta2 <- x$eta2[good]
 
 if(is.null(sw)) sw <- rep(1,length(eta2)) 
+
 core <- apply( c(dnorm(eta2))*X2sg, 2, weighted.mean,  w = sw)
 
-if(naive==FALSE) G <- c( rep(0,x$X1.d2), core ,0) else G <- c( core )  
+if(naive==FALSE) G <- c( rep(0,x$X1.d2), core ,0) 
+if(naive==TRUE)  G <- c( core )  
 
   
   wm <- weighted.mean(pnorm(eta2), w=sw)
   
-  if(naive==FALSE) Vv <- x$Vb else Vv <- x$gam2$Vp  
+  if(naive==FALSE) Vv <- x$Vb 
+  if(naive==TRUE)  Vv <- x$gam2$Vp  
 
   sv <- sqrt( t(G)%*%Vv%*%G ) 
 
   qz <- qnorm(sig.lev/2, lower.tail = FALSE)
-  lb <- wm - qz*sv # lower bound
-  ub <- wm + qz*sv # upper bound 
+  lb <- wm - qz*sv 
+  ub <- wm + qz*sv 
 
   res <- c(lb,wm,ub)
 

@@ -12,7 +12,7 @@ plot.SemiParBIVProbit <- function(x, eq, ...){
            ss.plot$Vp <- x$Vb[ind,ind]
            ss.plot$edf <- diag(x$F)[ind]
 
-  plot.gam(ss.plot, ...)  # recall that with PL this function is not good when plotting on the response scale
+  plot.gam(ss.plot, ...)  # with asymmetric links this function is not good when plotting on the response scale
        
 }
 

@@ -1,8 +1,9 @@
 export(AT,est.prev,adjCov,adjCovSD,gt.bpm,
-bprobgHs,bprobgHsBB,
+bprobgHs,
 bprobgHsPL,
-copgHs,copgHsBB,
-bprobgHsSS,bprobgHsSSBB,bprobgHsSSPL,
+bprobgHsPO,
+bprobgHsSS,
+copgHs,
 logLik.SemiParBIVProbit,
 LM.bpm,
 VuongClarke.bcm,
@@ -11,7 +12,6 @@ predict.SemiParBIVProbit,
 print.AT,print.est.prev,
 print.SemiParBIVProbit,
 print.summary.SemiParBIVProbit,
-residuals.SemiParBIVProbit,
 S.m,S.mPL,
 sem.checks,
 SemiParBIVProbit.fit.post,
@@ -21,23 +21,20 @@ startSS,
 summary.SemiParBIVProbit,
 working.comp)
 
-importFrom(MASS, ginv)
 importFrom(magic, adiag)
-importFrom(polycor, polychor)
 importFrom(survey, svyrecvar, twophasevar, twophase2var, svyCprod)
 importFrom(trust,trust)
 importFrom(mvtnorm,rmvnorm)
 importFrom(VGAM,pbinorm,dbinorm)
 importFrom(VineCopula, BiCopHfuncDeriv)
-importFrom(CDVine,BiCopCDF,BiCopPar2Tau)
-importFrom(mgcv)
-importFrom(matrixStats,rowVars)
-importFrom(Matrix,nearPD,bdiag,chol,chol2inv,Matrix)
-importFrom(sn,psn,qsn)
+importFrom(CDVine,BiCopCDF,BiCopPar2Tau,BiCopHfunc,BiCopPDF)
+import(mgcv)
+importFrom(Matrix,nearPD,bdiag,Matrix)
+importFrom(sn,qsn,psn,T.Owen)
+
 
 S3method(plot, SemiParBIVProbit)
 S3method(summary, SemiParBIVProbit)
-S3method(residuals, SemiParBIVProbit)
 S3method(print, AT)
 S3method(print, SemiParBIVProbit)
 S3method(print, summary.SemiParBIVProbit)

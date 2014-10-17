@@ -1,4 +1,4 @@
-summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",prob.lev=0.05,thrs1=0.5,thrs2=0.5,...){
+summary.SemiParBIVProbit <- function(object, n.sim = 1000, s.meth = "svd", prob.lev = 0.05, thrs1 = 0.5, thrs2 = 0.5, ...){
 
   testStat <- function (p, X, V, rank = NULL) {
       qrx <- qr(X)
@@ -57,36 +57,22 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",prob.lev=0.0
   n.good <- sum(as.numeric(good))
   tableN <- list(NULL,NULL)
   table <- list()
-  n.sel <- object$n.sel; masses <- object$masses
-  CIl1 <- CIl2 <- table.R <- table.P <- table.F <- P1 <- P2 <- QPS1 <- QPS2 <- CR1 <- CR1 <- CR2 <- MR <- CIkt <- CId <- NULL  
+  n.sel <- object$n.sel
+  CIl1 <- CIl2 <- table.R <- table.P <- table.F <- P1 <- P2 <- QPS1 <- QPS2 <- CR1 <- CR1 <- CR2 <- MR <- CIkt <- NULL  
   epsilon <- .Machine$double.eps*10^6
-  est.RHOb <- est.KeTb <- est.l1 <- est.l2 <- ass.ps2 <- rep(NA,n.sim) 
-  bb <- c("BB1.0","BB1.180","BB1.90","BB1.270",
-          "BB6.0","BB6.180","BB6.90","BB6.270",
-          "BB7.0","BB7.180","BB7.90","BB7.270",
-          "BB8.0","BB8.180","BB8.90","BB8.270")
+  est.RHOb <- est.KeTb <- est.l1 <- est.l2 <- rep(NA,n.sim) 
+
  
   lf.n <- lf <- length(coef(object))
   F  <- object$F[1:lf,1:lf]
   Vr <- object$Vb[1:lf,1:lf] 
-
-  #object$fit$hessian
-
-  #Hll=HH[(d-1):d,(d-1):d]
-  #Hbl=HH[(d-1):d,1:(d-2)]
-  #Hlb=HH[1:(d-2),(d-1):d]
-  #Hbb=HH[1:(d-2),1:(d-2)]
-  #Hbb-Hlb%*%solve(Hll)%*%Hbl
-
-
-          
+   
   SE <- sqrt(diag(object$Vb[1:lf,1:lf]))
   n  <- object$n 
 
 
   bs <- rmvnorm(n.sim, mean = coef(object), sigma=object$Vb, method=s.meth)
 
-  if(object$BivD %in% bb ) lf.n <- lf-1
 
   if(object$PL != "P" && object$fitPL!="fixed") { if(object$eqPL=="both") lf.n <- lf-2 else lf.n <- lf-1 }
 
@@ -102,20 +88,8 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",prob.lev=0.0
    if(object$BivD %in% c("G0", "G180") ) est.RHOb <-   1+exp(bs[,lf.n])  
    if(object$BivD %in% c("G90","G270") ) est.RHOb <- -(1+exp(bs[,lf.n])) 
    
-   if(object$BivD %in% c("BB1.0", "BB1.180")){est.RHOb <-   exp(bs[,lf.n]) + epsilon;  ass.ps2 <-   exp(bs[,lf]) + 1}
-   if(object$BivD %in% c("BB1.90","BB1.270")){est.RHOb <- -(exp(bs[,lf.n]) + epsilon); ass.ps2 <- -(exp(bs[,lf]) + 1)}
-   
-   if(object$BivD %in% c("BB6.0", "BB6.180")){est.RHOb <-   exp(bs[,lf.n]) + 1; ass.ps2 <-   exp(bs[,lf]) + 1}
-   if(object$BivD %in% c("BB6.90","BB6.270")){est.RHOb <- -(exp(bs[,lf.n]) + 1);ass.ps2 <- -(exp(bs[,lf]) + 1)}
-   
-   if(object$BivD %in% c("BB7.0", "BB7.180")){est.RHOb <-   exp(bs[,lf.n]) + 1; ass.ps2 <-   exp(bs[,lf]) + epsilon}
-   if(object$BivD %in% c("BB7.90","BB7.270")){est.RHOb <- -(exp(bs[,lf.n]) + 1);ass.ps2 <- -(exp(bs[,lf]) + epsilon)}
-   
-   if(object$BivD %in% c("BB8.0", "BB8.180")){est.RHOb <-   exp(bs[,lf.n]) + 1; ass.ps2 <-  pnorm(bs[,lf]); ass.ps2 <- ifelse(ass.ps2==0, epsilon, ass.ps2)}
-   if(object$BivD %in% c("BB8.90","BB8.270")){est.RHOb <- -(exp(bs[,lf.n]) + 1);ass.ps2 <- -pnorm(bs[,lf]); ass.ps2 <- ifelse(ass.ps2==0, -epsilon, ass.ps2)}  
-   
-   
-   if(object$BivD=="T") asp2 <- rep(object$nu,n.sim) else asp2 <- ass.ps2
+
+   if(object$BivD=="T") asp2 <- rep(object$nu,n.sim) else asp2 <- rep(0,n.sim)
    
    for(i in 1:n.sim) est.KeTb[i] <- BiCopPar2Tau(object$nC,est.RHOb[i],par2=asp2[i]) # this is not efficient but the function gives problems with vectors...
 
@@ -137,10 +111,10 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",prob.lev=0.0
                        CIl1 <- as.numeric(quantile(est.l1,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
                        CIl2 <- as.numeric(quantile(est.l2,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
                        }
-  if(object$BivD %in% bb ) CId <- as.numeric(quantile(ass.ps2,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
+
 
                      
-  ind <- list(ind1=1:(object$gam1$nsdf),ind2=object$X1.d2+(1:(object$gam2$nsdf)))
+  ind <- list(ind1=1:(object$gp1),ind2=object$X1.d2+(1:(object$gp2)))
 
   for(i in 1:2){
   estimate <- coef(object)[ind[[i]]]
@@ -188,7 +162,7 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",prob.lev=0.0
 
 
 
- if(object$sel==FALSE){
+ if(object$Model=="B"){
  
  Pre.p <- matrix(NA,n.good,8)
  Pre.c <- matrix(NA,n.good,2)
@@ -244,17 +218,16 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",prob.lev=0.0
   
   res <- list(tableP1=table[[1]], tableP2=table[[2]], 
               tableNP1=tableN[[1]], tableNP2=tableN[[2]], 
-              n=n, rho=object$rho, theta=object$theta, delta=object$delta, KeT=object$KeT,   
+              n=n, rho=object$rho, theta=object$theta, KeT=object$KeT,   
               formula1=object$gam1$formula, formula2=object$gam2$formula, 
-              l.sc1=l.sp11, l.sc2=l.sp22, pPen1=object$pPen1, pPen2=object$pPen2,  
+              l.sc1=l.sp11, l.sc2=l.sp22, # pPen1=object$pPen1, pPen2=object$pPen2,  
               t.edf=object$t.edf, CIrs=CIrs, CIkt=CIkt, CIl1=CIl1, CIl2=CIl2, 
-              CId=CId, 
               sel=object$sel,n.sel=n.sel, 
               BivD=object$BivD,nu=object$nu, 
               PL=object$PL, xi1=object$xi1, xi2=object$xi2,
               table.R=table.R, table.P=table.P, table.F=table.F, MR=MR,
               P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2,
-              good=good
+              good=good, Model=object$Model
               )
   class(res) <- "summary.SemiParBIVProbit"
       
@@ -263,6 +236,65 @@ summary.SemiParBIVProbit <- function(object,n.sim=1000,s.meth="svd",prob.lev=0.0
 res
 
 }
+
+
+
+
+#residuals.SemiParBIVProbit <- function(object,...){
+#
+#if(object$selection==TRUE) stop("Current residual definition for models with non-random sample selection not meaningful.")
+#  
+#  der.1 <- object$fit$dl.dbe1
+#  der.2 <- object$fit$dl.dbe2
+#  der.3 <- object$fit$dl.drho
+#
+#  D <- matrix(0,3*object$n,1)
+#  r.w <- r.p <- matrix(0,object$n,3) 
+#
+#  j <- 1
+#
+#    for(i in seq(1,(3*object$n-2),by=3)) {
+#
+#      D[i,1]   <- der.1[j]
+#      D[i+1,1] <- der.2[j]
+#      D[i+2,1] <- der.3[j]
+#
+#      W <- matrix(c( object$fit$d2l.be1.be1[j],object$fit$d2l.be1.be2[j],object$fit$d2l.be1.rho[j],     
+#                     object$fit$d2l.be1.be2[j],object$fit$d2l.be2.be2[j],object$fit$d2l.be2.rho[j],  
+#                     object$fit$d2l.be1.rho[j],object$fit$d2l.be2.rho[j],object$fit$d2l.rho.rho[j] ) , 3 , 3 ) 
+#
+#      W.eig <- eigen(W,symmetric=TRUE)
+#      W.ins <- W.eig$vec%*%tcrossprod(diag(1/sqrt(pmax(W.eig$val,.Machine$double.eps^0.6))),W.eig$vec) 
+#      W.inv <- W.eig$vec%*%tcrossprod(diag(1/pmax(W.eig$val,.Machine$double.eps^0.6)),W.eig$vec) 
+#
+#      r.p[j,] <- W.ins%*%D[i:(i+2),1]
+#      r.w[j,] <- W.inv%*%D[i:(i+2),1]
+#  
+#      j <- j + 1
+#
+#    }
+#
+# list( r.p=r.p, r.w=r.w )
+#
+#}
+#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

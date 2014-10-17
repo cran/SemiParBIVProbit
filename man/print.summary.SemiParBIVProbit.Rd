@@ -9,7 +9,7 @@
 
 
 \method{print}{summary.SemiParBIVProbit}(x, digits = max(3, getOption("digits") - 3), 
-           signif.stars = getOption("show.signif.stars"),...)
+           signif.stars = getOption("show.signif.stars"), ...)
 
 
 }

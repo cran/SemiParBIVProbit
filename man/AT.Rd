@@ -49,7 +49,8 @@ the control group. This only makes sense if used jointly with \code{E = FALSE}.}
 
 AT measures the sample average difference in outcomes under 
 the treatment (the binary predictor/treatment assumes value 1) and under the 
-control (the binary treatment assumes value 0). See the references below for details. 
+control (the binary treatment assumes value 0). Note that this function is only suitable for the 
+calculation of the average treatment effect in recursive binary models. See the references below for details. 
 
 }
 

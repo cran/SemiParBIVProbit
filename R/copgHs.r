@@ -2314,37 +2314,8 @@ der.p1.lambda1 <- 2*dbinorm(eta1,0, cov12=del1)*(-(1/sqrt(1 + xi1^2) - xi1 * (0.
 
 der.p2.lambda2 <- 2*dbinorm(eta2,0, cov12=del2)*(-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + xi2^2)^2))
 
-#
-#der.der.p1.lam1.der.p1 <- ((2*dbinorm(qsn(p1),0, cov12=del1)*(-(1/sqrt(1 + xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + xi1^2)^2)))-
-#(2*dbinorm(qsn(p1+eps),0, cov12=del1)*(-(1/sqrt(1 + xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + xi1^2)^2))))/eps
-#
-#der.der.p2.lam2.der.p2 <- ((2*dbinorm(qsn(p2),0, cov12=del2)*(-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + xi2^2)^2)))-
-#(2*dbinorm(qsn(p2+eps),0, cov12=del2)*(-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + xi2^2)^2))))/eps
-#
-
-
 der.der.p1.lam1.der.p1 <- der.p1.lambda1*(-eta1/(1-del1^2))*((qsn(p1+eps,alpha=xi1)-qsn(p1,alpha=xi1))/eps)
 der.der.p2.lam2.der.p2 <- der.p2.lambda2*(-eta2/(1-del2^2))*((qsn(p2+eps,alpha=xi2)-qsn(p2,alpha=xi2))/eps)
-
-
-#der.der.p1.lam1.der.p1 <- (( 2*dbinorm(qsn(p1+eps,alpha=xi1),0, cov12=del1)*(-(1/sqrt(1 + xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + xi1^2)^2)) )-
-#( 2*dbinorm(qsn(p1,    alpha=xi1),0, cov12=del1)*(-(1/sqrt(1 + xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + xi1^2)^2)) ) )/eps
-#der.der.p2.lam2.der.p2 <- (( 2*dbinorm(qsn(p2+eps,alpha=xi2),0, cov12=del2)*(-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + xi2^2)^2)) )-
-#( 2*dbinorm(qsn(p2,    alpha=xi2),0, cov12=del2)*(-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + xi2^2)^2)) ) )/eps
-
-
-#func1 <- function(p1,xi1){
-#2*dbinorm(qsn(p1,alpha=xi1),0, cov12=(-xi1/sqrt(1+xi1^2)))*(-(1/sqrt(1 + xi1^2) - xi1 * (0.5 * (2 * xi1 * (1 + xi1^2)^-0.5))/sqrt(1 + xi1^2)^2))
-#}
-
-#func2 <- function(p2,xi2){
-#2*dbinorm(qsn(p2,alpha=xi2),0, cov12=(-xi2/sqrt(1+xi2^2)))*(-(1/sqrt(1 + xi2^2) - xi2 * (0.5 * (2 * xi2 * (1 + xi2^2)^-0.5))/sqrt(1 + xi2^2)^2))
-#}
-
-#der.der.p1.lam1.der.p1 <- grad(func1,p1,xi1=xi1)
-#der.der.p2.lam2.der.p2 <- grad(func2,p2,xi2=xi2)
-
-
 
 der2.p1.lambda1 <- 2 * ((1/(2 * pi * sqrt(1 - (-xi1/sqrt(1 + xi1^2))^2)) * (exp(-1/(2 * 
     (1 - (-xi1/sqrt(1 + xi1^2))^2)) * eta1^2) * (2 * (2 * ((1/sqrt(1 + 

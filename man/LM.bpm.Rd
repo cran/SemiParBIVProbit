@@ -5,36 +5,52 @@
 
 \description{ 
 Before fitting a bivariate probit model, \code{LM.bpm} can be used to test the hypothesis of absence of endogeneity 
-or correlated model equations/errors or non-random sample selection.}
+or non-random sample selection or correlated model equations/errors.}
 
 
 \usage{
 
-LM.bpm(formula.eq1, formula.eq2, data, selection = FALSE, FI = FALSE)
+LM.bpm(formula, data = list(), weights = NULL, subset = NULL, 
+       Model = "B", hess = FALSE, gamma = 1, 
+       pPen1 = NULL, pPen2 = NULL)
 
 }
 
 \arguments{ 
 
-\item{formula.eq1}{A formula for equation 1.} 
 
-\item{formula.eq2}{A formula for equation 2.} 
+\item{formula}{A list of two formulas, one for equation 1 and the other for equation 2. \code{s} terms are used to specify 
+               smooth smooth functions of predictors. Note that if \code{Model = "BSS"} then the first formula MUST refer 
+               to the selection equation.} 
 
-\item{data}{An optional data frame, list or environment containing the variables in the model. If not found in \code{data}, the
-            variables are taken from \code{environment(formula)}, typically the environment from which \code{LM.bpm} is called.}
+\item{data}{An optional data frame, list or environment containing the variables in the model.  If not found in \code{data}, the
+            variables are taken from \code{environment(formula)}.} 
 
-\item{selection}{If \code{TRUE}, then the test is performed for the sample selection model case.}
+\item{weights}{Optional vector of prior weights to be used in fitting.} 
 
-\item{FI}{If \code{TRUE}, then the Fisher (rather than the observed) information matrix is used.}
+\item{subset}{Optional vector specifying a subset of observations to be used in the fitting process.}
+
+\item{Model}{It indicates the type of model to be used in the analysis. Possible values are "B" (bivariate model) and 
+             "BSS" (bivariate model with sample selection).}
+
+\item{hess}{If \code{TRUE} then the observed (rather than expected) information matrix is employed.}
+
+\item{gamma}{Inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
+             this parameter to a value greater than 1. Typically \code{gamma = 1.4} achieves this.}
+
+\item{pPen1, pPen2}{Optional list specifying any penalties to be applied to the parametric model terms of equations 1 and 2.}
+
 
 }
 
 
 \details{
 This Lagrange multiplier test (also known as score test) is used here for testing the null 
-hypothesis \eqn{\rho}{\rho=0} (i.e. no endogeneity or non-random sample selection, depending on the model being fitted). Its main advantage is that it does 
+hypothesis \eqn{\rho}{\rho=0} (i.e. no endogeneity or non-random sample selection or no correlated model equations/errors, depending on the model being fitted). Its main advantage is that it does 
 not require an estimate of the model parameter vector under the alternative hypothesis. Asymptotically, it takes a Chi-squared distribution 
-with one degree of freedom. Full details can be found in Marra et al. (2014).
+with one degree of freedom. Full details can be found in Marra et al. (2014) and Marra et al. (submitted).
+
+This test only valid for bivariate models with probit links and normal errors.
 
 
 }
@@ -55,6 +71,8 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 }
 
 \references{
+
+Marra G., Radice R. and Filippou P. (submitted), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity.
 
 Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}, 29(3-4), 715-741.
 

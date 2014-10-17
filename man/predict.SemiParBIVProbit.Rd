@@ -14,7 +14,7 @@ This function is based on \code{predict.gam()} in \code{mgcv}. Please see the do
 
 \usage{
 
-\method{predict}{SemiParBIVProbit}(object, eq,...)
+\method{predict}{SemiParBIVProbit}(object, eq, ...)
 
 
 }
@@ -36,6 +36,14 @@ This function is based on \code{predict.gam()} in \code{mgcv}. Please see the do
 Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 }
+
+
+\section{WARNING}{ 
+
+With asymmetric link functions this function is currently not suitable when predicting on the response scale.
+
+} 
+
 
 
 \seealso{
