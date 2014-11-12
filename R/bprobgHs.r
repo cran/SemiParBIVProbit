@@ -60,18 +60,6 @@ dH <- copgHs(p1,p2,eta1=NULL,eta2=NULL,teta,teta.st,xi1=NULL,xi1.st=NULL,xi2=NUL
 c.copula.be1   <- dH$c.copula.be1
 c.copula.be2   <- dH$c.copula.be2
 c.copula.theta <- dH$c.copula.theta 
-        
-if(AT==TRUE){
-
-    if(VC$BivD %in% c("N","T")      ) add.b <- 1/cosh(teta.st)^2
-    if(VC$BivD=="F")                  add.b <- 1
-    if(VC$BivD %in% c("C0", "C180","J0", "J180","G0", "G180") ) add.b <-  exp(teta.st)
-    if(VC$BivD %in% c("C90","C270","J90","J270","G90","G270") ) add.b <- -exp(teta.st)
-
-c.copula.theta <- c.copula.theta/add.b
-
-
-}
   
 c.copula2.be1 <- dH$c.copula2.be1   
 c.copula2.be2 <- dH$c.copula2.be2 
@@ -105,12 +93,11 @@ bit2.b2th <- -bit1.b2th
 bit3.b2th <- -bit1.b2th 
 bit4.b2th <- bit1.b2th 
 
-bit1.th2 <- dH$bit1.th2
+if(AT==TRUE) bit1.th2 <- dH$bit1.th2ATE else bit1.th2 <- dH$bit1.th2
+
 bit2.th2 <- -bit1.th2 
 bit3.th2 <- -bit1.th2 
 bit4.th2 <- bit1.th2 
-
-
 
   dl.dbe1 <-  weights*d.n1*( (y1.y2*c.copula.be1/p11)  +
                       (y1.cy2*(1-c.copula.be1)/p10) +
@@ -126,6 +113,12 @@ bit4.th2 <- bit1.th2
                        cy1.y2*(-c.copula.theta)/p01+cy1.cy2*c.copula.theta/p00 ) 
 
 
+add.b  <- 1
+if(AT==TRUE){
+    if(VC$BivD %in% c("N","T") )                                add.b <- 1/cosh(teta.st)^2
+    if(VC$BivD %in% c("C0", "C180","J0", "J180","G0", "G180") ) add.b <-  exp(teta.st)     
+    if(VC$BivD %in% c("C90","C270","J90","J270","G90","G270") ) add.b <- -exp(teta.st)        
+}
 
 
 
@@ -149,17 +142,17 @@ if(VC$hess==TRUE){
   d2l.be1.rho  <- -weights*(y1.y2*(bit1.b1th*p11-(c.copula.be1*d.n1*c.copula.theta))/p11^2+
                               y1.cy2*(bit2.b1th*p10-((1-c.copula.be1)*d.n1)*(-c.copula.theta))/p10^2+
                               cy1.y2*(bit3.b1th*p01-(-c.copula.be1*d.n1)*(-c.copula.theta))/p01^2+
-                              cy1.cy2*(bit4.b1th*p00-((c.copula.be1-1)*d.n1)*c.copula.theta)/p00^2 )
+                              cy1.cy2*(bit4.b1th*p00-((c.copula.be1-1)*d.n1)*c.copula.theta)/p00^2 )/add.b
 
   d2l.be2.rho  <- -weights*(y1.y2*(bit1.b2th*p11-(c.copula.be2*d.n2*c.copula.theta))/p11^2+
                               y1.cy2*(bit2.b2th*p10-(-c.copula.be2*d.n2)*(-c.copula.theta))/p10^2+
                               cy1.y2*(bit3.b2th*p01-((1-c.copula.be2)*d.n2)*(-c.copula.theta))/p01^2+
-                              cy1.cy2*(bit4.b2th*p00-((c.copula.be2-1)*d.n2)*c.copula.theta)/p00^2 )
-
-  d2l.rho.rho  <- -weights*(y1.y2*(bit1.th2*p11-c.copula.theta^2)/p11^2+
-                              y1.cy2*(bit2.th2*p10-(-c.copula.theta)^2)/p10^2+
-                              cy1.y2*(bit3.th2*p01-(-c.copula.theta)^2)/p01^2+
-                              cy1.cy2*(bit4.th2*p00-c.copula.theta^2)/p00^2 )
+                              cy1.cy2*(bit4.b2th*p00-((c.copula.be2-1)*d.n2)*c.copula.theta)/p00^2 )/add.b
+                              
+  d2l.rho.rho  <- (-weights*(   y1.y2*(bit1.th2*p11-( c.copula.theta/add.b)^2)/p11^2+
+                               y1.cy2*(bit2.th2*p10-(-c.copula.theta/add.b)^2)/p10^2+
+                               cy1.y2*(bit3.th2*p01-(-c.copula.theta/add.b)^2)/p01^2+
+                              cy1.cy2*(bit4.th2*p00-( c.copula.theta/add.b)^2)/p00^2 ) )                            
 }     
 
 
@@ -183,17 +176,17 @@ if(VC$hess==FALSE && VC$end==0){
   d2l.be1.rho  <- -weights*((bit1.b1th*p11-(c.copula.be1*d.n1*c.copula.theta))/p11+
                               (bit2.b1th*p10-((1-c.copula.be1)*d.n1)*(-c.copula.theta))/p10+
                               (bit3.b1th*p01-(-c.copula.be1*d.n1)*(-c.copula.theta))/p01+
-                              (bit4.b1th*p00-((c.copula.be1-1)*d.n1)*c.copula.theta)/p00 )
+                              (bit4.b1th*p00-((c.copula.be1-1)*d.n1)*c.copula.theta)/p00 )/add.b
 
-  d2l.be2.rho  <- -weights*((bit1.b2th*p11-(c.copula.be2*d.n2*c.copula.theta))/p11+
+  d2l.be2.rho  <- -weights*(  (bit1.b2th*p11-(c.copula.be2*d.n2*c.copula.theta))/p11+
                               (bit2.b2th*p10-(-c.copula.be2*d.n2)*(-c.copula.theta))/p10+
                               (bit3.b2th*p01-((1-c.copula.be2)*d.n2)*(-c.copula.theta))/p01+
-                              (bit4.b2th*p00-((c.copula.be2-1)*d.n2)*c.copula.theta)/p00 )
+                              (bit4.b2th*p00-((c.copula.be2-1)*d.n2)*c.copula.theta)/p00 )/add.b
 
-  d2l.rho.rho  <- -weights*((bit1.th2*p11-c.copula.theta^2)/p11+
-                              (bit2.th2*p10-(-c.copula.theta)^2)/p10+
-                              (bit3.th2*p01-(-c.copula.theta)^2)/p01+
-                              (bit4.th2*p00-c.copula.theta^2)/p00 )
+  d2l.rho.rho  <- -weights*((bit1.th2*p11-c.copula.theta/add.b^2)/p11+
+                              (bit2.th2*p10-(-c.copula.theta/add.b)^2)/p10+
+                              (bit3.th2*p01-(-c.copula.theta/add.b)^2)/p01+
+                              (bit4.th2*p00-c.copula.theta/add.b^2)/p00 )
 }  
 
 if(VC$hess==FALSE && (VC$end==1 || VC$end==2)){
@@ -245,17 +238,17 @@ resp4 <- 1 - y2
   d2l.be1.rho  <- -weights*(  fi*(bit1.b1th*p11-(c.copula.be1*d.n1*c.copula.theta))/p11^2*resp1+
                               se*(bit2.b1th*p10-((1-c.copula.be1)*d.n1)*(-c.copula.theta))/p10^2*resp2+
                               th*(bit3.b1th*p01-(-c.copula.be1*d.n1)*(-c.copula.theta))/p01^2*resp3+
-                              fo*(bit4.b1th*p00-((c.copula.be1-1)*d.n1)*c.copula.theta)/p00^2*resp4 )
+                              fo*(bit4.b1th*p00-((c.copula.be1-1)*d.n1)*c.copula.theta)/p00^2*resp4 )/add.b
 
   d2l.be2.rho  <- -weights*(  fi*(bit1.b2th*p11-(c.copula.be2*d.n2*c.copula.theta))/p11^2*resp1+
                               se*(bit2.b2th*p10-(-c.copula.be2*d.n2)*(-c.copula.theta))/p10^2*resp2+
                               th*(bit3.b2th*p01-((1-c.copula.be2)*d.n2)*(-c.copula.theta))/p01^2*resp3+
-                              fo*(bit4.b2th*p00-((c.copula.be2-1)*d.n2)*c.copula.theta)/p00^2*resp4 )
+                              fo*(bit4.b2th*p00-((c.copula.be2-1)*d.n2)*c.copula.theta)/p00^2*resp4 )/add.b
 
-  d2l.rho.rho  <- -weights*(  fi*(bit1.th2*p11-c.copula.theta^2)/p11^2*resp1+
-                              se*(bit2.th2*p10-(-c.copula.theta)^2)/p10^2*resp2+
-                              th*(bit3.th2*p01-(-c.copula.theta)^2)/p01^2*resp3+
-                              fo*(bit4.th2*p00-c.copula.theta^2)/p00^2*resp4 )
+  d2l.rho.rho  <- -weights*(  fi*(bit1.th2*p11-c.copula.theta/add.b^2)/p11^2*resp1+
+                              se*(bit2.th2*p10-(-c.copula.theta/add.b)^2)/p10^2*resp2+
+                              th*(bit3.th2*p01-(-c.copula.theta/add.b)^2)/p01^2*resp3+
+                              fo*(bit4.th2*p00-c.copula.theta/add.b^2)/p00^2*resp4 )
 }
 
 
@@ -280,14 +273,6 @@ resp4 <- 1 - y2
          G   <- -c( colSums( c(dl.dbe1)*X1 ),
                     colSums( c(dl.dbe2)*X2 ),
                     sum( dl.drho )  )
-
-
-if(AT==TRUE){
-
-         grad <- cbind( c(dl.dbe1)*X1 , c(dl.dbe2)*X2, dl.drho )   
-         H    <- crossprod(grad)
-
-            }
 
 
 if( ( VC$l.sp1==0 && VC$l.sp2==0 ) || VC$fp==TRUE) S.h <- S.h1 <- S.h2 <- 0

@@ -1,3 +1,7 @@
+version 3.2-12.1
+- working linear model calculation made more stable
+- NAs handling fixed.
+
 version 3.2-12
 - manual updated and namespace fixed.
 - equations have to be provided using a list of two formulas. See examples.

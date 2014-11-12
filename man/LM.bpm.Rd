@@ -11,7 +11,7 @@ or non-random sample selection or correlated model equations/errors.}
 \usage{
 
 LM.bpm(formula, data = list(), weights = NULL, subset = NULL, 
-       Model = "B", hess = FALSE, gamma = 1, 
+       Model = "B", hess = TRUE, gamma = 1, 
        pPen1 = NULL, pPen2 = NULL)
 
 }
@@ -33,7 +33,7 @@ LM.bpm(formula, data = list(), weights = NULL, subset = NULL,
 \item{Model}{It indicates the type of model to be used in the analysis. Possible values are "B" (bivariate model) and 
              "BSS" (bivariate model with sample selection).}
 
-\item{hess}{If \code{TRUE} then the observed (rather than expected) information matrix is employed.}
+\item{hess}{If \code{FALSE} then the expected (rather than observed) information matrix is employed.}
 
 \item{gamma}{Inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
              this parameter to a value greater than 1. Typically \code{gamma = 1.4} achieves this.}

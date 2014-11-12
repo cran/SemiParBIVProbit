@@ -28,7 +28,11 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   
   ig <- interpret.gam(formula)
   mf <- match.call(expand.dots = FALSE)
-  mf$formula <- ig$fake.formula 
+
+  pred.n <- union(ig[[1]]$pred.names,c(ig[[2]]$pred.names,ig[[2]]$response))
+  fake.formula <- paste(ig[[1]]$response, "~", paste(pred.n, collapse = " + ")) 
+  environment(fake.formula) <- environment(ig$fake.formula)
+  mf$formula <- fake.formula 
   mf$start.v <- mf$Model <- mf$BivD <- mf$nu <- mf$fp <- mf$PL <- mf$eqPL <- mf$valPL <- mf$fitPL <- mf$spPL <- mf$hess <- mf$gamma <- mf$pPen1 <- mf$pPen2 <- mf$rinit <- mf$rmax <- mf$iterlimsp <- mf$pr.tolsp <- NULL  
   mf$drop.unused.levels <- TRUE 
   if(Model=="BSS") mf$na.action <- na.pass

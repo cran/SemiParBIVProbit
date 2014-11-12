@@ -54,38 +54,25 @@ working.comp <- function(x, VC = VC, myf = myf){
   W.inv <- c.W <- list()
   nz <- 0.000000001
 
-    for(i in 1:n) {
+    for(i in 1:n){
 
       W.eig <- eigen(L.W[[i]], symmetric=TRUE)  
+      s.ch <- sum(as.numeric(as.vector(L.W[[i]])==0))
       
-      if((VC$Model=="B" || VC$Model=="BPO") && VC$PL == "P" ) {
+     if(VC$Model=="BSS" && s.ch==3){ 
       
-               if(min(W.eig$values) < .Machine$double.eps) W.eig$values[2] <- nz
-      
-                                                               }
-      
-      if(VC$Model=="BSS"){ 
-      
-       s.ch <- sum(as.numeric(as.vector(L.W[[i]])==0))
-   
-             if(s.ch==3){ c.W[[i]] <- W.inv[[i]] <- matrix(0,2,2)
+                          if(L.W[[i]][1,1] < .Machine$double.eps) L.W[[i]][1,1] <- nz
+                          c.W[[i]] <- W.inv[[i]] <- matrix(0,2,2)
                           c.W[[i]][1,1] <- sqrt(L.W[[i]][1,1]) 
                           W.inv[[i]][1,1] <- 1/L.W[[i]][1,1]
-                                                            }else{
-                                                            
-                                         if(min(W.eig$values) < .Machine$double.eps) W.eig$values[2] <- nz    
-                                         
-                                                                 }
-                         }  
+                          
+                                   }else{
+                                   
+      if(min(W.eig$values) < .Machine$double.eps) { pep <- which(W.eig$values < .Machine$double.eps)
+      	                                            W.eig$values[pep] <- nz  
+      	                                           }                                   
+                                        }
       
-      
-      if(VC$Model=="B" && VC$PL != "P"){
-      	if(min(W.eig$values) < .Machine$double.eps) { pep <- which(W.eig$values < .Machine$double.eps)
-      	                                              W.eig$values[pep] <- nz  
-      	                                              }        
-                                        } 
-                                
-                      
       if( !(VC$Model=="BSS" && s.ch==3) ){
       
       c.W[[i]]   <- W.eig$vec%*%tcrossprod(diag(sqrt(W.eig$val)),W.eig$vec) 

@@ -46,6 +46,15 @@ bit1.th2 <- (2 * pi * (0.5 * (2 * (1/ct.st^2 * tt.st) * (1 -
     ct.st))/(ct.st^2)^2 
 
 
+bit1.th2ATE <- 0.5 * (pi * (0.5 * (2 * teta * (1 - teta^2)^-0.5)))/(pi * sqrt(1 - 
+    teta^2))^2 * (exp(-0.5/(1 - teta^2) * (qp1^2 + qp2^2 - 2 * 
+    teta * qp1 * qp2))) - 0.5/(pi * sqrt(1 - teta^2)) * (exp(-0.5/(1 - 
+    teta^2) * (qp1^2 + qp2^2 - 2 * teta * qp1 * qp2)) * (-0.5/(1 - 
+    teta^2) * (2 * qp1 * qp2) + 0.5 * (2 * teta)/(1 - teta^2)^2 * 
+    (qp1^2 + qp2^2 - 2 * teta * qp1 * qp2)))
+
+
+
 
 }
 
@@ -80,6 +89,15 @@ bit1.th2 <- -(((1 + (qtp1^2 + qtp2^2 - 2 * tt.st * qtp1 * qtp2)/(nu *
     (1 + (qtp1^2 + qtp2^2 - 2 * tt.st * qtp1 * qtp2)/(nu * 
         (1 - tt.st^2)))^(-nu/2)/(2 * pi * sqrt(1 - tt.st^2)) * 
         1 * (2 * (sinh(teta.st) * ct.st))/(ct.st^2)^2) 
+
+bit1.th2ATE <- -((1 + (qtp1^2 + qtp2^2 - 2 * teta * qtp1 * qtp2)/(nu * (1 - 
+    teta^2)))^((-nu/2) - 1) * ((-nu/2) * (2 * qtp1 * qtp2/(nu * 
+    (1 - teta^2)) - (qtp1^2 + qtp2^2 - 2 * teta * qtp1 * qtp2) * 
+    (nu * (2 * teta))/(nu * (1 - teta^2))^2))/(2 * pi * sqrt(1 - 
+    teta^2)) - (1 + (qtp1^2 + qtp2^2 - 2 * teta * qtp1 * qtp2)/(nu * 
+    (1 - teta^2)))^(-nu/2) * (2 * pi * (0.5 * (2 * teta * (1 - 
+    teta^2)^-0.5)))/(2 * pi * sqrt(1 - teta^2))^2)
+
 
 
 }
@@ -190,6 +208,23 @@ bit1.th2 <-((p1^(-(et.st + epsilon)) + p2^(-(et.st + epsilon)) -
         p1^(-(et.st + epsilon)) * (lo.p1 * et.st) * 
             (lo.p1 * et.st)))))
 
+bit1.th2ATE <- ((p1^(-teta) + p2^(-teta) - 1)^(-1/teta) * (log((p1^(-teta) + 
+    p2^(-teta) - 1)) * (1/teta^2)) - (p1^(-teta) + p2^(-teta) - 
+    1)^((-1/teta) - 1) * ((-1/teta) * (p2^(-teta) * log(p2) + 
+    p1^(-teta) * log(p1)))) * (log((p1^(-teta) + p2^(-teta) - 
+    1)) * (1/teta^2)) - (p1^(-teta) + p2^(-teta) - 1)^(-1/teta) * 
+    (log((p1^(-teta) + p2^(-teta) - 1)) * (2 * teta/(teta^2)^2) + 
+        (p2^(-teta) * log(p2) + p1^(-teta) * log(p1))/(p1^(-teta) + 
+            p2^(-teta) - 1) * (1/teta^2)) - (((p1^(-teta) + p2^(-teta) - 
+    1)^((-1/teta) - 1) * (log((p1^(-teta) + p2^(-teta) - 1)) * 
+    (1/teta^2)) - (p1^(-teta) + p2^(-teta) - 1)^(((-1/teta) - 
+    1) - 1) * (((-1/teta) - 1) * (p2^(-teta) * log(p2) + p1^(-teta) * 
+    log(p1)))) * ((-1/teta) * (p2^(-teta) * lo.p2 + p1^(-teta) * 
+    lo.p1)) + (p1^(-teta) + p2^(-teta) - 1)^((-1/teta) - 1) * 
+    (1/teta^2 * (p2^(-teta) * lo.p2 + p1^(-teta) * lo.p1) - (-1/teta) * 
+        (p1^(-teta) * log(p1) * lo.p1 + p2^(-teta) * log(p2) * 
+            lo.p2)))
+
 
 }
 
@@ -294,6 +329,25 @@ c.copula.be1 <- ((1 - p1)^(-(-teta)) + p2^(-(-teta)) - 1)^((-1/(-teta)) - 1) *
          epsilon)) * (log((1 - p1)) * et.st) * (log((1 - 
          p1)) * et.st))))))
  
+
+ bit1.th2ATE <- -((((1 - p1)^teta + p2^teta - 1)^(((1/teta) - 1) - 1) * (((1/teta) - 
+    1) * ((1 - p1)^teta * log((1 - p1)) + p2^teta * log(p2))) - 
+    ((1 - p1)^teta + p2^teta - 1)^((1/teta) - 1) * (log(((1 - 
+        p1)^teta + p2^teta - 1)) * (1/teta^2))) * ((1/teta) * 
+    ((1 - p1)^teta * log((1 - p1)) + p2^teta * lo.p2)) + ((1 - 
+    p1)^teta + p2^teta - 1)^((1/teta) - 1) * ((1/teta) * ((1 - 
+    p1)^teta * log((1 - p1)) * log((1 - p1)) + p2^teta * log(p2) * 
+    lo.p2) - 1/teta^2 * ((1 - p1)^teta * log((1 - p1)) + p2^teta * 
+    lo.p2)) - ((((1 - p1)^teta + p2^teta - 1)^((1/teta) - 1) * 
+    ((1/teta) * ((1 - p1)^teta * log((1 - p1)) + p2^teta * log(p2))) - 
+    ((1 - p1)^teta + p2^teta - 1)^(1/teta) * (log(((1 - p1)^teta + 
+        p2^teta - 1)) * (1/teta^2))) * (log(((1 - p1)^teta + 
+    p2^teta - 1)) * (1/teta^2)) + ((1 - p1)^teta + p2^teta - 
+    1)^(1/teta) * (((1 - p1)^teta * log((1 - p1)) + p2^teta * 
+    log(p2))/((1 - p1)^teta + p2^teta - 1) * (1/teta^2) - log(((1 - 
+    p1)^teta + p2^teta - 1)) * (2 * teta/(teta^2)^2)))) 
+ 
+
 
 }
 
@@ -416,6 +470,30 @@ bit1.th2 <-(((1 - p1)^(-(exp(teta.st) + epsilon)) + (1 - p2)^(-(exp(teta.st) +
         (log((1 - p1)) * exp(teta.st)) * (log((1 - p1)) * exp(teta.st))))))
 
 
+bit1.th2ATE <- (((1 - p1)^(-teta) + (1 - p2)^(-teta) - 1)^(-1/teta) * (log(((1 - 
+    p1)^(-teta) + (1 - p2)^(-teta) - 1)) * (1/teta^2)) - ((1 - 
+    p1)^(-teta) + (1 - p2)^(-teta) - 1)^((-1/teta) - 1) * ((-1/teta) * 
+    ((1 - p2)^(-teta) * log((1 - p2)) + (1 - p1)^(-teta) * log((1 - 
+        p1))))) * (log(((1 - p1)^(-teta) + (1 - p2)^(-teta) - 
+    1)) * (1/teta^2)) - ((1 - p1)^(-teta) + (1 - p2)^(-teta) - 
+    1)^(-1/teta) * (log(((1 - p1)^(-teta) + (1 - p2)^(-teta) - 
+    1)) * (2 * teta/(teta^2)^2) + ((1 - p2)^(-teta) * log((1 - 
+    p2)) + (1 - p1)^(-teta) * log((1 - p1)))/((1 - p1)^(-teta) + 
+    (1 - p2)^(-teta) - 1) * (1/teta^2)) - ((((1 - p1)^(-teta) + 
+    (1 - p2)^(-teta) - 1)^((-1/teta) - 1) * (log(((1 - p1)^(-teta) + 
+    (1 - p2)^(-teta) - 1)) * (1/teta^2)) - ((1 - p1)^(-teta) + 
+    (1 - p2)^(-teta) - 1)^(((-1/teta) - 1) - 1) * (((-1/teta) - 
+    1) * ((1 - p2)^(-teta) * log((1 - p2)) + (1 - p1)^(-teta) * 
+    log((1 - p1))))) * ((-1/teta) * ((1 - p2)^(-teta) * log((1 - 
+    p2)) + (1 - p1)^(-teta) * log((1 - p1)))) + ((1 - p1)^(-teta) + 
+    (1 - p2)^(-teta) - 1)^((-1/teta) - 1) * (1/teta^2 * ((1 - 
+    p2)^(-teta) * log((1 - p2)) + (1 - p1)^(-teta) * log((1 - 
+    p1))) - (-1/teta) * ((1 - p1)^(-teta) * log((1 - p1)) * log((1 - 
+    p1)) + (1 - p2)^(-teta) * log((1 - p2)) * log((1 - p2)))))
+ 
+ 
+
+
 }
 
 
@@ -519,6 +597,23 @@ c.copula.be1 <- 1 - (p1^(teta) + (1 - p2)^(teta) - 1)^((1/teta) - 1) * ((1/teta)
      epsilon)) * (lo.p1 * exp(teta.st)) - p1^(-(exp(teta.st) + 
      epsilon)) * (lo.p1 * exp(teta.st)) * (lo.p1 * exp(teta.st)))))))
  
+ bit1.th2ATE <- -(((p1^(teta) + (1 - p2)^(teta) - 1)^(((1/teta) - 1) - 1) * (((1/teta) - 
+    1) * (p1^(teta) * log(p1) + (1 - p2)^(teta) * log((1 - p2)))) - 
+    (p1^(teta) + (1 - p2)^(teta) - 1)^((1/teta) - 1) * (log((p1^(teta) + 
+        (1 - p2)^(teta) - 1)) * (1/teta^2))) * ((1/teta) * (p1^(teta) * 
+    lo.p1 + (1 - p2)^(teta) * log((1 - p2)))) + (p1^(teta) + 
+    (1 - p2)^(teta) - 1)^((1/teta) - 1) * ((1/teta) * (p1^(teta) * 
+    log(p1) * lo.p1 + (1 - p2)^(teta) * log((1 - p2)) * log((1 - 
+    p2))) - 1/teta^2 * (p1^(teta) * lo.p1 + (1 - p2)^(teta) * 
+    log((1 - p2)))) - (((p1^(teta) + (1 - p2)^(teta) - 1)^((1/teta) - 
+    1) * ((1/teta) * (p1^(teta) * log(p1) + (1 - p2)^(teta) * 
+    log((1 - p2)))) - (p1^(teta) + (1 - p2)^(teta) - 1)^(1/teta) * 
+    (log((p1^(teta) + (1 - p2)^(teta) - 1)) * (1/teta^2))) * 
+    (log((p1^(teta) + (1 - p2)^(teta) - 1)) * (1/teta^2)) + (p1^(teta) + 
+    (1 - p2)^(teta) - 1)^(1/teta) * ((p1^(teta) * log(p1) + (1 - 
+    p2)^(teta) * log((1 - p2)))/(p1^(teta) + (1 - p2)^(teta) - 
+    1) * (1/teta^2) - log((p1^(teta) + (1 - p2)^(teta) - 1)) * 
+    (2 * teta/(teta^2)^2))))
  
 }
 
@@ -623,7 +718,7 @@ c.copula2.be2th <- -(1/teta^2 * (1/(epcl) * ((1 - exp(-teta * p1)) * (exp(-teta 
     exp(-teta * p1)) * (1 - exp(-teta * p2))))^2))
 
 
-bit1.th2 <-1/teta^2 * ((1/(epcl) * (exp(-teta) - (exp(-teta * 
+bit1.th2 <- bit1.th2ATE <- 1/teta^2 * ((1/(epcl) * (exp(-teta) - (exp(-teta * 
     p1) * p1 * (1 - exp(-teta * p2)) + (1 - exp(-teta * p1)) * 
     (exp(-teta * p2) * p2))) - exp(-teta)/(epcl)^2 * 
     ((epcl) - (1 - exp(-teta * p1)) * (1 - exp(-teta * 
@@ -661,7 +756,6 @@ bit1.th2 <-1/teta^2 * ((1/(epcl) * (exp(-teta) - (exp(-teta *
         exp(-teta)) * ((epcl) - (1 - exp(-teta * p1)) * 
         (1 - exp(-teta * p2))))^2))
 
- 
 
 }
 
@@ -813,7 +907,35 @@ bit1.th2 <- -(exp(-((-log(p1))^((exp(teta.st) + 1)) + (-log(p2))^((exp(teta.st) 
     1))) * (log(((-log(p1))^((exp(teta.st) + 1)) + (-log(p2))^((exp(teta.st) + 
     1)))) * (exp(teta.st)/((exp(teta.st) + 1))^2))))
 
+bit1.th2ATE <- -(exp(-((-log(p1))^teta + (-log(p2))^teta)^(1/teta)) * ((((-log(p1))^teta + 
+    (-log(p2))^teta)^(((1/teta) - 1) - 1) * (((1/teta) - 1) * 
+    ((-log(p1))^teta * log((-log(p1))) + (-log(p2))^teta * log((-log(p2))))) - 
+    ((-log(p1))^teta + (-log(p2))^teta)^((1/teta) - 1) * (log(((-log(p1))^teta + 
+        (-log(p2))^teta)) * (1/teta^2))) * ((1/teta) * ((-log(p1))^teta * 
+    log((-log(p1))) + (-log(p2))^teta * log((-log(p2))))) + ((-log(p1))^teta + 
+    (-log(p2))^teta)^((1/teta) - 1) * ((1/teta) * ((-log(p1))^teta * 
+    log((-log(p1))) * log((-log(p1))) + (-log(p2))^teta * log((-log(p2))) * 
+    log((-log(p2)))) - 1/teta^2 * ((-log(p1))^teta * log((-log(p1))) + 
+    (-log(p2))^teta * log((-log(p2))))) - ((((-log(p1))^teta + 
+    (-log(p2))^teta)^((1/teta) - 1) * ((1/teta) * ((-log(p1))^teta * 
+    log((-log(p1))) + (-log(p2))^teta * log((-log(p2))))) - ((-log(p1))^teta + 
+    (-log(p2))^teta)^(1/teta) * (log(((-log(p1))^teta + (-log(p2))^teta)) * 
+    (1/teta^2))) * (log(((-log(p1))^teta + (-log(p2))^teta)) * 
+    (1/teta^2)) + ((-log(p1))^teta + (-log(p2))^teta)^(1/teta) * 
+    (((-log(p1))^teta * log((-log(p1))) + (-log(p2))^teta * log((-log(p2))))/((-log(p1))^teta + 
+        (-log(p2))^teta) * (1/teta^2) - log(((-log(p1))^teta + 
+        (-log(p2))^teta)) * (2 * teta/(teta^2)^2)))) - exp(-((-log(p1))^teta + 
+    (-log(p2))^teta)^(1/teta)) * (((-log(p1))^teta + (-log(p2))^teta)^((1/teta) - 
+    1) * ((1/teta) * ((-log(p1))^teta * log((-log(p1))) + (-log(p2))^teta * 
+    log((-log(p2))))) - ((-log(p1))^teta + (-log(p2))^teta)^(1/teta) * 
+    (log(((-log(p1))^teta + (-log(p2))^teta)) * (1/teta^2))) * 
+    (((-log(p1))^teta + (-log(p2))^teta)^((1/teta) - 1) * ((1/teta) * 
+        ((-log(p1))^teta * log((-log(p1))) + (-log(p2))^teta * 
+            log((-log(p2))))) - ((-log(p1))^teta + (-log(p2))^teta)^(1/teta) * 
+        (log(((-log(p1))^teta + (-log(p2))^teta)) * (1/teta^2))))
 
+ 
+ 
 
 }
 
@@ -998,6 +1120,39 @@ bit1.th2 <-  exp(-((-log(1 - p1))^(exp(teta.st) + 1) + (-log(p2))^(exp(teta.st) 
     (log(((-log(1 - p1))^(exp(teta.st) + 1) + (-log(p2))^(exp(teta.st) + 
         1))) * (exp(teta.st)/(exp(teta.st) + 1)^2)))
 
+bit1.th2ATE <- exp(-((-log(1 - p1))^(-teta) + (-log(p2))^(-teta))^(-1/teta)) * 
+    ((((-log(1 - p1))^(-teta) + (-log(p2))^(-teta))^(-1/teta) * 
+        (log(((-log(1 - p1))^(-teta) + (-log(p2))^(-teta))) * 
+            (1/teta^2)) - ((-log(1 - p1))^(-teta) + (-log(p2))^(-teta))^((-1/teta) - 
+        1) * ((-1/teta) * ((-log(p2))^(-teta) * log((-log(p2))) + 
+        (-log(1 - p1))^(-teta) * log((-log(1 - p1)))))) * (log(((-log(1 - 
+        p1))^(-teta) + (-log(p2))^(-teta))) * (1/teta^2)) - ((-log(1 - 
+        p1))^(-teta) + (-log(p2))^(-teta))^(-1/teta) * (log(((-log(1 - 
+        p1))^(-teta) + (-log(p2))^(-teta))) * (2 * teta/(teta^2)^2) + 
+        ((-log(p2))^(-teta) * log((-log(p2))) + (-log(1 - p1))^(-teta) * 
+            log((-log(1 - p1))))/((-log(1 - p1))^(-teta) + (-log(p2))^(-teta)) * 
+            (1/teta^2)) - ((((-log(1 - p1))^(-teta) + (-log(p2))^(-teta))^((-1/teta) - 
+        1) * (log(((-log(1 - p1))^(-teta) + (-log(p2))^(-teta))) * 
+        (1/teta^2)) - ((-log(1 - p1))^(-teta) + (-log(p2))^(-teta))^(((-1/teta) - 
+        1) - 1) * (((-1/teta) - 1) * ((-log(p2))^(-teta) * log((-log(p2))) + 
+        (-log(1 - p1))^(-teta) * log((-log(1 - p1)))))) * ((-1/teta) * 
+        ((-log(p2))^(-teta) * log((-log(p2))) + (-log(1 - p1))^(-teta) * 
+            log((-log(1 - p1))))) + ((-log(1 - p1))^(-teta) + 
+        (-log(p2))^(-teta))^((-1/teta) - 1) * (1/teta^2 * ((-log(p2))^(-teta) * 
+        log((-log(p2))) + (-log(1 - p1))^(-teta) * log((-log(1 - 
+        p1)))) - (-1/teta) * ((-log(1 - p1))^(-teta) * log((-log(1 - 
+        p1))) * log((-log(1 - p1))) + (-log(p2))^(-teta) * log((-log(p2))) * 
+        log((-log(p2))))))) - exp(-((-log(1 - p1))^(-teta) + 
+    (-log(p2))^(-teta))^(-1/teta)) * (((-log(1 - p1))^(-teta) + 
+    (-log(p2))^(-teta))^(-1/teta) * (log(((-log(1 - p1))^(-teta) + 
+    (-log(p2))^(-teta))) * (1/teta^2)) - ((-log(1 - p1))^(-teta) + 
+    (-log(p2))^(-teta))^((-1/teta) - 1) * ((-1/teta) * ((-log(p2))^(-teta) * 
+    log((-log(p2))) + (-log(1 - p1))^(-teta) * log((-log(1 - 
+    p1)))))) * (((-log(1 - p1))^(-teta) + (-log(p2))^(-teta))^(-1/teta) * 
+    (log(((-log(1 - p1))^(-teta) + (-log(p2))^(-teta))) * (1/teta^2)) - 
+    ((-log(1 - p1))^(-teta) + (-log(p2))^(-teta))^((-1/teta) - 
+        1) * ((-1/teta) * ((-log(p2))^(-teta) * log((-log(p2))) + 
+        (-log(1 - p1))^(-teta) * log((-log(1 - p1))))))
 
 }
 
@@ -1192,7 +1347,42 @@ bit1.th2 <- -(exp(-((-log(1 - p1))^(exp(teta.st) + 1) + (-log(1 - p2))^(exp(teta
     p2))^(exp(teta.st) + 1))) * (exp(teta.st)/(exp(teta.st) + 
     1)^2))))
 
-
+bit1.th2ATE <- -(exp(-((-log(1 - p1))^teta + (-log(1 - p2))^teta)^(1/teta)) * 
+    ((((-log(1 - p1))^teta + (-log(1 - p2))^teta)^(((1/teta) - 
+        1) - 1) * (((1/teta) - 1) * ((-log(1 - p1))^teta * log((-log(1 - 
+        p1))) + (-log(1 - p2))^teta * log((-log(1 - p2))))) - 
+        ((-log(1 - p1))^teta + (-log(1 - p2))^teta)^((1/teta) - 
+            1) * (log(((-log(1 - p1))^teta + (-log(1 - p2))^teta)) * 
+            (1/teta^2))) * ((1/teta) * ((-log(1 - p1))^teta * 
+        log((-log(1 - p1))) + (-log(1 - p2))^teta * log((-log(1 - 
+        p2))))) + ((-log(1 - p1))^teta + (-log(1 - p2))^teta)^((1/teta) - 
+        1) * ((1/teta) * ((-log(1 - p1))^teta * log((-log(1 - 
+        p1))) * log((-log(1 - p1))) + (-log(1 - p2))^teta * log((-log(1 - 
+        p2))) * log((-log(1 - p2)))) - 1/teta^2 * ((-log(1 - 
+        p1))^teta * log((-log(1 - p1))) + (-log(1 - p2))^teta * 
+        log((-log(1 - p2))))) - ((((-log(1 - p1))^teta + (-log(1 - 
+        p2))^teta)^((1/teta) - 1) * ((1/teta) * ((-log(1 - p1))^teta * 
+        log((-log(1 - p1))) + (-log(1 - p2))^teta * log((-log(1 - 
+        p2))))) - ((-log(1 - p1))^teta + (-log(1 - p2))^teta)^(1/teta) * 
+        (log(((-log(1 - p1))^teta + (-log(1 - p2))^teta)) * (1/teta^2))) * 
+        (log(((-log(1 - p1))^teta + (-log(1 - p2))^teta)) * (1/teta^2)) + 
+        ((-log(1 - p1))^teta + (-log(1 - p2))^teta)^(1/teta) * 
+            (((-log(1 - p1))^teta * log((-log(1 - p1))) + (-log(1 - 
+                p2))^teta * log((-log(1 - p2))))/((-log(1 - p1))^teta + 
+                (-log(1 - p2))^teta) * (1/teta^2) - log(((-log(1 - 
+                p1))^teta + (-log(1 - p2))^teta)) * (2 * teta/(teta^2)^2)))) - 
+    exp(-((-log(1 - p1))^teta + (-log(1 - p2))^teta)^(1/teta)) * 
+        (((-log(1 - p1))^teta + (-log(1 - p2))^teta)^((1/teta) - 
+            1) * ((1/teta) * ((-log(1 - p1))^teta * log((-log(1 - 
+            p1))) + (-log(1 - p2))^teta * log((-log(1 - p2))))) - 
+            ((-log(1 - p1))^teta + (-log(1 - p2))^teta)^(1/teta) * 
+                (log(((-log(1 - p1))^teta + (-log(1 - p2))^teta)) * 
+                  (1/teta^2))) * (((-log(1 - p1))^teta + (-log(1 - 
+        p2))^teta)^((1/teta) - 1) * ((1/teta) * ((-log(1 - p1))^teta * 
+        log((-log(1 - p1))) + (-log(1 - p2))^teta * log((-log(1 - 
+        p2))))) - ((-log(1 - p1))^teta + (-log(1 - p2))^teta)^(1/teta) * 
+        (log(((-log(1 - p1))^teta + (-log(1 - p2))^teta)) * (1/teta^2))))
+ 
 
 }
 
@@ -1377,7 +1567,41 @@ bit1.th2 <-exp(-((-log(p1))^(exp(teta.st) + 1) + (-log(1 - p2))^(exp(teta.st) +
     1))) * (exp(teta.st)/(exp(teta.st) + 1)^2)))
 
 
-
+bit1.th2ATE <- exp(-((-log(p1))^(-teta) + (-log(1 - p2))^(-teta))^(-1/teta)) * 
+    ((((-log(p1))^(-teta) + (-log(1 - p2))^(-teta))^(-1/teta) * 
+        (log(((-log(p1))^(-teta) + (-log(1 - p2))^(-teta))) * 
+            (1/teta^2)) - ((-log(p1))^(-teta) + (-log(1 - p2))^(-teta))^((-1/teta) - 
+        1) * ((-1/teta) * ((-log(1 - p2))^(-teta) * log((-log(1 - 
+        p2))) + (-log(p1))^(-teta) * log((-log(p1)))))) * (log(((-log(p1))^(-teta) + 
+        (-log(1 - p2))^(-teta))) * (1/teta^2)) - ((-log(p1))^(-teta) + 
+        (-log(1 - p2))^(-teta))^(-1/teta) * (log(((-log(p1))^(-teta) + 
+        (-log(1 - p2))^(-teta))) * (2 * teta/(teta^2)^2) + ((-log(1 - 
+        p2))^(-teta) * log((-log(1 - p2))) + (-log(p1))^(-teta) * 
+        log((-log(p1))))/((-log(p1))^(-teta) + (-log(1 - p2))^(-teta)) * 
+        (1/teta^2)) - ((((-log(p1))^(-teta) + (-log(1 - p2))^(-teta))^((-1/teta) - 
+        1) * (log(((-log(p1))^(-teta) + (-log(1 - p2))^(-teta))) * 
+        (1/teta^2)) - ((-log(p1))^(-teta) + (-log(1 - p2))^(-teta))^(((-1/teta) - 
+        1) - 1) * (((-1/teta) - 1) * ((-log(1 - p2))^(-teta) * 
+        log((-log(1 - p2))) + (-log(p1))^(-teta) * log((-log(p1)))))) * 
+        ((-1/teta) * ((-log(1 - p2))^(-teta) * log((-log(1 - 
+            p2))) + (-log(p1))^(-teta) * log((-log(p1))))) + 
+        ((-log(p1))^(-teta) + (-log(1 - p2))^(-teta))^((-1/teta) - 
+            1) * (1/teta^2 * ((-log(1 - p2))^(-teta) * log((-log(1 - 
+            p2))) + (-log(p1))^(-teta) * log((-log(p1)))) - (-1/teta) * 
+            ((-log(p1))^(-teta) * log((-log(p1))) * log((-log(p1))) + 
+                (-log(1 - p2))^(-teta) * log((-log(1 - p2))) * 
+                  log((-log(1 - p2))))))) - exp(-((-log(p1))^(-teta) + 
+    (-log(1 - p2))^(-teta))^(-1/teta)) * (((-log(p1))^(-teta) + 
+    (-log(1 - p2))^(-teta))^(-1/teta) * (log(((-log(p1))^(-teta) + 
+    (-log(1 - p2))^(-teta))) * (1/teta^2)) - ((-log(p1))^(-teta) + 
+    (-log(1 - p2))^(-teta))^((-1/teta) - 1) * ((-1/teta) * ((-log(1 - 
+    p2))^(-teta) * log((-log(1 - p2))) + (-log(p1))^(-teta) * 
+    log((-log(p1)))))) * (((-log(p1))^(-teta) + (-log(1 - p2))^(-teta))^(-1/teta) * 
+    (log(((-log(p1))^(-teta) + (-log(1 - p2))^(-teta))) * (1/teta^2)) - 
+    ((-log(p1))^(-teta) + (-log(1 - p2))^(-teta))^((-1/teta) - 
+        1) * ((-1/teta) * ((-log(1 - p2))^(-teta) * log((-log(1 - 
+        p2))) + (-log(p1))^(-teta) * log((-log(p1))))))
+ 
 
 }
 
@@ -1573,8 +1797,45 @@ bit1.th2 <- -((((1 - p1)^(exp(teta.st) + 1 + epsilon) + (1 - p2)^(exp(teta.st) +
     (exp(teta.st)/(exp(teta.st) + 1 + epsilon)^2 - exp(teta.st) * 
         (2 * (exp(teta.st) * (exp(teta.st) + 1 + epsilon)))/((exp(teta.st) + 
         1 + epsilon)^2)^2))))
-
-
+        
+bit1.th2ATE <- -((((1 - p1)^teta + (1 - p2)^teta - (1 - p1)^teta * (1 - p2)^teta)^(((1/teta) - 
+    1) - 1) * (((1/teta) - 1) * ((1 - p1)^teta * log((1 - p1)) + 
+    (1 - p2)^teta * log((1 - p2)) - ((1 - p1)^teta * log((1 - 
+    p1)) * (1 - p2)^teta + (1 - p1)^teta * ((1 - p2)^teta * log((1 - 
+    p2)))))) - ((1 - p1)^teta + (1 - p2)^teta - (1 - p1)^teta * 
+    (1 - p2)^teta)^((1/teta) - 1) * (log(((1 - p1)^teta + (1 - 
+    p2)^teta - (1 - p1)^teta * (1 - p2)^teta)) * (1/teta^2))) * 
+    ((1/teta) * ((1 - p1)^teta * log((1 - p1)) + (1 - p2)^teta * 
+        log((1 - p2)) - ((1 - p1)^teta * log((1 - p1)) * (1 - 
+        p2)^teta + (1 - p1)^teta * ((1 - p2)^teta * log((1 - 
+        p2)))))) + ((1 - p1)^teta + (1 - p2)^teta - (1 - p1)^teta * 
+    (1 - p2)^teta)^((1/teta) - 1) * ((1/teta) * ((1 - p1)^teta * 
+    log((1 - p1)) * log((1 - p1)) + (1 - p2)^teta * log((1 - 
+    p2)) * log((1 - p2)) - ((1 - p1)^teta * log((1 - p1)) * log((1 - 
+    p1)) * (1 - p2)^teta + (1 - p1)^teta * log((1 - p1)) * ((1 - 
+    p2)^teta * log((1 - p2))) + ((1 - p1)^teta * log((1 - p1)) * 
+    ((1 - p2)^teta * log((1 - p2))) + (1 - p1)^teta * ((1 - p2)^teta * 
+    log((1 - p2)) * log((1 - p2)))))) - 1/teta^2 * ((1 - p1)^teta * 
+    log((1 - p1)) + (1 - p2)^teta * log((1 - p2)) - ((1 - p1)^teta * 
+    log((1 - p1)) * (1 - p2)^teta + (1 - p1)^teta * ((1 - p2)^teta * 
+    log((1 - p2)))))) - ((((1 - p1)^teta + (1 - p2)^teta - (1 - 
+    p1)^teta * (1 - p2)^teta)^((1/teta) - 1) * ((1/teta) * ((1 - 
+    p1)^teta * log((1 - p1)) + (1 - p2)^teta * log((1 - p2)) - 
+    ((1 - p1)^teta * log((1 - p1)) * (1 - p2)^teta + (1 - p1)^teta * 
+        ((1 - p2)^teta * log((1 - p2)))))) - ((1 - p1)^teta + 
+    (1 - p2)^teta - (1 - p1)^teta * (1 - p2)^teta)^(1/teta) * 
+    (log(((1 - p1)^teta + (1 - p2)^teta - (1 - p1)^teta * (1 - 
+        p2)^teta)) * (1/teta^2))) * (log(((1 - p1)^teta + (1 - 
+    p2)^teta - (1 - p1)^teta * (1 - p2)^teta)) * (1/teta^2)) + 
+    ((1 - p1)^teta + (1 - p2)^teta - (1 - p1)^teta * (1 - p2)^teta)^(1/teta) * 
+        (((1 - p1)^teta * log((1 - p1)) + (1 - p2)^teta * log((1 - 
+            p2)) - ((1 - p1)^teta * log((1 - p1)) * (1 - p2)^teta + 
+            (1 - p1)^teta * ((1 - p2)^teta * log((1 - p2)))))/((1 - 
+            p1)^teta + (1 - p2)^teta - (1 - p1)^teta * (1 - p2)^teta) * 
+            (1/teta^2) - log(((1 - p1)^teta + (1 - p2)^teta - 
+            (1 - p1)^teta * (1 - p2)^teta)) * (2 * teta/(teta^2)^2))))
+ 
+ 
 
 }
 
@@ -1753,8 +2014,44 @@ bit1.th2 <-  ((p1^((exp(teta.st) + 1 + epsilon)) + (1 - p2)^((exp(teta.st) +
             1 + epsilon)))) * (exp(teta.st)/(exp(teta.st) + 1 + 
         epsilon)^2 - exp(teta.st) * (2 * (exp(teta.st) * (exp(teta.st) + 
         1 + epsilon)))/((exp(teta.st) + 1 + epsilon)^2)^2)))
-
-
+        
+bit1.th2ATE <- ((p1^(-teta) + (1 - p2)^(-teta) - p1^(-teta) * (1 - p2)^(-teta))^(-1/teta) * 
+    (log((p1^(-teta) + (1 - p2)^(-teta) - p1^(-teta) * (1 - p2)^(-teta))) * 
+        (1/teta^2)) - (p1^(-teta) + (1 - p2)^(-teta) - p1^(-teta) * 
+    (1 - p2)^(-teta))^((-1/teta) - 1) * ((-1/teta) * ((1 - p2)^(-teta) * 
+    log((1 - p2)) + p1^(-teta) * log(p1) - (p1^(-teta) * ((1 - 
+    p2)^(-teta) * log((1 - p2))) + p1^(-teta) * log(p1) * (1 - 
+    p2)^(-teta))))) * (log((p1^(-teta) + (1 - p2)^(-teta) - p1^(-teta) * 
+    (1 - p2)^(-teta))) * (1/teta^2)) - (p1^(-teta) + (1 - p2)^(-teta) - 
+    p1^(-teta) * (1 - p2)^(-teta))^(-1/teta) * (log((p1^(-teta) + 
+    (1 - p2)^(-teta) - p1^(-teta) * (1 - p2)^(-teta))) * (2 * 
+    teta/(teta^2)^2) + ((1 - p2)^(-teta) * log((1 - p2)) + p1^(-teta) * 
+    log(p1) - (p1^(-teta) * ((1 - p2)^(-teta) * log((1 - p2))) + 
+    p1^(-teta) * log(p1) * (1 - p2)^(-teta)))/(p1^(-teta) + (1 - 
+    p2)^(-teta) - p1^(-teta) * (1 - p2)^(-teta)) * (1/teta^2)) - 
+    (((p1^(-teta) + (1 - p2)^(-teta) - p1^(-teta) * (1 - p2)^(-teta))^((-1/teta) - 
+        1) * (log((p1^(-teta) + (1 - p2)^(-teta) - p1^(-teta) * 
+        (1 - p2)^(-teta))) * (1/teta^2)) - (p1^(-teta) + (1 - 
+        p2)^(-teta) - p1^(-teta) * (1 - p2)^(-teta))^(((-1/teta) - 
+        1) - 1) * (((-1/teta) - 1) * ((1 - p2)^(-teta) * log((1 - 
+        p2)) + p1^(-teta) * log(p1) - (p1^(-teta) * ((1 - p2)^(-teta) * 
+        log((1 - p2))) + p1^(-teta) * log(p1) * (1 - p2)^(-teta))))) * 
+        ((-1/teta) * ((1 - p2)^(-teta) * log((1 - p2)) + p1^(-teta) * 
+            log(p1) - (p1^(-teta) * ((1 - p2)^(-teta) * log((1 - 
+            p2))) + p1^(-teta) * log(p1) * (1 - p2)^(-teta)))) + 
+        (p1^(-teta) + (1 - p2)^(-teta) - p1^(-teta) * (1 - p2)^(-teta))^((-1/teta) - 
+            1) * (1/teta^2 * ((1 - p2)^(-teta) * log((1 - p2)) + 
+            p1^(-teta) * log(p1) - (p1^(-teta) * ((1 - p2)^(-teta) * 
+            log((1 - p2))) + p1^(-teta) * log(p1) * (1 - p2)^(-teta))) - 
+            (-1/teta) * (p1^(-teta) * log(p1) * log(p1) + (1 - 
+                p2)^(-teta) * log((1 - p2)) * log((1 - p2)) - 
+                (p1^(-teta) * log(p1) * ((1 - p2)^(-teta) * log((1 - 
+                  p2))) + p1^(-teta) * log(p1) * log(p1) * (1 - 
+                  p2)^(-teta) + (p1^(-teta) * ((1 - p2)^(-teta) * 
+                  log((1 - p2)) * log((1 - p2))) + p1^(-teta) * 
+                  log(p1) * ((1 - p2)^(-teta) * log((1 - p2))))))))
+ 
+ 
 }
 
 
@@ -1919,7 +2216,35 @@ bit1.th2 <- -(((p1^(exp(teta.st) + 1 + epsilon) + p2^(exp(teta.st) + 1 +
         1 + epsilon)^2 - exp(teta.st) * (2 * (exp(teta.st) * 
         (exp(teta.st) + 1 + epsilon)))/((exp(teta.st) + 1 + epsilon)^2)^2))))
 
-
+bit1.th2ATE <- -(((p1^teta + p2^teta - p1^teta * p2^teta)^(((1/teta) - 1) - 
+    1) * (((1/teta) - 1) * (p1^teta * log(p1) + p2^teta * log(p2) - 
+    (p1^teta * log(p1) * p2^teta + p1^teta * (p2^teta * log(p2))))) - 
+    (p1^teta + p2^teta - p1^teta * p2^teta)^((1/teta) - 1) * 
+        (log((p1^teta + p2^teta - p1^teta * p2^teta)) * (1/teta^2))) * 
+    ((1/teta) * (p1^teta * log(p1) + p2^teta * log(p2) - (p1^teta * 
+        log(p1) * p2^teta + p1^teta * (p2^teta * log(p2))))) + 
+    (p1^teta + p2^teta - p1^teta * p2^teta)^((1/teta) - 1) * 
+        ((1/teta) * (p1^teta * log(p1) * log(p1) + p2^teta * 
+            log(p2) * log(p2) - (p1^teta * log(p1) * log(p1) * 
+            p2^teta + p1^teta * log(p1) * (p2^teta * log(p2)) + 
+            (p1^teta * log(p1) * (p2^teta * log(p2)) + p1^teta * 
+                (p2^teta * log(p2) * log(p2))))) - 1/teta^2 * 
+            (p1^teta * log(p1) + p2^teta * log(p2) - (p1^teta * 
+                log(p1) * p2^teta + p1^teta * (p2^teta * log(p2))))) - 
+    (((p1^teta + p2^teta - p1^teta * p2^teta)^((1/teta) - 1) * 
+        ((1/teta) * (p1^teta * log(p1) + p2^teta * log(p2) - 
+            (p1^teta * log(p1) * p2^teta + p1^teta * (p2^teta * 
+                log(p2))))) - (p1^teta + p2^teta - p1^teta * 
+        p2^teta)^(1/teta) * (log((p1^teta + p2^teta - p1^teta * 
+        p2^teta)) * (1/teta^2))) * (log((p1^teta + p2^teta - 
+        p1^teta * p2^teta)) * (1/teta^2)) + (p1^teta + p2^teta - 
+        p1^teta * p2^teta)^(1/teta) * ((p1^teta * log(p1) + p2^teta * 
+        log(p2) - (p1^teta * log(p1) * p2^teta + p1^teta * (p2^teta * 
+        log(p2))))/(p1^teta + p2^teta - p1^teta * p2^teta) * 
+        (1/teta^2) - log((p1^teta + p2^teta - p1^teta * p2^teta)) * 
+        (2 * teta/(teta^2)^2))))
+ 
+ 
 }
 
 
@@ -2107,8 +2432,45 @@ bit1.th2 <- (((1 - p1)^((exp(teta.st) + 1 + epsilon)) + p2^((exp(teta.st) +
         1 + epsilon)))) * (exp(teta.st)/((exp(teta.st) + 1 + 
         epsilon))^2 - exp(teta.st) * (2 * (exp(teta.st) * ((exp(teta.st) + 
         1 + epsilon))))/(((exp(teta.st) + 1 + epsilon))^2)^2)))
-
-
+        
+bit1.th2ATE <- (((1 - p1)^(-teta) + p2^(-teta) - (1 - p1)^(-teta) * p2^(-teta))^(-1/teta) * 
+    (log(((1 - p1)^(-teta) + p2^(-teta) - (1 - p1)^(-teta) * 
+        p2^(-teta))) * (1/teta^2)) - ((1 - p1)^(-teta) + p2^(-teta) - 
+    (1 - p1)^(-teta) * p2^(-teta))^((-1/teta) - 1) * ((-1/teta) * 
+    (p2^(-teta) * log(p2) + (1 - p1)^(-teta) * log((1 - p1)) - 
+        ((1 - p1)^(-teta) * (p2^(-teta) * log(p2)) + (1 - p1)^(-teta) * 
+            log((1 - p1)) * p2^(-teta))))) * (log(((1 - p1)^(-teta) + 
+    p2^(-teta) - (1 - p1)^(-teta) * p2^(-teta))) * (1/teta^2)) - 
+    ((1 - p1)^(-teta) + p2^(-teta) - (1 - p1)^(-teta) * p2^(-teta))^(-1/teta) * 
+        (log(((1 - p1)^(-teta) + p2^(-teta) - (1 - p1)^(-teta) * 
+            p2^(-teta))) * (2 * teta/(teta^2)^2) + (p2^(-teta) * 
+            log(p2) + (1 - p1)^(-teta) * log((1 - p1)) - ((1 - 
+            p1)^(-teta) * (p2^(-teta) * log(p2)) + (1 - p1)^(-teta) * 
+            log((1 - p1)) * p2^(-teta)))/((1 - p1)^(-teta) + 
+            p2^(-teta) - (1 - p1)^(-teta) * p2^(-teta)) * (1/teta^2)) - 
+    ((((1 - p1)^(-teta) + p2^(-teta) - (1 - p1)^(-teta) * p2^(-teta))^((-1/teta) - 
+        1) * (log(((1 - p1)^(-teta) + p2^(-teta) - (1 - p1)^(-teta) * 
+        p2^(-teta))) * (1/teta^2)) - ((1 - p1)^(-teta) + p2^(-teta) - 
+        (1 - p1)^(-teta) * p2^(-teta))^(((-1/teta) - 1) - 1) * 
+        (((-1/teta) - 1) * (p2^(-teta) * log(p2) + (1 - p1)^(-teta) * 
+            log((1 - p1)) - ((1 - p1)^(-teta) * (p2^(-teta) * 
+            log(p2)) + (1 - p1)^(-teta) * log((1 - p1)) * p2^(-teta))))) * 
+        ((-1/teta) * (p2^(-teta) * log(p2) + (1 - p1)^(-teta) * 
+            log((1 - p1)) - ((1 - p1)^(-teta) * (p2^(-teta) * 
+            log(p2)) + (1 - p1)^(-teta) * log((1 - p1)) * p2^(-teta)))) + 
+        ((1 - p1)^(-teta) + p2^(-teta) - (1 - p1)^(-teta) * p2^(-teta))^((-1/teta) - 
+            1) * (1/teta^2 * (p2^(-teta) * log(p2) + (1 - p1)^(-teta) * 
+            log((1 - p1)) - ((1 - p1)^(-teta) * (p2^(-teta) * 
+            log(p2)) + (1 - p1)^(-teta) * log((1 - p1)) * p2^(-teta))) - 
+            (-1/teta) * ((1 - p1)^(-teta) * log((1 - p1)) * log((1 - 
+                p1)) + p2^(-teta) * log(p2) * log(p2) - ((1 - 
+                p1)^(-teta) * log((1 - p1)) * (p2^(-teta) * log(p2)) + 
+                (1 - p1)^(-teta) * log((1 - p1)) * log((1 - p1)) * 
+                  p2^(-teta) + ((1 - p1)^(-teta) * (p2^(-teta) * 
+                log(p2) * log(p2)) + (1 - p1)^(-teta) * log((1 - 
+                p1)) * (p2^(-teta) * log(p2)))))))
+ 
+ 
 
 }
 
@@ -2509,7 +2871,7 @@ bit1.thlambda2 <- c.copula2.be2th* der.p2.lambda2
               der.p1.lambda1=der.p1.lambda1, der.p2.lambda2=der.p2.lambda2, der.d.n1.be1=der.d.n1.be1, der.d.n2.be2=der.d.n2.be2,
 der.der.p1.lam1.der.p1=der.der.p1.lam1.der.p1, der.der.p2.lam2.der.p2=der.der.p2.lam2.der.p2, 
 der2.p1.lambda1=der2.p1.lambda1, der2.p2.lambda2=der2.p2.lambda2, der.d.n1.lambda1=der.d.n1.lambda1,
-der.d.n2.lambda2=der.d.n2.lambda2)     
+der.d.n2.lambda2=der.d.n2.lambda2, bit1.th2ATE= bit1.th2ATE)     
 
 
 }

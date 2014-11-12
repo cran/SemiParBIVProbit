@@ -1,5 +1,5 @@
 LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, 
-                   Model = "B", hess = FALSE, gamma = 1, pPen1 = NULL, pPen2 = NULL){
+                   Model = "B", hess = TRUE, gamma = 1, pPen1 = NULL, pPen2 = NULL){
 
   sp <- qu.mag <- y1.y2 <- y1.cy2 <- cy1.y2 <- cy1.cy2 <- cy <- cy1 <- NULL  
   end <- 0

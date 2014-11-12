@@ -2,11 +2,10 @@ est.prev <- function(x, sig.lev = 0.05, sw = NULL, naive = FALSE){
 
 if(x$Model=="B" || x$Model=="BPO") stop("This function is suitable for sample selection models only.")
 
-good <- x$good
-X2sg <- x$X2s[good,]
+X2sg <- x$X2s
 
 if(naive==TRUE)  eta2 <- X2sg%*%coef(x$gam2) 
-if(naive==FALSE) eta2 <- x$eta2[good]
+if(naive==FALSE) eta2 <- x$eta2
 
 if(is.null(sw)) sw <- rep(1,length(eta2)) 
 
