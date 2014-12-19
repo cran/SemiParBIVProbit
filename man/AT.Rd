@@ -11,7 +11,7 @@
 \usage{
 
 AT(x, eq, nm.bin = "", E = TRUE, treat = TRUE, delta = FALSE, prob.lev = 0.05, 
-   s.meth = "svd", n.sim = 1000)
+   s.meth = "svd", n.sim = 500, naive = FALSE)
 
 }
 
@@ -33,13 +33,15 @@ the control group. This only makes sense if used jointly with \code{E = FALSE}.}
 
 \item{prob.lev}{Probability of the left and right tails of the posterior distribution used for interval calculations.} 
 
-\item{n.sim}{Number of simulated coefficient vectors from the posterior distribution of the estimated model parameters. This is used 
-             when \code{delta = FALSE}.} 
-
 \item{s.meth}{Matrix decomposition used to determine the matrix root of the covariance 
               matrix. This is used when \code{delta = FALSE}. See the documentation of the \code{mvtnorm} package for further details.}
 
+\item{n.sim}{Number of simulated coefficient vectors from the posterior distribution of the estimated model parameters. This is used 
+             when \code{delta = FALSE}. It may be increased if more precision is required.} 
 
+\item{naive}{It indicates whether the AT is calculated from a univariate (probit) model. This option has been 
+             introduced to compare adjusted (for unobserved confounding) and unadjusted estimates. Note that the unadjusted estimates
+             control for observed confounding.} 
 
 
 }
@@ -48,9 +50,11 @@ the control group. This only makes sense if used jointly with \code{E = FALSE}.}
 \details{
 
 AT measures the sample average difference in outcomes under 
-the treatment (the binary predictor/treatment assumes value 1) and under the 
+treatment (the binary predictor/treatment assumes value 1) and under 
 control (the binary treatment assumes value 0). Note that this function is only suitable for the 
-calculation of the average treatment effect in recursive binary models. See the references below for details. 
+calculation of the average treatment effect in recursive bivariate binary models. Posterior simulation 
+and delta method can be used to obtain `confidence' intervals. The former is typically more reliable at small
+sample sizes. See the references below for details. 
 
 }
 
@@ -60,7 +64,8 @@ calculation of the average treatment effect in recursive binary models. See the 
 
 \item{res}{It returns three values: lower confidence interval limit, estimated AT and upper confidence interval limit.}
 \item{sig.lev}{Significance level used.}
-\item{est.ATb}{When \code{delta = FALSE} it returns a vector containing simulated values of the average treatment effect. This is used to calculate intervals.}
+\item{est.ATb}{When \code{delta = FALSE} it returns a vector containing simulated values of the average treatment effect. This 
+               is used to calculate intervals.}
 
 }
 

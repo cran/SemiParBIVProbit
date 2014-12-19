@@ -1003,16 +1003,6 @@ if(eqPL=="second"){
 
 
 
-
-
-
-
-
-
-
-
-
-
   be1.be1 <- crossprod(X1*c(d2l.be1.be1),X1)
   be2.be2 <- crossprod(X2*c(d2l.be2.be2),X2)
   be1.be2 <- crossprod(X1*c(d2l.be1.be2),X2)
@@ -1113,78 +1103,41 @@ G <- -c(G, sum( dl.dlambda2.st ) )
 
 
 
+  if(VC$extra.regI == TRUE){
+  
+      op <- options(warn = -1)
+      R <- chol(H, pivot = TRUE)
+      options(op)
+      p <- dim(H)[2]
+      ipiv <- piv <- attr(R, "pivot")
+      ipiv[piv] <- 1:p
+      rank <- attr(R, "rank")
+      ind <- 1:rank
+      if (rank < p) R[(rank + 1):p, ] <- 0
+      R <- R[ipiv, ipiv]
+      H <- crossprod(R)
+  
+  }
+
 
 
 
     res <- -sum(l.par)
-
+    
     if(eqPL=="both"){   add.z <- diag(c(1,1)); add.z <- add.z*c(sp.xi1,sp.xi2); nsh <- 2  } 
     if(eqPL=="first"){  add.z <- sp.xi1; nsh <- 1}
     if(eqPL=="second"){ add.z <- sp.xi2; nsh <- 1}
 
+ps <- list()
 
-if( ( VC$l.sp1==0 && VC$l.sp2==0 ) || VC$fp==TRUE){ 
-
-    lps <- length(params) - nsh 
-    S.h <- adiag( matrix(0,lps,lps), add.z) 
+if( ( VC$l.sp1==0 && VC$l.sp2==0 ) || VC$fp==TRUE){ lps <- length(params) - nsh 
+                                                    S.h <- adiag( matrix(0,lps,lps), add.z) 
     
-                                         }else{
-        
-    dimP1 <- dimP2 <- 0     
-    S1 <- S2 <- matrix(0,1,1)  
-
-    S <- mapply("*", qu.mag$Ss[-qu.mag$exclu], sp, SIMPLIFY=FALSE)
-    S <- do.call(adiag, lapply(S, unlist))
-
-    ma1 <- matrix(0,VC$gp1,VC$gp1) 
-    ma2 <- matrix(0,VC$gp2,VC$gp2)
-
-    if(length(VC$pPen1)!=0){ indP1 <- qu.mag$off[1]:(qu.mag$off[1]+qu.mag$rank[1]-1)
-                          dimP1 <- length(indP1)
-                          ma1[indP1,indP1] <- S[1:dimP1,1:dimP1]
-                                } 
-
-    if(length(VC$pPen2)!=0){ 
-                          indP2 <- (qu.mag$off[VC$l.sp1+1]-VC$X1.d2):(-VC$X1.d2+qu.mag$off[VC$l.sp1+1]+qu.mag$rank[VC$l.sp1+1]-1)
-                          dimP2 <- length(indP2)
-                          ma2[indP2,indP2] <- S[(dimP1+1):(length(indP2)+dimP1),(dimP1+1):(length(indP2)+dimP1)]
-                                }                                 
-    
-    lP1 <- length(VC$pPen1); lP2 <- length(VC$pPen2) 
-    
-    if((lP1!=0 && VC$l.sp1>1) || (lP1==0 && VC$l.sp1>0)) S1 <- S[(dimP1+1):(dimP1+VC$X1.d2-VC$gp1),(dimP1+1):(dimP1+VC$X1.d2-VC$gp1)]
-    if((lP2!=0 && VC$l.sp2>1) || (lP2==0 && VC$l.sp2>0)){dS1 <- dim(S1)[2]; if(dS1==1) dS1 <- 0; 
-                                                   S2 <- S[(dimP1+dimP2+dS1+1):dim(S)[2],(dimP1+dimP2+dS1+1):dim(S)[2]]}
-    
-    lS1 <- length(S1); lS2 <- length(S2) 
-
-if(fitPL!="fixed"){
-
-    if(lS1==1 && lS2==1) S.h <- adiag(ma1, ma2, 0, add.z)
-    if(lS1 >1 && lS2==1) S.h <- adiag(ma1, S1, ma2, 0, add.z)
-    if(lS1==1 && lS2 >1) S.h <- adiag(ma1, ma2, S2, 0, add.z)
-    if(lS1 >1 && lS2 >1) S.h <- adiag(ma1, S1, ma2, S2, 0, add.z)
-        
-  }else{
-  
-    if(lS1==1 && lS2==1) S.h <- adiag(ma1, ma2, 0)
-    if(lS1 >1 && lS2==1) S.h <- adiag(ma1, S1, ma2, 0)
-    if(lS1==1 && lS2 >1) S.h <- adiag(ma1, ma2, S2, 0)
-    if(lS1 >1 && lS2 >1) S.h <- adiag(ma1, S1, ma2, S2, 0)
-  
-  }
-        
-        
-         }
+                                                   }else S.h <- penPL(qu.mag, sp, VC, add.z, fitPL)$S.h
          
-         
-         
-         
-         
-
    S.h1 <- 0.5*crossprod(params,S.h)%*%params
    S.h2 <- S.h%*%params
-
+   
          if(fitPL=="fixed") G <- -G
          S.res <- res
          res <- S.res + S.h1
@@ -1192,7 +1145,10 @@ if(fitPL!="fixed"){
         
          H   <- H + S.h  
 
-         list(value=res, gradient=G, hessian=H, S.h=S.h, l=S.res, l.par=l.par, 
+ps$S.h <- S.h; ps$S.h1 <- S.h1; ps$S.h2 <- S.h2  
+
+
+         list(value=res, gradient=G, hessian=H, S.h=ps$S.h, l=S.res, l.par=l.par, ps = ps,
               p11=p11, p10=p10, p01=p01, p00=p00, eta1=eta1, eta2=eta2,
               dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.drho=dl.drho,
               d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
@@ -1204,7 +1160,7 @@ if(fitPL!="fixed"){
               d2l.rho.lambda1=d2l.rho.lambda1, d2l.rho.lambda2=d2l.rho.lambda2, 
               d2l.lambda1.lambda1=d2l.lambda1.lambda1, d2l.lambda2.lambda2=d2l.lambda2.lambda2,  
               d2l.lambda1.lambda2=d2l.lambda1.lambda2, 
-              good=good, PL=PL, eqPL=eqPL, BivD=VC$BivD)      
+              good=good, PL=PL, eqPL=eqPL, BivD=VC$BivD, p1=p1, p2=p2)      
 
 }
 

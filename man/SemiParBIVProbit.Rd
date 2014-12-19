@@ -17,15 +17,13 @@ via the use of penalized thin plate regression splines (isotropic).
 
 \usage{
 SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,  
-                 start.v = NULL, Model = "B", BivD = "N", nu = 3, fp = FALSE,
-                 PL = "P", eqPL = "both", valPL = c(0,0), 
-                 fitPL = "pLiksp", spPL = c(0.01,0.01), 
+                 start.v = NULL, Model = "B", method = "trwlF", 
+                 BivD = "N", nu = 3, fp = FALSE, PL = "P", eqPL = "both", 
+                 valPL = c(0,0), fitPL = "pLiksp", spPL = c(0.01,0.01), 
                  hess = TRUE, gamma = 1, pPen1 = NULL, pPen2 = NULL, 
-                 rinit = 1, rmax = 100, iterlimsp = 50, pr.tolsp = 1e-6)
+                 rinit = 1, rmax = 100, iterlimsp = 50, pr.tolsp = 1e-6,
+                 gc.l = FALSE, awlm = FALSE, extra.regI = FALSE)
 }
-
-
-
 
 
 
@@ -50,10 +48,14 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
 \item{Model}{It indicates the type of model to be used in the analysis. Possible values are "B" (bivariate model), 
              "BSS" (bivariate model with sample selection) and "BPO" (bivariate model with partial observability).}
 
+\item{method}{Estimation method used. It can be either "trwl" or "trwlF". The latter option is much faster and more stable when smoothing 
+              parameter estimation is employed, and is the default.}
+
 \item{BivD}{Type of bivariate error distribution employed. Possible choices are "N", "C0", "C90", "C180", "C270", "J0", "J90", "J180", "J270", 
             "G0", "G90", "G180", "G270", "F", "T" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
-             Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Student-t.} 
+             Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Student-t.
+             Note that, for instace, C90, J270 and G270 are very similar.} 
 
 \item{nu}{Degrees of freedom for Student-t.}
 
@@ -89,8 +91,15 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
 
 \item{pr.tolsp}{Tolerance to use in judging convergence of the algorithm when automatic smoothing parameter estimation is used.} 
 
+\item{gc.l}{This is relevant when working with big datasets. If \code{TRUE} then the garbage collector is called more often than when R 
+decides to. This keeps the memory footprint down but it will slow down the routine.}
 
-
+\item{awlm}{If \code{TRUE} then the association parameter of the two equations is used in the construction of the 
+            working linear model needed for smoothing parameter estimation. This option makes sense only when \code{method = "trwl"}.}
+    
+\item{extra.regI}{If \code{TRUE} then extra regularization is applied to the information matrix. This is based on pivoted Choleski.}    
+        
+                      
 }
 
 
@@ -141,7 +150,7 @@ Journal of Statistics}, 39(2), 259-279.
 
 Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, 7, 1432-1455.
 
-Marra G. and Radice R. (submitted), Flexible Bivariate Binary Models for Estimating the Efficacy of Phototherapy for Newborns with Jaundice.
+Marra G. and Radice R. (2015), Flexible Bivariate Binary Models for Estimating the Efficacy of Phototherapy for Newborns with Jaundice. \emph{International Journal of Statistics and Probability}. 
 
 Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}, 29(3-4), 715-741.
 
@@ -164,8 +173,8 @@ Wood S.N. (2004), Stable and efficient multiple smoothing parameter estimation f
 
 \section{WARNINGS}{
 
-Convergence failure may occur when the number of observations is low. Convergence failure may show 
-when an infinite cycling between the two steps detailed above occurs. In this case, 
+Convergence failure may occur when the number of observations is low. Convergence failure may also mean that 
+an infinite cycling between the two steps detailed above occurs. In this case, 
 the smoothing parameters are set to the values obtained from the non-converged algorithm. 
 
 
@@ -210,6 +219,7 @@ dataSim <- data.frame(y1, y2, x1, x2, x3)
 out  <- SemiParBIVProbit(list(y1 ~ x1 + x2 + x3, 
                               y2 ~ x1 + x2 + x3), 
                          data = dataSim)
+sem.checks(out)
 summary(out)
 AIC(out)
 BIC(out)
@@ -260,6 +270,7 @@ plot(out, eq = 2, select = 2, seWithMean = TRUE, scale = 0); lines(x3, f3.x3, co
 outSS <- SemiParBIVProbit(list(y1 ~ x1 + s(x2, bs = "cs") + s(x3, bs = "cs"), 
                                y2 ~ x1 + s(x2, bs = "cs") + s(x3, bs = "cs")), 
                           data = dataSim)
+sem.checks(outSS)                          
 
 par(mfrow = c(2,2), mar = c(4.5,4.5,2,2))
 plot(outSS, eq = 1, select = 1, scale = 0)
@@ -311,6 +322,7 @@ LM.bpm(list(y1 ~ x1 + s(x2), y2 ~ y1 + s(x2)), dataSim)
 out <- SemiParBIVProbit(list(y1 ~ x1 + x2, 
                              y2 ~ y1 + x2), 
                         data = dataSim)
+sem.checks(out)                        
 summary(out)
 
 ## SEMIPARAMETRIC RECURSIVE BIVARIATE PROBIT
@@ -318,6 +330,7 @@ summary(out)
 out <- SemiParBIVProbit(list(y1 ~ x1 + s(x2), 
                              y2 ~ y1 + s(x2)), 
                         data = dataSim)
+sem.checks(out)                        
 summary(out)
 
 #
@@ -329,7 +342,9 @@ gt.bpm(out)
 #
 ## average treatment effect with CIs
 
+mb(y1, y2)
 AT(out, eq = 2, nm.bin = "y1") 
+AT(out, eq = 2, nm.bin = "y1", naive = TRUE) 
 
 
 ## try a Clayton copula model... 
@@ -337,6 +352,7 @@ AT(out, eq = 2, nm.bin = "y1")
 outC <- SemiParBIVProbit(list(y1 ~ x1 + s(x2), 
                               y2 ~ y1 + s(x2)), 
                          data = dataSim, BivD = "C0")
+sem.checks(outC)                         
 summary(outC)
 AT(outC, eq = 2, nm.bin = "y1") 
 
@@ -345,6 +361,7 @@ AT(outC, eq = 2, nm.bin = "y1")
 outJ <- SemiParBIVProbit(list(y1 ~ x1 + s(x2), 
                               y2 ~ y1 + s(x2)), 
                          data = dataSim, BivD = "J0")
+sem.checks(outJ)
 summary(outJ)
 AT(outJ, eq = 2, nm.bin = "y1") 
 
@@ -358,6 +375,7 @@ VuongClarke.bcm(out, outJ)
 outFP <- SemiParBIVProbit(list(y1 ~ x1 + s(x2, bs = "cr", k = 5), 
                                y2 ~ y1 + s(x2, bs = "cr", k = 6)), fp = TRUE, 
                           data = dataSim)
+sem.checks(outFP)                            
 summary(outFP)
 
 #
@@ -367,6 +385,7 @@ summary(outFP)
 out <- SemiParBIVProbit(list(y1 ~ x1 + s(x2), 
                              y2 ~ y1 + s(x2)), 
                         data = dataSim, PL = "SN")
+sem.checks(out)                        
 summary(out) 
 # same output as model with probit links
 
@@ -411,6 +430,7 @@ LM.bpm(list(ys ~ bi + s(x1) + s(x2), yo ~ bi + s(x1)), dataSim, Model = "BSS")
 out <- SemiParBIVProbit(list(ys ~ bi + s(x1) + s(x2), 
                              yo ~ bi + s(x1)), 
                         data = dataSim, Model = "BSS")
+sem.checks(out)                          
 gt.bpm(out)                        
 
 ## compare the two summary outputs
@@ -423,6 +443,7 @@ summary(out$gam2)
 ## corrected predicted probability that 'yo' is equal to 1
 
 est.prev(out)
+est.prev(out, naive = TRUE)
 
 ## estimated smooth function plots
 ## the red line is the true curve
@@ -491,7 +512,7 @@ cbind(out$p11, out$p10, out$p00, out$p01)[1:10,]
 
 
 # case with smooth function 
-# (computationally intensive...)  
+# (a bit more computationally intensive)  
 
 f1 <- function(x) cos(pi*2*x) + sin(pi*x)
 

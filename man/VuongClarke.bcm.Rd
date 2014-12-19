@@ -42,9 +42,6 @@ parameters \eqn{n} and 0.5. Critical values can be obtained as shown in Clarke (
 the model in \code{obj1} is preferred over that in \code{obj2} if the value of the test 
 is significantly larger than its expected value under the null hypothesis (\eqn{n/2}), and vice versa. If 
 the value is not significantly different from \eqn{n/2} then \code{obj1} can be thought of as equivalent to \code{obj2}.
-
-For details on the actual implementation of the tests see Radice, Marra and Wojtys (submitted). 
-
  
 
 }
@@ -67,8 +64,6 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 \references{
 
 Clarke K. (2007), A Simple Distribution-Free Test for Non-Nested Model Selection. \emph{Political Analysis}, 15, 347-363.
-
-Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes.
 
 Vuong Q.H. (1989), Likelihood Ratio Tests for Model Selection and Non-Nested Hypotheses. \emph{Econometrica}, 57(2), 307-333. 
 

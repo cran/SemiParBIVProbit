@@ -38,8 +38,6 @@
 
 \item{theta}{Estimated copula parameter linking the two equations.}
 
-\item{KeT}{Estimated Kendall's tau coefficient between the two equations.}
-
 \item{n}{Sample size.}
 
 \item{n.sel}{Number of selected observations in the sample selection case.}
@@ -102,9 +100,11 @@
 
 \item{respvec}{List containing response vectors. These are used for internal calculations.}
 
-\item{qu.mag, gp1, gp2, VC, Model, ig}{These are used for internal calculations.}
+\item{qu.mag, gp1, gp2, VC, Model, ig, method, magpp}{These are used for internal calculations.}
 
 \item{X2s}{Full design matrix of outcome equation in sample selection case.}
+
+\item{OR, GM}{Odds ratio and Gamma measure. See \code{\link{summary.SemiParBIVProbit}} for details.}
 
 
 }

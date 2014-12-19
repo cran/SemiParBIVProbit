@@ -3,7 +3,8 @@
 
 \title{Some convergence diagnostics}
 
-\description{It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVProbit()} and produces some diagnostic information about the fitting procedure.
+\description{It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVProbit()} and produces some 
+diagnostic information about the fitting procedure.
 
 }
 

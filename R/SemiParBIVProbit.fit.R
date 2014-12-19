@@ -1,4 +1,4 @@
-SemiParBIVProbit.fit <- function(func.opt, start.v, 
+SemiParBIVProbit.fit  <- function(func.opt, start.v, 
                                  rinit, rmax, iterlim, iterlimsp, pr.tolsp,
                                  PL, eqPL, valPL, fitPL, 
                                  respvec, VC,
@@ -19,19 +19,28 @@ if( PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0) ){
                 sp=spE, qu.mag=qu.mag, 
                 blather=TRUE, iterlim = iterlim)  
 
-  iter.if <- fit$iterations  
+  iter.if <- fit$iterations
+  #n <- sum(as.numeric(fit$good)) 
 
-  conv.sp <- iter.sp <- iter.inner <- bs.mgfit <- wor.c <- NULL
+  conv.sp <- iter.sp <- iter.inner <- bs.mgfit <- wor.c <- magpp <- NULL
 
 if( PL!="P" && fitPL!="pLiksp" ) list(fit=fit, iter.if=iter.if, conv.sp=conv.sp, iter.sp=iter.sp, iter.inner=iter.inner, bs.mgfit=bs.mgfit, wor.c=wor.c, sp=sp) else{
-       
+
+
+
     if((VC$fp==FALSE && (VC$l.sp1!=0 || VC$l.sp2!=0)) || PL!="P"){
 
        stoprule.SP <- 1; conv.sp <- TRUE; iter.inner <- iter.sp <- 0  
        
+         if(PL == "P"){ 
        
-         if(PL == "P")          myf <- function(x) list( rbind( c(x[1],x[2]), 
-                                                                c(x[2],x[3])  ) )
+         if(VC$awlm == FALSE) myf <- function(x) list( rbind( c(x[1],x[2]), 
+                                                              c(x[2],x[3])  ) )
+                                          
+         if(VC$awlm == TRUE)  myf <- function(x) list( rbind( c(x[1],x[2],x[4]), 
+                                                              c(x[2],x[3],x[5]),
+                                                              c(x[4],x[5],x[6])  ) )                                                                
+                      }
        
          if(PL != "P"){
        
@@ -44,8 +53,37 @@ if( PL!="P" && fitPL!="pLiksp" ) list(fit=fit, iter.if=iter.if, conv.sp=conv.sp,
                                                                 c(x[4],x[6],x[8],x[9]),
                                                                 c(x[5],x[7],x[9],x[10])  ) )
                       }
-       
+                      
+              
+              
+if(PL == "P" && VC$awlm == TRUE){
 
+  ll <- p.const <- NULL
+  X  <- Matrix(0, 3*VC$n, (VC$X1.d2 + VC$X2.d2 + 1))
+  D  <- Matrix(0, 3*VC$n, 1)
+  
+  wcf <- working.comp3
+
+}else{              
+              
+  ll <- length(fit$argument) 
+  p.const <- 2
+  if(PL != "P"){   if(eqPL=="both"){ ll <- ll-2; p.const <- 4 } else {ll <- ll-1; p.const <- 3} } 
+  
+  if(PL == "P") X <- Matrix(0,p.const*VC$n,(VC$X1.d2+VC$X2.d2)) 
+  if(PL != "P"){ if(eqPL == "both") X <- Matrix(0,p.const*VC$n,(VC$X1.d2+VC$X2.d2+2)) else X <- Matrix(0,p.const*VC$n,(VC$X1.d2+VC$X2.d2+1))   } 
+  
+  D <- Matrix(0, p.const*VC$n, 1) 
+  
+  wcf <- working.comp                      
+
+}
+
+  extra.l <- list(ll = ll, X = X, D = D, p.const = p.const)   
+  rm(ll, X, D, p.const)
+  if(VC$gc.l == TRUE) gc()
+
+  
 
 	  while( stoprule.SP > pr.tolsp ){ 
 
@@ -53,7 +91,9 @@ if( PL!="P" && fitPL!="pLiksp" ) list(fit=fit, iter.if=iter.if, conv.sp=conv.sp,
              spEo <- spo <- sp 
              if(PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0) ) spEo <- spo[-exclu]   
   
-		 wor.c <- try(working.comp(fit, VC, myf)) 
+		 wor.c <- try( wcf(fit, VC, myf, extra.l) ) 
+		 
+
                  if(class(wor.c)=="try-error") break
              
                 	bs.mgfit <- try(magic(y = wor.c$rW.Z, 
@@ -95,6 +135,11 @@ if( PL!="P" && fitPL!="pLiksp" ) list(fit=fit, iter.if=iter.if, conv.sp=conv.sp,
                   
            
           }
+          
+       rm(extra.l)
+       if(VC$gc.l == TRUE){ rm(wor.c); gc(); wor.c <- NULL}
+       
+       magpp <- magic.post.proc(wor.c$rW.X, bs.mgfit)
       
     }
 
@@ -106,7 +151,7 @@ if( PL!="P" && fitPL!="pLiksp" ) list(fit=fit, iter.if=iter.if, conv.sp=conv.sp,
                        iter.inner = iter.inner, 
                        bs.mgfit = bs.mgfit, 
                        wor.c = wor.c, 
-                       sp = sp)
+                       sp = sp, magpp = magpp)
                        
 }                       
 

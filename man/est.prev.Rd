@@ -23,7 +23,8 @@ est.prev(x, sig.lev = 0.05, sw = NULL, naive = FALSE)
 
 \item{sw}{Survey weights.} 
 
-\item{naive}{It indicates whether the prevalence is calculated using the (naive/classic imputation) probit or sample selection model. This option has been introduced to compared adjusted and unadjusted estimates.} 
+\item{naive}{It indicates whether the prevalence is calculated using the (naive/classic imputation) probit or sample selection 
+             model. This option has been introduced to compare adjusted (for non-random sample selection) and unadjusted estimates.} 
 
 
 }

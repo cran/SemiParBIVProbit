@@ -1,8 +1,9 @@
 SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NULL, start.v = NULL, 
-                             Model = "B", BivD = "N", nu = 3, fp = FALSE,
+                             Model = "B", method = "trwlF", BivD = "N", nu = 3, fp = FALSE,
                              PL = "P", eqPL = "both", valPL = c(0,0), fitPL = "pLiksp", spPL = c(0.01,0.01),
                              hess = TRUE, gamma = 1, pPen1 = NULL, pPen2 = NULL, 
-                             rinit = 1, rmax = 100, iterlimsp = 50, pr.tolsp = 1e-6){
+                             rinit = 1, rmax = 100, iterlimsp = 50, pr.tolsp = 1e-6,
+                             gc.l = FALSE, awlm = FALSE, extra.regI = FALSE){
   
   ##########################################################################################################################
   # model set up and starting values
@@ -18,13 +19,15 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   pplf <- c("fixed","unpLik","pLik","pLiksp")
   mb   <- c("B", "BSS", "BPO")
 
-  if(Model == "BPO") stop("Check next release for the final tested version of this model.")
+  #if(Model == "BPO") stop("Check next release for final tested version of this model.")
 
   if(!(Model %in% mb)) stop("Error in parameter Model value. It should be one of: B, BSS or BPO.")
   if(!(PL %in% ppl)) stop("Error in parameter PL value. It should be one of: P, PP, RPP or SN.")
   if(!(fitPL %in% pplf)) stop("Error in parameter fitPL value. It should be one of: fixed, unpLik, pLik or pLiksp.")
   if(!(BivD %in% opc)) stop("Error in parameter BivD value. It should be one of: N, C0, C90, C180, C270, J0, J90, J180, J270, G0, G90, G180, G270, F, T")
   if(PL!="P" && Model %in% c("BSS","BPO")) stop("Sample selection models with asymmetric links not implemented.")
+  if(!(method %in% c("trwl","trwlF"))) stop("Error in parameter method value. It should be one of: trwl or trwlF.")
+  
   
   ig <- interpret.gam(formula)
   mf <- match.call(expand.dots = FALSE)
@@ -33,12 +36,14 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   fake.formula <- paste(ig[[1]]$response, "~", paste(pred.n, collapse = " + ")) 
   environment(fake.formula) <- environment(ig$fake.formula)
   mf$formula <- fake.formula 
-  mf$start.v <- mf$Model <- mf$BivD <- mf$nu <- mf$fp <- mf$PL <- mf$eqPL <- mf$valPL <- mf$fitPL <- mf$spPL <- mf$hess <- mf$gamma <- mf$pPen1 <- mf$pPen2 <- mf$rinit <- mf$rmax <- mf$iterlimsp <- mf$pr.tolsp <- NULL  
+  mf$start.v <- mf$Model <- mf$BivD <- mf$nu <- mf$fp <- mf$PL <- mf$eqPL <- mf$valPL <- mf$fitPL <- mf$spPL <- mf$hess <- mf$gamma <- mf$pPen1 <- mf$pPen2 <- mf$rinit <- mf$rmax <- mf$iterlimsp <- mf$pr.tolsp <- mf$gc.l <- mf$awlm <- mf$method <- mf$extra.regI <- NULL                           
   mf$drop.unused.levels <- TRUE 
   if(Model=="BSS") mf$na.action <- na.pass
   mf[[1]] <- as.name("model.frame")
   data <- eval(mf, parent.frame())
   
+  if(gc.l == TRUE) gc()
+        
   if(Model=="BSS"){ 
      indS <- as.logical(data[,ig[[1]]$response])==FALSE 
      indS <- ifelse( is.na(indS), FALSE, indS) 
@@ -72,7 +77,7 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
    
 
   gam1 <- eval(substitute(gam(formula.eq1, binomial(link="probit"), gamma=gamma, weights=weights, 
-                              data=data, paraPen=pPen1,control=list(keepData=TRUE)),list(weights=weights))) # do not remember why I have to keep data...
+                              data=data, paraPen=pPen1),list(weights=weights))) 
 
   X1 <- model.matrix(gam1)
   X1.d2 <- dim(X1)[2]
@@ -127,16 +132,12 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   cy1.y2 <- (1-y1)*y2
   cy1.cy2 <- (1-y1)*(1-y2)
 
-  if(PL=="P") func.opt <- bprobgHs                       
-  if(PL!="P") func.opt <- bprobgHsPL
-  
   }
+
   
   if(Model=="BPO" ){ 
-  
-  cy <- 1 - y1
-  
-  func.opt <- bprobgHsPO 
+
+      cy <- 1 - y1
   
   }
   
@@ -159,7 +160,7 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   X2.d2 <- length(coef(gam2))
   X2 <- matrix(0,length(inde),X2.d2,dimnames = list(c(1:length(inde)),c(names(coef(gam2)))) )
   X2[inde, ] <- model.matrix(gam2) 
-  y2 <- rep(0,length(inde)); y2[inde] <- gam2$y; n.sel <- length(gam2$y)
+  y2 <- rep(0,length(inde)); y2[inde] <- gam2$y   # ; n.sel <- length(gam2$y)
   l.sp2 <- length(gam2$sp)
 
 
@@ -183,8 +184,6 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   y1.y2 <- y1*y2
   y1.cy2 <- y1*(1-y2)
   
-  func.opt <- bprobgHsSS 
-
   }
 
 
@@ -216,8 +215,6 @@ if(PL!="P" && selection == FALSE){
 }
 
 
-#if(!is.null(qu.mag) && hess==TRUE) hess <- FALSE
-
 
   respvec <- list(y1 = y1,
                   y2 = y2,
@@ -245,18 +242,33 @@ if(PL!="P" && selection == FALSE){
              Model = Model,
              PL = PL, end = end,
              BivD = BivD, nu = nu,
-             nC = nC)
+             nC = nC, gc.l = gc.l, awlm = awlm, n = n, extra.regI = extra.regI) # original n only needed in SemiParBIVProbit.fit
+             
+  if(gc.l == TRUE) gc()           
              
   ##########################################################################################################################
   # model fitting
   ##########################################################################################################################
 
-  SemiParFit <- SemiParBIVProbit.fit(func.opt = func.opt, start.v = start.v, 
+  if(Model=="B"){ 
+  if(PL=="P") func.opt <- bprobgHs   
+  if(PL!="P") func.opt <- bprobgHsPL
+                }
+  if(Model=="BPO") func.opt <- bprobgHsPO 
+  if(Model=="BSS") func.opt <- bprobgHsSS 
+
+  if(method == "trwl")  fit.func <- SemiParBIVProbit.fit
+  if(method == "trwlF") fit.func <- SemiParBIVProbit.fit1
+
+  SemiParFit <- fit.func(func.opt = func.opt, start.v = start.v, 
                                      rinit = rinit, rmax = rmax, iterlim = 1e+4, iterlimsp = iterlimsp, pr.tolsp = pr.tolsp,
                                      PL = PL, eqPL = eqPL, valPL = valPL, fitPL = fitPL, 
                                      respvec = respvec, VC = VC, 
                                      sp = sp, qu.mag = qu.mag) 
-
+  
+  n <- sum(as.numeric(SemiParFit$fit$good))  
+  if(Model=="BSS") n.sel <- sum(as.numeric(inde[SemiParFit$fit$good]))
+  
   ##########################################################################################################################
   # post estimation
   ##########################################################################################################################
@@ -266,8 +278,12 @@ if(PL!="P" && selection == FALSE){
                                             PL = PL, eqPL = eqPL, valPL = valPL, fitPL = fitPL, 
                                             qu.mag = qu.mag, gam1 = gam1, gam2 = gam2)
                                             
-  SemiParFit <- SemiParFit.p$SemiParFit 
+  SemiParFit <- SemiParFit.p$SemiParFit # useful for SS models, eta2 calculatons etc.
   ##########################################################################################################################
+
+rm(data)
+if(gc.l == TRUE) gc()
+
 
 L <- list(fit = SemiParFit$fit, 
           gam1 = gam1, gam2 = gam2, gam2.1 = startvSS$gam2.1, 
@@ -275,7 +291,7 @@ L <- list(fit = SemiParFit$fit,
           weights = weights, 
           sp = SemiParFit.p$sp, iter.sp = SemiParFit$iter.sp, l.sp1 = l.sp1, l.sp2 = l.sp2, fp = fp,  
           iter.if = SemiParFit$iter.if, iter.inner = SemiParFit$iter.inner,
-          rho = SemiParFit.p$rho, theta = SemiParFit.p$theta, KeT = SemiParFit.p$KeT,   
+          rho = SemiParFit.p$rho, theta = SemiParFit.p$theta, OR = SemiParFit.p$OR, GM = SemiParFit.p$GM, #####  KeT = SemiParFit.p$KeT,   
           n = n, n.sel = n.sel, 
           X1 = X1, X2 = X2, X1.d2 = X1.d2, X2.d2 = X2.d2, 
           He = SemiParFit.p$He, HeSh = SemiParFit.p$HeSh, Vb = SemiParFit.p$Vb, F = SemiParFit.p$F, 
@@ -295,7 +311,7 @@ L <- list(fit = SemiParFit$fit,
           qu.mag = qu.mag, 
           gp1 = gp1, gp2 = gp2, 
           X2s = SemiParFit.p$X2s,
-          VC = VC, Model = Model, ig = ig)
+          VC = VC, Model = Model, ig = ig, method = method, magpp = SemiParFit$magpp)
 
 class(L) <- "SemiParBIVProbit"
 

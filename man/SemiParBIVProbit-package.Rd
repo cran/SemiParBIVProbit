@@ -49,7 +49,7 @@ Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariat
 
 Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, 7, 1432-1455.
 
-Marra G. and Radice R. (submitted), Flexible Bivariate Binary Models for Estimating the Efficacy of Phototherapy for Newborns with Jaundice.
+Marra G. and Radice R. (2015), Flexible Bivariate Binary Models for Estimating the Efficacy of Phototherapy for Newborns with Jaundice. \emph{International Journal of Statistics and Probability}. 
 
 Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}, 29(3-4), 715-741.
 

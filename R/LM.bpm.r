@@ -10,7 +10,11 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL,
 
   ig <- interpret.gam(formula)
   mf <- match.call(expand.dots = FALSE)
-  mf$formula <- ig$fake.formula 
+  
+  pred.n <- union(ig[[1]]$pred.names,c(ig[[2]]$pred.names,ig[[2]]$response))
+  fake.formula <- paste(ig[[1]]$response, "~", paste(pred.n, collapse = " + ")) 
+  environment(fake.formula) <- environment(ig$fake.formula)
+  mf$formula <- fake.formula  
   mf$Model <- mf$hess <- mf$gamma <- mf$pPen1 <- mf$pPen2 <- NULL  
   mf$drop.unused.levels <- TRUE 
   if(Model=="BSS") mf$na.action <- na.pass
@@ -33,9 +37,7 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL,
   if(ig[[1]]$response %in% ig[[2]]$pred.names ) end <- 1
   if(ig[[2]]$response %in% ig[[1]]$pred.names ) end <- 2
   }
-
-
-
+  
 
   gam1 <- eval(substitute(gam(formula.eq1, binomial(link="probit"), gamma=gamma, weights=weights, 
                               data=data, paraPen=pPen1),list(weights=weights))) 
@@ -121,7 +123,7 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL,
              pPen2 = pPen2,
              Model = Model,
              end = end, fp = fp,
-             BivD = BivD, nC = 1, nu = 3)
+             BivD = BivD, nC = 1, nu = 3, extra.regI = FALSE)
 
 
 params <- c(coef(gam1),coef(gam2),0)
@@ -133,8 +135,7 @@ G   <- resf$gradient
 var <- resf$hessian
 
 var.eig <- eigen(var, symmetric=TRUE)   
-if(min(var.eig$values) < .Machine$double.eps){ var <- as.matrix( nearPD( var, ensureSymmetry = FALSE )$mat )
-                                               var.eig <- eigen(var, symmetric=TRUE) }
+if(min(var.eig$values) < .Machine$double.eps) var.eig$values[which(var.eig$values < .Machine$double.eps)] <- 0.000000001
 var <- var.eig$vec%*%tcrossprod(diag(1/var.eig$val),var.eig$vec)  
 
 ev <- as.numeric(t(G)%*%var%*%G)

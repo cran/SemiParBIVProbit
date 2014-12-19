@@ -183,10 +183,10 @@ if(VC$hess==FALSE && VC$end==0){
                               (bit3.b2th*p01-((1-c.copula.be2)*d.n2)*(-c.copula.theta))/p01+
                               (bit4.b2th*p00-((c.copula.be2-1)*d.n2)*c.copula.theta)/p00 )/add.b
 
-  d2l.rho.rho  <- -weights*((bit1.th2*p11-c.copula.theta/add.b^2)/p11+
+  d2l.rho.rho  <- -weights*(  (bit1.th2*p11-( c.copula.theta/add.b)^2)/p11+
                               (bit2.th2*p10-(-c.copula.theta/add.b)^2)/p10+
                               (bit3.th2*p01-(-c.copula.theta/add.b)^2)/p01+
-                              (bit4.th2*p00-c.copula.theta/add.b^2)/p00 )
+                              (bit4.th2*p00-( c.copula.theta/add.b)^2)/p00 )
 }  
 
 if(VC$hess==FALSE && (VC$end==1 || VC$end==2)){
@@ -245,10 +245,10 @@ resp4 <- 1 - y2
                               th*(bit3.b2th*p01-((1-c.copula.be2)*d.n2)*(-c.copula.theta))/p01^2*resp3+
                               fo*(bit4.b2th*p00-((c.copula.be2-1)*d.n2)*c.copula.theta)/p00^2*resp4 )/add.b
 
-  d2l.rho.rho  <- -weights*(  fi*(bit1.th2*p11-c.copula.theta/add.b^2)/p11^2*resp1+
+  d2l.rho.rho  <- -weights*(  fi*(bit1.th2*p11-( c.copula.theta/add.b)^2)/p11^2*resp1+
                               se*(bit2.th2*p10-(-c.copula.theta/add.b)^2)/p10^2*resp2+
                               th*(bit3.th2*p01-(-c.copula.theta/add.b)^2)/p01^2*resp3+
-                              fo*(bit4.th2*p00-c.copula.theta/add.b^2)/p00^2*resp4 )
+                              fo*(bit4.th2*p00-( c.copula.theta/add.b)^2)/p00^2*resp4 )
 }
 
 
@@ -261,75 +261,52 @@ resp4 <- 1 - y2
   be1.be2 <- crossprod(X1*c(d2l.be1.be2),X2)
   be1.rho <- t(t(rowSums(t(X1*c(d2l.be1.rho)))))
   be2.rho <- t(t(rowSums(t(X2*c(d2l.be2.rho)))))
-
-
-
+  
   H <- rbind( cbind( be1.be1    , be1.be2    , be1.rho ), 
               cbind( t(be1.be2) , be2.be2    , be2.rho ), 
               cbind( t(be1.rho) , t(be2.rho) , sum(d2l.rho.rho) ) 
             ) 
-
+            
+            
          res <- -sum(l.par)
+         
          G   <- -c( colSums( c(dl.dbe1)*X1 ),
                     colSums( c(dl.dbe2)*X2 ),
                     sum( dl.drho )  )
-
-
-if( ( VC$l.sp1==0 && VC$l.sp2==0 ) || VC$fp==TRUE) S.h <- S.h1 <- S.h2 <- 0
-
-     else{
-        
-    dimP1 <- dimP2 <- 0     
-    S1 <- S2 <- matrix(0,1,1)   
-
-    S <- mapply("*", qu.mag$Ss, sp, SIMPLIFY=FALSE)
-    S <- do.call(adiag, lapply(S, unlist))
-
-    ma1 <- matrix(0,VC$gp1,VC$gp1) 
-    ma2 <- matrix(0,VC$gp2,VC$gp2)
-
-    if(length(VC$pPen1)!=0){ indP1 <- qu.mag$off[1]:(qu.mag$off[1]+qu.mag$rank[1]-1)
-                          dimP1 <- length(indP1)
-                          ma1[indP1,indP1] <- S[1:dimP1,1:dimP1]
-                                } 
-    if(length(VC$pPen2)!=0){ 
-                          indP2 <- (qu.mag$off[VC$l.sp1+1]-VC$X1.d2):(-VC$X1.d2+qu.mag$off[VC$l.sp1+1]+qu.mag$rank[VC$l.sp1+1]-1)
-                          dimP2 <- length(indP2)
-                          ma2[indP2,indP2] <- S[(dimP1+1):(length(indP2)+dimP1),(dimP1+1):(length(indP2)+dimP1)]
-                                }                                 
     
-    lP1 <- length(VC$pPen1); lP2 <- length(VC$pPen2) 
     
-    if((lP1!=0 && VC$l.sp1>1) || (lP1==0 && VC$l.sp1>0)) S1 <- S[(dimP1+1):(dimP1+VC$X1.d2-VC$gp1),(dimP1+1):(dimP1+VC$X1.d2-VC$gp1)]
-    if((lP2!=0 && VC$l.sp2>1) || (lP2==0 && VC$l.sp2>0)){dS1 <- dim(S1)[2]; if(dS1==1) dS1 <- 0; 
-                                                   S2 <- S[(dimP1+dimP2+dS1+1):dim(S)[2],(dimP1+dimP2+dS1+1):dim(S)[2]]}
+  if(VC$extra.regI == TRUE){
+  
+      op <- options(warn = -1)
+      R <- chol(H, pivot = TRUE)
+      options(op)
+      p <- dim(H)[2]
+      ipiv <- piv <- attr(R, "pivot")
+      ipiv[piv] <- 1:p
+      rank <- attr(R, "rank")
+      ind <- 1:rank
+      if (rank < p) R[(rank + 1):p, ] <- 0
+      R <- R[ipiv, ipiv]
+      H <- crossprod(R)
+  
+  }
     
-    lS1 <- length(S1); lS2 <- length(S2) 
     
-    if(lS1==1 && lS2==1) S.h <- adiag(ma1, ma2, 0)
-    if(lS1 >1 && lS2==1) S.h <- adiag(ma1, S1, ma2, 0)
-    if(lS1==1 && lS2 >1) S.h <- adiag(ma1, ma2, S2, 0)
-    if(lS1 >1 && lS2 >1) S.h <- adiag(ma1, S1, ma2, S2, 0)
-        
-   
-   S.h1 <- 0.5*crossprod(params,S.h)%*%params
-   S.h2 <- S.h%*%params
-   
-         }
+if( ( VC$l.sp1==0 && VC$l.sp2==0 ) || VC$fp==TRUE) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0) else ps <- pen(params, qu.mag, sp, VC)
 
 
          S.res <- res
-         res <- S.res + S.h1
-         G   <- G + S.h2
-         H   <- H + S.h  
+         res   <- S.res + ps$S.h1
+         G     <- G + ps$S.h2
+         H     <- H + ps$S.h  
 
-         list(value=res, gradient=G, hessian=H, S.h=S.h, l=S.res, l.par=l.par, 
+         list(value=res, gradient=G, hessian=H, S.h=ps$S.h, l=S.res, l.par=l.par, ps = ps, 
               p11=p11, p10=p10, p01=p01, p00=p00, eta1=eta1, eta2=eta2,
               dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.drho=dl.drho,
               d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
               d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
               d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho,good=good, 
-              PL=PL, eqPL=eqPL, BivD=VC$BivD)      
+              PL=PL, eqPL=eqPL, BivD=VC$BivD, p1=p1, p2=p2)      
 
 }
 

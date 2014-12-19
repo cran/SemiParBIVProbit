@@ -1,5 +1,12 @@
+version 3.2-13
+- working linear model calculation made more effient.
+- extra regularization for information matrix provided.
+- alternative, faster and more stable, smoothing parameter procedure implemented.
+- worst-case Manski's bound included for comparison.
+- gamma measure and odds ratio included in summary function.
+
 version 3.2-12.1
-- working linear model calculation made more stable
+- working linear model calculation made more stable.
 - NAs handling fixed.
 
 version 3.2-12

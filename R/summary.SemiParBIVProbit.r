@@ -1,4 +1,4 @@
-summary.SemiParBIVProbit <- function(object, n.sim = 1000, s.meth = "svd", prob.lev = 0.05, thrs1 = 0.5, thrs2 = 0.5, ...){
+summary.SemiParBIVProbit <- function(object, n.sim = 100, s.meth = "svd", prob.lev = 0.05, thrs1 = 0.5, thrs2 = 0.5, ...){
 
   testStat <- function (p, X, V, rank = NULL) {
       qrx <- qr(X)
@@ -54,25 +54,21 @@ summary.SemiParBIVProbit <- function(object, n.sim = 1000, s.meth = "svd", prob.
 }
 
   good <- object$fit$good
-  n.good <- sum(as.numeric(good))
+  n <- object$n; n.sel <- object$n.sel
   tableN <- list(NULL,NULL)
   table <- list()
-  n.sel <- object$n.sel
   CIl1 <- CIl2 <- table.R <- table.P <- table.F <- P1 <- P2 <- QPS1 <- QPS2 <- CR1 <- CR1 <- CR2 <- MR <- CIkt <- NULL  
   epsilon <- .Machine$double.eps*10^6
-  est.RHOb <- est.KeTb <- est.l1 <- est.l2 <- rep(NA,n.sim) 
+  est.RHOb <- est.l1 <- est.l2 <- est.OR <- est.GM <-  rep(NA,n.sim) 
 
  
   lf.n <- lf <- length(coef(object))
-  F  <- object$F[1:lf,1:lf]
+  F  <- object$F[1:lf,1:lf]          # why do I do 1:l.f? can't remember
   Vr <- object$Vb[1:lf,1:lf] 
    
   SE <- sqrt(diag(object$Vb[1:lf,1:lf]))
-  n  <- object$n 
-
 
   bs <- rmvnorm(n.sim, mean = coef(object), sigma=object$Vb, method=s.meth)
-
 
   if(object$PL != "P" && object$fitPL!="fixed") { if(object$eqPL=="both") lf.n <- lf-2 else lf.n <- lf-1 }
 
@@ -89,10 +85,58 @@ summary.SemiParBIVProbit <- function(object, n.sim = 1000, s.meth = "svd", prob.
    if(object$BivD %in% c("G90","G270") ) est.RHOb <- -(1+exp(bs[,lf.n])) 
    
 
-   if(object$BivD=="T") asp2 <- rep(object$nu,n.sim) else asp2 <- rep(0,n.sim)
    
-   for(i in 1:n.sim) est.KeTb[i] <- BiCopPar2Tau(object$nC,est.RHOb[i],par2=asp2[i]) # this is not efficient but the function gives problems with vectors...
+   
+   ####
+   # for OR and GM
+   ##
+   
+   
+   
+   if(object$BivD=="T") pa2 <- object$nu else pa2 <- 0
+   
+   et1s <- object$X1[good,]%*%t(bs[,1:object$X1.d2])    
+   et2s <- object$X2[good,]%*%t(bs[,(object$X1.d2+1):(object$X1.d2+object$X2.d2)]) 
+     
+   p1s <- pnorm(et1s)
+   p1s <- pmax(p1s, 1000*.Machine$double.eps )
+   p1s <- ifelse(p1s==1,0.9999999999999999,p1s)  
+   p2s <- pnorm(et2s)
+   p2s <- pmax(p2s, 1000*.Machine$double.eps )
+   p2s <- ifelse(p2s==1,0.9999999999999999,p2s) 
+   
+   p11s <- matrix(NA,dim(p1s)[1],dim(p1s)[2])
+     
+   for(i in 1:n.sim){  
+   
+   if(object$BivD=="N") p11s[,i] <- pbinorm(qnorm(p1s[,i]),qnorm(p2s[,i]),cov12=est.RHOb[i])
+   if(object$BivD!="N") p11s[,i] <- BiCopCDF(p1s[,i],p2s[,i], object$nC, par=est.RHOb[i], par2=pa2) 
+      
+   }     
+        
+ p11s <- pmax(p11s, 1000*.Machine$double.eps )
+ p11s <- ifelse(p11s==1,0.9999999999999999,p11s)  
+ p10s <- p1s - p11s 
+ p00s <- (1 - p2s) - ( p1s - p11s )
+ p01s <- p2s - p11s
 
+
+
+ORs <- (p00s*p11s)/(p01s*p10s)
+GMs <- colMeans((ORs - 1)/(ORs + 1))
+ORs <- colMeans(ORs)
+
+rm(p11s,p10s,p00s,p01s,p1s,p2s)
+
+if(object$VC$gc.l == TRUE) gc()
+
+ 
+#########################
+   
+   
+   
+   
+   
    if((object$PL=="PP" || object$PL=="RPP") && object$fitPL!="fixed"){ if(object$eqPL=="both"){   est.l1 <- exp(bs[, lf.n+1 ]) + epsilon; est.l2 <- exp(bs[,lf ]) + epsilon}
                        if(object$eqPL=="first"){  est.l1 <- exp(bs[, lf ]) + epsilon;     est.l2 <- 1}
                        if(object$eqPL=="second"){ est.l2 <- exp(bs[, lf ]) + epsilon;     est.l1 <- 1}
@@ -105,7 +149,10 @@ summary.SemiParBIVProbit <- function(object, n.sim = 1000, s.meth = "svd", prob.
 
              
   CIrs <- as.numeric(quantile(est.RHOb,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
-  CIkt <- as.numeric(quantile(est.KeTb,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
+  
+  CIor <- as.numeric(quantile(ORs,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
+  CIgm <- as.numeric(quantile(GMs,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
+
   
   if(object$PL != "P" && object$fitPL!="fixed"){
                        CIl1 <- as.numeric(quantile(est.l1,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
@@ -131,7 +178,7 @@ summary.SemiParBIVProbit <- function(object, n.sim = 1000, s.meth = "svd", prob.
   if( (l.sp11!=0 || l.sp22!=0) ){
 
   	pTerms.df <- pTerms.chi.sq <- pTerms.pv <- edf <- tableN <- list(0,0)
-        XX <- cbind(object$X1,object$X2)
+        XX <- cbind(object$X1[good,],object$X2[good,])
         
            for(i in 1:2){
 
@@ -164,13 +211,13 @@ summary.SemiParBIVProbit <- function(object, n.sim = 1000, s.meth = "svd", prob.
 
  if(object$Model=="B"){
  
- Pre.p <- matrix(NA,n.good,8)
- Pre.c <- matrix(NA,n.good,2)
+ Pre.p <- matrix(NA,n,8)
+ Pre.c <- matrix(NA,n,2)
 
 
  Pre.p[,1:6] <- cbind(object$y1[good],object$y2[good],object$p11,object$p10,object$p01,object$p00)
 
- for(i in 1:n.good) {
+ for(i in 1:n) {
    ind <- sort(Pre.p[i,3:6],index.return=TRUE)$ix[4]
    if(ind==1) Pre.p[i,7:8] <- c(1,1) 
    if(ind==2) Pre.p[i,7:8] <- c(1,0) 
@@ -180,7 +227,7 @@ summary.SemiParBIVProbit <- function(object, n.sim = 1000, s.meth = "svd", prob.
 
  Pre.p <- Pre.p[,-c(3:6)]
 
- for(i in 1:n.good){
+ for(i in 1:n){
    Pre.c[i,1] <- paste(as.character(Pre.p[i,1:2]), collapse="")
    Pre.c[i,2] <- paste(as.character(Pre.p[i,3:4]), collapse="")
  }
@@ -190,7 +237,7 @@ summary.SemiParBIVProbit <- function(object, n.sim = 1000, s.meth = "svd", prob.
 
  c00.p <- c10.p <- c01.p <- c11.p <- 0
 
- for(i in 1:n.good){
+ for(i in 1:n){
   if(Pre.c[i,1]=="00" & Pre.c[i,1]==Pre.c[i,2]) c00.p <- c00.p + 1
   if(Pre.c[i,1]=="10" & Pre.c[i,1]==Pre.c[i,2]) c10.p <- c10.p + 1
   if(Pre.c[i,1]=="01" & Pre.c[i,1]==Pre.c[i,2]) c01.p <- c01.p + 1
@@ -218,11 +265,11 @@ summary.SemiParBIVProbit <- function(object, n.sim = 1000, s.meth = "svd", prob.
   
   res <- list(tableP1=table[[1]], tableP2=table[[2]], 
               tableNP1=tableN[[1]], tableNP2=tableN[[2]], 
-              n=n, rho=object$rho, theta=object$theta, KeT=object$KeT,   
+              n=n, rho=object$rho, theta=object$theta, OR = object$OR, GM = object$GM,  # KeT=object$KeT, 
               formula1=object$gam1$formula, formula2=object$gam2$formula, 
               l.sc1=l.sp11, l.sc2=l.sp22, # pPen1=object$pPen1, pPen2=object$pPen2,  
-              t.edf=object$t.edf, CIrs=CIrs, CIkt=CIkt, CIl1=CIl1, CIl2=CIl2, 
-              sel=object$sel,n.sel=n.sel, 
+              t.edf=object$t.edf, CIrs=CIrs, CIl1=CIl1, CIl2=CIl2, # CIkt=CIkt,
+              sel=object$sel,n.sel=n.sel, CIor = CIor, CIgm = CIgm, 
               BivD=object$BivD,nu=object$nu, 
               PL=object$PL, xi1=object$xi1, xi2=object$xi2,
               table.R=table.R, table.P=table.P, table.F=table.F, MR=MR,
@@ -236,65 +283,5 @@ summary.SemiParBIVProbit <- function(object, n.sim = 1000, s.meth = "svd", prob.
 res
 
 }
-
-
-
-
-#residuals.SemiParBIVProbit <- function(object,...){
-#
-#if(object$selection==TRUE) stop("Current residual definition for models with non-random sample selection not meaningful.")
-#  
-#  der.1 <- object$fit$dl.dbe1
-#  der.2 <- object$fit$dl.dbe2
-#  der.3 <- object$fit$dl.drho
-#
-#  D <- matrix(0,3*object$n,1)
-#  r.w <- r.p <- matrix(0,object$n,3) 
-#
-#  j <- 1
-#
-#    for(i in seq(1,(3*object$n-2),by=3)) {
-#
-#      D[i,1]   <- der.1[j]
-#      D[i+1,1] <- der.2[j]
-#      D[i+2,1] <- der.3[j]
-#
-#      W <- matrix(c( object$fit$d2l.be1.be1[j],object$fit$d2l.be1.be2[j],object$fit$d2l.be1.rho[j],     
-#                     object$fit$d2l.be1.be2[j],object$fit$d2l.be2.be2[j],object$fit$d2l.be2.rho[j],  
-#                     object$fit$d2l.be1.rho[j],object$fit$d2l.be2.rho[j],object$fit$d2l.rho.rho[j] ) , 3 , 3 ) 
-#
-#      W.eig <- eigen(W,symmetric=TRUE)
-#      W.ins <- W.eig$vec%*%tcrossprod(diag(1/sqrt(pmax(W.eig$val,.Machine$double.eps^0.6))),W.eig$vec) 
-#      W.inv <- W.eig$vec%*%tcrossprod(diag(1/pmax(W.eig$val,.Machine$double.eps^0.6)),W.eig$vec) 
-#
-#      r.p[j,] <- W.ins%*%D[i:(i+2),1]
-#      r.w[j,] <- W.inv%*%D[i:(i+2),1]
-#  
-#      j <- j + 1
-#
-#    }
-#
-# list( r.p=r.p, r.w=r.w )
-#
-#}
-#
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

@@ -1,14 +1,13 @@
-AT <- function(x, eq, nm.bin = "", E = TRUE, treat = TRUE, delta = FALSE, prob.lev = 0.05, s.meth = "svd", n.sim = 1000){
+AT <- function(x, eq, nm.bin = "", E = TRUE, treat = TRUE, delta = FALSE, prob.lev = 0.05, s.meth = "svd", n.sim = 500, naive = FALSE){
 
 stopm <- "Calculation of this average treatment effect is valid for recursive binary models only."
 end <- 0
+
 if(x$ig[[1]]$response %in% x$ig[[2]]$pred.names ) end <- 1
 if(x$ig[[2]]$response %in% x$ig[[1]]$pred.names ) end <- 1
 if(x$Model=="BSS" || x$Model=="BPO" || end==0) stop(stopm)
 
 if(is.character(nm.bin)==FALSE) stop("nm.bin is not a character!")
-
-# delta method does not allow the use of the fisher information
 
 if(x$PL!="P") delta <- FALSE
 
@@ -16,48 +15,74 @@ est.ATb <- NA
 ass.ps2 <- ass.p2 <- NULL
 ind <- list()
 
+good <- x$fit$good
+epsilon <- .Machine$double.eps*10^6
+
+
+
+
+
+
+
+if(naive==FALSE){
+
 p.rho <- length(coef(x))
 
 if(x$PL!="P" && x$fitPL!="fixed"){if(x$eqPL=="both") p.rho <- p.rho - 2 else p.rho <- p.rho - 1} 
 
-good <- x$fit$good
-epsilon <- .Machine$double.eps*10^6
-
 ind[[1]] <- 1:x$X1.d2 
 ind[[2]] <- x$X1.d2+(1:x$X2.d2)
 
+}
+
+
+
 
 if(eq==1){ X.int <- x$X1
+    if(naive==FALSE){
            X.noi <- x$X2
            ind.int <- ind[[1]]
            ind.noi <- ind[[2]] 
-           etap.noi <- x$eta2
+           etap.noi <- x$eta2 }
                  
 }
 
 if(eq==2){ X.int <- x$X2
+    if(naive==FALSE){
            X.noi <- x$X1
            ind.int <- ind[[2]]
            ind.noi <- ind[[1]] 
-           etap.noi  <- x$eta1
+           etap.noi  <- x$eta1}
             
 }
 
 
-              
+if(naive==FALSE){              
 coef.int <- as.numeric(coef(x)[ind.int])
 coef.noi <- as.numeric(coef(x)[ind.noi])        
+}
+
+
+
+
 
 X.int <- X.int[good,]       
-X.noi <- X.noi[good,]   
-                             
+if(naive==FALSE) X.noi <- X.noi[good,]   
+       
+
+                      
 d0 <- d1 <- X.int
 d0[,nm.bin] <- 0
 d1[,nm.bin] <- 1
 
+
+
+if(naive==FALSE){
 eti1 <- d1%*%coef.int 
 eti0 <- d0%*%coef.int 
 etno <- etap.noi      
+}
+
 
 
 if(E==TRUE) ind.excl <- rep(TRUE,x$n) else{ 
@@ -69,14 +94,26 @@ if(E==TRUE) ind.excl <- rep(TRUE,x$n) else{
 
 
 
+
+
+
+###############
+# Calculate ATE
+###############
+
+if(naive==FALSE){
+
+
 if(x$PL=="P"){
-p.int1 <- pmax(pnorm(eti1), 1000*.Machine$double.eps )
-p.int0 <- pmax(pnorm(eti0), 1000*.Machine$double.eps )
+
+p.int1 <- pnorm(eti1)
+p.int0 <- pnorm(eti0)
+
 
 d.int1 <- dnorm(eti1)
 d.int0 <- dnorm(eti0)
 
-p.etn  <- pmax(pnorm(etno), 1000*.Machine$double.eps )
+p.etn  <- pnorm(etno)
 d.etn  <- dnorm(etno)
 }
 
@@ -87,27 +124,27 @@ if(x$PL=="PP"){
 
 if(eq==1){
 
-p.int1 <- pmax(pnorm(eti1), 1000*.Machine$double.eps )^x$xi1
-p.int0 <- pmax(pnorm(eti0), 1000*.Machine$double.eps )^x$xi1
+p.int1 <- pnorm(eti1)^x$xi1
+p.int0 <- pnorm(eti0)^x$xi1
 
-d.int1 <- pmax(pnorm(eti1), 1000*.Machine$double.eps )^(x$xi1 - 1) * (x$xi1 * dnorm(eti1))
-d.int0 <- pmax(pnorm(eti0), 1000*.Machine$double.eps )^(x$xi1 - 1) * (x$xi1 * dnorm(eti0))
+d.int1 <- pnorm(eti1)^(x$xi1 - 1) * (x$xi1 * dnorm(eti1))
+d.int0 <- pnorm(eti0)^(x$xi1 - 1) * (x$xi1 * dnorm(eti0))
 
-p.etn  <- pmax(pnorm(etno), 1000*.Machine$double.eps )^x$xi2   
-d.etn  <- pmax(pnorm(etno), 1000*.Machine$double.eps )^(x$xi2 - 1) * (x$xi2 * dnorm(etno))
+p.etn  <- pnorm(etno)^x$xi2   
+d.etn  <- pnorm(etno)^(x$xi2 - 1) * (x$xi2 * dnorm(etno))
 
          }   
 
 if(eq==2){
 
-p.int1 <- pmax(pnorm(eti1), 1000*.Machine$double.eps )^x$xi2
-p.int0 <- pmax(pnorm(eti0), 1000*.Machine$double.eps )^x$xi2
+p.int1 <- pnorm(eti1)^x$xi2
+p.int0 <- pnorm(eti0)^x$xi2
 
-d.int1 <- pmax(pnorm(eti1), 1000*.Machine$double.eps )^(x$xi2 - 1) * (x$xi2 * dnorm(eti1))
-d.int0 <- pmax(pnorm(eti0), 1000*.Machine$double.eps )^(x$xi2 - 1) * (x$xi2 * dnorm(eti0))
+d.int1 <- pnorm(eti1)^(x$xi2 - 1) * (x$xi2 * dnorm(eti1))
+d.int0 <- pnorm(eti0)^(x$xi2 - 1) * (x$xi2 * dnorm(eti0))
 
-p.etn  <- pmax(pnorm(etno), 1000*.Machine$double.eps )^x$xi1   
-d.etn  <- pmax(pnorm(etno), 1000*.Machine$double.eps )^(x$xi1 - 1) * (x$xi1 * dnorm(etno))
+p.etn  <- pnorm(etno)^x$xi1   
+d.etn  <- pnorm(etno)^(x$xi1 - 1) * (x$xi1 * dnorm(etno))
         }
 
 }
@@ -118,27 +155,27 @@ if(x$PL=="RPP"){
 
 if(eq==1){
 
-p.int1 <- 1-pmax(pnorm(-eti1), 1000*.Machine$double.eps )^x$xi1
-p.int0 <- 1-pmax(pnorm(-eti0), 1000*.Machine$double.eps )^x$xi1
+p.int1 <- 1-pnorm(-eti1)^x$xi1
+p.int0 <- 1-pnorm(-eti0)^x$xi1
 
-d.int1 <- pmax(pnorm(-eti1), 1000*.Machine$double.eps )^(x$xi1 - 1) * (x$xi1 * dnorm(-eti1))
-d.int0 <- pmax(pnorm(-eti0), 1000*.Machine$double.eps )^(x$xi1 - 1) * (x$xi1 * dnorm(-eti0))
+d.int1 <- pnorm(-eti1)^(x$xi1 - 1) * (x$xi1 * dnorm(-eti1))
+d.int0 <- pnorm(-eti0)^(x$xi1 - 1) * (x$xi1 * dnorm(-eti0))
 
-p.etn  <- 1-pmax(pnorm(-etno), 1000*.Machine$double.eps )^x$xi2   
-d.etn  <- pmax(pnorm(-etno), 1000*.Machine$double.eps )^(x$xi2 - 1) * (x$xi2 * dnorm(-etno))
+p.etn  <- 1-pnorm(-etno)^x$xi2   
+d.etn  <- pnorm(-etno)^(x$xi2 - 1) * (x$xi2 * dnorm(-etno))
 
          }   
 
 if(eq==2){
 
-p.int1 <- 1-pmax(pnorm(-eti1), 1000*.Machine$double.eps )^x$xi2
-p.int0 <- 1-pmax(pnorm(-eti0), 1000*.Machine$double.eps )^x$xi2
+p.int1 <- 1-pnorm(-eti1)^x$xi2
+p.int0 <- 1-pnorm(-eti0)^x$xi2
 
-d.int1 <- pmax(pnorm(-eti1), 1000*.Machine$double.eps )^(x$xi2 - 1) * (x$xi2 * dnorm(-eti1))
-d.int0 <- pmax(pnorm(-eti0), 1000*.Machine$double.eps )^(x$xi2 - 1) * (x$xi2 * dnorm(-eti0))
+d.int1 <- pnorm(-eti1)^(x$xi2 - 1) * (x$xi2 * dnorm(-eti1))
+d.int0 <- pnorm(-eti0)^(x$xi2 - 1) * (x$xi2 * dnorm(-eti0))
 
-p.etn  <- 1-pmax(pnorm(-etno), 1000*.Machine$double.eps )^x$xi1   
-d.etn  <- pmax(pnorm(-etno), 1000*.Machine$double.eps )^(x$xi1 - 1) * (x$xi1 * dnorm(-etno))
+p.etn  <- 1-pnorm(-etno)^x$xi1   
+d.etn  <- pnorm(-etno)^(x$xi1 - 1) * (x$xi1 * dnorm(-etno))
         }
 
 }
@@ -152,27 +189,27 @@ d.etn  <- pmax(pnorm(-etno), 1000*.Machine$double.eps )^(x$xi1 - 1) * (x$xi1 * d
 
   if(eq==1){
 
-p.int1 <- 2*pmax(pbinorm( eti1, 0, cov12=del1), 1000*.Machine$double.eps )
-p.int0 <- 2*pmax(pbinorm( eti0, 0, cov12=del1), 1000*.Machine$double.eps )
+p.int1 <- 2*pbinorm( eti1, 0, cov12=del1)
+p.int0 <- 2*pbinorm( eti0, 0, cov12=del1)
 
-d.int1 <- 2*dnorm(eti1)*pmax(pnorm(x$xi1*eti1), 1000*.Machine$double.eps )
-d.int0 <- 2*dnorm(eti0)*pmax(pnorm(x$xi1*eti0), 1000*.Machine$double.eps )
+d.int1 <- 2*dnorm(eti1)*pnorm(x$xi1*eti1)
+d.int0 <- 2*dnorm(eti0)*pnorm(x$xi1*eti0)
 
-p.etn  <- 2*pmax(pbinorm( etno, 0, cov12=del2), 1000*.Machine$double.eps )
-d.etn  <- 2*dnorm(etno)*pmax(pnorm(x$xi2*etno), 1000*.Machine$double.eps )
+p.etn  <- 2*pbinorm( etno, 0, cov12=del2)
+d.etn  <- 2*dnorm(etno)*pnorm(x$xi2*etno)
 
          }   
 
 if(eq==2){
 
-p.int1 <- 2*pmax(pbinorm( eti1, 0, cov12=del2), 1000*.Machine$double.eps )
-p.int0 <- 2*pmax(pbinorm( eti0, 0, cov12=del2), 1000*.Machine$double.eps )
+p.int1 <- 2*pbinorm( eti1, 0, cov12=del2)
+p.int0 <- 2*pbinorm( eti0, 0, cov12=del2)
 
-d.int1 <- 2*dnorm(eti1)*pmax(pnorm(x$xi2*eti1), 1000*.Machine$double.eps )
-d.int0 <- 2*dnorm(eti0)*pmax(pnorm(x$xi2*eti0), 1000*.Machine$double.eps )
+d.int1 <- 2*dnorm(eti1)*pnorm(x$xi2*eti1)
+d.int0 <- 2*dnorm(eti0)*pnorm(x$xi2*eti0)
 
-p.etn  <- 2*pmax(pbinorm( etno, 0, cov12=del1), 1000*.Machine$double.eps )
-d.etn  <- 2*dnorm(etno)*pmax(pnorm(x$xi1*etno), 1000*.Machine$double.eps )
+p.etn  <- 2*pbinorm( etno, 0, cov12=del1)
+d.etn  <- 2*dnorm(etno)*pnorm(x$xi1*etno)
         }    
       
   
@@ -182,6 +219,21 @@ d.etn  <- 2*dnorm(etno)*pmax(pnorm(x$xi1*etno), 1000*.Machine$double.eps )
 
 if(x$BivD %in% c("N", "T") ) {ass.p <- x$rho; ass.pst <- coef(x)["athrho"] } else{ ass.p <- x$theta; ass.pst <- coef(x)["theta.star"]} 
  
+
+
+
+
+p.int1 <- pmax(p.int1, 1000*.Machine$double.eps ) 
+p.int1 <- ifelse(p.int1==1, 0.9999999999999999, p.int1)
+p.int0 <- pmax(p.int0, 1000*.Machine$double.eps )
+p.int0 <- ifelse(p.int0==1,0.9999999999999999,p.int0)
+
+
+p.etn  <- pmax(p.etn, 1000*.Machine$double.eps )
+p.etn <- ifelse(p.etn==1,0.9999999999999999,p.etn)
+
+
+
    if(x$BivD=="N") { 
                      pn.int1 <- qnorm(p.int1)
                      pn.int0 <- qnorm(p.int0)
@@ -196,12 +248,42 @@ if(x$BivD %in% c("N", "T") ) {ass.p <- x$rho; ass.pst <- coef(x)["athrho"] } els
                      C.10  <- p.int0 - pmax( BiCopCDF(p.int0,p.etn, x$nC, par=ass.p, par2=pa2) , 1000*.Machine$double.eps )
                          }           
 
+
+
    est.AT <- mean(   (C.11/p.etn - C.10/(1-p.etn))[ind.excl],na.rm = TRUE   )
 
+} 
 
 
-            
+if(naive == TRUE){
+
+if(eq==1) ngam <- x$gam1
+if(eq==2) ngam <- x$gam2
+
+eti1 <- d1%*%coef(ngam) 
+eti0 <- d0%*%coef(ngam) 
+
+p.int1 <- pmax(pnorm(eti1), 1000*.Machine$double.eps ) 
+p.int1 <- ifelse(p.int1==1,0.9999999999999999,p.int1) 
+p.int0 <- pmax(pnorm(eti0), 1000*.Machine$double.eps ) 
+p.int0 <- ifelse(p.int0==1,0.9999999999999999,p.int0) 
+
+est.AT <- mean(  (p.int1 - p.int0)[ind.excl] , na.rm = TRUE    ) 
+
+
+}
+
+
+###############
+
+
+
+
+
+      
 if(delta==TRUE){
+
+  if(naive == FALSE){
 
     if(x$BivD %in% c("N","T")      ) add.b <- 1/cosh(coef(x)["athrho"])^2
     if(x$BivD=="F")                  add.b <- 1
@@ -227,58 +309,90 @@ if(delta==TRUE){
                          sp=x$sp, qu.mag=x$qu.mag, AT=TRUE)$hessian
 
 
-   var.eig <- eigen(var, symmetric=TRUE)
-    
-   if(min(var.eig$values) < .Machine$double.eps){ var <- as.matrix( nearPD( var, ensureSymmetry = FALSE )$mat )
-                                                  var.eig <- eigen(var, symmetric=TRUE) }
-    
-   var <- var.eig$vec%*%tcrossprod(diag(1/var.eig$val),var.eig$vec)  
+   var.eig <- eigen(var, symmetric=TRUE)                    
+   if(min(var.eig$values) < .Machine$double.eps) var.eig$values[which(var.eig$values < .Machine$double.eps)] <- 0.000000001
+   var <- var.eig$vectors%*%tcrossprod(diag(1/var.eig$values),var.eig$vectors)  
 
    delta.AT <- sqrt( t(dATT)%*%var%*%dATT )
-                       
+   
+   }
+   
+   
+   if(naive == TRUE){
+   
+   var <- ngam$Vp   
+   dATT <- colMeans(  ( c(dnorm(eti1))*d1 - c(dnorm(eti0))*d0 )[ind.excl,]  )
+   delta.AT <- sqrt( t(dATT)%*%var%*%dATT )
+       
+   }
+   
+                      
 }
+
+
 
 if(delta==FALSE){
 
 
-bs <- rmvnorm(n.sim, mean = coef(x), sigma=x$Vb, method=s.meth)
+if(naive == TRUE){ 
 
+
+bs <- rmvnorm(n.sim, mean = coef(ngam), sigma=ngam$Vp, method=s.meth) 
+
+ peti1s <- pmax(pnorm(d1%*%t(bs)), 1000*.Machine$double.eps )  
+ peti1s <- ifelse(peti1s==1,0.9999999999999999,peti1s)  
+ peti0s <- pmax(pnorm(d0%*%t(bs)), 1000*.Machine$double.eps ) 
+ peti0s <- ifelse(peti0s==1,0.9999999999999999,peti0s)  
+
+
+ est.ATb <- colMeans(  (peti1s - peti0s)[ind.excl,] , na.rm = TRUE    )
+
+
+}
+
+
+
+if(naive == FALSE){ 
+
+bs <- rmvnorm(n.sim, mean = coef(x), sigma=x$Vb, method=s.meth)
 
  eti1s <- d1%*%t(bs[,ind.int])    
  eti0s <- d0%*%t(bs[,ind.int])   
  etnos <- X.noi%*%t(bs[,ind.noi]) 
+
                                   
 if(x$PL=="P"){
-	p.int1s <- pmax(pnorm(eti1s), 1000*.Machine$double.eps )
-	p.int0s <- pmax(pnorm(eti0s), 1000*.Machine$double.eps )
-	p.etns  <- pmax(pnorm(etnos), 1000*.Machine$double.eps )
+	p.int1s <- pnorm(eti1s)
+	p.int0s <- pnorm(eti0s)
+	p.etns  <- pnorm(etnos)
+
              }
 
 
 if(x$PL=="PP"){                    
  if(eq==1){
-  p.int1s <- pmax(pnorm(eti1s), 1000*.Machine$double.eps )^x$xi1  # this does not account for xi variability, provided it makes sense ... 
-  p.int0s <- pmax(pnorm(eti0s), 1000*.Machine$double.eps )^x$xi1
-  p.etns  <- pmax(pnorm(etnos), 1000*.Machine$double.eps )^x$xi2 
+  p.int1s <- pnorm(eti1s)^x$xi1   
+  p.int0s <- pnorm(eti0s)^x$xi1
+  p.etns  <- pnorm(etnos)^x$xi2 
            }   
  if(eq==2){
-  p.int1s <- pmax(pnorm(eti1s), 1000*.Machine$double.eps )^x$xi2
-  p.int0s <- pmax(pnorm(eti0s), 1000*.Machine$double.eps )^x$xi2
-  p.etns  <- pmax(pnorm(etnos), 1000*.Machine$double.eps )^x$xi1 
+  p.int1s <- pnorm(eti1s)^x$xi2
+  p.int0s <- pnorm(eti0s)^x$xi2
+  p.etns  <- pnorm(etnos)^x$xi1 
            }
 }
 
 
 if(x$PL=="RPP"){
  if(eq==1){
-  p.int1s <- 1-pmax(pnorm(-eti1s), 1000*.Machine$double.eps )^x$xi1
-  p.int0s <- 1-pmax(pnorm(-eti0s), 1000*.Machine$double.eps )^x$xi1
-  p.etns  <- 1-pmax(pnorm(-etnos), 1000*.Machine$double.eps )^x$xi2  
+  p.int1s <- 1-pnorm(-eti1s)^x$xi1
+  p.int0s <- 1-pnorm(-eti0s)^x$xi1
+  p.etns  <- 1-pnorm(-etnos)^x$xi2  
           }   
  if(eq==2){
-  p.int1s <- 1-pmax(pnorm(-eti1s), 1000*.Machine$double.eps )^x$xi2
-  p.int0s <- 1-pmax(pnorm(-eti0s), 1000*.Machine$double.eps )^x$xi2
-  p.etns  <- 1-pmax(pnorm(-etnos), 1000*.Machine$double.eps )^x$xi1  
+  p.int1s <- 1-pnorm(-eti1s)^x$xi2
+  p.int0s <- 1-pnorm(-eti0s)^x$xi2
+  p.etns  <- 1-pnorm(-etnos)^x$xi1  
           }
 }
 
@@ -291,17 +405,17 @@ dim2 <- dim(eti1s)[2]
       
   if(eq==1){
 
-p.int1s <- matrix(2*pmax(pbinorm( as.vector(eti1s), 0, cov12=del1), 1000*.Machine$double.eps ),dim1,dim2)
-p.int0s <- matrix(2*pmax(pbinorm( as.vector(eti0s), 0, cov12=del1), 1000*.Machine$double.eps ),dim1,dim2)
-p.etns  <- matrix(2*pmax(pbinorm( as.vector(etnos), 0, cov12=del2), 1000*.Machine$double.eps ),dim1,dim2)
+p.int1s <- matrix(2*pbinorm( as.vector(eti1s), 0, cov12=del1),dim1,dim2)
+p.int0s <- matrix(2*pbinorm( as.vector(eti0s), 0, cov12=del1),dim1,dim2)
+p.etns  <- matrix(2*pbinorm( as.vector(etnos), 0, cov12=del2),dim1,dim2)
 
          }   
 
 if(eq==2){
 
-p.int1s <- matrix(2*pmax(pbinorm( as.vector(eti1s), 0, cov12=del2), 1000*.Machine$double.eps ),dim1,dim2)
-p.int0s <- matrix(2*pmax(pbinorm( as.vector(eti0s), 0, cov12=del2), 1000*.Machine$double.eps ),dim1,dim2)
-p.etns  <- matrix(2*pmax(pbinorm( as.vector(etnos), 0, cov12=del1), 1000*.Machine$double.eps ),dim1,dim2)
+p.int1s <- matrix(2*pbinorm( as.vector(eti1s), 0, cov12=del2),dim1,dim2)
+p.int0s <- matrix(2*pbinorm( as.vector(eti0s), 0, cov12=del2),dim1,dim2)
+p.etns  <- matrix(2*pbinorm( as.vector(etnos), 0, cov12=del1),dim1,dim2)
 
         }    
    
@@ -332,6 +446,12 @@ if(x$BivD!="N"){
 if(x$BivD=="T") asp2 <- rep(x$nu,n.sim) else asp2 <- rep(0,n.sim) 
 
 
+p.int1s <- pmax(p.int1s, 1000*.Machine$double.eps )
+p.int1s <- ifelse(p.int1s==1,0.9999999999999999,p.int1s)   
+p.int0s <- pmax(p.int0s, 1000*.Machine$double.eps )
+p.int0s <- ifelse(p.int0s==1,0.9999999999999999,p.int0s) 
+p.etns  <- pmax(p.etns, 1000*.Machine$double.eps )
+p.etns  <- ifelse(p.etns==1,0.9999999999999999,p.etns) 
 
 
 
@@ -358,6 +478,8 @@ est.ATb[i] <- mean(   (pmax(pbinorm(pn.int1s,pn.etns,cov12=tanh(bs[i,p.rho])), 1
 
 }  # end big loop   
 
+
+}
 
 
             

@@ -49,13 +49,6 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 
 
-\references{
-
-Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes.
-
-}
-
-
 \seealso{
 \code{\link{AIC}}, \code{\link{BIC}}
 }

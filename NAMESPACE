@@ -19,7 +19,7 @@ SemiParBIVProbit.fit,
 SemiParBIVProbit,
 startSS,
 summary.SemiParBIVProbit,
-working.comp)
+working.comp, mb)
 
 importFrom(magic, adiag)
 importFrom(survey, svyrecvar, twophasevar, twophase2var, svyCprod)
@@ -29,7 +29,7 @@ importFrom(VGAM,pbinorm,dbinorm)
 importFrom(VineCopula, BiCopHfuncDeriv)
 importFrom(CDVine,BiCopCDF,BiCopPar2Tau,BiCopHfunc,BiCopPDF)
 import(mgcv)
-importFrom(Matrix,nearPD,bdiag,Matrix)
+importFrom(Matrix,bdiag,Matrix)
 importFrom(sn,qsn,psn,T.Owen)
 
 

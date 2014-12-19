@@ -23,7 +23,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Marra G. and Radice R. (submitted), Flexible Bivariate Binary Models for Estimating the Efficacy of Phototherapy for Newborns with Jaundice.
+Marra G. and Radice R. (2015), Flexible Bivariate Binary Models for Estimating the Efficacy of Phototherapy for Newborns with Jaundice. \emph{International Journal of Statistics and Probability}. 
 
 
 }

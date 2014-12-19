@@ -4,17 +4,16 @@ SemiParBIVProbit.fit.post <- function(SemiParFit, formula.eq2, data,
                                       qu.mag=NULL, gam1, gam2){
 
 non.sel.dd <- lambda1s <- lambda2s <- eta1S <- eta2S <- athrhoS <- rho <- theta <- edf <- NULL
+
+
 xi1 <- xi2 <- 1
    
 He <- SemiParFit$fit$hessian
 logLik <- -SemiParFit$fit$l
                                            
     He.eig <- eigen(He, symmetric=TRUE)
-    
-    if(min(He.eig$values) < .Machine$double.eps){ He <- as.matrix( nearPD( He, ensureSymmetry = FALSE )$mat )
-                                                  He.eig <- eigen(He, symmetric=TRUE) }
-     
-Vb <- He.eig$vec%*%tcrossprod(diag(1/He.eig$val),He.eig$vec)      
+    if(min(He.eig$values) < .Machine$double.eps) He.eig$values[which(He.eig$values < .Machine$double.eps)] <- 0.000000001
+    Vb <- He.eig$vectors%*%tcrossprod(diag(1/He.eig$values),He.eig$vectors)      
 
                                      
 if( (VC$l.sp1!=0 || VC$l.sp2!=0) && VC$fp==FALSE){ 
@@ -24,7 +23,7 @@ if( (VC$l.sp1!=0 || VC$l.sp2!=0) && VC$fp==FALSE){
 t.edf <- sum(diag(F))
   
 
-  if( VC$BivD %in% c("N","T") ) {rho <- tanh(SemiParFit$fit$argument["athrho"]); names(rho) <- "rho"; KeT <- BiCopPar2Tau(VC$nC,rho,par2=VC$nu)} 
+  if( VC$BivD %in% c("N","T") ) {rho <- tanh(SemiParFit$fit$argument["athrho"]); names(rho) <- "rho"} 
   else{
 
    th.st <- SemiParFit$fit$argument["theta.star"]  
@@ -37,11 +36,11 @@ t.edf <- sum(diag(F))
    if(VC$BivD %in% c("J0", "J180","G0", "G180") ) theta <-    1 + exp(th.st)
    if(VC$BivD %in% c("J90","J270","G90","G270") ) theta <- -( 1 + exp(th.st) )
        
-   names(theta) <- "theta"; KeT <- BiCopPar2Tau(VC$nC,theta)
+   names(theta) <- "theta"
    
         }
 
-  names(KeT) <- "k.tau"
+
   
   if((PL=="PP" || PL=="RPP")){
   
@@ -93,7 +92,9 @@ t.edf <- sum(diag(F))
 
 
 
-
+###
+## can be made more efficient by avoiding eta1 etc in some models
+###
 
 
   if(Model=="BSS"){
@@ -103,7 +104,8 @@ t.edf <- sum(diag(F))
   fs        <- as.formula( paste("resp","~",formula.eq2[3],sep="") ) 
 
   non.sel.dd <- gam(fs, data=data, fit = FALSE)$X[SemiParFit$fit$good,] 
-  non.sel.d  <- gam(fs, data=data, fit = FALSE)$X 
+  
+  if(VC$gc.l == TRUE) gc()  
   
   ll <- length(SemiParFit$fit$argument)
   
@@ -112,7 +114,7 @@ t.edf <- sum(diag(F))
   if(length(param)!=dim(non.sel.dd)[2]){
   posit <- which(names(VC$X2[1,])%in%names(param))
   non.sel.dd <- non.sel.dd[,posit]
-  non.sel.d  <- non.sel.d[,posit]
+
   }
   
   eta2 <- non.sel.dd%*%param
@@ -142,9 +144,35 @@ if(Model=="BSS" || Model=="BPO"){
    SemiParFit$fit$p11 <- p11
    SemiParFit$fit$p00 <- (1 - p2) - ( p1 - p11 )
    SemiParFit$fit$p01 <- p2 - p11
+   
+   SemiParFit$fit$p1 <- p1
+   SemiParFit$fit$p2 <- p2
 
 }
 
+
+######################
+# Association measures
+######################
+
+
+p00 <- SemiParFit$fit$p00 
+p01 <- SemiParFit$fit$p01 
+p11 <- SemiParFit$fit$p11 
+p10 <- SemiParFit$fit$p10 
+
+p1 <- SemiParFit$fit$p1
+p2 <- SemiParFit$fit$p2
+
+OR <- (p00*p11)/(p01*p10)
+GM <- mean((OR - 1)/(OR + 1))
+OR <- mean(OR)
+
+
+rm(p00,p01,p10,p11,p1,p2)
+
+#pp <- 2*(1-p1)*(1-p2)
+#GM <- mean( (2*p00 - pp)/(p00*(4*(p1+p2)-6) + 4*p00^2 + pp) ) 
 
   l.sp11 <- length(gam1$smooth)
   l.sp22 <- length(gam2$smooth) 
@@ -192,9 +220,9 @@ if(Model=="BSS" || Model=="BPO"){
 
    
                  list(SemiParFit = SemiParFit, He = He, logLik = logLik, Vb = Vb, HeSh = HeSh, F = F, t.edf = t.edf,
-                      edf1 = edf[[1]], edf2 = edf[[2]], rho = rho, theta = theta, KeT = KeT,
-                      xi1 = xi1, xi2 = xi2, sp = sp, 
-                      X2s = non.sel.dd)
+                      edf1 = edf[[1]], edf2 = edf[[2]], rho = rho, theta = theta, #  KeT = KeT, or OG
+                      xi1 = xi1, xi2 = xi2, sp = sp, OR = OR, GM = GM, 
+                      X2s = non.sel.dd) # , magpp = SemiParFit$magpp)
 
 }
 
