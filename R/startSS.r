@@ -1,11 +1,11 @@
-startSS <- function(gam1, gam2, formula.eq2, data, gamma, weights, inde, l.sp1, l.sp2, pPen2, fp){
+startSS <- function(gam1, gam2, formula.eq2, data, infl.fac, weights, inde, l.sp1, l.sp2, pPen2, fp){
 
 
 
     p.g1 <- predict(gam1)
     imr <- data$imr <- dnorm(p.g1)/pnorm(p.g1)
     formula.eq2.1 <- update.formula(formula.eq2, ~. + imr)
-    ols <- eval(substitute(gam(formula.eq2.1, data=data, gamma=gamma, weights=weights, subset=inde, paraPen=pPen2),list(weights=weights,inde=inde)))
+    ols <- eval(substitute(gam(formula.eq2.1, data=data, gamma=infl.fac, weights=weights, subset=inde, paraPen=pPen2),list(weights=weights,inde=inde)))
     rhi <- coef(ols)["imr"]/sqrt(ols$sig2)
     
 if(fp==FALSE){  
@@ -20,7 +20,7 @@ if(fp==FALSE){
     MM <- as.data.frame(model.matrix(fw,M)[,-1])
                                
     if(dim(M)[2]==2) names(MM) <- vSn[2]
-    data.r <- MM/sqrt( pmax(10000*.Machine$double.eps, ta2) ) 
+    data.r <- MM/sqrt( pmax(sqrt(.Machine$double.eps), ta2) ) 
     data.r <- as.data.frame(cbind(ols$y,data.r)); names(data.r)[1] <- names(M)[1]
                         
     #if(length(ols$smooth)!=0) l <- as.matrix(data.r[,2:(ols$smooth[[1]]$first.para-1)]) else l <- as.matrix(data.r[,-1])
@@ -40,7 +40,7 @@ if(fp==FALSE){
     if(l.sp2!=0) for(i in 1:l.sp2) fw <- paste(fw,"+",ols$smooth[[i]]$label,sep="")
     fw <- as.formula(fw)      
 
-gam2.1 <- suppressWarnings(try(eval(substitute(gam(fw, binomial(link="probit"), gamma=gamma, weights=weights[inde], data=data.r, paraPen=pPen2),list(weights=weights,inde=inde))),silent=TRUE))
+gam2.1 <- suppressWarnings(try(eval(substitute(gam(fw, binomial(link="probit"), gamma=infl.fac, weights=weights[inde], data=data.r, paraPen=pPen2),list(weights=weights,inde=inde))),silent=TRUE))
 
                                environment(gam2.1$formula) <- environment(gam2$formula) 
 

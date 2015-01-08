@@ -1,13 +1,11 @@
 working.comp1 <- function(fit){
    
-  nz <- 0.000000001
-  
   G <- -(fit$gradient - fit$ps$S.h2)
   H <- fit$hessian - fit$ps$S.h
   
   W.eig <- eigen(H, symmetric=TRUE)
   
-  if(min(W.eig$values) < .Machine$double.eps) { pep <- which(W.eig$values < .Machine$double.eps); W.eig$values[pep] <- nz }  
+  if(min(W.eig$values) < sqrt(.Machine$double.eps)) { pep <- which(W.eig$values < sqrt(.Machine$double.eps)); W.eig$values[pep] <- 0.0000001 }  
   
   srev    <- sqrt(W.eig$val)
   c.W     <- W.eig$vec%*%tcrossprod(diag(srev)  ,W.eig$vec) 

@@ -4,7 +4,7 @@
 \title{Gradient test}
 
 \description{ 
-\code{gt.bpm} can be used to test the hypothesis of absence of endogeneity or correlated model equations/errors or non-random sample selection.}
+\code{gt.bpm} can be used to test the hypothesis of absence of endogeneity, correlated model equations/errors or non-random sample selection.}
 
 
 \usage{
@@ -22,7 +22,7 @@ gt.bpm(object)
 
 \details{
 
-The gradient test was first proposed by Terrell (2002) and it is based on classic likelihood theory results. See Marra et al. (submitted) for full details. 
+The gradient test was first proposed by Terrell (2002) and it is based on classic likelihood theory. See Marra et al. (submitted) for full details. 
 
 
 
@@ -31,9 +31,19 @@ The gradient test was first proposed by Terrell (2002) and it is based on classi
 
 \value{
 
-It returns a numeric p-value corresponding to the null hypothesis \eqn{\rho}{\rho=0}.
+It returns a numeric p-value corresponding to the null hypothesis that \eqn{\rho}{\rho} is equal to 0. 
+
 
 }
+
+
+
+\section{WARNINGS}{
+
+This test's implementation is only valid for models with normal errors and probit links.
+
+} 
+
 
 
 
@@ -69,6 +79,7 @@ Terrell G. (2002), The Gradient Statistic. \emph{Computing Science and Statistic
 \keyword{gradient test} 
 \keyword{endogeneity}
 \keyword{non-random sample selection}
+\keyword{correlated model equations/errors}
 
 
 

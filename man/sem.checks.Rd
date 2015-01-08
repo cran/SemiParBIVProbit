@@ -19,7 +19,7 @@ sem.checks(x)
 \arguments{ 
 
 
-\item{x}{A \code{SemiParBIVProbit} object produced by \code{SemiParBIVProbit()}.}
+\item{x}{\code{SemiParBIVProbit} object produced by \code{SemiParBIVProbit()}.}
 
 
 }

@@ -5,15 +5,16 @@ SemiParBIVProbit.fit.post <- function(SemiParFit, formula.eq2, data,
 
 non.sel.dd <- lambda1s <- lambda2s <- eta1S <- eta2S <- athrhoS <- rho <- theta <- edf <- NULL
 
-
 xi1 <- xi2 <- 1
    
 He <- SemiParFit$fit$hessian
 logLik <- -SemiParFit$fit$l
-                                           
+
+epsilon <- sqrt(.Machine$double.eps)
+                                                                                                         
     He.eig <- eigen(He, symmetric=TRUE)
-    if(min(He.eig$values) < .Machine$double.eps) He.eig$values[which(He.eig$values < .Machine$double.eps)] <- 0.000000001
-    Vb <- He.eig$vectors%*%tcrossprod(diag(1/He.eig$values),He.eig$vectors)      
+    if(min(He.eig$values) < epsilon) He.eig$values[which(He.eig$values < epsilon)] <- 0.0000001
+    Vb <- He.eig$vectors%*%tcrossprod(diag(1/He.eig$values),He.eig$vectors)   
 
                                      
 if( (VC$l.sp1!=0 || VC$l.sp2!=0) && VC$fp==FALSE){ 
@@ -21,7 +22,13 @@ if( (VC$l.sp1!=0 || VC$l.sp2!=0) && VC$fp==FALSE){
                                           F <- Vb%*%HeSh
                                         }else{ HeSh <- He; F <- diag(rep(1,dim(Vb)[1])) } 
 t.edf <- sum(diag(F))
+
+
+dimnames(SemiParFit$fit$hessian)[[1]] <- dimnames(SemiParFit$fit$hessian)[[2]] <- dimnames(Vb)[[1]] <- dimnames(Vb)[[2]] <- dimnames(HeSh)[[1]] <- dimnames(HeSh)[[2]] <- dimnames(F)[[1]] <- dimnames(F)[[2]] <- dimnames(He)[[1]] <- dimnames(He)[[2]] <- names(SemiParFit$fit$argument)   
+
   
+if(VC$hess == FALSE) SemiParFit$fit$Fisher <- SemiParFit$fit$hessian
+
 
   if( VC$BivD %in% c("N","T") ) {rho <- tanh(SemiParFit$fit$argument["athrho"]); names(rho) <- "rho"} 
   else{
@@ -93,7 +100,7 @@ t.edf <- sum(diag(F))
 
 
 ###
-## can be made more efficient by avoiding eta1 etc in some models
+## can be made more efficient by avoiding eta1 etc in some models?
 ###
 
 
@@ -129,15 +136,15 @@ if(Model=="BSS" || Model=="BPO"){
 
   if(Model=="BPO") {eta1 <- SemiParFit$fit$eta1; eta2 <- SemiParFit$fit$eta2} 
 
-  p1 <- pmax(pnorm(eta1), 1000*.Machine$double.eps ) 
-  p2 <- pmax(pnorm(eta2), 1000*.Machine$double.eps ) 
-  p1 <- ifelse(p1==1,0.9999999999999999,p1)
-  p2 <- ifelse(p2==1,0.9999999999999999,p2)
+  p1 <- pmax(pnorm(eta1), epsilon) 
+  p2 <- pmax(pnorm(eta2), epsilon ) 
+  p1 <- ifelse(p1==1,0.9999999,p1)
+  p2 <- ifelse(p2==1,0.9999999,p2)
   
-  if(VC$BivD=="N") p11 <- pmax( pbinorm( eta1, eta2, cov12=rho), 1000*.Machine$double.eps ) 
+  if(VC$BivD=="N") p11 <- pmax( pbinorm( eta1, eta2, cov12=rho), epsilon ) 
   else{ 
    if(VC$BivD=="T") theta <- rho
-   p11 <- pmax(BiCopCDF(p1,p2, VC$nC, par=theta, par2=VC$nu), 1000*.Machine$double.eps ) 
+   p11 <- pmax(BiCopCDF(p1,p2, VC$nC, par=theta, par2=VC$nu), epsilon ) 
    }
 
    SemiParFit$fit$p10 <- p1 - p11
@@ -165,6 +172,10 @@ p1 <- SemiParFit$fit$p1
 p2 <- SemiParFit$fit$p2
 
 OR <- (p00*p11)/(p01*p10)
+
+OR  <- ifelse(OR  ==  Inf,  8.218407e+307, OR ) 
+OR  <- ifelse(OR  == -Inf, -8.218407e+307, OR ) 
+
 GM <- mean((OR - 1)/(OR + 1))
 OR <- mean(OR)
 

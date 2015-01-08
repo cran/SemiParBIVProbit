@@ -1,5 +1,5 @@
 LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, 
-                   Model = "B", hess = TRUE, gamma = 1, pPen1 = NULL, pPen2 = NULL){
+                   Model = "B", hess = TRUE, infl.fac = 1, pPen1 = NULL, pPen2 = NULL){
 
   sp <- qu.mag <- y1.y2 <- y1.cy2 <- cy1.y2 <- cy1.cy2 <- cy <- cy1 <- NULL  
   end <- 0
@@ -15,7 +15,7 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL,
   fake.formula <- paste(ig[[1]]$response, "~", paste(pred.n, collapse = " + ")) 
   environment(fake.formula) <- environment(ig$fake.formula)
   mf$formula <- fake.formula  
-  mf$Model <- mf$hess <- mf$gamma <- mf$pPen1 <- mf$pPen2 <- NULL  
+  mf$Model <- mf$hess <- mf$infl.fac <- mf$pPen1 <- mf$pPen2 <- NULL  
   mf$drop.unused.levels <- TRUE 
   if(Model=="BSS") mf$na.action <- na.pass
   mf[[1]] <- as.name("model.frame")
@@ -39,7 +39,7 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL,
   }
   
 
-  gam1 <- eval(substitute(gam(formula.eq1, binomial(link="probit"), gamma=gamma, weights=weights, 
+  gam1 <- eval(substitute(gam(formula.eq1, binomial(link="probit"), gamma=infl.fac, weights=weights, 
                               data=data, paraPen=pPen1),list(weights=weights))) 
 
   X1 <- model.matrix(gam1)
@@ -51,7 +51,7 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL,
 
   if(Model=="B"){
   
-  gam2  <- eval(substitute(gam(formula.eq2, binomial(link="probit"), gamma=gamma, weights=weights, 
+  gam2  <- eval(substitute(gam(formula.eq2, binomial(link="probit"), gamma=infl.fac, weights=weights, 
                            data=data, paraPen=pPen2),list(weights=weights))) 
   X2 <- model.matrix(gam2)
   X2.d2 <- dim(X2)[2]
@@ -72,7 +72,7 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL,
   if(Model=="BSS"){
 
   inde <- y1 > 0
-  gam2 <- eval(substitute(gam(formula.eq2, binomial(link="probit"), gamma=gamma, weights=weights, 
+  gam2 <- eval(substitute(gam(formula.eq2, binomial(link="probit"), gamma=infl.fac, weights=weights, 
                               data=data, subset=inde, paraPen=pPen2),list(weights=weights,inde=inde)))                              
   X2.d2 <- length(coef(gam2))
   X2 <- matrix(0,length(inde),X2.d2,dimnames = list(c(1:length(inde)),c(names(coef(gam2)))) )
@@ -116,7 +116,7 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL,
              gp2 = gp2,
              l.sp1 = l.sp1, 
              l.sp2 = l.sp2,
-             gamma = gamma,
+             infl.fac = infl.fac,
              weights = weights,
              hess = hess,
              pPen1 = pPen1,
@@ -135,7 +135,7 @@ G   <- resf$gradient
 var <- resf$hessian
 
 var.eig <- eigen(var, symmetric=TRUE)   
-if(min(var.eig$values) < .Machine$double.eps) var.eig$values[which(var.eig$values < .Machine$double.eps)] <- 0.000000001
+if(min(var.eig$values) < sqrt(.Machine$double.eps)) var.eig$values[which(var.eig$values < sqrt(.Machine$double.eps))] <- 0.0000001
 var <- var.eig$vec%*%tcrossprod(diag(1/var.eig$val),var.eig$vec)  
 
 ev <- as.numeric(t(G)%*%var%*%G)

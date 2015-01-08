@@ -1,4 +1,4 @@
-summary.SemiParBIVProbit <- function(object, n.sim = 100, s.meth = "svd", prob.lev = 0.05, thrs1 = 0.5, thrs2 = 0.5, ...){
+summary.SemiParBIVProbit <- function(object, n.sim = 100, s.meth = "svd", prob.lev = 0.05, thrs1 = 0.5, thrs2 = 0.5, cplot = FALSE, ...){
 
   testStat <- function (p, X, V, rank = NULL) {
       qrx <- qr(X)
@@ -58,7 +58,7 @@ summary.SemiParBIVProbit <- function(object, n.sim = 100, s.meth = "svd", prob.l
   tableN <- list(NULL,NULL)
   table <- list()
   CIl1 <- CIl2 <- table.R <- table.P <- table.F <- P1 <- P2 <- QPS1 <- QPS2 <- CR1 <- CR1 <- CR2 <- MR <- CIkt <- NULL  
-  epsilon <- .Machine$double.eps*10^6
+  epsilon <- sqrt(.Machine$double.eps)
   est.RHOb <- est.l1 <- est.l2 <- est.OR <- est.GM <-  rep(NA,n.sim) 
 
  
@@ -82,7 +82,10 @@ summary.SemiParBIVProbit <- function(object, n.sim = 100, s.meth = "svd", prob.l
    if(object$BivD %in% c("J90","J270") ) est.RHOb <- -(1+exp(bs[,lf.n]) + epsilon) 
 
    if(object$BivD %in% c("G0", "G180") ) est.RHOb <-   1+exp(bs[,lf.n])  
-   if(object$BivD %in% c("G90","G270") ) est.RHOb <- -(1+exp(bs[,lf.n])) 
+   if(object$BivD %in% c("G90","G270") ) est.RHOb <- -(1+exp(bs[,lf.n]))
+   
+   est.RHOb <- ifelse(est.RHOb ==  Inf,  8.218407e+307, est.RHOb) 
+   est.RHOb <- ifelse(est.RHOb == -Inf, -8.218407e+307, est.RHOb)    
    
 
    
@@ -99,11 +102,11 @@ summary.SemiParBIVProbit <- function(object, n.sim = 100, s.meth = "svd", prob.l
    et2s <- object$X2[good,]%*%t(bs[,(object$X1.d2+1):(object$X1.d2+object$X2.d2)]) 
      
    p1s <- pnorm(et1s)
-   p1s <- pmax(p1s, 1000*.Machine$double.eps )
-   p1s <- ifelse(p1s==1,0.9999999999999999,p1s)  
+   p1s <- pmax(p1s, epsilon )
+   p1s <- ifelse(p1s==1,0.9999999,p1s)  
    p2s <- pnorm(et2s)
-   p2s <- pmax(p2s, 1000*.Machine$double.eps )
-   p2s <- ifelse(p2s==1,0.9999999999999999,p2s) 
+   p2s <- pmax(p2s, epsilon )
+   p2s <- ifelse(p2s==1,0.9999999,p2s) 
    
    p11s <- matrix(NA,dim(p1s)[1],dim(p1s)[2])
      
@@ -114,15 +117,21 @@ summary.SemiParBIVProbit <- function(object, n.sim = 100, s.meth = "svd", prob.l
       
    }     
         
- p11s <- pmax(p11s, 1000*.Machine$double.eps )
- p11s <- ifelse(p11s==1,0.9999999999999999,p11s)  
+ p11s <- pmax(p11s, epsilon )
+ p11s <- ifelse(p11s==1,0.9999999,p11s)  
  p10s <- p1s - p11s 
  p00s <- (1 - p2s) - ( p1s - p11s )
  p01s <- p2s - p11s
 
-
+   est.RHOb <- ifelse(est.RHOb ==  Inf,  8.218407e+307, est.RHOb) 
+   est.RHOb <- ifelse(est.RHOb == -Inf, -8.218407e+307, est.RHOb)  
 
 ORs <- (p00s*p11s)/(p01s*p10s)
+
+ORs  <- ifelse(ORs  ==  Inf,  8.218407e+307, ORs ) 
+ORs  <- ifelse(ORs  == -Inf, -8.218407e+307, ORs ) 
+
+
 GMs <- colMeans((ORs - 1)/(ORs + 1))
 ORs <- colMeans(ORs)
 
@@ -261,6 +270,38 @@ if(object$VC$gc.l == TRUE) gc()
  CR2 <- mean(as.numeric(object$y2[good]==P2.b))*100
 
  }
+ 
+ 
+ 
+ if(cplot == TRUE){
+ 
+ if(object$BivD %in% c("N", "T") ) par1 <- object$rho else par1 <- object$theta
+ if(object$BivD=="T") par2 <- object$nu else par2 <- 0
+ 
+ 
+ if(object$BivD=="N")    cop <- bquote(paste("Gaussian (",hat(rho)," = ",.(round(par1,2)),")",sep=""))
+ if(object$BivD=="F")    cop <- bquote(paste("Frank (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
+ if(object$BivD=="T")    cop <- bquote(paste("Student-t (",hat(rho)," = ",.(round(par1,2)),", ",nu," = ",.(par2),")",sep=""))
+ if(object$BivD=="C0")   cop <- bquote(paste("Clayton (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
+ if(object$BivD=="C90")  cop <- bquote(paste("Rotated Clayton - 90 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
+ if(object$BivD=="C180") cop <- bquote(paste("Survival Clayton (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
+ if(object$BivD=="C270") cop <- bquote(paste("Rotated Clayton - 270 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep="")) 
+ if(object$BivD=="J0")   cop <- bquote(paste("Joe (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
+ if(object$BivD=="J90")  cop <- bquote(paste("Rotated Joe - 90 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
+ if(object$BivD=="J180") cop <- bquote(paste("Survival Joe (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
+ if(object$BivD=="J270") cop <- bquote(paste("Rotated Joe - 270 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep="")) 
+ if(object$BivD=="G0")   cop <- bquote(paste("Gumbel (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
+ if(object$BivD=="G90")  cop <- bquote(paste("Rotated Gumbel - 90 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
+ if(object$BivD=="G180") cop <- bquote(paste("Survival Gumbel (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
+ if(object$BivD=="G270") cop <- bquote(paste("Rotated Gumbel - 270 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep="")) 
+ 
+ 
+ BiCopMetaContour(object$fit$p1, object$fit$p2, family = object$nC, par = par1, par2 = par2, margins = "norm", main = cop, 
+                  ylab = "Margin 2", xlab = "Margin 1", ...)
+ 
+ }
+ 
+ 
 
   
   res <- list(tableP1=table[[1]], tableP2=table[[2]], 

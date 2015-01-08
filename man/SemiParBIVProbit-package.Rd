@@ -4,29 +4,42 @@
 
 \title{Semiparametric Bivariate Probit Modelling}
 
-\description{\code{SemiParBIVProbit} provides a function for bivariate probit modelling with semiparametric 
-predictors, including linear and nonlinear effects. Several bivariate copula distributions and asymmetric link 
-functions are also supported.
+\description{\code{SemiParBIVProbit} provides a function for fitting bivariate probit models with semiparametric 
+predictors, including linear and nonlinear effects. Several bivariate copula distributions are supported. Smoothness selection is
+achieved automatically and interval calculations are based on a Bayesian approach.
+
+
 }
 
-\details{\code{SemiParBIVProbit} provides a function for flexible bivariate probit modelling, in the presence of 
+\details{\code{SemiParBIVProbit} provides a function for fitting flexible bivariate probit models, in the presence of 
 correlated error equations, endogeneity, non-random sample selection or partial observability. The underlying representation and 
-estimation of the model is based on a penalized regression spline approach, with automatic smoothness selection. Several
-bivariate copula distributions and asymmetric links are also available. The 
-numerical routine carries out function minimization using a trust region Newton algorithm from the package \code{trust} in combination with
+estimation of the model is based on a penalized likelihood-based regression spline approach, with automatic smoothness selection. Several
+bivariate copula distributions are available. The 
+numerical routine carries out function minimization using a trust region algorithm from the package \code{trust} in combination with
 an adaptation of a low level smoothness estimation fitting procedure from the package \code{mgcv}. 
  
 \code{\link{SemiParBIVProbit}} supports the use of many smoothers as extracted from \code{mgcv}. Estimation is by penalized 
 maximum likelihood with automatic smoothness estimation achieved 
-by using the approximate Un-Biased Risk Estimator (UBRE) which can also be viewed as an approximate AIC. 
+by using the approximate Un-Biased Risk Estimator (UBRE), which can also be viewed as an approximate AIC. 
 
-Confidence intervals for smooth components are derived using a Bayesian approach. Approximate p-values for testing 
+Confidence intervals for smooth components and nonlinear functions of the model
+parameters are derived using a Bayesian approach. Approximate p-values for testing 
 individual smooth terms for equality to the zero function are also provided. Functions \code{\link{plot.SemiParBIVProbit}} and 
-\code{\link{summary.SemiParBIVProbit}} extract such information from a fitted \code{\link{SemiParBIVProbitObject}}. Model/variable 
+\code{\link{summary.SemiParBIVProbit}} extract such information from a fitted \code{\link{SemiParBIVProbit}} object. Model/variable 
 selection is also possible via the use of shrinakge smoothers or information criteria. 
 
 Tools for testing the hypothesis of uncorrelated error equations/absence of unobserved 
-confounding/absence of endogeneity/absence of non-random sample selection are also available. 
+confounding/absence of endogeneity/absence of non-random sample selection are available (see \code{\link{gt.bpm}}
+and \code{\link{LM.bpm}}). 
+
+For recursive bivariate and sample selection models \code{\link{AT}} and \code{\link{est.prev}} calculate 
+the average effect of an endogenous covariate and corrected prevalence. \code{\link{mb}} provides the
+nonparametric (worst-case) Manski's bound which is useful to check whether the average effect from a recursive model 
+is included within the possibilites of the bound.
+
+Models with asymmetric link functions are also implemented. However, in our experience, this approach
+is not likely to lead to significant improvements as compared to using probit links.
+
 
 }
 
@@ -55,7 +68,7 @@ Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence o
 
 Marra G., Radice R. and Filippou P. (submitted), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity.
 
-McGovern M.E., Barnighausen T., Marra G. and Radice R. (forthcoming), On the Assumption of Joint Normality in Selection Models: A Copula Based Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}.
+McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Based Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}.
 
 Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes.
 
@@ -63,15 +76,13 @@ Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models f
 }
 
 
-\seealso{
-\code{\link{SemiParBIVProbit}}
-}
+\seealso{  \code{\link{SemiParBIVProbit}}  }
 
 
-\keyword{asymmetric link function} 
 \keyword{endogeneity} 
 \keyword{package}
 \keyword{non-random sample selection} 
+\keyword{partial observability} 
 \keyword{semiparametric bivariate probit modelling} 
 \keyword{smooth} 
 \keyword{regression}

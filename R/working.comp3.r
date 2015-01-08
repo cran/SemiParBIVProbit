@@ -21,7 +21,7 @@ working.comp3 <- function(x, VC = VC, myf = myf,  extra.l =  extra.l){
   L.W <- unlist( apply(be1be2, 1, myf ) , recursive = FALSE) 
 
   W.invsr <- c.W <- list()
-  nz <- 0.000000001
+  nz <- 0.0000001
 
     for(i in 1:n){
 
@@ -29,7 +29,7 @@ working.comp3 <- function(x, VC = VC, myf = myf,  extra.l =  extra.l){
       
      if(VC$Model=="BSS" && s.ch==8){ 
       
-                          if(L.W[[i]][1,1] < .Machine$double.eps) L.W[[i]][1,1] <- nz
+                          if(L.W[[i]][1,1] < sqrt(.Machine$double.eps)) L.W[[i]][1,1] <- nz
                           c.W[[i]] <- W.invsr[[i]] <- matrix(0,3,3)
                           c.W[[i]][1,1] <- sqrt(L.W[[i]][1,1]) 
                           W.invsr[[i]][1,1] <- 1/c.W[[i]][1,1]
@@ -37,7 +37,7 @@ working.comp3 <- function(x, VC = VC, myf = myf,  extra.l =  extra.l){
                                    }else{
                                    
       W.eig <- eigen(L.W[[i]], symmetric=TRUE)                               
-      if(min(W.eig$values) < .Machine$double.eps) { pep <- which(W.eig$values < .Machine$double.eps)
+      if(min(W.eig$values) < sqrt(.Machine$double.eps)) { pep <- which(W.eig$values < sqrt(.Machine$double.eps))
       	                                            W.eig$values[pep] <- nz  
       	                                           }                                   
                                         }

@@ -1,7 +1,7 @@
 \name{adjCov}
 \alias{adjCov}
 
-\title{Adjustment for the covariance matrix of the parameter estimates from a fitted SemiParBIVProbit model}
+\title{Adjustment for the covariance matrix from a fitted SemiParBIVProbit model}
 
 \description{ 
 

@@ -16,7 +16,7 @@ ass.ps2 <- ass.p2 <- NULL
 ind <- list()
 
 good <- x$fit$good
-epsilon <- .Machine$double.eps*10^6
+epsilon <- sqrt(.Machine$double.eps)
 
 
 
@@ -223,14 +223,14 @@ if(x$BivD %in% c("N", "T") ) {ass.p <- x$rho; ass.pst <- coef(x)["athrho"] } els
 
 
 
-p.int1 <- pmax(p.int1, 1000*.Machine$double.eps ) 
-p.int1 <- ifelse(p.int1==1, 0.9999999999999999, p.int1)
-p.int0 <- pmax(p.int0, 1000*.Machine$double.eps )
-p.int0 <- ifelse(p.int0==1,0.9999999999999999,p.int0)
+p.int1 <- pmax(p.int1, epsilon ) 
+p.int1 <- ifelse(p.int1==1, 0.9999999, p.int1)
+p.int0 <- pmax(p.int0, epsilon )
+p.int0 <- ifelse(p.int0==1, 0.9999999,p.int0)
 
 
-p.etn  <- pmax(p.etn, 1000*.Machine$double.eps )
-p.etn <- ifelse(p.etn==1,0.9999999999999999,p.etn)
+p.etn  <- pmax(p.etn, epsilon )
+p.etn <- ifelse(p.etn==1, 0.9999999,p.etn)
 
 
 
@@ -238,14 +238,14 @@ p.etn <- ifelse(p.etn==1,0.9999999999999999,p.etn)
                      pn.int1 <- qnorm(p.int1)
                      pn.int0 <- qnorm(p.int0)
                      pn.etn  <- qnorm(p.etn) 
-                     C.11  <- pmax(pbinorm(pn.int1,pn.etn,cov12=ass.p), 1000*.Machine$double.eps )
-                     C.10  <- p.int0 - pmax(pbinorm(pn.int0,pn.etn,cov12=ass.p), 1000*.Machine$double.eps )
+                     C.11  <- pmax(pbinorm(pn.int1,pn.etn,cov12=ass.p), epsilon )
+                     C.10  <- p.int0 - pmax(pbinorm(pn.int0,pn.etn,cov12=ass.p), epsilon )
 
                     }else{ 
                     
                      if(x$BivD=="T") pa2 <- x$nu else pa2 <- 0
-                     C.11  <- pmax( BiCopCDF(p.int1,p.etn, x$nC, par=ass.p,par2=pa2) , 1000*.Machine$double.eps )
-                     C.10  <- p.int0 - pmax( BiCopCDF(p.int0,p.etn, x$nC, par=ass.p, par2=pa2) , 1000*.Machine$double.eps )
+                     C.11  <- pmax( BiCopCDF(p.int1,p.etn, x$nC, par=ass.p,par2=pa2) , epsilon )
+                     C.10  <- p.int0 - pmax( BiCopCDF(p.int0,p.etn, x$nC, par=ass.p, par2=pa2) , epsilon )
                          }           
 
 
@@ -263,10 +263,10 @@ if(eq==2) ngam <- x$gam2
 eti1 <- d1%*%coef(ngam) 
 eti0 <- d0%*%coef(ngam) 
 
-p.int1 <- pmax(pnorm(eti1), 1000*.Machine$double.eps ) 
-p.int1 <- ifelse(p.int1==1,0.9999999999999999,p.int1) 
-p.int0 <- pmax(pnorm(eti0), 1000*.Machine$double.eps ) 
-p.int0 <- ifelse(p.int0==1,0.9999999999999999,p.int0) 
+p.int1 <- pmax(pnorm(eti1), epsilon ) 
+p.int1 <- ifelse(p.int1==1,0.9999999,p.int1) 
+p.int0 <- pmax(pnorm(eti0), epsilon ) 
+p.int0 <- ifelse(p.int0==1,0.9999999,p.int0) 
 
 est.AT <- mean(  (p.int1 - p.int0)[ind.excl] , na.rm = TRUE    ) 
 
@@ -310,7 +310,7 @@ if(delta==TRUE){
 
 
    var.eig <- eigen(var, symmetric=TRUE)                    
-   if(min(var.eig$values) < .Machine$double.eps) var.eig$values[which(var.eig$values < .Machine$double.eps)] <- 0.000000001
+   if(min(var.eig$values) < epsilon) var.eig$values[which(var.eig$values < epsilon)] <- 0.0000001
    var <- var.eig$vectors%*%tcrossprod(diag(1/var.eig$values),var.eig$vectors)  
 
    delta.AT <- sqrt( t(dATT)%*%var%*%dATT )
@@ -339,10 +339,10 @@ if(naive == TRUE){
 
 bs <- rmvnorm(n.sim, mean = coef(ngam), sigma=ngam$Vp, method=s.meth) 
 
- peti1s <- pmax(pnorm(d1%*%t(bs)), 1000*.Machine$double.eps )  
- peti1s <- ifelse(peti1s==1,0.9999999999999999,peti1s)  
- peti0s <- pmax(pnorm(d0%*%t(bs)), 1000*.Machine$double.eps ) 
- peti0s <- ifelse(peti0s==1,0.9999999999999999,peti0s)  
+ peti1s <- pmax(pnorm(d1%*%t(bs)), epsilon )  
+ peti1s <- ifelse(peti1s==1,0.9999999,peti1s)  
+ peti0s <- pmax(pnorm(d0%*%t(bs)), epsilon ) 
+ peti0s <- ifelse(peti0s==1,0.9999999,peti0s)  
 
 
  est.ATb <- colMeans(  (peti1s - peti0s)[ind.excl,] , na.rm = TRUE    )
@@ -438,20 +438,20 @@ if(x$BivD!="N"){
    if(x$BivD %in% c("G0", "G180") )  ass.ps <-    1 + exp(bs[,p.rho])
    if(x$BivD %in% c("G90","G270") )  ass.ps <- -( 1 + exp(bs[,p.rho]) )
    
-   ass.ps <- ifelse(ass.ps=="Inf" ,  2.688117e+43, ass.ps )
-   ass.ps <- ifelse(ass.ps=="-Inf", -2.688117e+43, ass.ps )
+   ass.ps <- ifelse(ass.ps == Inf ,  8.218407e+307, ass.ps )
+   ass.ps <- ifelse(ass.ps == -Inf, -8.218407e+307, ass.ps )
 
 }
 
 if(x$BivD=="T") asp2 <- rep(x$nu,n.sim) else asp2 <- rep(0,n.sim) 
 
 
-p.int1s <- pmax(p.int1s, 1000*.Machine$double.eps )
-p.int1s <- ifelse(p.int1s==1,0.9999999999999999,p.int1s)   
-p.int0s <- pmax(p.int0s, 1000*.Machine$double.eps )
-p.int0s <- ifelse(p.int0s==1,0.9999999999999999,p.int0s) 
-p.etns  <- pmax(p.etns, 1000*.Machine$double.eps )
-p.etns  <- ifelse(p.etns==1,0.9999999999999999,p.etns) 
+p.int1s <- pmax(p.int1s, epsilon )
+p.int1s <- ifelse(p.int1s==1,0.9999999,p.int1s)   
+p.int0s <- pmax(p.int0s, epsilon )
+p.int0s <- ifelse(p.int0s==1,0.9999999,p.int0s) 
+p.etns  <- pmax(p.etns, epsilon )
+p.etns  <- ifelse(p.etns==1,0.9999999,p.etns) 
 
 
 
@@ -461,12 +461,12 @@ for(i in 1:n.sim){
                      pn.int0s <- qnorm(p.int0s[,i])
                      pn.etns  <- qnorm(p.etns[,i]) 
 
-est.ATb[i] <- mean(   (pmax(pbinorm(pn.int1s,pn.etns,cov12=tanh(bs[i,p.rho])), 1000*.Machine$double.eps)/p.etns[,i] - (p.int0s[,i] - pmax(pbinorm(pn.int0s,pn.etns,cov12=tanh(bs[i,p.rho])), 1000*.Machine$double.eps))/(1-p.etns[,i]))[ind.excl],na.rm = TRUE   )
+est.ATb[i] <- mean(   (pmax(pbinorm(pn.int1s,pn.etns,cov12=tanh(bs[i,p.rho])), epsilon)/p.etns[,i] - (p.int0s[,i] - pmax(pbinorm(pn.int0s,pn.etns,cov12=tanh(bs[i,p.rho])), epsilon))/(1-p.etns[,i]))[ind.excl],na.rm = TRUE   )
 
                 }else{
 
- C.11 <- pmax( BiCopCDF(p.int1s[,i],p.etns[,i], x$nC, par=ass.ps[i],par2=asp2[i]) , 1000*.Machine$double.eps )
- C.10 <- p.int0s[,i] - pmax( BiCopCDF(p.int0s[,i],p.etns[,i], x$nC, par=ass.ps[i],par2=asp2[i]) , 1000*.Machine$double.eps )
+ C.11 <- pmax( BiCopCDF(p.int1s[,i],p.etns[,i], x$nC, par=ass.ps[i],par2=asp2[i]) , epsilon )
+ C.10 <- p.int0s[,i] - pmax( BiCopCDF(p.int0s[,i],p.etns[,i], x$nC, par=ass.ps[i],par2=asp2[i]) , epsilon )
 
  est.ATb[i] <- mean(   (C.11/p.etns[,i] - C.10/(1-p.etns[,i]))[ind.excl],na.rm = TRUE   )
                      }
@@ -482,8 +482,7 @@ est.ATb[i] <- mean(   (pmax(pbinorm(pn.int1s,pn.etns,cov12=tanh(bs[i,p.rho])), 1
 }
 
 
-            
-
+           
 if(delta==TRUE){esd.AT <- delta.AT*qnorm(prob.lev/2,lower.tail = FALSE) 
                    CIs <- c(est.AT - esd.AT, est.AT + esd.AT)
                }else CIs <- as.numeric(quantile(est.ATb,c(prob.lev/2,1-prob.lev/2),na.rm = TRUE))

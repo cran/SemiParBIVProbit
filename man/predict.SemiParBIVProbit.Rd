@@ -40,7 +40,9 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \section{WARNING}{ 
 
-With asymmetric link functions this function is currently not suitable when predicting on the response scale.
+
+This function is currently not suitable when plotting on the response scale if asymmetric links are employed.
+
 
 } 
 

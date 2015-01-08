@@ -5,9 +5,8 @@
 
 \description{ 
 \code{SemiParBIVProbit} can be used to fit bivariate probit models where the linear predictors can be flexibly specified using 
-parametric and regression spline components. Several 
-bivariate copula distributions and asymmetric link functions are supported. During the model fitting process, the possible presence of 
-correlated error equations, endogeneity, non-random sample selection or partial observability is accounted for. Regression 
+parametric and regression spline components. Several bivariate copula distributions are supported. During the model fitting process, the 
+possible presence of correlated error equations, endogeneity, non-random sample selection or partial observability is accounted for. Regression 
 spline bases are extracted from the package \code{mgcv}. Multi-dimensional smooths are available 
 via the use of penalized thin plate regression splines (isotropic).
 
@@ -20,9 +19,9 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
                  start.v = NULL, Model = "B", method = "trwlF", 
                  BivD = "N", nu = 3, fp = FALSE, PL = "P", eqPL = "both", 
                  valPL = c(0,0), fitPL = "pLiksp", spPL = c(0.01,0.01), 
-                 hess = TRUE, gamma = 1, pPen1 = NULL, pPen2 = NULL, 
+                 hess = TRUE, infl.fac = 1, pPen1 = NULL, pPen2 = NULL, 
                  rinit = 1, rmax = 100, iterlimsp = 50, pr.tolsp = 1e-6,
-                 gc.l = FALSE, awlm = FALSE, extra.regI = FALSE)
+                 gc.l = FALSE, awlm = FALSE, parscale, extra.regI = "t")
 }
 
 
@@ -46,7 +45,7 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
                can be provided here.} 
 
 \item{Model}{It indicates the type of model to be used in the analysis. Possible values are "B" (bivariate model), 
-             "BSS" (bivariate model with sample selection) and "BPO" (bivariate model with partial observability).}
+             "BSS" (bivariate model with non-random sample selection) and "BPO" (bivariate model with partial observability).}
 
 \item{method}{Estimation method used. It can be either "trwl" or "trwlF". The latter option is much faster and more stable when smoothing 
               parameter estimation is employed, and is the default.}
@@ -54,30 +53,34 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
 \item{BivD}{Type of bivariate error distribution employed. Possible choices are "N", "C0", "C90", "C180", "C270", "J0", "J90", "J180", "J270", 
             "G0", "G90", "G180", "G270", "F", "T" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
-             Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Student-t.
-             Note that, for instace, C90, J270 and G270 are very similar.} 
+             Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, and Student-t (with fixed degrees of 
+             freedom \code{nu}). Note that for empirical applications options N, C (and all rotated versions), F and T may suffice.
+             This is becuase the Clayton, Joe and Gumbel copulas are very similar; for instace, C90, J270 and G270 are very close.
+             Nevertheless, there might be situations in which the use of Joe or Gumbel may result in more stable computation as
+             compared to Clayton.} 
 
 \item{nu}{Degrees of freedom for Student-t.}
 
-\item{fp}{If \code{TRUE}, then a fully parametric model with unpenalised regression splines if fitted. See the example below.}  
+\item{fp}{If \code{TRUE} then a fully parametric model with unpenalised regression splines if fitted. See the example below.}  
 
-\item{PL}{Link function to be employed. Possible choices are "P" (classic probit), "PP" (power probit), "RPP" (reciprocal power probit) and "SN" (skew normal).}
+\item{PL}{Link function to be employed. Possible choices are "P" (classic probit - default option), "PP" (power probit), 
+          "RPP" (reciprocal power probit) and "SN" (skew normal).}
 
 \item{eqPL}{Equation(s) on which the asymmetric link function approach should be applied. Possible choices are "both", "first" and "second".}
 
 \item{valPL}{Initial values for link function shape parameters when an asymmetric link fucntion approach is employed.}
 
 \item{fitPL}{Fitting approach for shape parameters of the asymmetric link functions employed. Possible choices 
-             are "fixed", "unpLik", "pLik" and "pLiksp" which stand for fixed shape parameters, classic likelihood optimization, penalized likelihood with fixed
-             smoothing parameters and penalized likelihood with automatic smoothing parameter estimation.}
+             are "fixed", "unpLik", "pLik" and "pLiksp" which stand for fixed shape parameters, classic likelihood optimization, penalized 
+             likelihood with fixed smoothing parameters and penalized likelihood with automatic smoothing parameter estimation.}
              
 \item{spPL}{Values for the smoothing parameters of the ridge penalties associated with the shape parameteres of the asymmetric 
             link functions.}             
 
-\item{hess}{If \code{TRUE} then the observed (rather than expected) information matrix is employed.}
+\item{hess}{If \code{FALSE} then the expected/Fisher (rather than observed) information matrix is employed.}
 
-\item{gamma}{Inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
-             this parameter to a value greater than 1. Typically \code{gamma = 1.4} achieves this.}
+\item{infl.fac}{Inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
+             this parameter to a value greater than 1.}
 
 \item{pPen1, pPen2}{Optional list specifying any penalties to be applied to the parametric model terms of equations 1 and 2.}
 
@@ -87,7 +90,8 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
 \item{rmax}{Maximum allowed trust region radius. This may be set very large. If set small, the algorithm traces a steepest 
             descent path.} 
 
-\item{iterlimsp}{A positive integer specifying the maximum number of loops to be performed before the smoothing parameter estimation step is terminated.} 
+\item{iterlimsp}{A positive integer specifying the maximum number of loops to be performed before the smoothing parameter estimation 
+                 step is terminated.} 
 
 \item{pr.tolsp}{Tolerance to use in judging convergence of the algorithm when automatic smoothing parameter estimation is used.} 
 
@@ -96,22 +100,27 @@ decides to. This keeps the memory footprint down but it will slow down the routi
 
 \item{awlm}{If \code{TRUE} then the association parameter of the two equations is used in the construction of the 
             working linear model needed for smoothing parameter estimation. This option makes sense only when \code{method = "trwl"}.}
-    
-\item{extra.regI}{If \code{TRUE} then extra regularization is applied to the information matrix. This is based on pivoted Choleski.}    
-        
+      
+\item{parscale}{The algorithm will operate as if optimizing objfun(x / parscale, ...). If missing then no rescaling is done. See the 
+documentation of \code{trust} for more details.}    
+
+\item{extra.regI}{If "t" then regularization as from \code{trust} is applied to the information matrix if needed. 
+                  If different from "t" then extra regularization is applied via the options "pC" (pivoted Choleski - this
+                  only makes sense when \code{hess = FALSE}) and "sED" (symmetric eigen-decomposition).}  
+     
                       
 }
 
 
 \details{
 
-The bivariate models considered in this package have probit or asymmetric links for the two model equations, and model the association
+The bivariate models considered in this package have probit links for the two model equations, and model the association
 between the responses through the correlation parameter \eqn{\rho}{\rho} of a standardised bivariate normal distribution, or that 
 of a bivariate copula distribution, \eqn{\theta}{\theta}. The linear predictors are flexibly specified using 
 parametric components and smooth functions of covariates. Replacing the smooth components with their regression spline expressions 
 yields a fully parametric bivariate probit model. In principle, classic 
-maximum likelihood estimation can be employed. However, to avoid overfitting, penalized likelihood maximization has 
-to be employed instead. Here the use of 
+maximum likelihood estimation can be employed. However, to avoid overfitting, penalized likelihood maximization is 
+employed instead. Here, the use of 
 penalty matrices allows for the suppression of that part of smooth term complexity which has no support 
 from the data. The trade-off between smoothness 
 and fitness is controlled by smoothing parameters associated with the penalty matrices. Smoothing parameters are chosen to 
@@ -141,6 +150,8 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
+Key References:
+
 Gu C. (1992), Cross validating non-Gaussian data. \emph{Journal of Computational and Graphical Statistics}, 1(2), 169-179.
 
 Marra G. (2013), On P-values for Semiparametric Bivariate Probit Models. \emph{Statistical Methodology}, 10(1), 23-28.
@@ -156,7 +167,7 @@ Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence o
 
 Marra G., Radice R. and Filippou P. (submitted), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity.
 
-McGovern M.E., Barnighausen T., Marra G. and Radice R. (forthcoming), On the Assumption of Joint Normality in Selection Models: A Copula Based Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}.
+McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Based Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}.
 
 Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes.
 
@@ -173,9 +184,18 @@ Wood S.N. (2004), Stable and efficient multiple smoothing parameter estimation f
 
 \section{WARNINGS}{
 
-Convergence failure may occur when the number of observations is low. Convergence failure may also mean that 
-an infinite cycling between the two steps detailed above occurs. In this case, 
-the smoothing parameters are set to the values obtained from the non-converged algorithm. 
+In our experience, convergence failure may occur, for instance, when the number of observations is low, there are important mistakes 
+in the model specification (i.e., using C90 when the model equations are positively associated), or there are many smooth components
+in the model as compared to the number of observations. Convergence failure may also mean that 
+an infinite cycling between steps (i) and (ii) occurs. In this case, the smoothing parameters are set to the values 
+obtained from the non-converged algorithm (\code{\link{sem.checks}} will give a warning). In such cases, we 
+recommend re-specifying the model, using some extra regularisation (see \code{extra.regI}) and/or using some
+rescaling (see \code{parscale}).
+
+The use of asymmetric links is not likely to lead to significant improvements as compared to using probit links. We recommend
+using this option at the end of the empirical analysis as a sensitivity analysis tool, and not during
+the model building process. Also, the theoretical and numerical complexity introduced by asymmetric links means that
+convergence failures are more likely to occur and that data requirements are typically high.
 
 
 } 
@@ -237,7 +257,7 @@ out  <- SemiParBIVProbit(list(y1 ~ x1 + s(x2, bs = "tp", k = 10, m = 2) + s(x3),
                               y2 ~ x1 + s(x2) + s(x3)),  
                          data = dataSim)
 sem.checks(out)
-summary(out)
+summary(out, cplot = TRUE)
 AIC(out)
 
 
@@ -257,7 +277,6 @@ plot(out, eq = 2, select = 2, scale = 0); lines(x3, f3.x3, col = "red")
 #
 ## same plots but CIs 'with intercept' 
 
-par(mfrow=c(2,2),mar=c(4.5,4.5,2,2))
 plot(out, eq = 1, select = 1, seWithMean = TRUE, scale = 0); lines(x2, f1.x2, col = "red")
 plot(out, eq = 1, select = 2, seWithMean = TRUE, scale = 0); lines(x3, f3.x3, col = "red")
 plot(out, eq = 2, select = 1, seWithMean = TRUE, scale = 0); lines(x2, f2.x2, col = "red")
@@ -272,11 +291,11 @@ outSS <- SemiParBIVProbit(list(y1 ~ x1 + s(x2, bs = "cs") + s(x3, bs = "cs"),
                           data = dataSim)
 sem.checks(outSS)                          
 
-par(mfrow = c(2,2), mar = c(4.5,4.5,2,2))
 plot(outSS, eq = 1, select = 1, scale = 0)
 plot(outSS, eq = 1, select = 2, ylim = c(-0.1,0.1))
 plot(outSS, eq = 2, select = 1, scale = 0)
 plot(outSS, eq = 2, select = 2, ylim = c(-0.1,0.1))
+graphics.off() 
 
 #
 #
@@ -340,9 +359,9 @@ summary(out)
 gt.bpm(out)
 
 #
-## average treatment effect with CIs
+## average treatment effect with CI
 
-mb(y1, y2)
+mb(y1, y2, Model = "B")
 AT(out, eq = 2, nm.bin = "y1") 
 AT(out, eq = 2, nm.bin = "y1", naive = TRUE) 
 
@@ -362,7 +381,7 @@ outJ <- SemiParBIVProbit(list(y1 ~ x1 + s(x2),
                               y2 ~ y1 + s(x2)), 
                          data = dataSim, BivD = "J0")
 sem.checks(outJ)
-summary(outJ)
+summary(outJ, cplot = TRUE)
 AT(outJ, eq = 2, nm.bin = "y1") 
 
 
@@ -384,7 +403,7 @@ summary(outFP)
 
 out <- SemiParBIVProbit(list(y1 ~ x1 + s(x2), 
                              y2 ~ y1 + s(x2)), 
-                        data = dataSim, PL = "SN")
+                        data = dataSim, PL = "SN", hess = FALSE)
 sem.checks(out)                        
 summary(out) 
 # same output as model with probit links
@@ -442,6 +461,7 @@ summary(out$gam2)
 
 ## corrected predicted probability that 'yo' is equal to 1
 
+mb(ys, yo, Model = "BSS")
 est.prev(out)
 est.prev(out, naive = TRUE)
 
@@ -452,7 +472,6 @@ est.prev(out, naive = TRUE)
 x1.s <- sort(x1[dataSim$ys>0])
 f21.x1 <- f21(x1.s)[order(x1.s)]-mean(f21(x1.s))
 
-x11()
 plot(out, eq = 2, ylim = c(-1.65,0.95)); lines(x1.s, f21.x1, col="red")
 par(new = TRUE)
 plot(out$gam2, se = FALSE, col = "blue", ylim = c(-1.65,0.95), ylab = "", rug = FALSE)
@@ -465,7 +484,7 @@ outC <- SemiParBIVProbit(list(ys ~ bi + s(x1) + s(x2),
                               yo ~ bi + s(x1)), 
                          data = dataSim, Model = "BSS", BivD = "C0")
 sem.checks(outC)
-summary(outC)
+summary(outC, cplot = TRUE)
 est.prev(outC)
 
 #
@@ -527,7 +546,7 @@ out  <- SemiParBIVProbit(list(y ~ x1 + s(x2),
                          data = dataSim, Model = "BPO")
 
 sem.checks(out)
-summary(out)
+summary(out, cplot = TRUE)
 
 
 # plot estimated and true functions
@@ -544,6 +563,7 @@ plot(out, eq = 1, scale = 0); lines(x2, f1.x2, col = "red")
 \keyword{non-random sample selection}
 \keyword{semiparametric bivariate probit modelling} 
 \keyword{bivariate probit model} 
+\keyword{partial observability} 
 \keyword{endogeneity} 
 \keyword{smooth} 
 \keyword{regression spline}

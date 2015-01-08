@@ -1,7 +1,7 @@
 \name{adjCovSD}
 \alias{adjCovSD}
 
-\title{Adjustment for the covariance matrix of the parameter estimates from a SemiParBIVProbit model fitted to complex survey data.}
+\title{Adjustment for the covariance matrix from a SemiParBIVProbit model fitted to complex survey data.}
 
 \description{ 
 

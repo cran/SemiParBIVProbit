@@ -3,7 +3,7 @@
 
 \title{Print an est.prev object}
 
-\description{The print method for a \code{est.prev} object.}
+\description{The print method for an \code{est.prev} object.}
 
 \usage{
 
@@ -17,7 +17,7 @@
 \arguments{ 
 
 
-\item{x}{A \code{est.prev} object produced by \code{est.prev()}.}
+\item{x}{\code{est.prev} object produced by \code{est.prev()}.}
 
 \item{...}{Other arguments.}
 

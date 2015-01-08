@@ -4,15 +4,14 @@
 \title{Lagrange Multiplier Test (Score Test)}
 
 \description{ 
-Before fitting a bivariate probit model, \code{LM.bpm} can be used to test the hypothesis of absence of endogeneity 
-or non-random sample selection or correlated model equations/errors.}
+Before fitting a bivariate probit model, \code{LM.bpm} can be used to test the hypothesis of absence of endogeneity, correlated model equations/errors 
+or non-random sample selection.}
 
 
 \usage{
 
-LM.bpm(formula, data = list(), weights = NULL, subset = NULL, 
-       Model = "B", hess = TRUE, gamma = 1, 
-       pPen1 = NULL, pPen2 = NULL)
+LM.bpm(formula, data = list(), weights = NULL, subset = NULL, Model = "B", 
+       hess = TRUE, infl.fac = 1, pPen1 = NULL, pPen2 = NULL)
 
 }
 
@@ -35,8 +34,8 @@ LM.bpm(formula, data = list(), weights = NULL, subset = NULL,
 
 \item{hess}{If \code{FALSE} then the expected (rather than observed) information matrix is employed.}
 
-\item{gamma}{Inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
-             this parameter to a value greater than 1. Typically \code{gamma = 1.4} achieves this.}
+\item{infl.fac}{Inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
+             this parameter to a value greater than 1.}
 
 \item{pPen1, pPen2}{Optional list specifying any penalties to be applied to the parametric model terms of equations 1 and 2.}
 
@@ -45,12 +44,12 @@ LM.bpm(formula, data = list(), weights = NULL, subset = NULL,
 
 
 \details{
+
 This Lagrange multiplier test (also known as score test) is used here for testing the null 
-hypothesis \eqn{\rho}{\rho=0} (i.e. no endogeneity or non-random sample selection or no correlated model equations/errors, depending on the model being fitted). Its main advantage is that it does 
+hypothesis that \eqn{\rho}{\rho} is equal to 0 (i.e. no endogeneity, non-random sample selection or correlated model equations/errors, depending 
+on  the model being fitted). Its main advantage is that it does 
 not require an estimate of the model parameter vector under the alternative hypothesis. Asymptotically, it takes a Chi-squared distribution 
 with one degree of freedom. Full details can be found in Marra et al. (2014) and Marra et al. (submitted).
-
-This test only valid for bivariate models with probit links and normal errors.
 
 
 }
@@ -58,9 +57,17 @@ This test only valid for bivariate models with probit links and normal errors.
 
 \value{
 
-It returns a numeric p-value corresponding to the null hypothesis \eqn{\rho}{\rho=0}.
+It returns a numeric p-value corresponding to the null hypothesis that \eqn{\rho}{\rho} is equal to 0.
 
 }
+
+
+\section{WARNINGS}{
+
+This test's implementation is only valid for models with normal errors and probit links.
+
+} 
+
 
 
 
@@ -95,6 +102,7 @@ Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence o
 \keyword{score test} 
 \keyword{endogeneity}
 \keyword{non-random sample selection}
+\keyword{correlated model equations/errors}
 
 
 

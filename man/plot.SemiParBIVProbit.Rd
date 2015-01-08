@@ -32,11 +32,11 @@ This function is based on \code{plot.gam()} in \code{mgcv}. Please see the docum
 
 This function produces plot showing the smooth terms of a fitted semiparametric bivariate probit model. For plots 
 of 1-D smooths, the x axis of each plot is labelled using the name of the regressor, while the y axis is labelled as \code{s(regr, edf)} 
-where \code{regr} is the regressor name, and \code{edf} the estimated degrees of freedom of the smooth. As for 2-D smooths, perspective 
-plots are produced with the x-axes labelled with the first and second variable names and the y axis 
+where \code{regr} is the regressor name, and \code{edf} the effective degrees of freedom of the smooth. As for 2-D smooths, perspective 
+plots are produced with the x axes labelled with the first and second variable names and the y axis 
 is labelled as \code{s(var1, var2, edf)}, which indicates the variables of which the term is a function and the \code{edf} for the term. 
 
-If \code{seWithMean = TRUE}, then the confidence intervals include the uncertainty about the overall mean. That is, 
+If \code{seWithMean = TRUE} then the intervals include the uncertainty about the overall mean. That is, 
 although each smooth is shown centred, the confidence intervals are obtained as if every other term in the model was 
 constrained to have average 0 (average taken over the covariate values) except for the smooth being plotted. The theoretical arguments 
 and simulation study of Marra and Wood (2012) suggests that \code{seWithMean = TRUE} results in intervals with
@@ -71,7 +71,7 @@ Marra G. and Wood S.N. (2012), Coverage Properties of Confidence Intervals for G
 
 The function can not deal with smooths of more than 2 variables. 
 
-With asymmetric link functions this function is currently not suitable when plotting on the response scale.
+This function is currently not suitable when plotting on the response scale if asymmetric links are employed.
 
 } 
 

@@ -4,14 +4,15 @@
 \title{Average treatment effect of a binary endogenous variable}
 
 \description{ 
-\code{AT} can be used to calculate the sample average treatment effect of a binary endogenous predictor/treatment, with corresponding confidence intervals.}
+\code{AT} can be used to calculate the sample average treatment effect of a binary endogenous predictor/treatment, with corresponding 
+confidence/credible intervals.}
 
 
 
 \usage{
 
-AT(x, eq, nm.bin = "", E = TRUE, treat = TRUE, delta = FALSE, prob.lev = 0.05, 
-   s.meth = "svd", n.sim = 500, naive = FALSE)
+AT(x, eq, nm.bin = "", E = TRUE, treat = TRUE, delta = FALSE, 
+   prob.lev = 0.05, s.meth = "svd", n.sim = 500, naive = FALSE)
 
 }
 
@@ -23,15 +24,17 @@ AT(x, eq, nm.bin = "", E = TRUE, treat = TRUE, delta = FALSE, prob.lev = 0.05,
 
 \item{nm.bin}{Name of the binary endogenous variable.} 
 
-\item{E}{If \code{TRUE}, then \code{AT} calculates the sample ATE. If \code{FALSE}, then it calculates the sample AT for the treated individuals only.}  
+\item{E}{If \code{TRUE} then \code{AT} calculates the sample ATE. If \code{FALSE} then it calculates the sample AT 
+         for the treated individuals only.}  
 
-\item{treat}{If \code{TRUE}, then \code{AT} calculates the AT using the treated only. If \code{FALSE}, then it calculates the effect on 
+\item{treat}{If \code{TRUE} then \code{AT} calculates the AT using the treated only. If \code{FALSE} then it calculates the effect on 
 the control group. This only makes sense if used jointly with \code{E = FALSE}.}  
 
-\item{delta}{If \code{TRUE} then an approximate delta method is used for confidence interval calculation, otherwise Bayesian posterior simulation (the most reliable option, despite a bit slower) 
+\item{delta}{If \code{TRUE} then an approximate delta method is used for confidence interval calculation, otherwise Bayesian posterior 
+             simulation (the most reliable option, despite a bit slower) 
              is employed. Note that for models involving asymmetric link functions only posterior simulation is allowed for.}  
 
-\item{prob.lev}{Probability of the left and right tails of the posterior distribution used for interval calculations.} 
+\item{prob.lev}{Probability of the left and right tails of the AT distribution used for interval calculations.} 
 
 \item{s.meth}{Matrix decomposition used to determine the matrix root of the covariance 
               matrix. This is used when \code{delta = FALSE}. See the documentation of the \code{mvtnorm} package for further details.}
@@ -39,10 +42,9 @@ the control group. This only makes sense if used jointly with \code{E = FALSE}.}
 \item{n.sim}{Number of simulated coefficient vectors from the posterior distribution of the estimated model parameters. This is used 
              when \code{delta = FALSE}. It may be increased if more precision is required.} 
 
-\item{naive}{It indicates whether the AT is calculated from a univariate (probit) model. This option has been 
-             introduced to compare adjusted (for unobserved confounding) and unadjusted estimates. Note that the unadjusted estimates
-             control for observed confounding.} 
-
+\item{naive}{It indicates whether the AT is calculated from a univariate probit model. This option has been 
+             introduced to compare adjusted (for unobserved confounding) and unadjusted estimates. Note that, although
+             the unadjusted estimates do not account for unobserved confounding, they do control for observed confounding.} 
 
 }
 
@@ -50,10 +52,10 @@ the control group. This only makes sense if used jointly with \code{E = FALSE}.}
 \details{
 
 AT measures the sample average difference in outcomes under 
-treatment (the binary predictor/treatment assumes value 1) and under 
+treatment (the binary predictor or treatment assumes value 1) and under 
 control (the binary treatment assumes value 0). Note that this function is only suitable for the 
 calculation of the average treatment effect in recursive bivariate binary models. Posterior simulation 
-and delta method can be used to obtain `confidence' intervals. The former is typically more reliable at small
+and delta method can be used to obtain confidence/credible intervals. The former is typically more reliable at small
 sample sizes. See the references below for details. 
 
 }
@@ -63,8 +65,8 @@ sample sizes. See the references below for details.
 \value{
 
 \item{res}{It returns three values: lower confidence interval limit, estimated AT and upper confidence interval limit.}
-\item{sig.lev}{Significance level used.}
-\item{est.ATb}{When \code{delta = FALSE} it returns a vector containing simulated values of the average treatment effect. This 
+\item{prob.lev}{Probability level used.}
+\item{est.ATb}{If \code{delta = FALSE} then it returns a vector containing simulated values of the average treatment effect. This 
                is used to calculate intervals.}
 
 }
@@ -103,6 +105,7 @@ Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models f
 \keyword{ATE} 
 \keyword{average treatment effect} 
 \keyword{bayesian posterior simulation}
+\keyword{delta method}
 
 
 

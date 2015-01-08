@@ -1,5 +1,5 @@
 export(AT,est.prev,adjCov,adjCovSD,gt.bpm,
-bprobgHs,
+bprobgHs,mb,
 bprobgHsPL,
 bprobgHsPO,
 bprobgHsSS,
@@ -9,7 +9,7 @@ LM.bpm,
 VuongClarke.bcm,
 plot.SemiParBIVProbit,
 predict.SemiParBIVProbit,
-print.AT,print.est.prev,
+print.AT,print.est.prev,print.mb,
 print.SemiParBIVProbit,
 print.summary.SemiParBIVProbit,
 S.m,S.mPL,
@@ -19,7 +19,7 @@ SemiParBIVProbit.fit,
 SemiParBIVProbit,
 startSS,
 summary.SemiParBIVProbit,
-working.comp, mb)
+working.comp)
 
 importFrom(magic, adiag)
 importFrom(survey, svyrecvar, twophasevar, twophase2var, svyCprod)
@@ -27,7 +27,7 @@ importFrom(trust,trust)
 importFrom(mvtnorm,rmvnorm)
 importFrom(VGAM,pbinorm,dbinorm)
 importFrom(VineCopula, BiCopHfuncDeriv)
-importFrom(CDVine,BiCopCDF,BiCopPar2Tau,BiCopHfunc,BiCopPDF)
+importFrom(CDVine,BiCopCDF,BiCopHfunc,BiCopPDF,BiCopMetaContour)
 import(mgcv)
 importFrom(Matrix,bdiag,Matrix)
 importFrom(sn,qsn,psn,T.Owen)

@@ -13,7 +13,7 @@ if( PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0) ){
     qu.mag$exclu <- exclu
 }
 
-  fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax,
+  fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, parscale=VC$parscale,  
                 sp.xi1=sp["xi1"], sp.xi2=sp["xi2"], PL=PL, eqPL=eqPL, 
                 valPL=valPL, fitPL=fitPL, respvec=respvec, VC=VC,
                 sp=spE, qu.mag=qu.mag, 
@@ -101,14 +101,14 @@ if(PL == "P" && VC$awlm == TRUE){
                 	                      sp= sp, S = qu.mag$Ss,
                         	              off = qu.mag$off, rank = qu.mag$rank,
                                 	      gcv = FALSE,
-                                	      gamma = VC$gamma))
+                                	      gamma = VC$infl.fac))
                 		if(class(bs.mgfit)=="try-error") {conv.sp <- FALSE; break} 
                 	spE <- sp <- bs.mgfit$sp; iter.sp <- iter.sp + 1; names(sp) <- names(spo) 
                         if(PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0) ) spE <- sp[-exclu]
                            
              o.ests <- c(fit$argument)
 
-             fit <- try(trust(func.opt, o.ests, rinit=rinit, rmax=rmax, 
+             fit <- try(trust(func.opt, o.ests, rinit=rinit, rmax=rmax, parscale=VC$parscale,
                               sp.xi1=sp["xi1"], sp.xi2=sp["xi2"], 
                               PL=PL, eqPL=eqPL, valPL=valPL, fitPL=fitPL, 
                               respvec=respvec, VC=VC, 
@@ -116,7 +116,7 @@ if(PL == "P" && VC$awlm == TRUE){
                               blather=TRUE, iterlim=iterlim),silent=TRUE) 
 
               			if(class(fit)=="try-error"){ 
-              	 			fit  <- trust(func.opt, coefo, rinit=rinit, rmax=rmax, 
+              	 			fit  <- trust(func.opt, coefo, rinit=rinit, rmax=rmax, parscale=VC$parscale,
               	 			              sp.xi1=spo["xi1"], sp.xi2=spo["xi2"], 
               	 			              PL=PL, eqPL=eqPL, fitPL=fitPL,   
                                                       respvec=respvec, VC=VC,

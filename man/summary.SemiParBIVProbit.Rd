@@ -10,7 +10,7 @@ It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVPro
 \usage{
 
 \method{summary}{SemiParBIVProbit}(object, n.sim = 100, s.meth = "svd", prob.lev = 0.05, 
-                                   thrs1 = 0.5, thrs2 = 0.5, ...)
+                                   thrs1 = 0.5, thrs2 = 0.5, cplot = FALSE, ...)
 
                          
 }
@@ -21,16 +21,21 @@ It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVPro
 \item{object}{A fitted \code{SemiParBIVProbit} object as produced by \code{SemiParBIVProbit()}.}
 
 \item{n.sim}{The number of simulated coefficient vectors from the posterior distribution of the estimated model parameters. This is used 
-to calculate `confidence' intervals for the association parameter and other measures (e.g., gamma measure). It should be increased if
+to calculate intervals for the association parameter and other measures (e.g., gamma measure). It should be increased if
             more precision is required.} 
 
-\item{s.meth}{Matrix decomposition used to determine the matrix root of the covariance matrix. See the documentation of \code{mvtnorm} for further details.} 
+\item{s.meth}{Matrix decomposition used to determine the matrix root of the covariance matrix. See the documentation of \code{mvtnorm} for 
+              further details.} 
 
 \item{prob.lev}{Probability of the left and right tails of the posterior distribution used for interval calculations.} 
 
-\item{thrs1, thrs2}{Threshold to calculate the correct prediction ratios for the two binary responses. Default value is 0.5. It only works when \code{Method = "B"}.} 
-
-\item{...}{Other arguments.}
+\item{thrs1, thrs2}{Threshold to calculate the correct prediction ratios for the two binary responses. Default value is 0.5. It only 
+                    works when \code{Method = "B"}.} 
+                    
+\item{cplot}{If \code{TRUE} then a bivariate contour meta plot corresponding to the assumed bivariate model with estimated 
+             association parameter is produced. See documentation of \code{CDVine} for details.}    
+                         
+\item{...}{Other graphics parameters to pass on to plotting commands, when \code{cplot=TRUE}.}
 
 }
 
@@ -44,14 +49,13 @@ corresponding Bayesian covariance matrix, and let \eqn{{\bf V}_f^{r-}}{V_f^{r-}}
 the rank \eqn{r}{r} pseudoinverse of \eqn{{\bf V}_f}{V_f}. The statistic used 
 is \eqn{T=\hat{\bf f}^\prime {\bf V}_f^{r-} \hat{\bf f}}. This is 
 compared to a chi-squared distribution with degrees of freedom given by \eqn{r}{r}, which is obtained by 
-biased rounding of the estimated degrees of freedom. See Marra (2013) for further details. 
+biased rounding of the estimated degrees of freedom. See Marra (2013) for further details. Covariate selection can also be achieved 
+using a single penalty shrinkage approach as shown in Marra and Wood (2011). 
 
-Covariate selection can also be achieved using a single penalty shrinkage approach as shown in Marra and Wood (2011). 
-
-Posterior simulation is used to obtain `confidence' intervals of nonlinear functions of parameters, such as the odds ratio and 
+Posterior simulation is used to obtain intervals of nonlinear functions of parameters, such as the odds ratio and 
 gamma measure discussed by Tajar et al. (2001). 
 
-For more details on model summaries see Radice, Marra and Wojtys (submitted). 
+For more details on some of the model summaries see Radice, Marra and Wojtys (submitted). 
 
 }
 
@@ -61,7 +65,7 @@ For more details on model summaries see Radice, Marra and Wojtys (submitted).
 
 \item{tableP1}{Table containing parametric estimates, their standard errors, z-values and p-values for equation 1.}
 \item{tableP2}{As above but for equation 2.}
-\item{tableNP1}{Table of nonparametric summaries for each smooth component including estimated degrees of freedom, estimated rank, 
+\item{tableNP1}{Table of nonparametric summaries for each smooth component including effective degrees of freedom, estimated rank, 
                 approximate Wald statistic for testing the null hypothesis that the smooth term is zero and 
                 corresponding p-value, for equation 1.}
 \item{tableNP2}{As above but for equation 2.}
@@ -70,20 +74,18 @@ For more details on model summaries see Radice, Marra and Wojtys (submitted).
 \item{theta}{Estimated copula parameter linking the two equations.}
 \item{formula1, formula2}{Formulas used for equations 1 and 2.}
 \item{l.sc1, l.sc2}{Number of smooth components in equations 1 and 2.}
-\item{t.edf}{Total degrees of freedom of the estimated bivariate probit model.}
+\item{t.edf}{Total degrees of freedom of the estimated bivariate model.}
 \item{CIrs}{`Confidence' interval for either \eqn{\rho}{\rho} or \eqn{\theta}{\theta}, depending of the model fitted.}
 \item{CIl1, CIl2}{`Confidence' intervals for the shape parameters when an asymmetric link approach is employed.}
-\item{sel}{This is used for internal calculations.}
 \item{n.sel}{Number of selected observations in the sample selection case.}
-\item{BivD, nu, PL}{These are used for internal calculations.}
 \item{good}{Indicator variable indicating the observations actually used in model fitting.}
-\item{OR, CIor}{Odds ratio and related CI.The odds ratio is a measure of association between binary random variables and is defined as 
+\item{OR, CIor}{Odds ratio and related CI. The odds ratio is a measure of association between binary random variables and is defined as 
                 p00p11/p10p01. In the case of independence this ratio is equal to 1. It can take values in the range (-Inf, Inf) and 
                 it does not depend on the marginal probabilities (Tajar et al., 2001). Interval is calculated using posterior simulation.}
 \item{GM, CIgm}{Gamma measure and related CI. This measure of association was proposed by Goodman and Kruskal (1954). It is defined as 
-                (OR - 1)/(OR + 1), can take values in the range (-1, 1) and does not depend on the marginal probabilities.
-                Interval is calculated using posterior simulation. }
-\item{xi1, xi2}{Power or shape parameters of the link functions of the two equations if an asymmetric link approach is used.}
+                (\code{OR} - 1)/(\code{OR} + 1), can take values in the range (-1, 1) and does not depend on the marginal probabilities.
+                Interval is calculated using posterior simulation.}
+\item{xi1, xi2}{Estimated power or shape parameters of the link functions of the two equations if an asymmetric link approach is used.}
 \item{table.R}{Joint absolute frequency table of observed binary value combinations. This as well as all remaining quantities below are not provided when \code{Method = "BSS"} or \code{Method = "BPO"}.}
 \item{table.P}{Joint absolute frequency table of predicted binary value combinations. }
 \item{table.F}{It is given by \code{table.P}/\code{table.R}.}

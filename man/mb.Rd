@@ -1,25 +1,31 @@
 \name{mb}
 \alias{mb}
 
-\title{Nonparametric (worst-case) Manski's bound}
+\title{Nonparametric (worst-case) Manski's bounds}
 
 \description{ 
-\code{mb} can be used to calculate the worst-case Manski's bound.}
+\code{mb} can be used to calculate the worst-case Manski's bounds and confidence interval covering the true effect of interest
+with a fixed probability.}
 
 
 
 \usage{
 
-mb(treat, outc)
+mb(treat, outc, Model, B = 100, sig.lev = 0.05)
 
 }
 
 \arguments{ 
 
-\item{treat}{Binary treatment variable.}
+\item{treat}{Binary treatment/selection variable.}
  
 \item{outc}{Binary outcome variable.} 
 
+\item{Model}{Possible values are "B" (model with endogenous variable) and "BSS" (model with non-random sample selection).}
+
+\item{B}{Number of bootstrap replicates. This is used to obtain some components needed for confidence interval calculations.} 
+
+\item{sig.lev}{Significance level.}
 
 }
 
@@ -27,20 +33,41 @@ mb(treat, outc)
 
 \value{
 
-It returns the nonparametric lower and upper (worst-case) Manski's bounds. For comparison, it also returns the average 
-treatment effect assuming random assignment (i.e., the treatment received relies on ignorable selection). 
+\item{LB, UP}{Lower and upper bounds for the true effect of interest.}
+\item{CI}{Confidence interval covering the true effect of interest with a fixed probability.}
+\item{av.p}{Estimated effect of interest assuming random assignment.}
+
+
 
 }
 
 
-\section{WARNINGS}{
 
-NOTE: Since the average treatment effect can be at most 1 and the worst-case Manski's bound has width 1 then
-0 is always included within the possibilites of this bound. 
+\details{
+
+Based on Manski (1990), this function returns the nonparametric lower and upper (worst-case) Manski's bounds for the average 
+treatment effect (ATE) when \code{Model = "B"} or prevalence when \code{Model = "BSS"}. 
+
+For comparison, it also returns the estimated effect assuming random assignment (i.e., the treatment received or selection relies 
+on the assumption of ignorable observed and unobserved selection). Note that this is different from
+what provided by \code{\link{AT}} or \code{\link{est.prev}} when \code{naive = FALSE} as observed confounders are accounted for
+and the assumption here is of ignorable unobserved selection.
+
+A confidence interval covering the true ATE/prevalence with a fixed probability is also provided. This is based on the approach 
+described in Imbens and Manski (2004). NOTE that this interval is typically very close (if not identical) to the lower
+and upper bounds.
+
+The ATE can be at most 1 (or 100 in percentage) and the worst-case Manski's bounds have width 1. This means that 
+0 is always included within the possibilites of these bounds. Nevertheless, this may be useful to check whether 
+the effect from a bivariate recursive model is included within the possibilites of the bounds. 
+
+When estimating the prevalance the worst-case Manski's bounds have width equal to the non-response probability,
+which provides a measure of the uncertainty about the prevalence caused by non-response. Again, this may be useful to check whether 
+the prevalence from a bivariate non-random sample selection model is included within the possibilites of the bounds.
+
+See \code{\link{SemiParBIVProbit}} for some examples.
 
 }
-
-
 
 
 
@@ -54,22 +81,28 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Manski C.F. (1990), Nonparametric Bounds on Treatment Effects. \emph{American Economic Review, Papers and Proceedings}, 80, 319-323.
+Manski C.F. (1990), Nonparametric Bounds on Treatment Effects. \emph{American Economic Review, Papers and Proceedings}, 80(2), 319-323.
+
+Imbens G.W. and Manski C.F (2004), Confidence Intervals for Partially Identified Parameters. \emph{Econometrica}, 72(6), 1845-1857.
 
 }
 
 
 \seealso{
-\code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}  
+\code{\link{SemiParBIVProbit}}  
 }
 
 \examples{
 ## see examples for SemiParBIVProbit
 }
 
-\keyword{Manski's bound} 
-\keyword{Nonparametric bound} 
-\keyword{Worst-case bound} 
+\keyword{Manski's bounds} 
+\keyword{Nonparametric bounds} 
+\keyword{Worst-case bounds} 
+\keyword{ATE} 
+\keyword{confidence interval} 
+\keyword{average treatment effect} 
+\keyword{prevalence} 
 
 
 

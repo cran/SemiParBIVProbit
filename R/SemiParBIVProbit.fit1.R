@@ -13,7 +13,7 @@ if( PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0) ){
     qu.mag$exclu <- exclu
 }
 
-  fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax,
+  fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, parscale=VC$parscale,
                 sp.xi1=sp["xi1"], sp.xi2=sp["xi2"], PL=PL, eqPL=eqPL, 
                 valPL=valPL, fitPL=fitPL, respvec=respvec, VC=VC,
                 sp=spE, qu.mag=qu.mag, 
@@ -33,7 +33,7 @@ if( PL!="P" && fitPL!="pLiksp" ) list(fit=fit, iter.if=iter.if, conv.sp=conv.sp,
 
 	  while( stoprule.SP > pr.tolsp ){ 
 
-             coefo <- fit$argument
+             #coefo <- c(fit$argument)
              spEo <- spo <- sp 
 
              if(PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0) ) spEo <- spo[-exclu]   
@@ -45,14 +45,14 @@ if( PL!="P" && fitPL!="pLiksp" ) list(fit=fit, iter.if=iter.if, conv.sp=conv.sp,
                 	                      sp= sp, S = qu.mag$Ss,
                         	              off = qu.mag$off, rank = qu.mag$rank,
                                 	      gcv = FALSE,
-                                	      gamma = VC$gamma))
+                                	      gamma = VC$infl.fac))
                 		if(class(bs.mgfit)=="try-error") {conv.sp <- FALSE; break} 
                 	spE <- sp <- bs.mgfit$sp; iter.sp <- iter.sp + 1; names(sp) <- names(spo) 
                         if(PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0) ) spE <- sp[-exclu]
                            
-             o.ests <- c(fit$argument)
+             o.ests <- c(fit$argument) # bs.mgfit$b NGI! ; names(o.ests) <- names(fit$argument)
 
-             fit <- trust(func.opt, o.ests, rinit=rinit, rmax=rmax,    
+             fit <- trust(func.opt, o.ests, rinit=rinit, rmax=rmax,  parscale=VC$parscale,  
                               sp.xi1=sp["xi1"], sp.xi2=sp["xi2"], 
                               PL=PL, eqPL=eqPL, valPL=valPL, fitPL=fitPL, 
                               respvec=respvec, VC=VC, 
@@ -61,12 +61,11 @@ if( PL!="P" && fitPL!="pLiksp" ) list(fit=fit, iter.if=iter.if, conv.sp=conv.sp,
                               
              iter.inner <- iter.inner + fit$iterations   	                                    
               
-
-             n.ests <- c(fit$argument)
+             #n.ests <- c(fit$argument)
 
              if(iter.sp >= iterlimsp){conv.sp <- FALSE; break }
 
-             stoprule.SP <- max(abs(o.ests-n.ests))
+             stoprule.SP <- max(abs(o.ests - c(fit$argument)))
                   
            
           }

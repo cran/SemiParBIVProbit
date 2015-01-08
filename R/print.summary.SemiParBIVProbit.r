@@ -1,7 +1,7 @@
 print.summary.SemiParBIVProbit <- function(x, digits = max(3, getOption("digits") - 3),
                                              signif.stars = getOption("show.signif.stars"),...){
 
-  if(x$BivD=="N")    cop <- "BIVARIATE NORMAL"
+  if(x$BivD=="N")    cop <- "BIVARIATE GAUSSIAN"
   if(x$BivD=="F")    cop <- "BIVARIATE FRANK COPULA"
   if(x$BivD=="T")    cop <- paste("BIVARIATE STUDENT-T COPULA (",x$nu," DEGREES OF FREEDOM)",sep="")
   if(x$BivD=="C0")   cop <- "BIVARIATE CLAYTON COPULA"

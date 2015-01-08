@@ -18,7 +18,7 @@
 \arguments{ 
 
 
-\item{x}{A \code{summary.SemiParBIVProbit} object produced by \code{summary.SemiParBIVProbit()}.}
+\item{x}{\code{summary.SemiParBIVProbit} object produced by \code{summary.SemiParBIVProbit()}.}
 
 \item{digits}{Number of digits printed in output.} 
 

@@ -11,7 +11,7 @@ bprobgHs <- function(params,
   p2 <- pnorm(eta2); d.n2 <- dnorm(eta2) 
 
   teta.st <- params[(VC$X1.d2+VC$X2.d2+1)]
-  epsilon <- .Machine$double.eps*10^6
+  epsilon <- sqrt(.Machine$double.eps)
 
   criteria <- c(0,1)
   no.good <- apply(apply(cbind(p1,p2), c(1,2), `%in%`, criteria), 1, any)
@@ -32,26 +32,39 @@ bprobgHs <- function(params,
   cy1.y2 <- respvec$cy1.y2[good]
   cy1.cy2 <- respvec$cy1.cy2[good]
   weights <- VC$weights[good]
-
-########################################################################################################
-
-    if(VC$BivD %in% c("N","T")      ){teta <- tanh(teta.st); if(teta %in% c(-1,1)) teta <- sign(teta)*0.9999999}
+  
+  
+  
+########################################################################################################  
+  
+  if( VC$BivD %in% c("N","T") ) teta.st <- ifelse(abs(teta.st) > 8.75, sign(teta.st)*8.75, teta.st )  
+  
+  if( VC$BivD %in%  c("C0","C180","C90","C270","J0","J180","J90","J270","G0","G180","G90","G270") ) {
+ 
+  if( sign(teta.st)==1  ) teta.st <- ifelse( teta.st > 709, 709, teta.st )  
+  if( sign(teta.st)==-1 ) teta.st <- ifelse( teta.st < -20, -20, teta.st )  
+  
+  }
+  
+ 
+    if(VC$BivD %in% c("N","T")      ) teta <- tanh(teta.st) # ; if(teta %in% c(-1,1)) teta <- sign(teta)*0.9999999}
     if(VC$BivD=="F")                  teta <- teta.st + epsilon
-    if(VC$BivD %in% c("C0", "C180") ) teta <-    exp(teta.st) + epsilon
-    if(VC$BivD %in% c("C90","C270") ) teta <- -( exp(teta.st) + epsilon ) 
-    if(VC$BivD %in% c("J0", "J180") ) teta <-    exp(teta.st) + 1 + epsilon 
-    if(VC$BivD %in% c("J90","J270") ) teta <- -( exp(teta.st) + 1 + epsilon ) 
-    if(VC$BivD %in% c("G0", "G180") ) teta <-    exp(teta.st) + 1 
-    if(VC$BivD %in% c("G90","G270") ) teta <- -( exp(teta.st) + 1 ) 
+    if(VC$BivD %in% c("C0", "C180") ) teta <-    exp(teta.st)       # + epsilon
+    if(VC$BivD %in% c("C90","C270") ) teta <- -( exp(teta.st) )     # + epsilon ) 
+    if(VC$BivD %in% c("J0", "J180","G0", "G180") ) teta <-    exp(teta.st) + 1   #+ epsilon 
+    if(VC$BivD %in% c("J90","J270","G90","G270") ) teta <- -( exp(teta.st) + 1 ) #+ epsilon ) 
+    
+    #if(VC$BivD %in% c("G0", "G180") ) teta <-    exp(teta.st) + 1 
+    #if(VC$BivD %in% c("G90","G270") ) teta <- -( exp(teta.st) + 1 ) 
 
 if(VC$BivD=="N") C.copula <- pbinorm( eta1, eta2, cov12=teta) else C.copula <- BiCopCDF(p1,p2, VC$nC, par=teta, par2=VC$nu)
 ########################################################################################################
 
 
-  p11 <- pmax( C.copula, 1000*.Machine$double.eps )
-  p10 <- pmax( p1 - p11, 1000*.Machine$double.eps )
-  p01 <- pmax( p2 - p11, 1000*.Machine$double.eps )
-  p00 <- pmax( 1- p11 - p10 - p01, 1000*.Machine$double.eps )
+  p11 <- pmax( C.copula, epsilon )
+  p10 <- pmax( p1 - p11, epsilon )
+  p01 <- pmax( p2 - p11, epsilon )
+  p00 <- pmax( 1- p11 - p10 - p01, epsilon )
 
   l.par <- weights*( y1.y2*log(p11)+y1.cy2*log(p10)+cy1.y2*log(p01)+cy1.cy2*log(p00) )
 
@@ -274,9 +287,12 @@ resp4 <- 1 - y2
                     colSums( c(dl.dbe2)*X2 ),
                     sum( dl.drho )  )
     
-    
-  if(VC$extra.regI == TRUE){
-  
+
+if( ( VC$l.sp1==0 && VC$l.sp2==0 ) || VC$fp==TRUE) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0) else ps <- pen(params, qu.mag, sp, VC)
+
+
+  if(VC$extra.regI == "pC" && VC$hess==FALSE){
+
       op <- options(warn = -1)
       R <- chol(H, pivot = TRUE)
       options(op)
@@ -289,16 +305,27 @@ resp4 <- 1 - y2
       R <- R[ipiv, ipiv]
       H <- crossprod(R)
   
-  }
-    
-    
-if( ( VC$l.sp1==0 && VC$l.sp2==0 ) || VC$fp==TRUE) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0) else ps <- pen(params, qu.mag, sp, VC)
-
+  } 
 
          S.res <- res
          res   <- S.res + ps$S.h1
          G     <- G + ps$S.h2
          H     <- H + ps$S.h  
+        
+        
+        
+  if(VC$extra.regI == "sED"){
+  
+  ds <- 0
+  
+  eH <- eigen(H, symmetric = TRUE)
+  if(min(eH$values) < epsilon){ eH$values <- abs(eH$values); ds <- 1 }
+  if(min(eH$values) < epsilon){ eH$values[which(eH$values < epsilon)] <- 0.0000001; ds <- 1 }
+  
+  if(ds == 1) H <- eH$vectors%*%tcrossprod(diag(1/eH$values),eH$vectors)   
+  
+  }  
+  
 
          list(value=res, gradient=G, hessian=H, S.h=ps$S.h, l=S.res, l.par=l.par, ps = ps, 
               p11=p11, p10=p10, p01=p01, p00=p00, eta1=eta1, eta2=eta2,

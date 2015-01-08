@@ -3,7 +3,7 @@
 
 \title{Print an AT object}
 
-\description{The print method for a \code{AT} object.}
+\description{The print method for an \code{AT} object.}
 
 \usage{
 
@@ -17,7 +17,7 @@
 \arguments{ 
 
 
-\item{x}{A \code{AT} object produced by \code{AT()}.}
+\item{x}{\code{AT} object produced by \code{AT()}.}
 
 \item{...}{Other arguments.}
 
@@ -37,8 +37,6 @@
 Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 }
-
-
 
 
 \seealso{

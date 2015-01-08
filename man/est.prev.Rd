@@ -1,7 +1,7 @@
 \name{est.prev}
 \alias{est.prev}
 
-\title{Estimated overall prevalence from sample selection models}
+\title{Estimated overall prevalence from sample selection model}
 
 \description{ 
 \code{est.prev} can be used to calculate the overall estimated prevalence from a sample selection model, with corresponding confidence intervals
@@ -23,8 +23,8 @@ est.prev(x, sig.lev = 0.05, sw = NULL, naive = FALSE)
 
 \item{sw}{Survey weights.} 
 
-\item{naive}{It indicates whether the prevalence is calculated using the (naive/classic imputation) probit or sample selection 
-             model. This option has been introduced to compare adjusted (for non-random sample selection) and unadjusted estimates.} 
+\item{naive}{If \code{FALSE} then the prevalence is calculated using the (naive/classic imputation) probit model. This option has 
+             been introduced to compare adjusted (for non-random sample selection) and unadjusted estimates.} 
 
 
 }
@@ -32,7 +32,7 @@ est.prev(x, sig.lev = 0.05, sw = NULL, naive = FALSE)
 
 \details{
 
-est.prev estimates the overall prevalence of a disease (e.g. HIV) when there are missing values that are not at random. 
+\code{est.prev} estimates the overall prevalence of a disease (e.g., HIV) when there are missing values that are not at random. 
 
 }
 
@@ -56,7 +56,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-McGovern M.E., Barnighausen T., Marra G. and Radice R. (forthcoming), On the Assumption of Joint Normality in Selection Models: A Copula Based Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}.
+McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Based Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}.
 
 }
 
@@ -74,6 +74,8 @@ McGovern M.E., Barnighausen T., Marra G. and Radice R. (forthcoming), On the Ass
 \keyword{semiparametric bivariate probit modelling} 
 \keyword{bivariate probit model} 
 \keyword{prevalence} 
+\keyword{delta method}
+\keyword{non-random sample selection} 
 
 
 

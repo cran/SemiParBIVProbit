@@ -1,9 +1,9 @@
 SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NULL, start.v = NULL, 
                              Model = "B", method = "trwlF", BivD = "N", nu = 3, fp = FALSE,
                              PL = "P", eqPL = "both", valPL = c(0,0), fitPL = "pLiksp", spPL = c(0.01,0.01),
-                             hess = TRUE, gamma = 1, pPen1 = NULL, pPen2 = NULL, 
+                             hess = TRUE, infl.fac = 1, pPen1 = NULL, pPen2 = NULL, 
                              rinit = 1, rmax = 100, iterlimsp = 50, pr.tolsp = 1e-6,
-                             gc.l = FALSE, awlm = FALSE, extra.regI = FALSE){
+                             gc.l = FALSE, awlm = FALSE, parscale, extra.regI = "t"){
   
   ##########################################################################################################################
   # model set up and starting values
@@ -19,7 +19,7 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   pplf <- c("fixed","unpLik","pLik","pLiksp")
   mb   <- c("B", "BSS", "BPO")
 
-  #if(Model == "BPO") stop("Check next release for final tested version of this model.")
+  if(Model == "BPO") stop("Check next release for final tested version of this model.")
 
   if(!(Model %in% mb)) stop("Error in parameter Model value. It should be one of: B, BSS or BPO.")
   if(!(PL %in% ppl)) stop("Error in parameter PL value. It should be one of: P, PP, RPP or SN.")
@@ -27,7 +27,7 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   if(!(BivD %in% opc)) stop("Error in parameter BivD value. It should be one of: N, C0, C90, C180, C270, J0, J90, J180, J270, G0, G90, G180, G270, F, T")
   if(PL!="P" && Model %in% c("BSS","BPO")) stop("Sample selection models with asymmetric links not implemented.")
   if(!(method %in% c("trwl","trwlF"))) stop("Error in parameter method value. It should be one of: trwl or trwlF.")
-  
+  if(!(extra.regI %in% c("t","pC","sED"))) stop("Error in parameter extra.regI value. It should be one of: t, pC or sED.")
   
   ig <- interpret.gam(formula)
   mf <- match.call(expand.dots = FALSE)
@@ -36,7 +36,7 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   fake.formula <- paste(ig[[1]]$response, "~", paste(pred.n, collapse = " + ")) 
   environment(fake.formula) <- environment(ig$fake.formula)
   mf$formula <- fake.formula 
-  mf$start.v <- mf$Model <- mf$BivD <- mf$nu <- mf$fp <- mf$PL <- mf$eqPL <- mf$valPL <- mf$fitPL <- mf$spPL <- mf$hess <- mf$gamma <- mf$pPen1 <- mf$pPen2 <- mf$rinit <- mf$rmax <- mf$iterlimsp <- mf$pr.tolsp <- mf$gc.l <- mf$awlm <- mf$method <- mf$extra.regI <- NULL                           
+  mf$start.v <- mf$Model <- mf$BivD <- mf$nu <- mf$fp <- mf$PL <- mf$eqPL <- mf$valPL <- mf$fitPL <- mf$spPL <- mf$hess <- mf$infl.fac <- mf$pPen1 <- mf$pPen2 <- mf$rinit <- mf$rmax <- mf$iterlimsp <- mf$pr.tolsp <- mf$gc.l <- mf$awlm <- mf$method <- mf$parscale <- mf$extra.regI <- NULL                           
   mf$drop.unused.levels <- TRUE 
   if(Model=="BSS") mf$na.action <- na.pass
   mf[[1]] <- as.name("model.frame")
@@ -76,7 +76,7 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
    
    
 
-  gam1 <- eval(substitute(gam(formula.eq1, binomial(link="probit"), gamma=gamma, weights=weights, 
+  gam1 <- eval(substitute(gam(formula.eq1, binomial(link="probit"), gamma=infl.fac, weights=weights, 
                               data=data, paraPen=pPen1),list(weights=weights))) 
 
   X1 <- model.matrix(gam1)
@@ -89,7 +89,7 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
 
   if(Model=="B" || Model=="BPO"){
   
-  gam2  <- eval(substitute(gam(formula.eq2, binomial(link="probit"), gamma=gamma, weights=weights, 
+  gam2  <- eval(substitute(gam(formula.eq2, binomial(link="probit"), gamma=infl.fac, weights=weights, 
                            data=data, paraPen=pPen2),list(weights=weights))) # check at later stage the need of eval and substitute
 
   X2 <- model.matrix(gam2)
@@ -154,7 +154,7 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
 
   inde <- y1 > 0
 
-  gam2 <- eval(substitute(gam(formula.eq2, binomial(link="probit"), gamma=gamma, weights=weights, 
+  gam2 <- eval(substitute(gam(formula.eq2, binomial(link="probit"), gamma=infl.fac, weights=weights, 
                               data=data, subset=inde, paraPen=pPen2),list(weights=weights,inde=inde)))  
                               
   X2.d2 <- length(coef(gam2))
@@ -164,7 +164,7 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   l.sp2 <- length(gam2$sp)
 
 
-  if(is.null(start.v)){ startvSS <- try(startSS(gam1, gam2, formula.eq2, data, gamma, weights, inde, l.sp1, l.sp2, pPen2, fp),silent=TRUE)
+  if(is.null(start.v)){ startvSS <- try(startSS(gam1, gam2, formula.eq2, data, infl.fac, weights, inde, l.sp1, l.sp2, pPen2, fp),silent=TRUE)
                        if(class(startvSS)=="try-error"){ i.rho <- 0.5; names(i.rho) <- "athrho" 
                                                          start.v <- c(coef(gam1),coef(gam2),i.rho)} else start.v <- startvSS$start.v
 
@@ -215,6 +215,9 @@ if(PL!="P" && selection == FALSE){
 }
 
 
+if(missing(parscale)) parscale <- rep(1, length(start.v))
+
+
 
   respvec <- list(y1 = y1,
                   y2 = y2,
@@ -233,7 +236,7 @@ if(PL!="P" && selection == FALSE){
              gp2 = gp2,
              l.sp1 = l.sp1, 
              l.sp2 = l.sp2,
-             gamma = gamma,
+             infl.fac = infl.fac,
              weights = weights,
              fp = fp,
              hess = hess,
@@ -242,7 +245,8 @@ if(PL!="P" && selection == FALSE){
              Model = Model,
              PL = PL, end = end,
              BivD = BivD, nu = nu,
-             nC = nC, gc.l = gc.l, awlm = awlm, n = n, extra.regI = extra.regI) # original n only needed in SemiParBIVProbit.fit
+             nC = nC, gc.l = gc.l, awlm = awlm, n = n, extra.regI = extra.regI,
+             parscale = parscale) # original n only needed in SemiParBIVProbit.fit
              
   if(gc.l == TRUE) gc()           
              

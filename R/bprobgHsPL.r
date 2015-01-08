@@ -5,7 +5,7 @@ bprobgHsPL <- function(params, sp.xi1, sp.xi2,
 
 dl.dlambda1.st <- dl.dlambda2.st <- d2l.be1.lambda1 <- d2l.be1.lambda2 <- d2l.be2.lambda1 <- d2l.be2.lambda2 <- d2l.rho.lambda1 <- d2l.rho.lambda2 <- d2l.lambda1.lambda1 <- d2l.lambda2.lambda2 <- d2l.lambda1.lambda2 <- NA 
 
-  epsilon <- .Machine$double.eps*10^6
+  epsilon <- sqrt(.Machine$double.eps)
 
   eta1 <- VC$X1%*%params[1:VC$X1.d2]
   eta2 <- VC$X2%*%params[(VC$X1.d2+1):(VC$X1.d2+VC$X2.d2)]
@@ -161,8 +161,8 @@ if(eqPL=="second"){
   
       if(eqPL=="both"){
   
-      p1 <- 2*pmax(pbinorm( eta1, 0, cov12=del1), 1000*.Machine$double.eps )
-      p2 <- 2*pmax(pbinorm( eta2, 0, cov12=del2), 1000*.Machine$double.eps )
+      p1 <- 2*pmax(pbinorm( eta1, 0, cov12=del1), epsilon )
+      p2 <- 2*pmax(pbinorm( eta2, 0, cov12=del2), epsilon )
       d.n1 <- 2*dnorm(eta1)*pnorm(lambda1*eta1)
       d.n2 <- 2*dnorm(eta2)*pnorm(lambda2*eta2)
     
@@ -170,7 +170,7 @@ if(eqPL=="second"){
     
       if(eqPL=="first"){
     
-      p1 <- 2*pmax(pbinorm( eta1, 0, cov12=del1), 1000*.Machine$double.eps )
+      p1 <- 2*pmax(pbinorm( eta1, 0, cov12=del1), epsilon )
       p2 <- pnorm(eta2)
       d.n1 <- 2*dnorm(eta1)*pnorm(lambda1*eta1)
       d.n2 <- dnorm(eta2)
@@ -180,7 +180,7 @@ if(eqPL=="second"){
       if(eqPL=="second"){
     
       p1 <- pnorm(eta1)
-      p2 <- 2*pmax(pbinorm( eta2, 0, cov12=del2), 1000*.Machine$double.eps )
+      p2 <- 2*pmax(pbinorm( eta2, 0, cov12=del2), epsilon )
       d.n1 <- dnorm(eta1)
       d.n2 <- 2*dnorm(eta2)*pnorm(lambda2*eta2)
       
@@ -212,25 +212,36 @@ if(eqPL=="second"){
   cy1.cy2 <- respvec$cy1.cy2[good]
   weights <- VC$weights[good]
 
-########################################################################################################
 
-    if(VC$BivD %in% c("N","T")      ){teta <- tanh(teta.st); if(teta %in% c(-1,1)) teta <- sign(teta)*0.9999999}
+########################################################################################################  
+  
+  if( VC$BivD %in% c("N","T") ) teta.st <- ifelse(abs(teta.st) > 8.75, sign(teta.st)*8.75, teta.st )  
+  
+  if( VC$BivD %in%  c("C0","C180","C90","C270","J0","J180","J90","J270","G0","G180","G90","G270") ) {
+ 
+  if( sign(teta.st)==1  ) teta.st <- ifelse( teta.st > 709, 709, teta.st )  
+  if( sign(teta.st)==-1 ) teta.st <- ifelse( teta.st < -20, -20, teta.st )  
+  
+  }
+  
+ 
+    if(VC$BivD %in% c("N","T")      ) teta <- tanh(teta.st) # ; if(teta %in% c(-1,1)) teta <- sign(teta)*0.9999999}
     if(VC$BivD=="F")                  teta <- teta.st + epsilon
-    if(VC$BivD %in% c("C0", "C180") ) teta <- exp(teta.st) + epsilon
-    if(VC$BivD %in% c("C90","C270") ) teta <- -( exp(teta.st) + epsilon ) 
-    if(VC$BivD %in% c("J0", "J180") ) teta <- exp(teta.st) + 1 + epsilon 
-    if(VC$BivD %in% c("J90","J270") ) teta <- -( exp(teta.st) + 1 + epsilon ) 
-    if(VC$BivD %in% c("G0", "G180") ) teta <- exp(teta.st) + 1 
-    if(VC$BivD %in% c("G90","G270") ) teta <- -( exp(teta.st) + 1 ) 
+    if(VC$BivD %in% c("C0", "C180") ) teta <-    exp(teta.st)       # + epsilon
+    if(VC$BivD %in% c("C90","C270") ) teta <- -( exp(teta.st) )     # + epsilon ) 
+    if(VC$BivD %in% c("J0", "J180","G0", "G180") ) teta <-    exp(teta.st) + 1   #+ epsilon 
+    if(VC$BivD %in% c("J90","J270","G90","G270") ) teta <- -( exp(teta.st) + 1 ) #+ epsilon ) 
+    #if(VC$BivD %in% c("G0", "G180") ) teta <-    exp(teta.st) + 1 
+    #if(VC$BivD %in% c("G90","G270") ) teta <- -( exp(teta.st) + 1 ) 
 
-if(VC$BivD=="N") C.copula <- pbinorm( qnorm(p1), qnorm(p2), cov12=teta) else C.copula <- BiCopCDF(p1,p2, VC$nC, par=teta, par2=VC$nu)
+if(VC$BivD=="N") C.copula <- pbinorm( eta1, eta2, cov12=teta) else C.copula <- BiCopCDF(p1,p2, VC$nC, par=teta, par2=VC$nu)
 ########################################################################################################
 
 
-  p11 <- pmax( C.copula, 1000*.Machine$double.eps )
-  p10 <- pmax( p1 - p11, 1000*.Machine$double.eps )
-  p01 <- pmax( p2 - p11, 1000*.Machine$double.eps )
-  p00 <- pmax( 1- p11 - p10 - p01, 1000*.Machine$double.eps )
+  p11 <- pmax( C.copula, epsilon )
+  p10 <- pmax( p1 - p11, epsilon )
+  p01 <- pmax( p2 - p11, epsilon )
+  p00 <- pmax( 1- p11 - p10 - p01, epsilon )
 
 
   l.par <- weights*( y1.y2*log(p11)+y1.cy2*log(p10)+cy1.y2*log(p01)+cy1.cy2*log(p00) )
@@ -1103,24 +1114,6 @@ G <- -c(G, sum( dl.dlambda2.st ) )
 
 
 
-  if(VC$extra.regI == TRUE){
-  
-      op <- options(warn = -1)
-      R <- chol(H, pivot = TRUE)
-      options(op)
-      p <- dim(H)[2]
-      ipiv <- piv <- attr(R, "pivot")
-      ipiv[piv] <- 1:p
-      rank <- attr(R, "rank")
-      ind <- 1:rank
-      if (rank < p) R[(rank + 1):p, ] <- 0
-      R <- R[ipiv, ipiv]
-      H <- crossprod(R)
-  
-  }
-
-
-
 
     res <- -sum(l.par)
     
@@ -1138,12 +1131,54 @@ if( ( VC$l.sp1==0 && VC$l.sp2==0 ) || VC$fp==TRUE){ lps <- length(params) - nsh
    S.h1 <- 0.5*crossprod(params,S.h)%*%params
    S.h2 <- S.h%*%params
    
+   
+
+  if(VC$extra.regI == "pC" && VC$hess==FALSE){
+
+      op <- options(warn = -1)
+      R <- chol(H, pivot = TRUE)
+      options(op)
+      p <- dim(H)[2]
+      ipiv <- piv <- attr(R, "pivot")
+      ipiv[piv] <- 1:p
+      rank <- attr(R, "rank")
+      ind <- 1:rank
+      if (rank < p) R[(rank + 1):p, ] <- 0
+      R <- R[ipiv, ipiv]
+      H <- crossprod(R)
+  
+  } 
+
+   
+   
+   
+   
          if(fitPL=="fixed") G <- -G
          S.res <- res
          res <- S.res + S.h1
          G   <- G + S.h2
         
          H   <- H + S.h  
+         
+         
+         
+
+        
+   
+        
+  if(VC$extra.regI == "sED"){
+  
+  ds <- 0
+  
+  eH <- eigen(H, symmetric = TRUE)
+  if(min(eH$values) < epsilon){ eH$values <- abs(eH$values); ds <- 1 }
+  if(min(eH$values) < epsilon){ eH$values[which(eH$values < epsilon)] <- 0.0000001; ds <- 1 }
+  
+  if(ds == 1) H <- eH$vectors%*%tcrossprod(diag(1/eH$values),eH$vectors)   
+  
+  }    
+  
+  
 
 ps$S.h <- S.h; ps$S.h1 <- S.h1; ps$S.h2 <- S.h2  
 
