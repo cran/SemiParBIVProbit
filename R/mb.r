@@ -1,4 +1,4 @@
-mb <- function(treat, outc, Model, B = 100, sig.lev = 0.05){
+mb <- function(treat, outc, IV = NULL, Model, B = 100, sig.lev = 0.05){
 
 
 if(length(table(treat))!=2 ) stop("The treatment variable must be binary.")
@@ -6,7 +6,7 @@ if(length(table(outc))!=2  ) stop("The outcome variable must be binary.")
 if(length(treat) != length(outc)  ) stop("The treatment and outcome variables have different lengths.")
 if(!(Model %in% c("B", "BSS")) || missing(Model)) stop("Error in parameter Model value. It should be one of: B or BSS.")
 
-IV <- NULL
+#IV <- NULL
 
 datato <- data.frame(treat, outc)
 
@@ -14,8 +14,9 @@ if(!is.null(IV)){
 
 	LBs <- UBs <- NULL
 	t.s <- table(IV)
-	if(length(t.s) == length(IV)) stop("Procedure not designed to do anything meaningful with this IV variable.")
-	cat.names <- dimnames( t.s )[[1]]
+	lt.s <- length(t.s)
+	if(lt.s == length(IV)) stop("Procedure not designed to do anything meaningful with this IV variable.")
+	#cat.names <- dimnames( t.s )[[1]]
 	
 }
 
@@ -92,30 +93,6 @@ pnorm(Cn + sqrt(n)*( (UB - LB)/max(sigma.LB, sigma.UB) ) ) - pnorm(-Cn) - alpha
 
 ################
 
-if(!is.null(IV)){
-
-mbfIV <- function(t.s, treat, outc, IV, cat.names){
-
-for( i in 1:length(t.s) ){
-
-mbfres <- mbf(data.frame(treat, outc)[IV==cat.names[i],])
-
-LBs[i] <- mbfres$LB
-UBs[i] <- mbfres$UB
-
-}
-
-LB <- max(LBs)
-UB <- min(UBs)
-
-list(LB = LB, UB = UB)
-
-}
-
-}
-################
-################
-
 
 
 
@@ -137,8 +114,8 @@ LBb[i] <- mbfresB$LB
 
 }
 
-sUBb <- sd(UBb)
-sLBb <- sd(LBb)
+sUBb <- sd(UBb, na.rm = TRUE)
+sLBb <- sd(LBb, na.rm = TRUE)
 
 ##############
 
@@ -147,12 +124,14 @@ mbfres <- mbf(datato)
 avte <- as.numeric(format(mbfres$avte*100, digits = 3, trim=TRUE))
 WCB  <- as.numeric(format(c(mbfres$LB*100, mbfres$UB*100), digits = 3, trim=TRUE))
 
-Cn <- abs(uniroot( Cn.fun, interval=c(-5,5), UB = mbfres$UB, LB = mbfres$LB, sigma.UB = sUBb, sigma.LB = sLBb, alpha = sig.lev, n = n)$root) 
+Cn <- try(uniroot( Cn.fun, interval=c(-5,5), UB = mbfres$UB, LB = mbfres$LB, sigma.UB = sUBb, sigma.LB = sLBb, alpha = sig.lev, n = n), silent = TRUE)
+if(class(Cn)=="try-error") Cn <- 1.645 else Cn <- abs(Cn$root)  
+
+
 #Cn <- abs(nleqslv( 0.5, Cn.fun, UB = mbfres$UB, LB = mbfres$LB, sigma.UB = sUBb, sigma.LB = sLBb, alpha = sig.lev, n = n)$x) 
-
-
-CIb1 <- as.numeric(round((mbfres$LB - Cn*sLBb/sqrt(n))*100, 2) )   
-CIb2 <- as.numeric(round((mbfres$UB + Cn*sUBb/sqrt(n))*100, 2) )
+ 
+CIb1 <- as.numeric( format((mbfres$LB - Cn*sLBb/sqrt(n))*100, digits = 3, trim=TRUE) )   
+CIb2 <- as.numeric( format((mbfres$UB + Cn*sUBb/sqrt(n))*100, digits = 3, trim=TRUE) )
 
 out <- list(LB = WCB[1], UB = WCB[2], CI = c(CIb1,CIb2), av.p = avte, Model = Model) 
 
@@ -168,16 +147,31 @@ out <- list(LB = WCB[1], UB = WCB[2], CI = c(CIb1,CIb2), av.p = avte, Model = Mo
 
 
 
-
-
 if(!is.null(IV)){
 
-rei <- mbfIV(t.s, treat, outc, IV, cat.names)
+
+
+mbfIV <- function(dat, IV, lt.s){
+
+resIV <- unlist(by(dat, IV, mbf))
+
+UBs <- resIV[seq(1,(lt.s*3),3)] # 3 depends on number of object output of mbf
+LBs <- resIV[seq(2,(lt.s*3),3)] 
+
+LB <- max(LBs)
+UB <- min(UBs)
+
+list(LB = LB, UB = UB)
+
+}
+
+
+rei <- mbfIV(datato, IV, lt.s)
 
 LB <- as.numeric(format(rei$LB*100, digits = 3, trim=TRUE))
 UB <- as.numeric(format(rei$UB*100, digits = 3, trim=TRUE))
 
-avte <- as.numeric(format(mbf(data.frame(treat, outc))$avte*100, digits = 3, trim=TRUE))
+avte <- as.numeric(format(mbf(datato)$avte*100, digits = 3, trim=TRUE))
 
 ########
 # for sd
@@ -189,30 +183,29 @@ bootind  <- sample( mind, size = n, replace = TRUE)
 bootsamp <- datato[bootind,]
 
 IVbi <- IV[bootind]
-t.s <- table(IVbi)
-cat.names <- dimnames( t.s )[[1]]
+lt.s <- length(table(IVbi))
 
-mbfresB  <- mbfIV(t.s, bootsamp$treat, bootsamp$outc, IVbi, cat.names)
+mbfresB  <- mbfIV(bootsamp, IVbi, lt.s)
 
 UBb[i] <- mbfresB$UB
 LBb[i] <- mbfresB$LB
 
 }
 
-sUBb <- sd(UBb)
-sLBb <- sd(LBb)
+sUBb <- sd(UBb, na.rm = TRUE)
+sLBb <- sd(LBb, na.rm = TRUE)
 
 ###############
 
-Cn <- abs(uniroot( Cn.fun, interval=c(-5,5), UB = UB, LB = LB, sigma.UB = sUBb, sigma.LB = sLBb, alpha = sig.lev, n = n)$root) 
+Cn <- try(uniroot( Cn.fun, interval=c(-5,5), UB = UB, LB = LB, sigma.UB = sUBb, sigma.LB = sLBb, alpha = sig.lev, n = n), silent = TRUE) 
+
+if(class(Cn)=="try-error") Cn <- 1.645 else Cn <- abs(Cn$root)
 
 
-CIb1 <- as.numeric(round((rei$LB - Cn*sLBb/sqrt(n))*100, 2) )   
-CIb2 <- as.numeric(round((rei$UB + Cn*sUBb/sqrt(n))*100, 2) )
+CIb1 <- as.numeric(format((rei$LB - Cn*sLBb/sqrt(n))*100, digits = 3, trim=TRUE))   
+CIb2 <- as.numeric(format((rei$UB + Cn*sUBb/sqrt(n))*100, digits = 3, trim=TRUE))
 
-out <- list(LB = LB, UB = UB, CI = c(CIb1,CIb2), av.p = avte, Model = Model) 
-
-
+out <- list(LB = LB, UB = UB, CI = c(CIb1,CIb2), av.p = avte, Model = Model, IV = IV) 
 
 }
 

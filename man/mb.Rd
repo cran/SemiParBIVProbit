@@ -1,17 +1,17 @@
 \name{mb}
 \alias{mb}
 
-\title{Nonparametric (worst-case) Manski's bounds}
+\title{Nonparametric (worst-case and IV) Manski's bounds}
 
 \description{ 
-\code{mb} can be used to calculate the worst-case Manski's bounds and confidence interval covering the true effect of interest
+\code{mb} can be used to calculate the (worst-case and IV) Manski's bounds and confidence interval covering the true effect of interest
 with a fixed probability.}
 
 
 
 \usage{
 
-mb(treat, outc, Model, B = 100, sig.lev = 0.05)
+mb(treat, outc, IV = NULL, Model, B = 100, sig.lev = 0.05)
 
 }
 
@@ -20,6 +20,8 @@ mb(treat, outc, Model, B = 100, sig.lev = 0.05)
 \item{treat}{Binary treatment/selection variable.}
  
 \item{outc}{Binary outcome variable.} 
+
+\item{IV}{An instrumental binary variable can be used if available.} 
 
 \item{Model}{Possible values are "B" (model with endogenous variable) and "BSS" (model with non-random sample selection).}
 
@@ -46,7 +48,8 @@ mb(treat, outc, Model, B = 100, sig.lev = 0.05)
 \details{
 
 Based on Manski (1990), this function returns the nonparametric lower and upper (worst-case) Manski's bounds for the average 
-treatment effect (ATE) when \code{Model = "B"} or prevalence when \code{Model = "BSS"}. 
+treatment effect (ATE) when \code{Model = "B"} or prevalence when \code{Model = "BSS"}. When an IV is employed
+the function returns IV Manski bounds.
 
 For comparison, it also returns the estimated effect assuming random assignment (i.e., the treatment received or selection relies 
 on the assumption of ignorable observed and unobserved selection). Note that this is different from

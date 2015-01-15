@@ -331,7 +331,7 @@ dataSim <- data.frame(y1, y2, x1, x2)
 
 ## Testing the hypothesis of absence of endogeneity... 
 
-LM.bpm(list(y1 ~ x1 + s(x2), y2 ~ y1 + s(x2)), dataSim)
+LM.bpm(list(y1 ~ x1 + s(x2), y2 ~ y1 + s(x2)), dataSim, Model = "B")
 
 # p-value suggests presence of endogeneity, hence fit a bivariate model
 

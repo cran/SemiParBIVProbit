@@ -1,12 +1,12 @@
 LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, 
-                   Model = "B", hess = TRUE, infl.fac = 1, pPen1 = NULL, pPen2 = NULL){
+                   Model, hess = TRUE, infl.fac = 1, pPen1 = NULL, pPen2 = NULL){
 
   sp <- qu.mag <- y1.y2 <- y1.cy2 <- cy1.y2 <- cy1.cy2 <- cy <- cy1 <- NULL  
   end <- 0
   BivD <- "N"; PL <- "P"
   fp <- FALSE
-
-  if(Model == "BPO") stop("This test's implementation is not valid for bivariate models with partial observability.")
+  
+  if(!(Model %in% c("B", "BSS")) || missing(Model)) stop("Error in parameter Model value. It should be one of: B or BSS.")
 
   ig <- interpret.gam(formula)
   mf <- match.call(expand.dots = FALSE)

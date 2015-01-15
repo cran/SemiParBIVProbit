@@ -19,7 +19,7 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   pplf <- c("fixed","unpLik","pLik","pLiksp")
   mb   <- c("B", "BSS", "BPO")
 
-  if(Model == "BPO") stop("Check next release for final tested version of this model.")
+  #if(Model == "BPO") stop("Check next release for final tested version of this model.")
 
   if(!(Model %in% mb)) stop("Error in parameter Model value. It should be one of: B, BSS or BPO.")
   if(!(PL %in% ppl)) stop("Error in parameter PL value. It should be one of: P, PP, RPP or SN.")

@@ -1,5 +1,5 @@
 Package: SemiParBIVProbit
-Version: 3.2-13.1
+Version: 3.2-13.2
 Author: Giampiero Marra <giampiero.marra@ucl.ac.uk> and Rosalba Radice <r.radice@bbk.ac.uk>
 Maintainer: Giampiero Marra <giampiero.marra@ucl.ac.uk>
 Title: Semiparametric Bivariate Probit Modelling
@@ -10,6 +10,6 @@ LazyLoad: yes
 License: GPL (>= 2)
 URL: http://www.ucl.ac.uk/statistics/people/giampieromarra
 Repository: CRAN
-Date/Publication: 2015-01-08 12:47:47
-Packaged: 2015-01-08 10:42:53 UTC; G&R
+Date/Publication: 2015-01-15 12:45:10
+Packaged: 2015-01-15 11:28:41 UTC; giampiero
 NeedsCompilation: no

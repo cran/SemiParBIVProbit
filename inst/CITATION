@@ -1,16 +1,3 @@
-desc <- packageDescription("SemiParBIVProbit")
-year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", desc$Date)
-vers <- paste(" R package version", desc$Version)
-
-citEntry(entry="Manual",
-title = "SemiParBIVProbit: Semiparametric Bivariate Probit Modelling",
-author = "Marra G. and Radice R.",
-year = year,
-note = vers,
-textVersion =
-paste("Marra G. and Radice R. (",year,"). SemiParBIVProbit: Semiparametric Bivariate Probit Modelling.",vers, ".", sep="")
-)
-
 citEntry(
  entry="Article",
  title="Estimation of a semiparametric recursive bivariate probit model in the presence of endogeneity",
@@ -28,9 +15,10 @@ citEntry(
   title="A penalized likelihood estimation approach to semiparametric sample selection binary response modeling",
   journal="Electronic Journal of Statistics",
   volume= "7",
-  number="",
   pages="1432-1455",
   year="2013", 
   author="Marra G. and Radice R.",
   textVersion="Marra G. and Radice R. (2013), A penalized likelihood estimation approach to semiparametric sample selection binary response modeling. Electronic Journal of Statistics, 7, 1432-1455."
  )
+
+
