@@ -219,8 +219,8 @@ if(eqPL=="second"){
   
   if( VC$BivD %in%  c("C0","C180","C90","C270","J0","J180","J90","J270","G0","G180","G90","G270") ) {
  
-  if( sign(teta.st)==1  ) teta.st <- ifelse( teta.st > 709, 709, teta.st )  
-  if( sign(teta.st)==-1 ) teta.st <- ifelse( teta.st < -20, -20, teta.st )  
+  teta.st <- ifelse( teta.st > 709, 709, teta.st )  
+  teta.st <- ifelse( teta.st < -20, -20, teta.st )  
   
   }
   
@@ -231,10 +231,9 @@ if(eqPL=="second"){
     if(VC$BivD %in% c("C90","C270") ) teta <- -( exp(teta.st) )     # + epsilon ) 
     if(VC$BivD %in% c("J0", "J180","G0", "G180") ) teta <-    exp(teta.st) + 1   #+ epsilon 
     if(VC$BivD %in% c("J90","J270","G90","G270") ) teta <- -( exp(teta.st) + 1 ) #+ epsilon ) 
-    #if(VC$BivD %in% c("G0", "G180") ) teta <-    exp(teta.st) + 1 
-    #if(VC$BivD %in% c("G90","G270") ) teta <- -( exp(teta.st) + 1 ) 
 
-if(VC$BivD=="N") C.copula <- pbinorm( eta1, eta2, cov12=teta) else C.copula <- BiCopCDF(p1,p2, VC$nC, par=teta, par2=VC$nu)
+  C.copula <- BiCDF(p1, p2, VC$nC, teta)
+  
 ########################################################################################################
 
 
@@ -1195,7 +1194,7 @@ ps$S.h <- S.h; ps$S.h1 <- S.h1; ps$S.h2 <- S.h2
               d2l.rho.lambda1=d2l.rho.lambda1, d2l.rho.lambda2=d2l.rho.lambda2, 
               d2l.lambda1.lambda1=d2l.lambda1.lambda1, d2l.lambda2.lambda2=d2l.lambda2.lambda2,  
               d2l.lambda1.lambda2=d2l.lambda1.lambda2, 
-              good=good, PL=PL, eqPL=eqPL, BivD=VC$BivD, p1=p1, p2=p2)      
+              good=good, PL=PL, eqPL=eqPL, BivD=VC$BivD, p1=p1, p2=p2, theta.star = teta.st)      
 
 }
 

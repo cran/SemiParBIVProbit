@@ -11,7 +11,7 @@ or non-random sample selection.}
 \usage{
 
 LM.bpm(formula, data = list(), weights = NULL, subset = NULL, Model, 
-       hess = TRUE, infl.fac = 1, pPen1 = NULL, pPen2 = NULL)
+       hess = TRUE, infl.fac = 1)
 
 }
 
@@ -36,9 +36,6 @@ LM.bpm(formula, data = list(), weights = NULL, subset = NULL, Model,
 
 \item{infl.fac}{Inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
              this parameter to a value greater than 1.}
-
-\item{pPen1, pPen2}{Optional list specifying any penalties to be applied to the parametric model terms of equations 1 and 2.}
-
 
 }
 

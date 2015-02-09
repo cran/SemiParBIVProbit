@@ -1,4 +1,8 @@
-export(AT,est.prev,adjCov,adjCovSD,gt.bpm,
+export(AT,
+est.prev,
+adjCov,
+adjCovSD,
+gt.bpm,
 bprobgHs,mb,
 bprobgHsPL,
 bprobgHsPO,
@@ -9,10 +13,13 @@ LM.bpm,
 VuongClarke.bcm,
 plot.SemiParBIVProbit,
 predict.SemiParBIVProbit,
-print.AT,print.est.prev,print.mb,
+print.AT, 
+print.est.prev, 
+print.mb,
 print.SemiParBIVProbit,
 print.summary.SemiParBIVProbit,
-S.m,S.mPL,
+S.m, 
+S.mPL,
 sem.checks,
 SemiParBIVProbit.fit.post,
 SemiParBIVProbit.fit,
@@ -26,8 +33,7 @@ importFrom(survey, svyrecvar, twophasevar, twophase2var, svyCprod)
 importFrom(trust,trust)
 importFrom(mvtnorm,rmvnorm)
 importFrom(VGAM,pbinorm,dbinorm)
-importFrom(VineCopula, BiCopHfuncDeriv)
-importFrom(CDVine,BiCopCDF,BiCopHfunc,BiCopPDF,BiCopMetaContour)
+importFrom(VineCopula, BiCopMetaContour)
 import(mgcv)
 importFrom(Matrix,bdiag,Matrix)
 importFrom(sn,qsn,psn,T.Owen)
@@ -38,3 +44,11 @@ S3method(summary, SemiParBIVProbit)
 S3method(print, AT)
 S3method(print, SemiParBIVProbit)
 S3method(print, summary.SemiParBIVProbit)
+S3method(logLik, SemiParBIVProbit)
+S3method(predict, SemiParBIVProbit)
+S3method(print, est.prev)
+S3method(print, mb)
+
+
+
+

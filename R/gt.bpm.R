@@ -1,6 +1,8 @@
 gt.bpm <- function(object) {
 
 if(object$BivD!="N" || object$PL!="P") stop("This test's implementation is currently valid for bivariate normal errors only.")
+if(!is.null(object$X3) ) stop("This test is not designed for a varying correlation coefficient model.")
+
 
 corr <- 0
 

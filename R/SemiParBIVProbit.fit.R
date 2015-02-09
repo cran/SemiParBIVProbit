@@ -6,7 +6,7 @@ SemiParBIVProbit.fit  <- function(func.opt, start.v,
 
 spE <- sp
 
-if( PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0) ){
+if( PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0) ){
     lspe <- length(sp)
     if(eqPL=="both") exclu <- c(lspe-1,lspe) else exclu <- c(lspe)  
     spE <- sp[-exclu]
@@ -28,7 +28,7 @@ if( PL!="P" && fitPL!="pLiksp" ) list(fit=fit, iter.if=iter.if, conv.sp=conv.sp,
 
 
 
-    if((VC$fp==FALSE && (VC$l.sp1!=0 || VC$l.sp2!=0)) || PL!="P"){
+    if((VC$fp==FALSE && (VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0)) || PL!="P"){
 
        stoprule.SP <- 1; conv.sp <- TRUE; iter.inner <- iter.sp <- 0  
        
@@ -89,7 +89,7 @@ if(PL == "P" && VC$awlm == TRUE){
 
              coefo <- fit$argument
              spEo <- spo <- sp 
-             if(PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0) ) spEo <- spo[-exclu]   
+             if(PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0) ) spEo <- spo[-exclu]   
   
 		 wor.c <- try( wcf(fit, VC, myf, extra.l) ) 
 		 
@@ -104,7 +104,7 @@ if(PL == "P" && VC$awlm == TRUE){
                                 	      gamma = VC$infl.fac))
                 		if(class(bs.mgfit)=="try-error") {conv.sp <- FALSE; break} 
                 	spE <- sp <- bs.mgfit$sp; iter.sp <- iter.sp + 1; names(sp) <- names(spo) 
-                        if(PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0) ) spE <- sp[-exclu]
+                        if(PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0) ) spE <- sp[-exclu]
                            
              o.ests <- c(fit$argument)
 

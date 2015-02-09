@@ -4,11 +4,13 @@
 \title{Semiparametric Bivariate Probit Modelling}
 
 \description{ 
-\code{SemiParBIVProbit} can be used to fit bivariate probit models where the linear predictors can be flexibly specified using 
+\code{SemiParBIVProbit} can be used to fit bivariate probit models where the linear predictors of the two main equations can 
+be flexibly specified using 
 parametric and regression spline components. Several bivariate copula distributions are supported. During the model fitting process, the 
 possible presence of correlated error equations, endogeneity, non-random sample selection or partial observability is accounted for. Regression 
 spline bases are extracted from the package \code{mgcv}. Multi-dimensional smooths are available 
-via the use of penalized thin plate regression splines (isotropic).
+via the use of penalized thin plate regression splines (isotropic). Note that, if it makes sense, the dependence parameter of the bivariate 
+distribution employed can be specified as a function of covariates.
 
 }
 
@@ -17,9 +19,9 @@ via the use of penalized thin plate regression splines (isotropic).
 \usage{
 SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,  
                  start.v = NULL, Model = "B", method = "trwlF", 
-                 BivD = "N", nu = 3, fp = FALSE, PL = "P", eqPL = "both", 
+                 BivD = "N", fp = FALSE, PL = "P", eqPL = "both", 
                  valPL = c(0,0), fitPL = "pLiksp", spPL = c(0.01,0.01), 
-                 hess = TRUE, infl.fac = 1, pPen1 = NULL, pPen2 = NULL, 
+                 hess = TRUE, infl.fac = 1, 
                  rinit = 1, rmax = 100, iterlimsp = 50, pr.tolsp = 1e-6,
                  gc.l = FALSE, awlm = FALSE, parscale, extra.regI = "t")
 }
@@ -32,7 +34,8 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
                   predictors. \code{SemiParBIVProbit} supports the use shrinkage smoothers for variable
                   selection purposes. See the examples below and the documentation of \code{mgcv} for further 
                   details on formula specifications. Note that 
-                  if \code{Model = "BSS"} then the first formula MUST refer to the selection equation.} 
+                  if \code{Model = "BSS"} then the first formula MUST refer to the selection equation. Furthermore,
+                  if it makes sense, a third equation for the dependence parameter can be specified (see Example 1 below).} 
 
 \item{data}{An optional data frame, list or environment containing the variables in the model.  If not found in \code{data}, the
             variables are taken from \code{environment(formula)}, typically the environment from which \code{SemiParBIVProbit} is called.} 
@@ -51,15 +54,13 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
               parameter estimation is employed, and is the default.}
 
 \item{BivD}{Type of bivariate error distribution employed. Possible choices are "N", "C0", "C90", "C180", "C270", "J0", "J90", "J180", "J270", 
-            "G0", "G90", "G180", "G270", "F", "T" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
+            "G0", "G90", "G180", "G270", "F" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
-             Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, and Student-t (with fixed degrees of 
-             freedom \code{nu}). Note that for empirical applications options N, C (and all rotated versions), F and T may suffice.
-             This is becuase the Clayton, Joe and Gumbel copulas are very similar; for instace, C90, J270 and G270 are very close.
+             Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), and Frank. Note that 
+             for empirical applications options N, C (and all rotated versions), and F may suffice.
+             This is because the Clayton, Joe and Gumbel copulas are very similar; for instance, C90, J270 and G270 are very close.
              Nevertheless, there might be situations in which the use of Joe or Gumbel may result in more stable computation as
-             compared to Clayton.} 
-
-\item{nu}{Degrees of freedom for Student-t.}
+             compared to Clayton.}            
 
 \item{fp}{If \code{TRUE} then a fully parametric model with unpenalised regression splines if fitted. See the example below.}  
 
@@ -81,8 +82,6 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
 
 \item{infl.fac}{Inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
              this parameter to a value greater than 1.}
-
-\item{pPen1, pPen2}{Optional list specifying any penalties to be applied to the parametric model terms of equations 1 and 2.}
 
 \item{rinit}{Starting trust region radius. The trust region radius is adjusted as the algorithm proceeds. See the documentation
              of \code{trust} for further details.}
@@ -116,8 +115,9 @@ documentation of \code{trust} for more details.}
 
 The bivariate models considered in this package have probit links for the two model equations, and model the association
 between the responses through the correlation parameter \eqn{\rho}{\rho} of a standardised bivariate normal distribution, or that 
-of a bivariate copula distribution, \eqn{\theta}{\theta}. The linear predictors are flexibly specified using 
-parametric components and smooth functions of covariates. Replacing the smooth components with their regression spline expressions 
+of a bivariate copula distribution, \eqn{\theta}{\theta}. The linear predictors of the two equations are flexibly specified using 
+parametric components and smooth functions of covariates. The same can be done for the dependence parameter if it makes sense.
+Replacing the smooth components with their regression spline expressions 
 yields a fully parametric bivariate probit model. In principle, classic 
 maximum likelihood estimation can be employed. However, to avoid overfitting, penalized likelihood maximization is 
 employed instead. Here, the use of 
@@ -167,7 +167,7 @@ Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence o
 
 Marra G., Radice R. and Filippou P. (submitted), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity.
 
-McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Based Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}.
+McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}, 26(2), 229-237.
 
 Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes.
 
@@ -196,6 +196,13 @@ The use of asymmetric links is not likely to lead to significant improvements as
 using this option at the end of the empirical analysis as a sensitivity analysis tool, and not during
 the model building process. Also, the theoretical and numerical complexity introduced by asymmetric links means that
 convergence failures are more likely to occur and that data requirements are typically high.
+
+In the contexts of endogeneity and non-random sample selection, it would not make much sense to specify the dependence
+parameter as function of covariates. This is because, in these situations, the assumption is that 
+the dependence parameter models the 
+association between the unobserved confounders in the two equations. However, this option does make sense when it is believed that the  
+association coefficient varies across geographical areas, for instance. If the interest is not in modelling unobserved confounding then 
+many possible structures may be possible for the dependence parameter and these can be tried out.
 
 
 } 
@@ -295,7 +302,23 @@ plot(outSS, eq = 1, select = 1, scale = 0)
 plot(outSS, eq = 1, select = 2, ylim = c(-0.1,0.1))
 plot(outSS, eq = 2, select = 1, scale = 0)
 plot(outSS, eq = 2, select = 2, ylim = c(-0.1,0.1))
-graphics.off() 
+
+
+## SEMIPARAMETRIC BIVARIATE PROBIT with association parameter 
+## depending on covariates as well
+
+outD <- SemiParBIVProbit(list(y1 ~ x1 + s(x2), 
+                              y2 ~ x1 + s(x2),
+                                 ~ x1 + s(x2) ), 
+                          data = dataSim)
+sem.checks(outD)  
+summary(outD)
+outD$rho
+
+plot(outD, eq = 1, seWithMean = TRUE)
+plot(outD, eq = 2, seWithMean = TRUE)
+plot(outD, eq = 3, seWithMean = TRUE)
+graphics.off()
 
 #
 #

@@ -1,3 +1,9 @@
+version 3.3
+- calculation of bivariate cdfs made faster.
+- dependence parameter is now allowed to depend on covariates.
+- Student-t case suppressed. Evaluation of cdf was expensive (which did not make this option viable for practical modelling). Moreover, for binary data,
+this cdf never really made a difference as compared to a Gaussian cdf.
+
 version 3.2-13.2
 - citation file fixed.
 

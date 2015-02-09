@@ -6,7 +6,7 @@ SemiParBIVProbit.fit1  <- function(func.opt, start.v,
 
 spE <- sp
 
-if( PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0) ){
+if( PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0) ){
     lspe <- length(sp)
     if(eqPL=="both") exclu <- c(lspe-1,lspe) else exclu <- c(lspe)  
     spE <- sp[-exclu]
@@ -21,12 +21,16 @@ if( PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0) ){
 
   iter.if <- fit$iterations  
 
+
+  #if( !is.null(VC$rho) ) fit$argument["athrho"] <- VC$i.rho
+
+
   conv.sp <- iter.sp <- iter.inner <- bs.mgfit <- wor.c <- magpp <- NULL
 
 if( PL!="P" && fitPL!="pLiksp" ) list(fit=fit, iter.if=iter.if, conv.sp=conv.sp, iter.sp=iter.sp, iter.inner=iter.inner, bs.mgfit=bs.mgfit, wor.c=wor.c, sp=sp) else{
 
 
-    if((VC$fp==FALSE && (VC$l.sp1!=0 || VC$l.sp2!=0)) || PL!="P"){
+    if((VC$fp==FALSE && (VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0)) || PL!="P"){
 
        stoprule.SP <- 1; conv.sp <- TRUE; iter.inner <- iter.sp <- 0  
        
@@ -36,7 +40,7 @@ if( PL!="P" && fitPL!="pLiksp" ) list(fit=fit, iter.if=iter.if, conv.sp=conv.sp,
              #coefo <- c(fit$argument)
              spEo <- spo <- sp 
 
-             if(PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0) ) spEo <- spo[-exclu]   
+             if(PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0) ) spEo <- spo[-exclu]   
   
 		 wor.c <- working.comp1(fit) 
   
@@ -48,7 +52,7 @@ if( PL!="P" && fitPL!="pLiksp" ) list(fit=fit, iter.if=iter.if, conv.sp=conv.sp,
                                 	      gamma = VC$infl.fac))
                 		if(class(bs.mgfit)=="try-error") {conv.sp <- FALSE; break} 
                 	spE <- sp <- bs.mgfit$sp; iter.sp <- iter.sp + 1; names(sp) <- names(spo) 
-                        if(PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0) ) spE <- sp[-exclu]
+                        if(PL!="P" && (VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0) ) spE <- sp[-exclu]
                            
              o.ests <- c(fit$argument) # bs.mgfit$b NGI! ; names(o.ests) <- names(fit$argument)
 
@@ -58,6 +62,8 @@ if( PL!="P" && fitPL!="pLiksp" ) list(fit=fit, iter.if=iter.if, conv.sp=conv.sp,
                               respvec=respvec, VC=VC, 
                               sp=spE, qu.mag=qu.mag, 
                               blather=TRUE, iterlim=iterlim)
+                              
+             # if( !is.null(VC$rho) ) fit$argument["athrho"] <- VC$i.rho                 
                               
              iter.inner <- iter.inner + fit$iterations   	                                    
               

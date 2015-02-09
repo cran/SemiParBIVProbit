@@ -3,7 +3,11 @@ adjCovSD <- function(object, design){
 if(object$PL!="P") stop("This correction does not currently work for models with asymmetric links.")
 
     Ainv <- object$Vb 
-    estfun <- cbind( c(object$fit$dl.dbe1)*object$X1, c(object$fit$dl.dbe2)*object$X2, object$fit$dl.drho )
+    
+    if(is.null(object$X3) )  mul <- 1
+    if(!is.null(object$X3) ) mul <- object$X3[object$good,]
+    
+    estfun <- cbind( c(object$fit$dl.dbe1)*object$X1[object$good,], c(object$fit$dl.dbe2)*object$X2[object$good,], object$fit$dl.drho*mul )
     
     if (inherits(design,"survey.design2"))
       covsan <- svyrecvar(estfun%*%Ainv,design$cluster,design$strata,design$fpc,postStrata=design$postStrata)

@@ -11,7 +11,11 @@ if(is.null(sw)) sw <- rep(1,length(eta2))
 
 core <- apply( c(dnorm(eta2))*X2sg, 2, weighted.mean,  w = sw)
 
-if(naive==FALSE) G <- c( rep(0,x$X1.d2), core ,0) 
+
+if( is.null(x$X3) ) zerod <- 0
+if(!is.null(x$X3) ) zerod <- rep(0, x$X3.d2)
+
+if(naive==FALSE) G <- c( rep(0,x$X1.d2), core, zerod) 
 if(naive==TRUE)  G <- c( core )  
 
   

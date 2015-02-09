@@ -7,7 +7,7 @@
 penalized or unpenalized maximum likelihood optimization. Possible bivariate distributions are 
 bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton, rotated Clayton (270 degrees), Joe, 
 rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees), Gumbel, rotated Gumbel (90 degrees), survival Gumbel, 
-rotated Gumbel (270 degrees), Frank and Student-t with fixed degrees of freedom.
+rotated Gumbel (270 degrees), and Frank.
 
 }
 

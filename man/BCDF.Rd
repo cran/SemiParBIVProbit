@@ -1,9 +1,9 @@
-\name{SemiParBIVProbit.fit1}
-\alias{SemiParBIVProbit.fit1}
+\name{BCDF}
+\alias{BCDF}
 
 \title{Internal Function}
 
-\description{Internal faster fitting function.}
+\description{It evaluates the cdf of several copula functions.}
 
 
 \author{

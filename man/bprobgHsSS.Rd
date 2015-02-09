@@ -7,7 +7,7 @@
 penalized or unpenalized maximum likelihood optimization, for the non-random sample selection model case. Possible 
 bivariate distributions are bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton, rotated 
 Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees), Gumbel, rotated Gumbel (90 degrees), 
-survival Gumbel, rotated Gumbel (270 degrees), Frank and Student-t with fixed degrees of freedom.
+survival Gumbel, rotated Gumbel (270 degrees), and Frank.
 
 }
 
@@ -25,7 +25,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, 7, 1432-1455.
 
-McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Based Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}.
+McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}, 26(2), 229-237.
 
 
 

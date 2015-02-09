@@ -12,7 +12,6 @@ if(is.character(nm.bin)==FALSE) stop("nm.bin is not a character!")
 if(x$PL!="P") delta <- FALSE
 
 est.ATb <- NA
-ass.ps2 <- ass.p2 <- NULL
 ind <- list()
 
 good <- x$fit$good
@@ -38,18 +37,18 @@ ind[[2]] <- x$X1.d2+(1:x$X2.d2)
 
 
 
-if(eq==1){ X.int <- x$X1
+if(eq==1){ X.int <- x$X1[good,]
     if(naive==FALSE){
-           X.noi <- x$X2
+           X.noi <- x$X2[good,]
            ind.int <- ind[[1]]
            ind.noi <- ind[[2]] 
            etap.noi <- x$eta2 }
                  
 }
 
-if(eq==2){ X.int <- x$X2
+if(eq==2){ X.int <- x$X2[good,]
     if(naive==FALSE){
-           X.noi <- x$X1
+           X.noi <- x$X1[good,]
            ind.int <- ind[[2]]
            ind.noi <- ind[[1]] 
            etap.noi  <- x$eta1}
@@ -102,6 +101,9 @@ if(E==TRUE) ind.excl <- rep(TRUE,x$n) else{
 ###############
 
 if(naive==FALSE){
+
+
+
 
 
 if(x$PL=="P"){
@@ -217,10 +219,16 @@ d.etn  <- 2*dnorm(etno)*pnorm(x$xi1*etno)
   }
   
 
-if(x$BivD %in% c("N", "T") ) {ass.p <- x$rho; ass.pst <- coef(x)["athrho"] } else{ ass.p <- x$theta; ass.pst <- coef(x)["theta.star"]} 
- 
 
 
+
+if( is.null(x$X3) ) {
+  if(x$BivD == "N" ) {ass.p <- x$rho; ass.pst <- coef(x)["athrho"] } else{ ass.p <- x$theta; ass.pst <- coef(x)["theta.star"]}  
+}
+
+if( !is.null(x$X3) ) {
+  if(x$BivD == "N" ) {ass.p <- x$rho; ass.pst <- x$fit$theta.star } else{ ass.p <- x$theta; ass.pst <- x$fit$theta.star}  
+}
 
 
 p.int1 <- pmax(p.int1, epsilon ) 
@@ -233,26 +241,15 @@ p.etn  <- pmax(p.etn, epsilon )
 p.etn <- ifelse(p.etn==1, 0.9999999,p.etn)
 
 
-
-   if(x$BivD=="N") { 
-                     pn.int1 <- qnorm(p.int1)
-                     pn.int0 <- qnorm(p.int0)
-                     pn.etn  <- qnorm(p.etn) 
-                     C.11  <- pmax(pbinorm(pn.int1,pn.etn,cov12=ass.p), epsilon )
-                     C.10  <- p.int0 - pmax(pbinorm(pn.int0,pn.etn,cov12=ass.p), epsilon )
-
-                    }else{ 
-                    
-                     if(x$BivD=="T") pa2 <- x$nu else pa2 <- 0
-                     C.11  <- pmax( BiCopCDF(p.int1,p.etn, x$nC, par=ass.p,par2=pa2) , epsilon )
-                     C.10  <- p.int0 - pmax( BiCopCDF(p.int0,p.etn, x$nC, par=ass.p, par2=pa2) , epsilon )
-                         }           
-
-
+   C.11  <- pmax( BiCDF(p.int1, p.etn, x$nC, ass.p) , epsilon )
+   C.10  <- p.int0 - pmax( BiCDF(p.int0, p.etn, x$nC, ass.p) , epsilon )
+                                 
 
    est.AT <- mean(   (C.11/p.etn - C.10/(1-p.etn))[ind.excl],na.rm = TRUE   )
 
-} 
+} # end naive condition 
+
+
 
 
 if(naive == TRUE){
@@ -285,28 +282,29 @@ if(delta==TRUE){
 
   if(naive == FALSE){
 
-    if(x$BivD %in% c("N","T")      ) add.b <- 1/cosh(coef(x)["athrho"])^2
+    if(x$BivD %in% c("N")      )     add.b <- 1/cosh(ass.pst)^2
     if(x$BivD=="F")                  add.b <- 1
-    if(x$BivD %in% c("C0", "C180","J0", "J180","G0", "G180") ) add.b <-  exp(coef(x)["theta.star"])
-    if(x$BivD %in% c("C90","C270","J90","J270","G90","G270") ) add.b <- -exp(coef(x)["theta.star"])
+    if(x$BivD %in% c("C0", "C180","J0", "J180","G0", "G180") ) add.b <-  exp(ass.pst)
+    if(x$BivD %in% c("C90","C270","J90","J270","G90","G270") ) add.b <- -exp(ass.pst)
    
-   dC1 <- copgHs(p1=p.etn,p2=p.int1,teta=ass.p,teta.st=ass.pst,BivD=x$BivD,nC=x$nC,nu=x$nu,xi1=NULL,xi2=NULL,eta1=etno,eta2=eti1,PL=x$PL,eqPL=x$eqPL)
-   dC0 <- copgHs(p1=p.etn,p2=p.int0,teta=ass.p,teta.st=ass.pst,BivD=x$BivD,nC=x$nC,nu=x$nu,xi1=NULL,xi2=NULL,eta1=etno,eta2=eti0,PL=x$PL,eqPL=x$eqPL)
+   dC1 <- copgHs(p1=p.etn,p2=p.int1,teta=ass.p,teta.st=ass.pst,BivD=x$BivD,nC=x$nC,nu=NULL,xi1=NULL,xi2=NULL,eta1=etno,eta2=eti1,PL=x$PL,eqPL=x$eqPL)
+   dC0 <- copgHs(p1=p.etn,p2=p.int0,teta=ass.p,teta.st=ass.pst,BivD=x$BivD,nC=x$nC,nu=NULL,xi1=NULL,xi2=NULL,eta1=etno,eta2=eti0,PL=x$PL,eqPL=x$eqPL)
 
    dATT.noint <- ( (dC1$c.copula.be1*p.etn-C.11)/p.etn^2 + (dC0$c.copula.be1*(1-p.etn)-C.10)/(1-p.etn)^2)*d.etn 
    dATT.noint <- colMeans( (c(dATT.noint)*X.noi)[ind.excl,] ) 
 
    dATT.int   <- colMeans( (c( (dC1$c.copula.be2*d.int1)/p.etn )*d1)[ind.excl,] ) - colMeans( (c( (1-dC0$c.copula.be2)*d.int0/(1-p.etn) )*d0)[ind.excl,])
 
-   dATT.tet   <- mean(((dC1$c.copula.theta/add.b)/p.etn + (dC0$c.copula.theta/add.b)/(1-p.etn))[ind.excl])  
+   if( is.null(x$X3) ) dATT.tet   <- mean(((dC1$c.copula.theta/add.b)/p.etn + (dC0$c.copula.theta/add.b)/(1-p.etn))[ind.excl])  
+   
+   if( !is.null(x$X3) ) dATT.tet <- colMeans( (c( (dC1$c.copula.theta/add.b)/p.etn + (dC0$c.copula.theta/add.b)/(1-p.etn) )*x$X3[good,])[ind.excl,]  )  
 
 
    if(eq==2) dATT <- c(dATT.noint,dATT.int,dATT.tet) else dATT <- c(dATT.int,dATT.noint,dATT.tet) 
 
 
-   var <- bprobgHs(params=coef(x), PL=x$PL, eqPL=x$eqPL, 
-                         respvec=x$respvec, VC=x$VC, 
-                         sp=x$sp, qu.mag=x$qu.mag, AT=TRUE)$hessian
+   var <- bprobgHs(params=coef(x), PL=x$PL, eqPL=x$eqPL, respvec=x$respvec, VC=x$VC, 
+                   sp=x$sp, qu.mag=x$qu.mag, AT=TRUE)$hessian
 
 
    var.eig <- eigen(var, symmetric=TRUE)                    
@@ -359,8 +357,8 @@ bs <- rmvnorm(n.sim, mean = coef(x), sigma=x$Vb, method=s.meth)
  eti1s <- d1%*%t(bs[,ind.int])    
  eti0s <- d0%*%t(bs[,ind.int])   
  etnos <- X.noi%*%t(bs[,ind.noi]) 
-
-                                  
+ 
+                          
 if(x$PL=="P"){
 	p.int1s <- pnorm(eti1s)
 	p.int0s <- pnorm(eti0s)
@@ -422,28 +420,34 @@ p.etns  <- matrix(2*pbinorm( as.vector(etnos), 0, cov12=del1),dim1,dim2)
   }  
   
   
-
-
-if(x$BivD!="N"){
-
-   if(x$BivD=="F")                   ass.ps <- bs[,p.rho] + epsilon
-   if(x$BivD=="T")                  {ass.ps <- tanh(bs[,p.rho]); ass.ps <- ifelse(ass.ps %in% c(-1,1), sign(ass.ps)*0.9999999, ass.ps) }
   
-   if(x$BivD %in% c("C0", "C180") )  ass.ps <-   exp(bs[,p.rho]) + epsilon
-   if(x$BivD %in% c("C90","C270") )  ass.ps <- -(exp(bs[,p.rho]) + epsilon)
+  
+  
+ if( !is.null(x$X3) ) etds <- x$X3[good,]%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)])
+ if(  is.null(x$X3) ) etds <- bs[, p.rho]  
+  
+  
+#if(x$BivD!="N"){
 
-   if(x$BivD %in% c("J0", "J180") )  ass.ps <-    1 + exp(bs[,p.rho]) + epsilon
-   if(x$BivD %in% c("J90","J270") )  ass.ps <- -( 1 + exp(bs[,p.rho]) + epsilon)
+   if(x$BivD=="F")                   ass.ps <- etds + epsilon
+   if(x$BivD %in% c("N"))           {ass.ps <- tanh(etds); ass.ps <- ifelse(ass.ps == -1, -0.9999999, ass.ps) 
+                                                           ass.ps <- ifelse(ass.ps ==  1,  0.9999999, ass.ps) }
+  
+   if(x$BivD %in% c("C0", "C180") )  ass.ps <-   exp(etds) + epsilon
+   if(x$BivD %in% c("C90","C270") )  ass.ps <- -(exp(etds) + epsilon)
+
+   if(x$BivD %in% c("J0", "J180") )  ass.ps <-    1 + exp(etds) + epsilon
+   if(x$BivD %in% c("J90","J270") )  ass.ps <- -( 1 + exp(etds) + epsilon)
  
-   if(x$BivD %in% c("G0", "G180") )  ass.ps <-    1 + exp(bs[,p.rho])
-   if(x$BivD %in% c("G90","G270") )  ass.ps <- -( 1 + exp(bs[,p.rho]) )
+   if(x$BivD %in% c("G0", "G180") )  ass.ps <-    1 + exp(etds)
+   if(x$BivD %in% c("G90","G270") )  ass.ps <- -( 1 + exp(etds) )
    
    ass.ps <- ifelse(ass.ps == Inf ,  8.218407e+307, ass.ps )
    ass.ps <- ifelse(ass.ps == -Inf, -8.218407e+307, ass.ps )
 
-}
+#}
 
-if(x$BivD=="T") asp2 <- rep(x$nu,n.sim) else asp2 <- rep(0,n.sim) 
+
 
 
 p.int1s <- pmax(p.int1s, epsilon )
@@ -455,27 +459,22 @@ p.etns  <- ifelse(p.etns==1,0.9999999,p.etns)
 
 
 
+
+
+
+if( is.null(x$X3) ) ass.ps <- t(matrix(ass.ps)) 
+
+
 for(i in 1:n.sim){ 
 
- if(x$BivD=="N"){    pn.int1s <- qnorm(p.int1s[,i])
-                     pn.int0s <- qnorm(p.int0s[,i])
-                     pn.etns  <- qnorm(p.etns[,i]) 
-
-est.ATb[i] <- mean(   (pmax(pbinorm(pn.int1s,pn.etns,cov12=tanh(bs[i,p.rho])), epsilon)/p.etns[,i] - (p.int0s[,i] - pmax(pbinorm(pn.int0s,pn.etns,cov12=tanh(bs[i,p.rho])), epsilon))/(1-p.etns[,i]))[ind.excl],na.rm = TRUE   )
-
-                }else{
-
- C.11 <- pmax( BiCopCDF(p.int1s[,i],p.etns[,i], x$nC, par=ass.ps[i],par2=asp2[i]) , epsilon )
- C.10 <- p.int0s[,i] - pmax( BiCopCDF(p.int0s[,i],p.etns[,i], x$nC, par=ass.ps[i],par2=asp2[i]) , epsilon )
+ C.11 <- pmax( BiCDF(p.int1s[,i], p.etns[,i], x$nC, ass.ps[,i]) , epsilon )
+ C.10 <- p.int0s[,i] - pmax( BiCDF(p.int0s[,i], p.etns[,i], x$nC, ass.ps[,i]) , epsilon )
 
  est.ATb[i] <- mean(   (C.11/p.etns[,i] - C.10/(1-p.etns[,i]))[ind.excl],na.rm = TRUE   )
-                     }
+                  }
+                  
 
-
-                 }
-
-
-
+               
 }  # end big loop   
 
 

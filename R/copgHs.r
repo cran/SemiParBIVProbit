@@ -1,4 +1,4 @@
-copgHs <- function(p1,p2,eta1=NULL,eta2=NULL,teta,teta.st,xi1,xi1.st=NULL,xi2,xi2.st=NULL,BivD,nC,nu,PL=NULL,eqPL=NULL){
+copgHs <- function(p1,p2,eta1=NULL,eta2=NULL,teta,teta.st,xi1,xi1.st=NULL,xi2,xi2.st=NULL,BivD,nC,nu=NULL,PL=NULL,eqPL=NULL){
 
 epsilon <- 0 # .Machine$double.eps*10^6
 c.copula.lambda1 <- c.copula.lambda2 <- bit1.lambda1.2 <- bit1.lambda2.2 <- c.copula2.be1lambda1 <- c.copula2.be2lambda2 <- c.copula2.be1lambda2 <- c.copula2.be2lambda1 <- bit1.thlambda1 <- bit1.thlambda2 <- bit1.lambda1lambda2 <- NULL
@@ -12,12 +12,15 @@ qp1 <- qnorm(p1)
 qp2 <- qnorm(p2)
 ct.st <- cosh(teta.st)
 
-c.copula.be1 <- BiCopHfunc(p1, p2, family=1, par=teta)$hfunc1
-c.copula.be2 <- BiCopHfunc(p1, p2, family=1, par=teta)$hfunc2
-c.copula.theta <- dbinorm(qnorm(p1),qnorm(p2), cov12=teta)*(1/ct.st^2) 
-c.copula2.be1 <- BiCopHfuncDeriv(p2, p1, 1, par=teta, deriv="u2")                
-c.copula2.be2 <- BiCopHfuncDeriv(p1, p2, 1, par=teta, deriv="u2")
-c.copula2.be1be2 <- BiCopPDF(p1, p2, 1, par=teta)
+c.copula.be1 <- pnorm( (qp2 - teta*qp1)/sqrt(1 - teta^2)   )  # BiCopHfunc(p1, p2, family=1, par=teta)$hfunc1                          
+c.copula.be2 <- pnorm( (qp1 - teta*qp2)/sqrt(1 - teta^2)   )  # BiCopHfunc(p1, p2, family=1, par=teta)$hfunc2
+
+c.copula.theta <- dbinorm(qp1,qp2, cov12=teta)*(1/ct.st^2) 
+
+c.copula2.be1 <- dnorm((qp2-teta*qp1)/sqrt(1 - teta^2))  * sqrt(2*pi) *(-teta)/sqrt(1 - teta^2)/exp(-qp1^2/2) # BiCopHfuncDeriv(p2, p1, 1, par=teta, deriv="u2")    
+c.copula2.be2 <- dnorm((qp1-teta*qp2)/sqrt(1 - teta^2))  * sqrt(2*pi) *(-teta)/sqrt(1 - teta^2)/exp(-qp2^2/2) # BiCopHfuncDeriv(p1, p2, 1, par=teta, deriv="u2")
+
+c.copula2.be1be2 <- 1/sqrt(1 - teta^2)*exp(  - (teta^2*( qnorm(p1)^2 +  qnorm(p2)^2 ) - 2*teta*qnorm(p1)*qnorm(p2) ) / (2*(1 - teta^2)) ) # BiCopPDF(p1, p2, 1, par=teta)
 
 c.copula2.be1th <- -(dnorm((qp2 - tt.st * qp1)/sqrt(1 - tt.st^2)) * 
      (1/ct.st^2 * qp1/sqrt(1 - tt.st^2) - (qp2 - 
@@ -57,54 +60,6 @@ bit1.th2ATE <- 0.5 * (pi * (0.5 * (2 * teta * (1 - teta^2)^-0.5)))/(pi * sqrt(1 
 
 
 }
-
-
-if(BivD=="T"){
-
-tt.st <- tanh(teta.st)
-ct.st <- cosh(teta.st)
-qtp1  <- qt(p1,nu)
-qtp2  <- qt(p2,nu)
-
-c.copula.be1 <- BiCopHfunc(p1, p2, family=2, par=teta, par2=nu)$hfunc1
-c.copula.be2 <- BiCopHfunc(p1, p2, family=2, par=teta, par2=nu)$hfunc2
-c.copula.theta <- ( 1 + (qtp1^2+qtp2^2-2*teta*qtp1*qtp2)/(nu*(1-teta^2)) )^(-nu/2)/(2*pi*sqrt(1-teta^2))*(1/ct.st^2) 
-
-c.copula2.be1    <- BiCopHfuncDeriv(p2, p1, 2, par=teta, par2=nu, deriv="u2")  
-c.copula2.be2    <- BiCopHfuncDeriv(p1, p2, 2, par=teta, par2=nu, deriv="u2")
-c.copula2.be1be2 <- BiCopPDF(p1, p2, 2, par=teta, par2=nu)
-c.copula2.be1th  <- BiCopHfuncDeriv(p2, p1, 2, par=teta, par2=nu, deriv="par")/ct.st^2 
-c.copula2.be2th  <- BiCopHfuncDeriv(p1, p2, 2, par=teta, par2=nu, deriv="par")/ct.st^2
- 
-
-bit1.th2 <- -(((1 + (qtp1^2 + qtp2^2 - 2 * tt.st * qtp1 * qtp2)/(nu * 
-    (1 - tt.st^2)))^((-nu/2) - 1) * ((-nu/2) * (2 * (1/ct.st^2) * 
-    qtp1 * qtp2/(nu * (1 - tt.st^2)) - (qtp1^2 + qtp2^2 - 
-    2 * tt.st * qtp1 * qtp2) * (nu * (2 * (1/ct.st^2 * 
-    tt.st)))/(nu * (1 - tt.st^2))^2))/(2 * pi * 
-    sqrt(1 - tt.st^2)) - (1 + (qtp1^2 + qtp2^2 - 2 * 
-    tt.st * qtp1 * qtp2)/(nu * (1 - tt.st^2)))^(-nu/2) * 
-    (2 * pi * (0.5 * (2 * (1/ct.st^2 * tt.st) * 
-        (1 - tt.st^2)^-0.5)))/(2 * pi * sqrt(1 - tt.st^2))^2)/ct.st^2 + 
-    (1 + (qtp1^2 + qtp2^2 - 2 * tt.st * qtp1 * qtp2)/(nu * 
-        (1 - tt.st^2)))^(-nu/2)/(2 * pi * sqrt(1 - tt.st^2)) * 
-        1 * (2 * (sinh(teta.st) * ct.st))/(ct.st^2)^2) 
-
-bit1.th2ATE <- -((1 + (qtp1^2 + qtp2^2 - 2 * teta * qtp1 * qtp2)/(nu * (1 - 
-    teta^2)))^((-nu/2) - 1) * ((-nu/2) * (2 * qtp1 * qtp2/(nu * 
-    (1 - teta^2)) - (qtp1^2 + qtp2^2 - 2 * teta * qtp1 * qtp2) * 
-    (nu * (2 * teta))/(nu * (1 - teta^2))^2))/(2 * pi * sqrt(1 - 
-    teta^2)) - (1 + (qtp1^2 + qtp2^2 - 2 * teta * qtp1 * qtp2)/(nu * 
-    (1 - teta^2)))^(-nu/2) * (2 * pi * (0.5 * (2 * teta * (1 - 
-    teta^2)^-0.5)))/(2 * pi * sqrt(1 - teta^2))^2)
-
-
-
-}
-
-
-
-
 
 
 if(BivD=="C0"){

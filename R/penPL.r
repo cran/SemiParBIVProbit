@@ -1,5 +1,5 @@
 penPL <- function(qu.mag, sp, VC, add.z, fitPL){
-            
+              
         dimP1 <- dimP2 <- 0     
         S1 <- S2 <- matrix(0,1,1)  
     
@@ -9,18 +9,18 @@ penPL <- function(qu.mag, sp, VC, add.z, fitPL){
         ma1 <- matrix(0,VC$gp1,VC$gp1) 
         ma2 <- matrix(0,VC$gp2,VC$gp2)
     
-        if(length(VC$pPen1)!=0){ indP1 <- qu.mag$off[1]:(qu.mag$off[1]+qu.mag$rank[1]-1)
+        if(0!=0){ indP1 <- qu.mag$off[1]:(qu.mag$off[1]+qu.mag$rank[1]-1)
                               dimP1 <- length(indP1)
                               ma1[indP1,indP1] <- S[1:dimP1,1:dimP1]
                                     } 
     
-        if(length(VC$pPen2)!=0){ 
+        if(0!=0){ 
                               indP2 <- (qu.mag$off[VC$l.sp1+1]-VC$X1.d2):(-VC$X1.d2+qu.mag$off[VC$l.sp1+1]+qu.mag$rank[VC$l.sp1+1]-1)
                               dimP2 <- length(indP2)
                               ma2[indP2,indP2] <- S[(dimP1+1):(length(indP2)+dimP1),(dimP1+1):(length(indP2)+dimP1)]
                                     }                                 
         
-        lP1 <- length(VC$pPen1); lP2 <- length(VC$pPen2) 
+        lP1 <- 0; lP2 <- 0
         
         if((lP1!=0 && VC$l.sp1>1) || (lP1==0 && VC$l.sp1>0)) S1 <- S[(dimP1+1):(dimP1+VC$X1.d2-VC$gp1),(dimP1+1):(dimP1+VC$X1.d2-VC$gp1)]
         if((lP2!=0 && VC$l.sp2>1) || (lP2==0 && VC$l.sp2>0)){dS1 <- dim(S1)[2]; if(dS1==1) dS1 <- 0; 

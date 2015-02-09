@@ -5,7 +5,8 @@
 \title{Semiparametric Bivariate Probit Modelling}
 
 \description{\code{SemiParBIVProbit} provides a function for fitting bivariate probit models with semiparametric 
-predictors, including linear and nonlinear effects. Several bivariate copula distributions are supported. Smoothness selection is
+predictors, including linear and nonlinear effects. Several bivariate copula distributions are supported. The dependence parameter of 
+the bivariate distribution employed can be specified as a function of a semiparametric predictor as well. Smoothness selection is
 achieved automatically and interval calculations are based on a Bayesian approach.
 
 
@@ -40,6 +41,8 @@ is included within the possibilites of the bound.
 Models with asymmetric link functions are also implemented. However, in our experience, this approach
 is not likely to lead to significant improvements as compared to using probit links.
 
+If it makes sense then the dependence parameter of the bivariate distribution employed can be specified as a function of covariates.
+
 
 }
 
@@ -68,7 +71,7 @@ Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence o
 
 Marra G., Radice R. and Filippou P. (submitted), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity.
 
-McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Based Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}.
+McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}, 26(2), 229-237.
 
 Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes.
 

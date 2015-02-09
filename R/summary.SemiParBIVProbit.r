@@ -53,10 +53,9 @@ summary.SemiParBIVProbit <- function(object, n.sim = 100, s.meth = "svd", prob.l
       d
 }
 
-  good <- object$fit$good
+  good <- object$good
   n <- object$n; n.sel <- object$n.sel
-  tableN <- list(NULL,NULL)
-  table <- list()
+  tableN <- table <- list(NULL,NULL,NULL)
   CIl1 <- CIl2 <- table.R <- table.P <- table.F <- P1 <- P2 <- QPS1 <- QPS2 <- CR1 <- CR1 <- CR2 <- MR <- CIkt <- NULL  
   epsilon <- sqrt(.Machine$double.eps)
   est.RHOb <- est.l1 <- est.l2 <- est.OR <- est.GM <-  rep(NA,n.sim) 
@@ -72,17 +71,25 @@ summary.SemiParBIVProbit <- function(object, n.sim = 100, s.meth = "svd", prob.l
 
   if(object$PL != "P" && object$fitPL!="fixed") { if(object$eqPL=="both") lf.n <- lf-2 else lf.n <- lf-1 }
 
-   if(object$BivD %in% c("N","T"))      {est.RHOb <- tanh(bs[,lf.n ]); est.RHOb <- ifelse(est.RHOb %in% c(-1,1), sign(est.RHOb)*0.9999999, est.RHOb)}
-   if(object$BivD=="F")                  est.RHOb <- bs[,lf.n ] + epsilon
 
-   if(object$BivD %in% c("C0", "C180") ) est.RHOb <-   exp(bs[,lf.n ]) + epsilon  
-   if(object$BivD %in% c("C90","C270") ) est.RHOb <- -(exp(bs[,lf.n ]) + epsilon) 
 
-   if(object$BivD %in% c("J0", "J180") ) est.RHOb <-   1+exp(bs[,lf.n]) + epsilon  
-   if(object$BivD %in% c("J90","J270") ) est.RHOb <- -(1+exp(bs[,lf.n]) + epsilon) 
 
-   if(object$BivD %in% c("G0", "G180") ) est.RHOb <-   1+exp(bs[,lf.n])  
-   if(object$BivD %in% c("G90","G270") ) est.RHOb <- -(1+exp(bs[,lf.n]))
+  if( !is.null(object$X3) ) epds <- object$X3[good,]%*%t(bs[,(object$X1.d2+object$X2.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2)])
+  if(  is.null(object$X3) ) epds <- bs[,lf.n]
+   
+
+   if(object$BivD=="N")                 {est.RHOb <- tanh(epds); est.RHOb <- ifelse(est.RHOb == -1, -0.9999999, est.RHOb)
+                                                                 est.RHOb <- ifelse(est.RHOb == 1 ,  0.9999999, est.RHOb)}
+   if(object$BivD=="F")                  est.RHOb <- epds + epsilon
+
+   if(object$BivD %in% c("C0", "C180") ) est.RHOb <-   exp(epds) + epsilon  
+   if(object$BivD %in% c("C90","C270") ) est.RHOb <- -(exp(epds) + epsilon) 
+
+   if(object$BivD %in% c("J0", "J180") ) est.RHOb <-   1+exp(epds) + epsilon  
+   if(object$BivD %in% c("J90","J270") ) est.RHOb <- -(1+exp(epds) + epsilon) 
+
+   if(object$BivD %in% c("G0", "G180") ) est.RHOb <-   1+exp(epds)  
+   if(object$BivD %in% c("G90","G270") ) est.RHOb <- -(1+exp(epds))
    
    est.RHOb <- ifelse(est.RHOb ==  Inf,  8.218407e+307, est.RHOb) 
    est.RHOb <- ifelse(est.RHOb == -Inf, -8.218407e+307, est.RHOb)    
@@ -93,11 +100,7 @@ summary.SemiParBIVProbit <- function(object, n.sim = 100, s.meth = "svd", prob.l
    ####
    # for OR and GM
    ##
-   
-   
-   
-   if(object$BivD=="T") pa2 <- object$nu else pa2 <- 0
-   
+      
    et1s <- object$X1[good,]%*%t(bs[,1:object$X1.d2])    
    et2s <- object$X2[good,]%*%t(bs[,(object$X1.d2+1):(object$X1.d2+object$X2.d2)]) 
      
@@ -110,13 +113,9 @@ summary.SemiParBIVProbit <- function(object, n.sim = 100, s.meth = "svd", prob.l
    
    p11s <- matrix(NA,dim(p1s)[1],dim(p1s)[2])
      
-   for(i in 1:n.sim){  
-   
-   if(object$BivD=="N") p11s[,i] <- pbinorm(qnorm(p1s[,i]),qnorm(p2s[,i]),cov12=est.RHOb[i])
-   if(object$BivD!="N") p11s[,i] <- BiCopCDF(p1s[,i],p2s[,i], object$nC, par=est.RHOb[i], par2=pa2) 
-      
-   }     
-        
+   if( !is.null(object$X3) ) { for(i in 1:n.sim) p11s[,i] <- BiCDF(p1s[,i], p2s[,i], object$nC, est.RHOb[,i]) }
+   if(  is.null(object$X3) ) { for(i in 1:n.sim) p11s[,i] <- BiCDF(p1s[,i], p2s[,i], object$nC, est.RHOb[i])  }
+    
  p11s <- pmax(p11s, epsilon )
  p11s <- ifelse(p11s==1,0.9999999,p11s)  
  p10s <- p1s - p11s 
@@ -161,6 +160,10 @@ if(object$VC$gc.l == TRUE) gc()
   
   CIor <- as.numeric(quantile(ORs,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
   CIgm <- as.numeric(quantile(GMs,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
+  
+  rm(est.RHOb, ORs, GMs)
+  
+  if(object$VC$gc.l == TRUE) gc()
 
   
   if(object$PL != "P" && object$fitPL!="fixed"){
@@ -169,10 +172,17 @@ if(object$VC$gc.l == TRUE) gc()
                        }
 
 
-                     
-  ind <- list(ind1=1:(object$gp1),ind2=object$X1.d2+(1:(object$gp2)))
+  index <- 1:2
+  if(!is.null(object$X3) ) {ind3 <- object$X1.d2 + object$X2.d2 + (1:object$gp3); index <- 1:3} else ind3 <- NULL  
+  
+ 
+  ind <- list( ind1 = 1:object$gp1,
+               ind2 = object$X1.d2 + (1:object$gp2),
+               ind3 = ind3 )
 
-  for(i in 1:2){
+  
+
+  for(i in index){
   estimate <- coef(object)[ind[[i]]]
   se       <- SE[ind[[i]]]
   ratio    <- estimate/se
@@ -181,23 +191,24 @@ if(object$VC$gc.l == TRUE) gc()
   dimnames(table[[i]])[[2]] <- c("Estimate", "Std. Error", "z value", "Pr(>|z|)")
   }
 
+  
+  if( object$l.sp1!=0 || object$l.sp2!=0 || object$l.sp3!=0 ){
 
-  l.sp11 <- length(object$gam1$smooth)
-  l.sp22 <- length(object$gam2$smooth) 
-  if( (l.sp11!=0 || l.sp22!=0) ){
-
-  	pTerms.df <- pTerms.chi.sq <- pTerms.pv <- edf <- tableN <- list(0,0)
-        XX <- cbind(object$X1[good,],object$X2[good,])
+  	pTerms.df <- pTerms.chi.sq <- pTerms.pv <- edf <- tableN <- list(0,0,0)
+        XX <- cbind(object$X1[good,], object$X2[good,], object$X3[good,])
         
-           for(i in 1:2){
+           for(i in index){
 
-             if(i==1) {mm <- l.sp11; if(mm==0) next}
-             if(i==2) {mm <- l.sp22; if(mm==0) break} 
+             if(i==1) {mm <- object$l.sp1; if(mm==0) next}
+             if(i==2) {mm <- object$l.sp2; if(mm==0) next} 
+             if(i==3) {mm <- object$l.sp3; if(mm==0) break} 
   
 		for(k in 1:mm){
 
-                        if(i==1){gam <- object$gam1; ind <- (gam$smooth[[k]]$first.para):(gam$smooth[[k]]$last.para)} 
-                        else{gam <- object$gam2; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para)+object$X1.d2} 
+                        if(i==1){ gam <- object$gam1; ind <-  gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para                                } 
+                        if(i==2){ gam <- object$gam2; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para) + object$X1.d2                } 
+                        if(i==3){ gam <- object$gam3; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para) + object$X1.d2 + object$X2.d2 }
+                        
 			edf[[i]][k] <- sum(diag(F)[ind])
 			names(edf[[i]])[k] <- gam$smooth[[k]]$label 
 			b  <- coef(object)[ind]
@@ -213,9 +224,11 @@ if(object$VC$gc.l == TRUE) gc()
               dimnames(tableN[[i]])[[2]] <- c("edf", "Est.rank", "Chi.sq", "p-value")
             }
 
+  rm(XX, Xt, V)
+  if(object$VC$gc.l == TRUE) gc()
+
   }
-
-
+  
 
 
  if(object$Model=="B"){
@@ -273,49 +286,46 @@ if(object$VC$gc.l == TRUE) gc()
  
  
  
+
+ 
+
  if(cplot == TRUE){
  
- if(object$BivD %in% c("N", "T") ) par1 <- object$rho else par1 <- object$theta
- if(object$BivD=="T") par2 <- object$nu else par2 <- 0
+ if(object$BivD == "N" ) par1 <- object$rho.a else par1 <- object$theta.a 
  
+ if(object$BivD=="N")    {family <- 1;  cop <- bquote(paste("Gaussian (",hat(rho)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="F")    {family <- 5;  cop <- bquote(paste("Frank (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="C0")   {family <- 3;  cop <- bquote(paste("Clayton (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="C90")  {family <- 23; cop <- bquote(paste("Rotated Clayton - 90 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="C180") {family <- 13; cop <- bquote(paste("Survival Clayton (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="C270") {family <- 33; cop <- bquote(paste("Rotated Clayton - 270 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))} 
+ if(object$BivD=="J0")   {family <- 6;  cop <- bquote(paste("Joe (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="J90")  {family <- 26; cop <- bquote(paste("Rotated Joe - 90 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="J180") {family <- 16; cop <- bquote(paste("Survival Joe (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="J270") {family <- 36; cop <- bquote(paste("Rotated Joe - 270 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))} 
+ if(object$BivD=="G0")   {family <- 4;  cop <- bquote(paste("Gumbel (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="G90")  {family <- 24; cop <- bquote(paste("Rotated Gumbel - 90 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="G180") {family <- 14; cop <- bquote(paste("Survival Gumbel (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="G270") {family <- 34; cop <- bquote(paste("Rotated Gumbel - 270 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))} 
  
- if(object$BivD=="N")    cop <- bquote(paste("Gaussian (",hat(rho)," = ",.(round(par1,2)),")",sep=""))
- if(object$BivD=="F")    cop <- bquote(paste("Frank (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
- if(object$BivD=="T")    cop <- bquote(paste("Student-t (",hat(rho)," = ",.(round(par1,2)),", ",nu," = ",.(par2),")",sep=""))
- if(object$BivD=="C0")   cop <- bquote(paste("Clayton (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
- if(object$BivD=="C90")  cop <- bquote(paste("Rotated Clayton - 90 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
- if(object$BivD=="C180") cop <- bquote(paste("Survival Clayton (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
- if(object$BivD=="C270") cop <- bquote(paste("Rotated Clayton - 270 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep="")) 
- if(object$BivD=="J0")   cop <- bquote(paste("Joe (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
- if(object$BivD=="J90")  cop <- bquote(paste("Rotated Joe - 90 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
- if(object$BivD=="J180") cop <- bquote(paste("Survival Joe (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
- if(object$BivD=="J270") cop <- bquote(paste("Rotated Joe - 270 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep="")) 
- if(object$BivD=="G0")   cop <- bquote(paste("Gumbel (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
- if(object$BivD=="G90")  cop <- bquote(paste("Rotated Gumbel - 90 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
- if(object$BivD=="G180") cop <- bquote(paste("Survival Gumbel (",hat(theta)," = ",.(round(par1,2)),")",sep=""))
- if(object$BivD=="G270") cop <- bquote(paste("Rotated Gumbel - 270 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep="")) 
- 
- 
- BiCopMetaContour(object$fit$p1, object$fit$p2, family = object$nC, par = par1, par2 = par2, margins = "norm", main = cop, 
+ BiCopMetaContour(object$fit$p1, object$fit$p2, family = family, par = par1, par2 = 0, margins = "norm", main = cop, 
                   ylab = "Margin 2", xlab = "Margin 1", ...)
- 
+       
  }
  
  
-
-  
-  res <- list(tableP1=table[[1]], tableP2=table[[2]], 
-              tableNP1=tableN[[1]], tableNP2=tableN[[2]], 
-              n=n, rho=object$rho, theta=object$theta, OR = object$OR, GM = object$GM,  # KeT=object$KeT, 
-              formula1=object$gam1$formula, formula2=object$gam2$formula, 
-              l.sc1=l.sp11, l.sc2=l.sp22, # pPen1=object$pPen1, pPen2=object$pPen2,  
-              t.edf=object$t.edf, CIrs=CIrs, CIl1=CIl1, CIl2=CIl2, # CIkt=CIkt,
+  res <- list(tableP1=table[[1]], tableP2=table[[2]], tableP3=table[[3]],
+              tableNP1=tableN[[1]], tableNP2=tableN[[2]], tableNP3=tableN[[3]], 
+              n=n, rho=object$rho.a, theta=object$theta.a, OR = object$OR, GM = object$GM, 
+              formula1=object$gam1$formula, formula2=object$gam2$formula, formula3=object$gam3$formula, 
+              t.edf=object$t.edf, CIrs=CIrs, CIl1=CIl1, CIl2=CIl2, 
               sel=object$sel,n.sel=n.sel, CIor = CIor, CIgm = CIgm, 
-              BivD=object$BivD,nu=object$nu, 
+              BivD=object$BivD,
               PL=object$PL, xi1=object$xi1, xi2=object$xi2,
               table.R=table.R, table.P=table.P, table.F=table.F, MR=MR,
               P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2,
-              good=good, Model=object$Model
+              good=good, Model=object$Model,
+              l.sp1 = object$l.sp1, l.sp2 = object$l.sp2, l.sp3 = object$l.sp3
               )
   class(res) <- "summary.SemiParBIVProbit"
       

@@ -1,9 +1,9 @@
 SemiParBIVProbit.fit.post <- function(SemiParFit, formula.eq2, data, 
                                       Model, VC, 
                                       PL, eqPL, valPL, fitPL,  
-                                      qu.mag=NULL, gam1, gam2){
+                                      qu.mag=NULL, gam1, gam2, gam3){
 
-non.sel.dd <- lambda1s <- lambda2s <- eta1S <- eta2S <- athrhoS <- rho <- theta <- edf <- NULL
+non.sel.dd <- lambda1s <- lambda2s <- eta1S <- eta2S <- athrhoS <- rho <- theta <- edf <- rho.a <- etad <- theta.a <- NULL
 
 xi1 <- xi2 <- 1
    
@@ -17,7 +17,7 @@ epsilon <- sqrt(.Machine$double.eps)
     Vb <- He.eig$vectors%*%tcrossprod(diag(1/He.eig$values),He.eig$vectors)   
 
                                      
-if( (VC$l.sp1!=0 || VC$l.sp2!=0) && VC$fp==FALSE){ 
+if( (VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0) && VC$fp==FALSE){ 
                                           HeSh <- He - SemiParFit$fit$S.h
                                           F <- Vb%*%HeSh
                                         }else{ HeSh <- He; F <- diag(rep(1,dim(Vb)[1])) } 
@@ -30,22 +30,37 @@ dimnames(SemiParFit$fit$hessian)[[1]] <- dimnames(SemiParFit$fit$hessian)[[2]] <
 if(VC$hess == FALSE) SemiParFit$fit$Fisher <- SemiParFit$fit$hessian
 
 
-  if( VC$BivD %in% c("N","T") ) {rho <- tanh(SemiParFit$fit$argument["athrho"]); names(rho) <- "rho"} 
-  else{
 
-   th.st <- SemiParFit$fit$argument["theta.star"]  
+  if( is.null(VC$X3) ){ if( VC$BivD == "N" ) dep <- SemiParFit$fit$argument["athrho"] else dep <- SemiParFit$fit$argument["theta.star"]  } 
 
-   if(VC$BivD=="F") theta <- th.st
+  if(!is.null(VC$X3) ) dep <- SemiParFit$fit$etad  
+
+
+
+  if( VC$BivD == "N" ) {rho <- tanh(dep); rho <- ifelse(rho == -1, -0.9999999, rho)
+                                          rho <- ifelse(rho == 1 ,  0.9999999, rho) }#; names(rho) <- rep("rho",length(rho))} 
   
-   if(VC$BivD %in% c("C0", "C180") ) theta <- exp(th.st)
-   if(VC$BivD %in% c("C90","C270") ) theta <- -exp(th.st)
+  if( VC$BivD != "N" ) {
 
-   if(VC$BivD %in% c("J0", "J180","G0", "G180") ) theta <-    1 + exp(th.st)
-   if(VC$BivD %in% c("J90","J270","G90","G270") ) theta <- -( 1 + exp(th.st) )
+                    th.st <- dep 
+
+   if(VC$BivD=="F") theta <- th.st + epsilon 
+  
+   if(VC$BivD %in% c("C0", "C180") ) theta <- exp(th.st) + epsilon
+   if(VC$BivD %in% c("C90","C270") ) theta <- -(exp(th.st) + epsilon)
+
+   if(VC$BivD %in% c("J0", "J180","G0", "G180") ) theta <-    1 + exp(th.st) + epsilon
+   if(VC$BivD %in% c("J90","J270","G90","G270") ) theta <- -( 1 + exp(th.st) + epsilon )
        
-   names(theta) <- "theta"
+   theta <- ifelse(theta == Inf ,  8.218407e+307, theta )
+   theta <- ifelse(theta == -Inf, -8.218407e+307, theta )    
+       
+   #names(theta) <- rep("theta",length(theta))
    
         }
+        
+        
+if( VC$BivD == "N" ) rho.a <- mean(rho) else theta.a <- mean(theta) 
 
 
   
@@ -114,9 +129,10 @@ if(VC$hess == FALSE) SemiParFit$fit$Fisher <- SemiParFit$fit$hessian
   
   if(VC$gc.l == TRUE) gc()  
   
-  ll <- length(SemiParFit$fit$argument)
-  
-  param <- SemiParFit$fit$argument[-c(1:length(gam1$coef),ll)] 
+  if( is.null(VC$X3) ) ll <- length(SemiParFit$fit$argument)
+  if(!is.null(VC$X3) ) ll <- (VC$X1.d2+VC$X2.d2+1):(VC$X1.d2+VC$X2.d2+VC$X3.d2)
+ 
+  param <- SemiParFit$fit$argument[-c(1:VC$X1.d2,ll)] 
   
   if(length(param)!=dim(non.sel.dd)[2]){
   posit <- which(names(VC$X2[1,])%in%names(param))
@@ -141,12 +157,11 @@ if(Model=="BSS" || Model=="BPO"){
   p1 <- ifelse(p1==1,0.9999999,p1)
   p2 <- ifelse(p2==1,0.9999999,p2)
   
-  if(VC$BivD=="N") p11 <- pmax( pbinorm( eta1, eta2, cov12=rho), epsilon ) 
-  else{ 
-   if(VC$BivD=="T") theta <- rho
-   p11 <- pmax(BiCopCDF(p1,p2, VC$nC, par=theta, par2=VC$nu), epsilon ) 
-   }
-
+  
+  if(VC$BivD=="N") theta <- rho 
+  
+   p11 <- pmax( BiCDF(p1, p2, VC$nC, theta), epsilon )
+  
    SemiParFit$fit$p10 <- p1 - p11
    SemiParFit$fit$p11 <- p11
    SemiParFit$fit$p00 <- (1 - p2) - ( p1 - p11 )
@@ -182,42 +197,56 @@ OR <- mean(OR)
 
 rm(p00,p01,p10,p11,p1,p2)
 
-#pp <- 2*(1-p1)*(1-p2)
-#GM <- mean( (2*p00 - pp)/(p00*(4*(p1+p2)-6) + 4*p00^2 + pp) ) 
+if(VC$gc.l == TRUE) gc()  
 
-  l.sp11 <- length(gam1$smooth)
-  l.sp22 <- length(gam2$smooth) 
 
-  if( (l.sp11!=0 || l.sp22!=0) ){
 
-  edf <- list(0,0)
+
+if( (VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0) ){
+
+  edf <- list(0,0,0)
         
-     for(i in 1:2){
+     for(i in 1:3){
 
-       if(i==1) {mm <- l.sp11; if(mm==0) next}
-       if(i==2) {mm <- l.sp22; if(mm==0) break} 
+       if(i==1) {mm <- VC$l.sp1; if(mm==0) next}
+       if(i==2) {mm <- VC$l.sp2; if(mm==0) next} 
+       if(i==3) {mm <- VC$l.sp3; if(mm==0) break} 
 
           for(k in 1:mm){
 
-              if(i==1){gam <- gam1; ind <- (gam$smooth[[k]]$first.para):(gam$smooth[[k]]$last.para)} 
-                  else{gam <- gam2; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para)+VC$X1.d2} 
+              if(i==1){ gam <- gam1; ind <- (gam$smooth[[k]]$first.para):(gam$smooth[[k]]$last.para) } 
+              if(i==2){ gam <- gam2; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para) + VC$X1.d2 } 
+              if(i==3){ gam <- gam3; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para) + VC$X1.d2 + VC$X2.d2 } 
+              
 	      edf[[i]][k] <- sum(diag(F)[ind])
                         }
                   }
-                  
-  if(length(gam1$paraPen)!=0 && VC$l.sp1>1)  names(edf[[1]]) <- names(gam1$sp)[-1]
-  if(length(gam1$paraPen)==0 && VC$l.sp1!=0) names(edf[[1]]) <- names(gam1$sp)  
+         
+  if(VC$l.sp1!=0) names(edf[[1]]) <- names(gam1$sp)  
+  if(VC$l.sp2!=0) names(edf[[2]]) <- names(gam2$sp)   
+  if(VC$l.sp3!=0) names(edf[[3]]) <- names(gam3$sp)   
 
-  if(length(gam2$paraPen)!=0 && VC$l.sp2>1)  names(edf[[2]]) <- names(gam2$sp)[-1] 
-  if(length(gam2$paraPen)==0 && VC$l.sp2!=0) names(edf[[2]]) <- names(gam2$sp) 
+}
+  
+ 
+  sp <- SemiParFit$sp 
+  
+  
+  if( VC$fp==FALSE ){ 
+  
+  if(VC$l.sp1!=0 && VC$l.sp2!=0 && VC$l.sp3!=0) names(sp) <- c(c(paste(names(gam1$sp),".eq1",sep="")),c(paste(names(gam2$sp),".eq2",sep="")),c(paste(names(gam3$sp),".eq3",sep="")))
+  if(VC$l.sp1!=0 && VC$l.sp2!=0 && VC$l.sp3==0) names(sp) <- c(c(paste(names(gam1$sp),".eq1",sep="")),c(paste(names(gam2$sp),".eq2",sep="")))
+  if(VC$l.sp1!=0 && VC$l.sp2==0 && VC$l.sp3==0) names(sp) <- paste(names(gam1$sp),".eq1",sep="")
+  if(VC$l.sp1==0 && VC$l.sp2!=0 && VC$l.sp3!=0) names(sp) <- c(c(paste(names(gam2$sp),".eq2",sep="")),c(paste(names(gam3$sp),".eq3",sep="")))
+  if(VC$l.sp1==0 && VC$l.sp2==0 && VC$l.sp3!=0) names(sp) <- paste(names(gam3$sp),".eq3",sep="")
+  if(VC$l.sp1==0 && VC$l.sp2!=0 && VC$l.sp3==0) names(sp) <- paste(names(gam2$sp),".eq2",sep="")
+  if(VC$l.sp1!=0 && VC$l.sp2==0 && VC$l.sp3!=0) names(sp) <- c(c(paste(names(gam1$sp),".eq1",sep="")),c(paste(names(gam3$sp),".eq3",sep="")))
   
   }
- 
-
-  sp <- SemiParFit$sp 
-  if(VC$l.sp1!=0 && VC$l.sp2!=0 && VC$fp==FALSE) names(sp) <- c(c(paste(names(gam1$sp),".eq1",sep="")),c(paste(names(gam2$sp),".eq2",sep="")))
-  if(VC$l.sp1==0 && VC$l.sp2!=0 && VC$fp==FALSE) names(sp) <- paste(names(gam2$sp),".eq2",sep="")
-  if(VC$l.sp1!=0 && VC$l.sp2==0 && VC$fp==FALSE) names(sp) <- paste(names(gam1$sp),".eq1",sep="")
+  
+  
+  
+  
   
   if(PL!="P"){
 
@@ -228,12 +257,15 @@ rm(p00,p01,p10,p11,p1,p2)
         if(eqPL=="second") names(sp)[wna] <- c("xi2")   
 
   }
-
-   
+  
+  
+  if( VC$BivD == "N" ){ if( length(rho)==1 ) rho.a <- rho} else { if( length(theta)==1 ) theta.a <- theta }  
+  
+  
                  list(SemiParFit = SemiParFit, He = He, logLik = logLik, Vb = Vb, HeSh = HeSh, F = F, t.edf = t.edf,
-                      edf1 = edf[[1]], edf2 = edf[[2]], rho = rho, theta = theta, #  KeT = KeT, or OG
+                      edf1 = edf[[1]], edf2 = edf[[2]], edf3 = edf[[3]], rho = rho, theta = theta, rho.a = rho.a, theta.a = theta.a,
                       xi1 = xi1, xi2 = xi2, sp = sp, OR = OR, GM = GM, 
-                      X2s = non.sel.dd) # , magpp = SemiParFit$magpp)
+                      X2s = non.sel.dd) 
 
 }
 

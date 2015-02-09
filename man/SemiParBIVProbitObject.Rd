@@ -20,6 +20,8 @@
 
 \item{gam2.1}{Univariate fit for equation 2, estimated using an adaptation of the Heckman sample selection correction procedure 
               when \code{Method = "BSS"}.}
+              
+\item{gam3}{Univariate fit for equation 3. This is available when the association parameter is modelled as functions of covariates.}              
 
 \item{coefficients}{The coefficients of the fitted model. They are given in the following 
                     order: parametric and regression spline (if present)
@@ -61,7 +63,9 @@
  
 \item{t.edf}{Total degrees of freedom of the estimated bivariate model. It is calculated as \code{sum(diag(F))}.}
 
-\item{edf1, edf2}{Degrees of freedom for the two equations of the fitted bivariate model. It is calculated when splines are used.}
+\item{edf1, edf2, edf3}{Degrees of freedom for the two equations of the fitted bivariate model (and for the third
+                        equation as well if the dependence parameter is modelled as function of covariates). They  
+                        are calculated when splines are used.}
 
 \item{bs.mgfit}{List of values and diagnostics extracted from \code{magic} in \code{mgcv}.}
 
@@ -73,7 +77,7 @@
                        
 \item{p0}{Distribution function of a standardised univariate normal evaluated at y_1 = 0. This is only provided when \code{Method = "BSS"}.}                       
 
-\item{eta1, eta2}{Estimated linear predictors for the two equations.}
+\item{eta1, eta2, eta3}{Estimated linear predictors for the two equations (as well as the third equation if present).}
 
 \item{y1, y2}{Responses of the two equations.}
 
@@ -81,9 +85,6 @@
 
 \item{logLik}{Value of the (unpenalized) log-likelihood evaluated at the (penalized or unpenalized) parameter 
             estimates.}
-
-\item{pPen1, pPen2}{List specifying any penalties to be applied to the parametric model 
-                    terms of the model equations.}
 
 \item{good}{Indicator variable indicating the observations actually used in model fitting.}
 

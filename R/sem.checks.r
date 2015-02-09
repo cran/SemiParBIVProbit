@@ -12,7 +12,7 @@ if (min(e.v) > 0) cat("\n",mv," information matrix is positive definite\n",sep="
 
 cat("Eigenvalue range: [",min(e.v),",",max(e.v),"]\n", sep = "")
 
-if( ((x$l.sp1!=0 || x$l.sp2!=0) && x$fp==FALSE) || (x$PL!="P" && x$fitPL=="pLiksp" ) ){
+if( ((x$l.sp1!=0 || x$l.sp2!=0 || x$l.sp3!=0) && x$fp==FALSE) || (x$PL!="P" && x$fitPL=="pLiksp" ) ){
 
 cat("\nTrust region iterations before smoothing parameter estimation:",x$iter.if)
 cat("\nLoops for smoothing parameter estimation:",x$iter.sp) 
