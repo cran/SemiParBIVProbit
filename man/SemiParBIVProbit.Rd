@@ -1,16 +1,21 @@
 \name{SemiParBIVProbit}
 \alias{SemiParBIVProbit}
 
-\title{Semiparametric Bivariate Probit Modelling}
+\title{Semiparametric Bivariate Regression Models}
 
 \description{ 
-\code{SemiParBIVProbit} can be used to fit bivariate probit models where the linear predictors of the two main equations can 
+\code{SemiParBIVProbit} can be used to fit bivariate binary models where the linear predictors of the two main equations can 
 be flexibly specified using 
 parametric and regression spline components. Several bivariate copula distributions are supported. During the model fitting process, the 
-possible presence of correlated error equations, endogeneity, non-random sample selection or partial observability is accounted for. Regression 
+possible presence of associated error equations, endogeneity, non-random sample selection or partial observability is accounted for. Regression 
 spline bases are extracted from the package \code{mgcv}. Multi-dimensional smooths are available 
-via the use of penalized thin plate regression splines (isotropic). Note that, if it makes sense, the dependence parameter of the bivariate 
-distribution employed can be specified as a function of covariates.
+via the use of penalized thin plate regression splines. Note that, if it makes sense, the dependence parameter of the copula
+distribution can be specified as a function of covariates.
+
+\code{SemiParBIVProbit} can also be used to fit bivariate models in which one response is binary and the other is continuous. This case
+is relevant for estimating, for instance, the effect that a binary endogenous variable has on a continuous response. 
+There are many continuous distributions that can be employed within this context and we plan to include several 
+options on a case-study basis. Other bivariate models will be implemented from time to time, depending on the case study at hand.
 
 }
 
@@ -18,24 +23,28 @@ distribution employed can be specified as a function of covariates.
 
 \usage{
 SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,  
-                 start.v = NULL, Model = "B", method = "trwlF", 
-                 BivD = "N", fp = FALSE, PL = "P", eqPL = "both", 
-                 valPL = c(0,0), fitPL = "pLiksp", spPL = c(0.01,0.01), 
-                 hess = TRUE, infl.fac = 1, 
-                 rinit = 1, rmax = 100, iterlimsp = 50, pr.tolsp = 1e-6,
-                 gc.l = FALSE, awlm = FALSE, parscale, extra.regI = "t")
+                 start.v = NULL, Model = "B", BivD = "N", 
+                 margins = c("probit","probit"), gamlssfit = FALSE,
+                 fp = FALSE, hess = TRUE, infl.fac = 1, 
+                 rinit = 1, rmax = 100, 
+                 iterlimsp = 50, pr.tolsp = 1e-6,
+                 gc.l = FALSE, parscale, extra.regI = "t")
 }
 
 
 
 \arguments{ 
 
-\item{formula}{A list of two formulas, one for equation 1 and the other for equation 2. \code{s} terms are used to specify smooth smooth functions of 
+\item{formula}{In the basic setup this will be a list of two formulas, one for equation 1 and the other for equation 2. \code{s} terms 
+               are used to specify smooth smooth functions of 
                   predictors. \code{SemiParBIVProbit} supports the use shrinkage smoothers for variable
                   selection purposes. See the examples below and the documentation of \code{mgcv} for further 
                   details on formula specifications. Note that 
                   if \code{Model = "BSS"} then the first formula MUST refer to the selection equation. Furthermore,
-                  if it makes sense, a third equation for the dependence parameter can be specified (see Example 1 below).} 
+                  if it makes sense, a third equation for the dependence parameter can be specified (see Example 1 below).
+                  When one outcome is binary and the other continuous then the first equation must refer to the binary outcome whereas 
+                  the second the continuous one. For the binary-continuous bivariate model, two more equations can be specified, one modelling 
+                  the dispersion parameter and the other the dependence parameter.} 
 
 \item{data}{An optional data frame, list or environment containing the variables in the model.  If not found in \code{data}, the
             variables are taken from \code{environment(formula)}, typically the environment from which \code{SemiParBIVProbit} is called.} 
@@ -48,35 +57,28 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
                can be provided here.} 
 
 \item{Model}{It indicates the type of model to be used in the analysis. Possible values are "B" (bivariate model), 
-             "BSS" (bivariate model with non-random sample selection) and "BPO" (bivariate model with partial observability).}
+             "BSS" (bivariate model with non-random sample selection), "BPO" (bivariate model with partial observability)
+             and "BPO0" (bivariate model with partial observability and zero correlation).}
 
-\item{method}{Estimation method used. It can be either "trwl" or "trwlF". The latter option is much faster and more stable when smoothing 
-              parameter estimation is employed, and is the default.}
+\item{margins}{It indicates the distributions used for the two margins. The first is always probit which means that the response of the 
+               first equation is always assumed to be binary. The response for the second equation can be binary (case in which a 
+               "probit" link is used), normal ("N"), log-normal ("LN"), Gumbel ("GU"), reverse Gumbel ("rGU"), 
+               logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG") and gamma ("GA").}
+               
+\item{gamlssfit}{In the case of continuous margin for the outcome equation, if \code{gamlssfit = TRUE} then 
+                 a gamlss if fitted for the outcome equation. This is useful to calculate, for instance, the average
+                 treatment effect from the model which does not account for endogeneity/associated equation errors.
+               }               
 
 \item{BivD}{Type of bivariate error distribution employed. Possible choices are "N", "C0", "C90", "C180", "C270", "J0", "J90", "J180", "J270", 
             "G0", "G90", "G180", "G270", "F" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
              Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), and Frank. Note that 
-             for empirical applications options N, C (and all rotated versions), and F may suffice.
+             for empirical applications, options N, one of Clayton, Joe or Gumbel (with all respective rotated versions), and F may suffice.
              This is because the Clayton, Joe and Gumbel copulas are very similar; for instance, C90, J270 and G270 are very close.
-             Nevertheless, there might be situations in which the use of Joe or Gumbel may result in more stable computation as
-             compared to Clayton.}            
+             Nevertheless, there might be situations in which the use of a specific copula may result in more stable computation.}            
 
-\item{fp}{If \code{TRUE} then a fully parametric model with unpenalised regression splines if fitted. See the example below.}  
-
-\item{PL}{Link function to be employed. Possible choices are "P" (classic probit - default option), "PP" (power probit), 
-          "RPP" (reciprocal power probit) and "SN" (skew normal).}
-
-\item{eqPL}{Equation(s) on which the asymmetric link function approach should be applied. Possible choices are "both", "first" and "second".}
-
-\item{valPL}{Initial values for link function shape parameters when an asymmetric link fucntion approach is employed.}
-
-\item{fitPL}{Fitting approach for shape parameters of the asymmetric link functions employed. Possible choices 
-             are "fixed", "unpLik", "pLik" and "pLiksp" which stand for fixed shape parameters, classic likelihood optimization, penalized 
-             likelihood with fixed smoothing parameters and penalized likelihood with automatic smoothing parameter estimation.}
-             
-\item{spPL}{Values for the smoothing parameters of the ridge penalties associated with the shape parameteres of the asymmetric 
-            link functions.}             
+\item{fp}{If \code{TRUE} then a fully parametric model with unpenalised regression splines if fitted. See the example below.}              
 
 \item{hess}{If \code{FALSE} then the expected/Fisher (rather than observed) information matrix is employed.}
 
@@ -94,18 +96,16 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
 
 \item{pr.tolsp}{Tolerance to use in judging convergence of the algorithm when automatic smoothing parameter estimation is used.} 
 
-\item{gc.l}{This is relevant when working with big datasets. If \code{TRUE} then the garbage collector is called more often than when R 
-decides to. This keeps the memory footprint down but it will slow down the routine.}
-
-\item{awlm}{If \code{TRUE} then the association parameter of the two equations is used in the construction of the 
-            working linear model needed for smoothing parameter estimation. This option makes sense only when \code{method = "trwl"}.}
+\item{gc.l}{This is relevant when working with big datasets. If \code{TRUE} then the garbage collector is called more often than it is 
+usually done. This keeps the memory footprint down but it will slow down the routine.}
       
-\item{parscale}{The algorithm will operate as if optimizing objfun(x / parscale, ...). If missing then no rescaling is done. See the 
+\item{parscale}{The algorithm will operate as if optimizing objfun(x / parscale, ...) where parscale is a scalar. If missing then no 
+rescaling is done. See the 
 documentation of \code{trust} for more details.}    
 
 \item{extra.regI}{If "t" then regularization as from \code{trust} is applied to the information matrix if needed. 
                   If different from "t" then extra regularization is applied via the options "pC" (pivoted Choleski - this
-                  only makes sense when \code{hess = FALSE}) and "sED" (symmetric eigen-decomposition).}  
+                  only makes sense when the information matrix is semi-positive or positive definite) and "sED" (symmetric eigen-decomposition).}  
      
                       
 }
@@ -113,12 +113,12 @@ documentation of \code{trust} for more details.}
 
 \details{
 
-The bivariate models considered in this package have probit links for the two model equations, and model the association
-between the responses through the correlation parameter \eqn{\rho}{\rho} of a standardised bivariate normal distribution, or that 
-of a bivariate copula distribution, \eqn{\theta}{\theta}. The linear predictors of the two equations are flexibly specified using 
+The bivariate models considered in this package consist of two model equations which depend on flexible linear predictors and
+whose association between the responses is modelled through parameter \eqn{\theta}{\theta} of a standardised bivariate normal 
+distribution or that of a bivariate copula distribution. The linear predictors of the two equations are flexibly specified using 
 parametric components and smooth functions of covariates. The same can be done for the dependence parameter if it makes sense.
 Replacing the smooth components with their regression spline expressions 
-yields a fully parametric bivariate probit model. In principle, classic 
+yields a fully parametric bivariate model. In principle, classic 
 maximum likelihood estimation can be employed. However, to avoid overfitting, penalized likelihood maximization is 
 employed instead. Here, the use of 
 penalty matrices allows for the suppression of that part of smooth term complexity which has no support 
@@ -127,9 +127,9 @@ and fitness is controlled by smoothing parameters associated with the penalty ma
 minimize the approximate Un-Biased Risk Estimator (UBRE), which can also be viewed as an approximate AIC.
 
 Automatic smoothing parameter estimation is integrated 
-using a performance-oriented iteration approach (Gu, 1992; Wood, 2004). At each iteration, (i) the penalized weighted least squares 
+using a performance-oriented iteration approach (Gu, 1992; Wood, 2004). Roughly speaking, at each iteration, (i) the penalized weighted least squares 
 problem is solved and (ii) the smoothing parameters of that problem estimated by approximate UBRE. Steps (i) and (ii) are iterated until 
-convergence. Details of the underlying fitting methods are given in Radice, Marra and Wojtys (submitted). Releases previous to 3.2-7
+convergence. Details of the underlying fitting methods are given in Radice, Marra and Wojtys (in press). Releases previous to 3.2-7
 were based on the algorithms detailed in Marra and Radice (2011, 2013). 
 
 }
@@ -150,8 +150,6 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Key References:
-
 Gu C. (1992), Cross validating non-Gaussian data. \emph{Journal of Computational and Graphical Statistics}, 1(2), 169-179.
 
 Marra G. (2013), On P-values for Semiparametric Bivariate Probit Models. \emph{Statistical Methodology}, 10(1), 23-28.
@@ -161,15 +159,13 @@ Journal of Statistics}, 39(2), 259-279.
 
 Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, 7, 1432-1455.
 
-Marra G. and Radice R. (2015), Flexible Bivariate Binary Models for Estimating the Efficacy of Phototherapy for Newborns with Jaundice. \emph{International Journal of Statistics and Probability}. 
-
 Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}, 29(3-4), 715-741.
 
-Marra G., Radice R. and Filippou P. (submitted), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity.
+Marra G., Radice R. and Filippou P. (in press), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity. \emph{Communications in Statistics - Simulation and Computation}.
 
 McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}, 26(2), 229-237.
 
-Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes.
+Radice R., Marra G. and M. Wojtys (in press), Copula Regression Spline Models for Binary Outcomes. \emph{Statistics and Computing}.
 
 Marra G. and Wood S.N. (2011), Practical Variable Selection for Generalized Additive Models. \emph{Computational Statistics and Data Analysis}, 55(7), 2372-2387.
 
@@ -185,30 +181,27 @@ Wood S.N. (2004), Stable and efficient multiple smoothing parameter estimation f
 \section{WARNINGS}{
 
 In our experience, convergence failure may occur, for instance, when the number of observations is low, there are important mistakes 
-in the model specification (i.e., using C90 when the model equations are positively associated), or there are many smooth components
-in the model as compared to the number of observations. Convergence failure may also mean that 
+in the model specification (i.e., using C90 when the model errors are positively associated), or the model is 'over-complicated'. Convergence 
+failure may also mean that 
 an infinite cycling between steps (i) and (ii) occurs. In this case, the smoothing parameters are set to the values 
-obtained from the non-converged algorithm (\code{\link{sem.checks}} will give a warning). In such cases, we 
+obtained from the non-converged algorithm (\code{\link{conv.check}} will notify the user if this is the case). In such cases, we 
 recommend re-specifying the model, using some extra regularisation (see \code{extra.regI}) and/or using some
 rescaling (see \code{parscale}).
 
-The use of asymmetric links is not likely to lead to significant improvements as compared to using probit links. We recommend
-using this option at the end of the empirical analysis as a sensitivity analysis tool, and not during
-the model building process. Also, the theoretical and numerical complexity introduced by asymmetric links means that
-convergence failures are more likely to occur and that data requirements are typically high.
-
 In the contexts of endogeneity and non-random sample selection, it would not make much sense to specify the dependence
-parameter as function of covariates. This is because, in these situations, the assumption is that 
+parameter as function of the same covariates used for the two main equations and some meaningful grouping should be used instead. This is 
+because, in these situations, the assumption 
+is that 
 the dependence parameter models the 
-association between the unobserved confounders in the two equations. However, this option does make sense when it is believed that the  
-association coefficient varies across geographical areas, for instance. If the interest is not in modelling unobserved confounding then 
+association between the unobserved confounders in the two equations. This option would make sense, for instance, when it is believed that the  
+association coefficient varies across geographical areas. If the interest is not in modelling unobserved confounding then 
 many possible structures may be possible for the dependence parameter and these can be tried out.
 
 
 } 
 
 \seealso{
-\code{\link{AT}}, \code{\link{adjCov}}, \code{\link{est.prev}}, \code{\link{gt.bpm}}, \code{\link{LM.bpm}}, \code{\link{VuongClarke.bcm}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{sem.checks}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{adjCov}}, \code{\link{prev}}, \code{\link{gt.bpm}}, \code{\link{LM.bpm}}, \code{\link{VuongClarke}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{conv.check}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
 }
 
 \examples{
@@ -226,7 +219,7 @@ set.seed(0)
 n <- 400
 
 Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
-u     <- rmvnorm(n, rep(0,2), Sigma)
+u     <- rMVN(n, rep(0,2), Sigma)
 
 x1 <- round(runif(n)); x2 <- runif(n); x3 <- runif(n)
 
@@ -246,7 +239,7 @@ dataSim <- data.frame(y1, y2, x1, x2, x3)
 out  <- SemiParBIVProbit(list(y1 ~ x1 + x2 + x3, 
                               y2 ~ x1 + x2 + x3), 
                          data = dataSim)
-sem.checks(out)
+conv.check(out)
 summary(out)
 AIC(out)
 BIC(out)
@@ -263,8 +256,8 @@ BIC(out)
 out  <- SemiParBIVProbit(list(y1 ~ x1 + s(x2, bs = "tp", k = 10, m = 2) + s(x3), 
                               y2 ~ x1 + s(x2) + s(x3)),  
                          data = dataSim)
-sem.checks(out)
-summary(out, cplot = TRUE)
+conv.check(out)
+summary(out, cm.plot = TRUE)
 AIC(out)
 
 
@@ -284,25 +277,30 @@ plot(out, eq = 2, select = 2, scale = 0); lines(x3, f3.x3, col = "red")
 #
 ## same plots but CIs 'with intercept' 
 
-plot(out, eq = 1, select = 1, seWithMean = TRUE, scale = 0); lines(x2, f1.x2, col = "red")
-plot(out, eq = 1, select = 2, seWithMean = TRUE, scale = 0); lines(x3, f3.x3, col = "red")
-plot(out, eq = 2, select = 1, seWithMean = TRUE, scale = 0); lines(x2, f2.x2, col = "red")
-plot(out, eq = 2, select = 2, seWithMean = TRUE, scale = 0); lines(x3, f3.x3, col = "red")
+plot(out, eq = 1, select = 1, seWithMean = TRUE, scale = 0)
+lines(x2, f1.x2, col = "red")
+plot(out, eq = 1, select = 2, seWithMean = TRUE, scale = 0)
+lines(x3, f3.x3, col = "red")
+plot(out, eq = 2, select = 1, seWithMean = TRUE, scale = 0)
+lines(x2, f2.x2, col = "red")
+plot(out, eq = 2, select = 2, seWithMean = TRUE, scale = 0)
+lines(x3, f3.x3, col = "red")
 
 
 ## p-values suggest to drop x3 from both equations, with a stronger 
 ## evidence for eq. 2. This can be also achieved using shrinkage smoothers
 
-outSS <- SemiParBIVProbit(list(y1 ~ x1 + s(x2, bs = "cs") + s(x3, bs = "cs"), 
-                               y2 ~ x1 + s(x2, bs = "cs") + s(x3, bs = "cs")), 
+outSS <- SemiParBIVProbit(list(y1 ~ x1 + s(x2, bs = "ts") + s(x3, bs = "cs"), 
+                               y2 ~ x1 + s(x2, bs = "cs") + s(x3, bs = "ts")), 
                           data = dataSim)
-sem.checks(outSS)                          
+conv.check(outSS)                          
 
 plot(outSS, eq = 1, select = 1, scale = 0)
 plot(outSS, eq = 1, select = 2, ylim = c(-0.1,0.1))
 plot(outSS, eq = 2, select = 1, scale = 0)
 plot(outSS, eq = 2, select = 2, ylim = c(-0.1,0.1))
 
+\dontrun{ 
 
 ## SEMIPARAMETRIC BIVARIATE PROBIT with association parameter 
 ## depending on covariates as well
@@ -311,9 +309,9 @@ outD <- SemiParBIVProbit(list(y1 ~ x1 + s(x2),
                               y2 ~ x1 + s(x2),
                                  ~ x1 + s(x2) ), 
                           data = dataSim)
-sem.checks(outD)  
+conv.check(outD)  
 summary(outD)
-outD$rho
+outD$theta
 
 plot(outD, eq = 1, seWithMean = TRUE)
 plot(outD, eq = 2, seWithMean = TRUE)
@@ -329,16 +327,14 @@ graphics.off()
 ## Generate data with one endogenous variable 
 ## and exclusion restriction
 
-\dontrun{ 
-
 set.seed(0)
 
-n <- 300
+n <- 400
 
 Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
-u     <- rmvnorm(n, rep(0,2), Sigma)
+u     <- rMVN(n, rep(0,2), Sigma)
 
-cov   <- rmvnorm(n, rep(0,2), Sigma, method = "svd")
+cov   <- rMVN(n, rep(0,2), Sigma)
 cov   <- pnorm(cov)
 x1 <- round(cov[,1]); x2 <- cov[,2]
 
@@ -364,7 +360,7 @@ LM.bpm(list(y1 ~ x1 + s(x2), y2 ~ y1 + s(x2)), dataSim, Model = "B")
 out <- SemiParBIVProbit(list(y1 ~ x1 + x2, 
                              y2 ~ y1 + x2), 
                         data = dataSim)
-sem.checks(out)                        
+conv.check(out)                        
 summary(out)
 
 ## SEMIPARAMETRIC RECURSIVE BIVARIATE PROBIT
@@ -372,7 +368,7 @@ summary(out)
 out <- SemiParBIVProbit(list(y1 ~ x1 + s(x2), 
                              y2 ~ y1 + s(x2)), 
                         data = dataSim)
-sem.checks(out)                        
+conv.check(out)                        
 summary(out)
 
 #
@@ -394,7 +390,7 @@ AT(out, eq = 2, nm.bin = "y1", naive = TRUE)
 outC <- SemiParBIVProbit(list(y1 ~ x1 + s(x2), 
                               y2 ~ y1 + s(x2)), 
                          data = dataSim, BivD = "C0")
-sem.checks(outC)                         
+conv.check(outC)                         
 summary(outC)
 AT(outC, eq = 2, nm.bin = "y1") 
 
@@ -403,33 +399,25 @@ AT(outC, eq = 2, nm.bin = "y1")
 outJ <- SemiParBIVProbit(list(y1 ~ x1 + s(x2), 
                               y2 ~ y1 + s(x2)), 
                          data = dataSim, BivD = "J0")
-sem.checks(outJ)
-summary(outJ, cplot = TRUE)
+conv.check(outJ)
+summary(outJ, cm.plot = TRUE)
 AT(outJ, eq = 2, nm.bin = "y1") 
 
 
-VuongClarke.bcm(out, outJ)
+VuongClarke(out, outJ)
 
 #
 ## recursive bivariate probit modelling with unpenalized splines 
 ## can be achieved as follows
 
 outFP <- SemiParBIVProbit(list(y1 ~ x1 + s(x2, bs = "cr", k = 5), 
-                               y2 ~ y1 + s(x2, bs = "cr", k = 6)), fp = TRUE, 
-                          data = dataSim)
-sem.checks(outFP)                            
+                               y2 ~ y1 + s(x2, bs = "cr", k = 6)), 
+                          fp = TRUE, data = dataSim)
+conv.check(outFP)                            
 summary(outFP)
 
 #
-## SEMIPARAMETRIC RECURSIVE BIVARIATE PROBIT 
-## WITH ASYMMETRIC LINK FUNCTIONS
-
-out <- SemiParBIVProbit(list(y1 ~ x1 + s(x2), 
-                             y2 ~ y1 + s(x2)), 
-                        data = dataSim, PL = "SN", hess = FALSE)
-sem.checks(out)                        
-summary(out) 
-# same output as model with probit links
+#
 
 ############
 ## EXAMPLE 3
@@ -439,13 +427,13 @@ summary(out)
 
 set.seed(0)
 
-n <- 1100
+n <- 2000
 
 Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
-u     <- rmvnorm(n, rep(0,2), Sigma)
+u     <- rMVN(n, rep(0,2), Sigma)
 
 SigmaC <- matrix(0.5, 3, 3); diag(SigmaC) <- 1
-cov    <- rmvnorm(n, rep(0,3), SigmaC, method = "svd")
+cov    <- rMVN(n, rep(0,3), SigmaC)
 cov    <- pnorm(cov)
 bi <- round(cov[,1]); x1 <- cov[,2]; x2 <- cov[,3]
   
@@ -472,7 +460,7 @@ LM.bpm(list(ys ~ bi + s(x1) + s(x2), yo ~ bi + s(x1)), dataSim, Model = "BSS")
 out <- SemiParBIVProbit(list(ys ~ bi + s(x1) + s(x2), 
                              yo ~ bi + s(x1)), 
                         data = dataSim, Model = "BSS")
-sem.checks(out)                          
+conv.check(out)                          
 gt.bpm(out)                        
 
 ## compare the two summary outputs
@@ -485,8 +473,8 @@ summary(out$gam2)
 ## corrected predicted probability that 'yo' is equal to 1
 
 mb(ys, yo, Model = "BSS")
-est.prev(out)
-est.prev(out, naive = TRUE)
+prev(out)
+prev(out, naive = TRUE)
 
 ## estimated smooth function plots
 ## the red line is the true curve
@@ -497,7 +485,8 @@ f21.x1 <- f21(x1.s)[order(x1.s)]-mean(f21(x1.s))
 
 plot(out, eq = 2, ylim = c(-1.65,0.95)); lines(x1.s, f21.x1, col="red")
 par(new = TRUE)
-plot(out$gam2, se = FALSE, col = "blue", ylim = c(-1.65,0.95), ylab = "", rug = FALSE)
+plot(out$gam2, se = FALSE, col = "blue", ylim = c(-1.65,0.95), 
+     ylab = "", rug = FALSE)
 
 #
 #
@@ -506,9 +495,9 @@ plot(out$gam2, se = FALSE, col = "blue", ylim = c(-1.65,0.95), ylab = "", rug = 
 outC <- SemiParBIVProbit(list(ys ~ bi + s(x1) + s(x2), 
                               yo ~ bi + s(x1)), 
                          data = dataSim, Model = "BSS", BivD = "C0")
-sem.checks(outC)
-summary(outC, cplot = TRUE)
-est.prev(outC)
+conv.check(outC)
+summary(outC, cm.plot = TRUE)
+prev(outC)
 
 #
 
@@ -522,7 +511,7 @@ set.seed(0)
 n <- 10000
 
 Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
-u     <- rmvnorm(n, rep(0,2), Sigma)
+u     <- rMVN(n, rep(0,2), Sigma)
 
 x1 <- round(runif(n)); x2 <- runif(n); x3 <- runif(n)
 
@@ -538,15 +527,8 @@ dataSim <- data.frame(y, x1, x2, x3)
 out  <- SemiParBIVProbit(list(y ~ x1 + x2, 
                               y ~ x3), 
                          data = dataSim, Model = "BPO")
-sem.checks(out)
+conv.check(out)
 summary(out)
-
-
-outC <- SemiParBIVProbit(list(y ~ x1 + x2, 
-                              y ~ x3), 
-                         data = dataSim, Model = "BPO", BivD = "C0")
-sem.checks(outC)
-summary(outC)
 
 # first ten estimated probabilities for the four events from object out
 
@@ -568,8 +550,8 @@ out  <- SemiParBIVProbit(list(y ~ x1 + s(x2),
                               y ~ x3), 
                          data = dataSim, Model = "BPO")
 
-sem.checks(out)
-summary(out, cplot = TRUE)
+conv.check(out)
+summary(out, cm.plot = TRUE)
 
 
 # plot estimated and true functions
@@ -579,6 +561,77 @@ plot(out, eq = 1, scale = 0); lines(x2, f1.x2, col = "red")
 
 #
 #
+
+############
+## EXAMPLE 5
+############
+## Generate data with one endogenous binary variable 
+## and continuous outcome
+
+set.seed(0)
+
+n <- 1000
+
+Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
+u     <- rMVN(n, rep(0,2), Sigma)
+
+cov   <- rMVN(n, rep(0,2), Sigma)
+cov   <- pnorm(cov)
+x1 <- round(cov[,1]); x2 <- cov[,2]
+
+f1   <- function(x) cos(pi*2*x) + sin(pi*x)
+f2   <- function(x) x+exp(-30*(x-0.5)^2)   
+
+y1 <- ifelse(-1.55 + 2*x1    + f1(x2) + u[,1] > 0, 1, 0)
+y2 <-        -0.25 - 1.25*y1 + f2(x2) + u[,2] 
+
+dataSim <- data.frame(y1, y2, x1, x2)
+
+
+## RECURSIVE Model
+
+resp.check(y2, margin = "GU") # does not seem appropriate
+resp.check(y2, margin = "N")  # seems appropriate
+
+out <- SemiParBIVProbit(list(y1 ~ x1 + x2, 
+                             y2 ~ y1 + x2), 
+                        data = dataSim, margins = c("probit","N"))
+conv.check(out)                        
+summary(out)
+
+## SEMIPARAMETRIC RECURSIVE Model
+
+out <- SemiParBIVProbit(list(y1 ~ x1 + s(x2), 
+                             y2 ~ y1 + s(x2), ~ 1, ~ 1), data = dataSim, 
+                             margins = c("probit","N"), gamlssfit = TRUE)
+conv.check(out)                        
+summary(out)
+AT(out, nm.bin = "y1")
+AT(out, nm.bin = "y1", naive = TRUE)
+
+
+#
+## Generate data with one endogenous binary variable 
+## and continuous outcome following a log-normal distribution
+
+
+set.seed(0)
+
+y2 <- rlnorm(n, meanlog = - 0.25 - 1.25*y1 + f2(x2), sdlog = sqrt(0.5))
+
+dataSim <- data.frame(y1, y2, x1, x2)
+
+resp.check(y2, margin = "WEI") # does not seem appropriate
+resp.check(y2, margin = "LN")  # seems appropriate
+
+out <- SemiParBIVProbit(list(y1 ~ x1 + s(x2), 
+                             y2 ~ y1 + s(x2), ~ 1, ~ 1), data = dataSim, 
+                             margins = c("probit","LN"), gamlssfit = TRUE)
+conv.check(out)                        
+summary(out, cm.plot = TRUE)
+AT(out, nm.bin = "y1")
+AT(out, nm.bin = "y1", naive = TRUE)
+
 }
 }
 

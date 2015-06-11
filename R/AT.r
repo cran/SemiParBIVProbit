@@ -1,75 +1,97 @@
-AT <- function(x, eq, nm.bin = "", E = TRUE, treat = TRUE, delta = FALSE, prob.lev = 0.05, s.meth = "svd", n.sim = 500, naive = FALSE){
+AT <- function(x, eq, nm.bin, E = TRUE, treat = TRUE, naive = FALSE, ind = NULL, sub.l = 50, delta = FALSE, 
+   n.sim = 100, prob.lev = 0.05, hd.plot = FALSE,
+   main = "Histogram and Kernel Density of Simulated Average Effects", 
+   xlab = "Simulated Average Effects", ...){
 
-stopm <- "Calculation of this average treatment effect is valid for recursive binary models only."
+etap.noi <- X.int <- X.noi <- eti1 <- eti0 <- etno <- indS <- bs <- ind.excl <- p.int1 <- p.int0 <- d.int1 <- d.int0 <- p.etn <- d.etn <- ass.p <- ass.pst <- C.11 <- C.10 <- sig2 <- peti1s <- peti0s <- sigma2.st <- sigma2s <- eti1s <- eti0s <- d0 <- d1 <- p.etns <- etnos <- etds <- ass.ps <- 1
+
+m2 <- c("N","GU","rGU","LO","LN","WEI","iG","GA")
 end <- 0
+epsilon <- 0.0000001 # 0.9999999 sqrt(.Machine$double.eps)
+max.p   <- 0.9999999
+est.ATb <- NA
+indD <- list()
 
+if(x$margins[2] != "probit") delta <- FALSE 
+if(missing(nm.bin)) stop("You must provide the name of the endogenous variable.")
+if(missing(eq) && x$Model=="B" && x$margins[2] != "probit") eq <- 2 
+if(x$Model=="B" && x$margins[2] != "probit")                eq <- 2  
 if(x$ig[[1]]$response %in% x$ig[[2]]$pred.names ) end <- 1
 if(x$ig[[2]]$response %in% x$ig[[1]]$pred.names ) end <- 1
-if(x$Model=="BSS" || x$Model=="BPO" || end==0) stop(stopm)
-
+if(x$Model=="BSS" || x$Model=="BPO" || x$Model=="BPO0" || end==0) stop("Calculation of this average treatment effect is valid for recursive models only.")
+if(x$gamlssfit == FALSE && naive == TRUE && x$margins[2] %in% m2) stop("You need to fit the naive model to obtain the ATE. Refit the model and set gamlssfit = TRUE.")
 if(is.character(nm.bin)==FALSE) stop("nm.bin is not a character!")
+if( !is.null(ind) && E == FALSE) stop("ind is not designed to be used when some observations are excluded from the AT's calculation.")
 
-if(x$PL!="P") delta <- FALSE
+if( !is.null(ind) ){ 
 
-est.ATb <- NA
-ind <- list()
+    if(is.logical(ind) == FALSE) stop("ind must be a logical variable.")
+    if(length(table(ind))!=2 ) stop("ind must be a logical binary variable.")
+    if( length(ind) != x$n ) stop("ind must have the same length as the number of observations used in fitting.")   
 
-good <- x$fit$good
-epsilon <- sqrt(.Machine$double.eps)
-
-
-
+}
 
 
+if(x$margins[2] != "probit" && is.null(ind)){ind <- 1:x$n; ind <- sample(ind, sub.l)}
+if(x$margins[2] == "probit" && is.null(ind)) ind <- 1:x$n
+
+
+
+if(E == FALSE ) {
+
+ if(x$margins[2] != "probit") ind <- 1:x$n  
+ 
+ if(eq==1) X.int <- as.matrix(x$X1[ind,])
+ if(eq==2) X.int <- as.matrix(x$X2[ind,]) 
+
+    if(treat == TRUE)  ind <- as.logical(X.int[, nm.bin]) 
+    if(treat == FALSE) ind <- as.logical(X.int[, nm.bin])!=TRUE
+                                              
+}
+
+
+
+########################################################
+# Set-up
+########################################################
 
 
 if(naive==FALSE){
-
-p.rho <- length(coef(x))
-
-if(x$PL!="P" && x$fitPL!="fixed"){if(x$eqPL=="both") p.rho <- p.rho - 2 else p.rho <- p.rho - 1} 
-
-ind[[1]] <- 1:x$X1.d2 
-ind[[2]] <- x$X1.d2+(1:x$X2.d2)
-
+	p.rho    <- length(coef(x))
+	indD[[1]] <- 1:x$X1.d2 
+	indD[[2]] <- x$X1.d2+(1:x$X2.d2)
 }
 
 
-
-
-if(eq==1){ X.int <- x$X1[good,]
+if(eq==1){ X.int <- as.matrix(x$X1[ind,])
     if(naive==FALSE){
-           X.noi <- x$X2[good,]
-           ind.int <- ind[[1]]
-           ind.noi <- ind[[2]] 
-           etap.noi <- x$eta2 }
-                 
+           X.noi <- as.matrix(x$X2[ind,])
+           ind.int <- indD[[1]]
+           ind.noi <- indD[[2]] 
+           etap.noi <- x$eta2[ind] 
+                    }      
 }
 
-if(eq==2){ X.int <- x$X2[good,]
+if(eq==2){ X.int <- as.matrix(x$X2[ind,])
     if(naive==FALSE){
-           X.noi <- x$X1[good,]
-           ind.int <- ind[[2]]
-           ind.noi <- ind[[1]] 
-           etap.noi  <- x$eta1}
-            
+           X.noi <- as.matrix(x$X1[ind,])
+           ind.int <- indD[[2]]
+           ind.noi <- indD[[1]] 
+           etap.noi  <- x$eta1[ind]
+                    } 
 }
-
 
 if(naive==FALSE){              
-coef.int <- as.numeric(coef(x)[ind.int])
-coef.noi <- as.numeric(coef(x)[ind.noi])        
+	   coef.int <- as.numeric(coef(x)[ind.int])
+	   coef.noi <- as.numeric(coef(x)[ind.noi])        
 }
 
 
 
-
-
-X.int <- X.int[good,]       
-if(naive==FALSE) X.noi <- X.noi[good,]   
+#                 X.int <- as.matrix(X.int)  # why do I have this?           
+#if(naive==FALSE) X.noi <- as.matrix(X.noi)  # same here     
        
-
-                      
+                 
 d0 <- d1 <- X.int
 d0[,nm.bin] <- 0
 d1[,nm.bin] <- 1
@@ -77,182 +99,138 @@ d1[,nm.bin] <- 1
 
 
 if(naive==FALSE){
-eti1 <- d1%*%coef.int 
-eti0 <- d0%*%coef.int 
-etno <- etap.noi      
+	eti1 <- d1%*%coef.int 
+	eti0 <- d0%*%coef.int 
+	etno <- etap.noi      
 }
 
 
 
-if(E==TRUE) ind.excl <- rep(TRUE,x$n) else{ 
-
-      if(treat==TRUE) ind.excl <- as.logical(X.int[,nm.bin]) 
-                 else ind.excl <- as.logical(X.int[,nm.bin])!=TRUE
-      
-    } 
-
-
-
-
-
-
-###############
-# Calculate ATE
-###############
+#############################################################################
+# ATE
+#############################################################################
 
 if(naive==FALSE){
 
 
+##
+
+if(x$margins[2] != "probit"){ 
 
 
+if( x$margins[2] %in% c("N","GU","rGU","LO") )             { lil <- -Inf;    uil <- Inf}
+if( x$margins[2] %in% c("LN","WEI","iG","GA")     )        { lil <- epsilon; uil <- Inf}
 
-if(x$PL=="P"){
+
+###########
+# functions
+###########
+
+ConExp0 <- function(y2, eti0, sigma2, margin2, p.etn0, ass.p, BivD){   
+
+	pp0 <- distrHsAT(y2, eti0, sigma2, margin2) 
+	p2.0   <- pp0$p2
+	pdf2.0 <- pp0$pdf2 
+	dc0 <- copgHsAT(p1=p.etn0, p2=p2.0, teta=ass.p, BivD=BivD)$c.copula.be2	
+	cond0 <- y2*dc0*pdf2.0/p.etn0
+	cond0
+                                                                   }
+
+ConExp1 <- function(y2, eti1, sigma2, margin2, p.etn0, ass.p, BivD){   
+
+	pp1 <- distrHsAT(y2, eti1, sigma2, margin2)
+	p2.1   <- pp1$p2
+	pdf2.1 <- pp1$pdf2 	
+	dc1 <- copgHsAT(p1=p.etn0, p2=p2.1, teta=ass.p, BivD=BivD)$c.copula.be2	
+	cond1 <- y2 * ( (1 - dc1)*pdf2.1/(1-p.etn0))
+	cond1
+                                                                   }
+                                                                   
+
+integr0 <- function(eti0, sigma2, margin2, p.etn0, ass.p, BivD, lil, uil){
+
+  integrate(ConExp0, lower=lil, upper=uil, eti0=eti0, 
+            sigma2=sigma2, margin2=margin2, p.etn0=p.etn0, 
+            ass.p=ass.p, BivD=BivD)$value
+                         
+                       }
+
+integr1 <- function(eti1, sigma2, margin2, p.etn0, ass.p, BivD, lil, uil){
+
+  integrate(ConExp1, lower=lil, upper=uil, eti1=eti1,  
+            sigma2=sigma2, margin2=margin2, p.etn0=p.etn0, 
+            ass.p=ass.p, BivD=BivD)$value
+                         
+                       }
+
+v.integr0 <- Vectorize(integr0)  
+v.integr1 <- Vectorize(integr1) 
+
+###########
+
+
+ass.p  <- x$theta
+sigma2 <- x$sigma2
+if( is.null(x$X3) && is.null(x$X4) ) { ass.p <- rep(ass.p, x$n); sigma2 <- rep(sigma2, x$n)     } 
+
+p.etn0  <- pnorm(-etno)
+p.etn0 <- pmax(p.etn0, epsilon ) 
+p.etn0 <- ifelse(p.etn0 > max.p, max.p, p.etn0)
+
+
+v0 <- v.integr0(eti0=eti0, sigma2=sigma2[ind], margin2=x$VC$margins[2], p.etn0=p.etn0, 
+                ass.p=ass.p[ind], BivD=x$BivD, lil=lil, uil=uil)
+v1 <- v.integr1(eti1=eti1, sigma2=sigma2[ind], margin2=x$VC$margins[2], p.etn0=p.etn0, 
+                ass.p=ass.p[ind], BivD=x$BivD, lil=lil, uil=uil)
+
+est.ATso <- (v1 - v0)  
+   
+}  
+
+  
+
+##
+if(x$margins[2] == "probit"){ 
 
 p.int1 <- pnorm(eti1)
 p.int0 <- pnorm(eti0)
-
 
 d.int1 <- dnorm(eti1)
 d.int0 <- dnorm(eti0)
 
 p.etn  <- pnorm(etno)
 d.etn  <- dnorm(etno)
-}
 
 
-
-
-if(x$PL=="PP"){
-
-if(eq==1){
-
-p.int1 <- pnorm(eti1)^x$xi1
-p.int0 <- pnorm(eti0)^x$xi1
-
-d.int1 <- pnorm(eti1)^(x$xi1 - 1) * (x$xi1 * dnorm(eti1))
-d.int0 <- pnorm(eti0)^(x$xi1 - 1) * (x$xi1 * dnorm(eti0))
-
-p.etn  <- pnorm(etno)^x$xi2   
-d.etn  <- pnorm(etno)^(x$xi2 - 1) * (x$xi2 * dnorm(etno))
-
-         }   
-
-if(eq==2){
-
-p.int1 <- pnorm(eti1)^x$xi2
-p.int0 <- pnorm(eti0)^x$xi2
-
-d.int1 <- pnorm(eti1)^(x$xi2 - 1) * (x$xi2 * dnorm(eti1))
-d.int0 <- pnorm(eti0)^(x$xi2 - 1) * (x$xi2 * dnorm(eti0))
-
-p.etn  <- pnorm(etno)^x$xi1   
-d.etn  <- pnorm(etno)^(x$xi1 - 1) * (x$xi1 * dnorm(etno))
-        }
-
-}
-
-
-
-if(x$PL=="RPP"){
-
-if(eq==1){
-
-p.int1 <- 1-pnorm(-eti1)^x$xi1
-p.int0 <- 1-pnorm(-eti0)^x$xi1
-
-d.int1 <- pnorm(-eti1)^(x$xi1 - 1) * (x$xi1 * dnorm(-eti1))
-d.int0 <- pnorm(-eti0)^(x$xi1 - 1) * (x$xi1 * dnorm(-eti0))
-
-p.etn  <- 1-pnorm(-etno)^x$xi2   
-d.etn  <- pnorm(-etno)^(x$xi2 - 1) * (x$xi2 * dnorm(-etno))
-
-         }   
-
-if(eq==2){
-
-p.int1 <- 1-pnorm(-eti1)^x$xi2
-p.int0 <- 1-pnorm(-eti0)^x$xi2
-
-d.int1 <- pnorm(-eti1)^(x$xi2 - 1) * (x$xi2 * dnorm(-eti1))
-d.int0 <- pnorm(-eti0)^(x$xi2 - 1) * (x$xi2 * dnorm(-eti0))
-
-p.etn  <- 1-pnorm(-etno)^x$xi1   
-d.etn  <- pnorm(-etno)^(x$xi1 - 1) * (x$xi1 * dnorm(-etno))
-        }
-
-}
-
-
-  if(x$PL=="SN"){  
-  
-  del1 <- -x$xi1/sqrt(1+x$xi1^2)
-  del2 <- -x$xi2/sqrt(1+x$xi2^2)
-
-
-  if(eq==1){
-
-p.int1 <- 2*pbinorm( eti1, 0, cov12=del1)
-p.int0 <- 2*pbinorm( eti0, 0, cov12=del1)
-
-d.int1 <- 2*dnorm(eti1)*pnorm(x$xi1*eti1)
-d.int0 <- 2*dnorm(eti0)*pnorm(x$xi1*eti0)
-
-p.etn  <- 2*pbinorm( etno, 0, cov12=del2)
-d.etn  <- 2*dnorm(etno)*pnorm(x$xi2*etno)
-
-         }   
-
-if(eq==2){
-
-p.int1 <- 2*pbinorm( eti1, 0, cov12=del2)
-p.int0 <- 2*pbinorm( eti0, 0, cov12=del2)
-
-d.int1 <- 2*dnorm(eti1)*pnorm(x$xi2*eti1)
-d.int0 <- 2*dnorm(eti0)*pnorm(x$xi2*eti0)
-
-p.etn  <- 2*pbinorm( etno, 0, cov12=del1)
-d.etn  <- 2*dnorm(etno)*pnorm(x$xi1*etno)
-        }    
-      
-  
-   
-  }
-  
-
-
-
-
-if( is.null(x$X3) ) {
-  if(x$BivD == "N" ) {ass.p <- x$rho; ass.pst <- coef(x)["athrho"] } else{ ass.p <- x$theta; ass.pst <- coef(x)["theta.star"]}  
-}
-
-if( !is.null(x$X3) ) {
-  if(x$BivD == "N" ) {ass.p <- x$rho; ass.pst <- x$fit$theta.star } else{ ass.p <- x$theta; ass.pst <- x$fit$theta.star}  
-}
-
+if( is.null(x$X3)  ) { ass.pst <- coef(x)["theta.star"]; ass.p <- x$theta      } 
+if( !is.null(x$X3) ) { ass.pst <- x$fit$etad[ind];       ass.p <- x$theta[ind] } 
 
 p.int1 <- pmax(p.int1, epsilon ) 
-p.int1 <- ifelse(p.int1==1, 0.9999999, p.int1)
+p.int1 <- ifelse(p.int1 > max.p, max.p, p.int1)
 p.int0 <- pmax(p.int0, epsilon )
-p.int0 <- ifelse(p.int0==1, 0.9999999,p.int0)
-
+p.int0 <- ifelse(p.int0 > max.p, max.p, p.int0)
 
 p.etn  <- pmax(p.etn, epsilon )
-p.etn <- ifelse(p.etn==1, 0.9999999,p.etn)
+p.etn <- ifelse(p.etn > max.p, max.p, p.etn)
 
-
-   C.11  <- pmax( BiCDF(p.int1, p.etn, x$nC, ass.p) , epsilon )
-   C.10  <- p.int0 - pmax( BiCDF(p.int0, p.etn, x$nC, ass.p) , epsilon )
+C.11  <- pmax( BiCDF(p.int1, p.etn, x$nC, ass.p) , epsilon )
+C.10  <- p.int0 - pmax( BiCDF(p.int0, p.etn, x$nC, ass.p) , epsilon )
                                  
+est.ATso <- ( C.11/p.etn - C.10/(1-p.etn) )  
 
-   est.AT <- mean(   (C.11/p.etn - C.10/(1-p.etn))[ind.excl],na.rm = TRUE   )
-
-} # end naive condition 
-
+}   
 
 
+} # end naive FALSE condition 
+
+
+
+
+##
 
 if(naive == TRUE){
+
+if(x$margins[2] == "probit"){ 
 
 if(eq==1) ngam <- x$gam1
 if(eq==2) ngam <- x$gam2
@@ -261,15 +239,45 @@ eti1 <- d1%*%coef(ngam)
 eti0 <- d0%*%coef(ngam) 
 
 p.int1 <- pmax(pnorm(eti1), epsilon ) 
-p.int1 <- ifelse(p.int1==1,0.9999999,p.int1) 
+p.int1 <- ifelse(p.int1 > max.p,max.p,p.int1) 
 p.int0 <- pmax(pnorm(eti0), epsilon ) 
-p.int0 <- ifelse(p.int0==1,0.9999999,p.int0) 
+p.int0 <- ifelse(p.int0 > max.p,max.p,p.int0) 
 
-est.AT <- mean(  (p.int1 - p.int0)[ind.excl] , na.rm = TRUE    ) 
-
+est.ATso <- (p.int1 - p.int0) 
 
 }
 
+
+if(x$margins[2] != "probit"){ 
+
+parg2 <- x$gamlss$fit$argument[1:x$X2.d2]
+eti1  <- d1%*%parg2 
+eti0  <- d0%*%parg2
+sig2  <- (exp(x$gamlss$fit$sigma2.st) + epsilon)[ind] 
+
+if(x$margins[2] %in% c("N","LO","iG") )   est.ATso <- x$gamlss$fit$argument[nm.bin]  
+if(x$margins[2] == "LN")                  est.ATso <- ( exp(eti1 + sig2/2) - exp(eti0 + sig2/2) ) 
+if(x$margins[2] == "GU")                  est.ATso <- ( ( eti1 - 0.57722*sqrt(sig2) ) - ( eti0 - 0.57722*sqrt(sig2) ) )   
+if(x$margins[2] == "rGU")                 est.ATso <- ( ( eti1 + 0.57722*sqrt(sig2) ) - ( eti0 + 0.57722*sqrt(sig2) ) )                           
+if(x$margins[2] == "WEI")                 est.ATso <- (  eti1*gamma((1/sqrt(sig2)) + 1) - eti0*gamma((1/sqrt(sig2)) + 1)  )                          
+if(x$margins[2] == "GA")                  est.ATso <- (  exp(eti1) - exp(eti0)   )                           
+
+                 }  
+
+
+
+} # end naive condition
+
+
+
+
+
+
+
+
+###############
+
+est.AT <- mean( est.ATso, na.rm = TRUE )
 
 ###############
 
@@ -277,7 +285,13 @@ est.AT <- mean(  (p.int1 - p.int0)[ind.excl] , na.rm = TRUE    )
 
 
 
-      
+
+
+
+###############
+# DELTA TRUE
+###############
+
 if(delta==TRUE){
 
   if(naive == FALSE){
@@ -287,24 +301,23 @@ if(delta==TRUE){
     if(x$BivD %in% c("C0", "C180","J0", "J180","G0", "G180") ) add.b <-  exp(ass.pst)
     if(x$BivD %in% c("C90","C270","J90","J270","G90","G270") ) add.b <- -exp(ass.pst)
    
-   dC1 <- copgHs(p1=p.etn,p2=p.int1,teta=ass.p,teta.st=ass.pst,BivD=x$BivD,nC=x$nC,nu=NULL,xi1=NULL,xi2=NULL,eta1=etno,eta2=eti1,PL=x$PL,eqPL=x$eqPL)
-   dC0 <- copgHs(p1=p.etn,p2=p.int0,teta=ass.p,teta.st=ass.pst,BivD=x$BivD,nC=x$nC,nu=NULL,xi1=NULL,xi2=NULL,eta1=etno,eta2=eti0,PL=x$PL,eqPL=x$eqPL)
+   dC1 <- copgHs(p1=p.etn,p2=p.int1,teta=ass.p,teta.st=ass.pst,BivD=x$BivD,eta1=etno,eta2=eti1)
+   dC0 <- copgHs(p1=p.etn,p2=p.int0,teta=ass.p,teta.st=ass.pst,BivD=x$BivD,eta1=etno,eta2=eti0)
 
    dATT.noint <- ( (dC1$c.copula.be1*p.etn-C.11)/p.etn^2 + (dC0$c.copula.be1*(1-p.etn)-C.10)/(1-p.etn)^2)*d.etn 
-   dATT.noint <- colMeans( (c(dATT.noint)*X.noi)[ind.excl,] ) 
+   dATT.noint <- colMeans( (c(dATT.noint)*X.noi) ) 
 
-   dATT.int   <- colMeans( (c( (dC1$c.copula.be2*d.int1)/p.etn )*d1)[ind.excl,] ) - colMeans( (c( (1-dC0$c.copula.be2)*d.int0/(1-p.etn) )*d0)[ind.excl,])
+   dATT.int   <- colMeans( (c( (dC1$c.copula.be2*d.int1)/p.etn )*d1) ) - colMeans( (c( (1-dC0$c.copula.be2)*d.int0/(1-p.etn) )*d0) )
 
-   if( is.null(x$X3) ) dATT.tet   <- mean(((dC1$c.copula.theta/add.b)/p.etn + (dC0$c.copula.theta/add.b)/(1-p.etn))[ind.excl])  
+   if( is.null(x$X3) ) dATT.tet   <- mean(((dC1$c.copula.theta/add.b)/p.etn + (dC0$c.copula.theta/add.b)/(1-p.etn)) )  
    
-   if( !is.null(x$X3) ) dATT.tet <- colMeans( (c( (dC1$c.copula.theta/add.b)/p.etn + (dC0$c.copula.theta/add.b)/(1-p.etn) )*x$X3[good,])[ind.excl,]  )  
+   if( !is.null(x$X3) ) dATT.tet <- colMeans( (c( (dC1$c.copula.theta/add.b)/p.etn + (dC0$c.copula.theta/add.b)/(1-p.etn) )*x$X3[ind,])  )  
 
 
    if(eq==2) dATT <- c(dATT.noint,dATT.int,dATT.tet) else dATT <- c(dATT.int,dATT.noint,dATT.tet) 
 
 
-   var <- bprobgHs(params=coef(x), PL=x$PL, eqPL=x$eqPL, respvec=x$respvec, VC=x$VC, 
-                   sp=x$sp, qu.mag=x$qu.mag, AT=TRUE)$hessian
+   var <- bprobgHs(params=coef(x), respvec=x$respvec, VC=x$VC, sp=x$sp, qu.mag=x$qu.mag, AT=TRUE)$hessian
 
 
    var.eig <- eigen(var, symmetric=TRUE)                    
@@ -319,7 +332,7 @@ if(delta==TRUE){
    if(naive == TRUE){
    
    var <- ngam$Vp   
-   dATT <- colMeans(  ( c(dnorm(eti1))*d1 - c(dnorm(eti0))*d0 )[ind.excl,]  )
+   dATT <- colMeans(  ( c(dnorm(eti1))*d1 - c(dnorm(eti0))*d0 )  )
    delta.AT <- sqrt( t(dATT)%*%var%*%dATT )
        
    }
@@ -329,137 +342,162 @@ if(delta==TRUE){
 
 
 
-if(delta==FALSE){
+
+
+###############
+# DELTA FALSE
+###############
+
+
+
+if(delta==FALSE){     
 
 
 if(naive == TRUE){ 
 
 
-bs <- rmvnorm(n.sim, mean = coef(ngam), sigma=ngam$Vp, method=s.meth) 
+if(x$margins[2] == "probit"){ 
 
+  
+ bs <- rMVN(n.sim, mean = coef(ngam), sigma=ngam$Vp)
+ 
  peti1s <- pmax(pnorm(d1%*%t(bs)), epsilon )  
- peti1s <- ifelse(peti1s==1,0.9999999,peti1s)  
+ peti1s <- ifelse(peti1s > max.p,max.p,peti1s)  
  peti0s <- pmax(pnorm(d0%*%t(bs)), epsilon ) 
- peti0s <- ifelse(peti0s==1,0.9999999,peti0s)  
+ peti0s <- ifelse(peti0s > max.p,max.p,peti0s)  
+ est.ATb <- colMeans(  (peti1s - peti0s) , na.rm = TRUE    ) 
+
+                             }
 
 
- est.ATb <- colMeans(  (peti1s - peti0s)[ind.excl,] , na.rm = TRUE    )
+if(x$margins[2] != "probit"){ 
+
+ hess <- x$gamlss$fit$hessian                                                                                                     
+ He.eig <- eigen(hess, symmetric=TRUE)
+ if(min(He.eig$values) < sqrt(.Machine$double.eps)) He.eig$values[which(He.eig$values < sqrt(.Machine$double.eps))] <- 0.0000001
+ inv.hess <- He.eig$vectors%*%tcrossprod(diag(1/He.eig$values),He.eig$vectors)  
+
+ bs <- rMVN(n.sim, mean = x$gamlss$fit$argument, sigma=inv.hess)
+ colnames(bs) <- names(x$gamlss$fit$argument)
+
+ eti1s <- d1%*%t(bs[,1:x$X2.d2])    
+ eti0s <- d0%*%t(bs[,1:x$X2.d2])  
+
+ if( !is.null(x$X3) ) sigma2.st <- x$X3[ind,]%*%t(bs[,(x$X2.d2+1):(x$X2.d2+x$X3.d2)]) 
+ if(  is.null(x$X3) ) sigma2.st <- bs[,x$X2.d2 + 1]
+   
+ sigma2.st <- ifelse( sigma2.st > 20, 20, sigma2.st )  
+ sigma2.st <- ifelse( sigma2.st < -17, -17, sigma2.st ) 
+ sigma2s <- exp(sigma2.st)
+               
+if(x$margins[2] %in% c("N","LO","iG") )   est.ATb <- bs[,nm.bin] 
+if(x$margins[2] == "LN")                  est.ATb <- colMeans(   exp(eti1s + sigma2s/2) - exp(eti0s + sigma2s/2)                         , na.rm = TRUE    )
+if(x$margins[2] == "GU")                  est.ATb <- colMeans(    ( eti1s - 0.57722*sqrt(sigma2s) ) - ( eti0s - 0.57722*sqrt(sigma2s) )  , na.rm = TRUE    )   
+if(x$margins[2] == "rGU")                 est.ATb <- colMeans(   ( eti1s + 0.57722*sqrt(sigma2s) ) - ( eti0s + 0.57722*sqrt(sigma2s) )   , na.rm = TRUE    )                           
+if(x$margins[2] == "WEI")                 est.ATb <- colMeans(    eti1s*gamma(1/sqrt(sigma2s) + 1) - eti0s*gamma(1/sqrt(sigma2s) + 1)    , na.rm = TRUE    )                            
+if(x$margins[2] == "GA")                  est.ATb <- colMeans(    exp(eti1s) - exp(eti0s)                                                , na.rm = TRUE    )         
+         
+                             }
+
+} # end naive loop
 
 
-}
+
 
 
 
 if(naive == FALSE){ 
 
-bs <- rmvnorm(n.sim, mean = coef(x), sigma=x$Vb, method=s.meth)
+ bs <- rMVN(n.sim, mean = coef(x), sigma=x$Vb) 
 
  eti1s <- d1%*%t(bs[,ind.int])    
  eti0s <- d0%*%t(bs[,ind.int])   
  etnos <- X.noi%*%t(bs[,ind.noi]) 
  
-                          
-if(x$PL=="P"){
-	p.int1s <- pnorm(eti1s)
-	p.int0s <- pnorm(eti0s)
-	p.etns  <- pnorm(etnos)
 
-             }
-
-
-if(x$PL=="PP"){                    
- if(eq==1){
-  p.int1s <- pnorm(eti1s)^x$xi1   
-  p.int0s <- pnorm(eti0s)^x$xi1
-  p.etns  <- pnorm(etnos)^x$xi2 
-           }   
- if(eq==2){
-  p.int1s <- pnorm(eti1s)^x$xi2
-  p.int0s <- pnorm(eti0s)^x$xi2
-  p.etns  <- pnorm(etnos)^x$xi1 
-           }
-}
-
-
-if(x$PL=="RPP"){
- if(eq==1){
-  p.int1s <- 1-pnorm(-eti1s)^x$xi1
-  p.int0s <- 1-pnorm(-eti0s)^x$xi1
-  p.etns  <- 1-pnorm(-etnos)^x$xi2  
-          }   
- if(eq==2){
-  p.int1s <- 1-pnorm(-eti1s)^x$xi2
-  p.int0s <- 1-pnorm(-eti0s)^x$xi2
-  p.etns  <- 1-pnorm(-etnos)^x$xi1  
-          }
-}
-
-
-  
-if(x$PL=="SN"){  
-
-dim1 <- dim(eti1s)[1]
-dim2 <- dim(eti1s)[2]
-      
-  if(eq==1){
-
-p.int1s <- matrix(2*pbinorm( as.vector(eti1s), 0, cov12=del1),dim1,dim2)
-p.int0s <- matrix(2*pbinorm( as.vector(eti0s), 0, cov12=del1),dim1,dim2)
-p.etns  <- matrix(2*pbinorm( as.vector(etnos), 0, cov12=del2),dim1,dim2)
-
-         }   
-
-if(eq==2){
-
-p.int1s <- matrix(2*pbinorm( as.vector(eti1s), 0, cov12=del2),dim1,dim2)
-p.int0s <- matrix(2*pbinorm( as.vector(eti0s), 0, cov12=del2),dim1,dim2)
-p.etns  <- matrix(2*pbinorm( as.vector(etnos), 0, cov12=del1),dim1,dim2)
-
-        }    
-   
-  }  
-  
-  
-  
-  
-  
- if( !is.null(x$X3) ) etds <- x$X3[good,]%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)])
- if(  is.null(x$X3) ) etds <- bs[, p.rho]  
-  
-  
-#if(x$BivD!="N"){
-
-   if(x$BivD=="F")                   ass.ps <- etds + epsilon
-   if(x$BivD %in% c("N"))           {ass.ps <- tanh(etds); ass.ps <- ifelse(ass.ps == -1, -0.9999999, ass.ps) 
-                                                           ass.ps <- ifelse(ass.ps ==  1,  0.9999999, ass.ps) }
-  
-   if(x$BivD %in% c("C0", "C180") )  ass.ps <-   exp(etds) + epsilon
-   if(x$BivD %in% c("C90","C270") )  ass.ps <- -(exp(etds) + epsilon)
-
-   if(x$BivD %in% c("J0", "J180") )  ass.ps <-    1 + exp(etds) + epsilon
-   if(x$BivD %in% c("J90","J270") )  ass.ps <- -( 1 + exp(etds) + epsilon)
+ if(x$VC$margins[2] %in% m2 ) p.etns  <- pnorm(-etnos) else p.etns  <- pnorm(etnos)
+ p.etns  <- pmax(p.etns, epsilon )
+ p.etns  <- ifelse(p.etns > max.p,max.p,p.etns) 
  
-   if(x$BivD %in% c("G0", "G180") )  ass.ps <-    1 + exp(etds)
-   if(x$BivD %in% c("G90","G270") )  ass.ps <- -( 1 + exp(etds) )
+ 
+ if(x$VC$margins[2]=="probit"){
    
-   ass.ps <- ifelse(ass.ps == Inf ,  8.218407e+307, ass.ps )
-   ass.ps <- ifelse(ass.ps == -Inf, -8.218407e+307, ass.ps )
+   if( !is.null(x$X3) ) etds <- x$X3[ind,]%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)])
+   if(  is.null(x$X3) ) etds <- bs[,p.rho]
+   
+   }
+   
+   if(x$VC$margins[2] %in% m2 ){
+   
+   if( !is.null(x$X3) ) sigma2.st <- x$X3[ind,]%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)]) 
+   if(  is.null(x$X3) ) sigma2.st <- bs[,p.rho-1]
+   
+   if( !is.null(x$X4) ) etds <- x$X4[ind,]%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2 + 1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2)])
+   if(  is.null(x$X4) ) etds <- bs[,p.rho]  
+   
+   sigma2.st <- ifelse( sigma2.st > 20, 20, sigma2.st )  
+   sigma2.st <- ifelse( sigma2.st < -17, -17, sigma2.st ) 
+   sigma2s <- exp(sigma2.st)
+  
+  } 
+ 
+ 
+ 
+ 
+    if(x$BivD=="F")                   ass.ps <- etds + epsilon
+    if(x$BivD %in% c("N"))           {ass.ps <- tanh(etds); ass.ps <- ifelse(ass.ps < -max.p, -max.p, ass.ps) 
+                                                            ass.ps <- ifelse(ass.ps >  max.p,  max.p, ass.ps) }
+   
+    if(x$BivD %in% c("C0", "C180") )  ass.ps <-   exp(etds) + epsilon
+    if(x$BivD %in% c("C90","C270") )  ass.ps <- -(exp(etds) + epsilon)
+ 
+    if(x$BivD %in% c("J0", "J180") )  ass.ps <-    1 + exp(etds) + epsilon
+    if(x$BivD %in% c("J90","J270") )  ass.ps <- -( 1 + exp(etds) + epsilon)
+  
+    if(x$BivD %in% c("G0", "G180") )  ass.ps <-    1 + exp(etds)
+    if(x$BivD %in% c("G90","G270") )  ass.ps <- -( 1 + exp(etds) )
+    
+    ass.ps <- ifelse(ass.ps == Inf ,  8.218407e+307, ass.ps )
+    ass.ps <- ifelse(ass.ps == -Inf, -8.218407e+307, ass.ps )
 
-#}
 
 
 
+
+
+if(x$margins[2] != "probit"){                     
+
+if( is.null(x$X3) && is.null(x$X4) ) { ass.ps <- matrix(ass.ps,  ncol = n.sim, nrow=dim(eti0s)[1],byrow = TRUE)
+                                      sigma2s <- matrix(sigma2s, ncol = n.sim, nrow=dim(eti0s)[1],byrow = TRUE)  } 
+
+for(i in 1:n.sim){ 
+
+v0 <- v.integr0(eti0=eti0s[,i], sigma2=sigma2s[,i], margin2=x$VC$margins[2], p.etn0=p.etns[,i], ass.p=ass.ps[,i], BivD=x$BivD, lil=lil, uil=uil)
+v1 <- v.integr1(eti1=eti1s[,i], sigma2=sigma2s[,i], margin2=x$VC$margins[2], p.etn0=p.etns[,i], ass.p=ass.ps[,i], BivD=x$BivD, lil=lil, uil=uil)
+
+ est.ATb[i] <- mean( (v1 - v0), na.rm = TRUE   ) 
+
+                 }
+
+
+}
+
+
+
+
+
+
+
+if(x$margins[2] == "probit"){ 
+
+ 
+p.int1s <- pnorm(eti1s)
+p.int0s <- pnorm(eti0s)
 
 p.int1s <- pmax(p.int1s, epsilon )
-p.int1s <- ifelse(p.int1s==1,0.9999999,p.int1s)   
+p.int1s <- ifelse(p.int1s > max.p,max.p,p.int1s)   
 p.int0s <- pmax(p.int0s, epsilon )
-p.int0s <- ifelse(p.int0s==1,0.9999999,p.int0s) 
-p.etns  <- pmax(p.etns, epsilon )
-p.etns  <- ifelse(p.etns==1,0.9999999,p.etns) 
-
-
-
-
+p.int0s <- ifelse(p.int0s > max.p,max.p,p.int0s) 
 
 
 if( is.null(x$X3) ) ass.ps <- t(matrix(ass.ps)) 
@@ -467,18 +505,46 @@ if( is.null(x$X3) ) ass.ps <- t(matrix(ass.ps))
 
 for(i in 1:n.sim){ 
 
- C.11 <- pmax( BiCDF(p.int1s[,i], p.etns[,i], x$nC, ass.ps[,i]) , epsilon )
- C.10 <- p.int0s[,i] - pmax( BiCDF(p.int0s[,i], p.etns[,i], x$nC, ass.ps[,i]) , epsilon )
+ C.11 <- BiCDF(p.int1s[,i], p.etns[,i], x$nC, ass.ps[,i]) 
+ C.10 <- p.int0s[,i] - BiCDF(p.int0s[,i], p.etns[,i], x$nC, ass.ps[,i]) 
 
- est.ATb[i] <- mean(   (C.11/p.etns[,i] - C.10/(1-p.etns[,i]))[ind.excl],na.rm = TRUE   )
+ est.ATb[i] <- mean(   (C.11/p.etns[,i] - C.10/(1-p.etns[,i])), na.rm = TRUE   )
                   }
                   
 
+
+}   # end probit true
+
+
+
+
+
+
                
-}  # end big loop   
+}  # end NAIVE FALSE   
 
 
-}
+
+
+
+  if(hd.plot == TRUE){
+  
+  if(x$margins[2] %in% m2) mult <- 1 else mult <- 100
+  
+  hist(est.ATb*mult, freq = FALSE, main=main, 
+       xlab=xlab, 
+       ylim=c(0,max(density(est.ATb*mult)$y,hist(est.ATb*mult, plot = FALSE)$density)), ...)
+  lines(density(est.ATb*mult))
+
+ }
+
+
+
+
+
+
+} # end DELTA condition
+
 
 
            
@@ -487,7 +553,11 @@ if(delta==TRUE){esd.AT <- delta.AT*qnorm(prob.lev/2,lower.tail = FALSE)
                }else CIs <- as.numeric(quantile(est.ATb,c(prob.lev/2,1-prob.lev/2),na.rm = TRUE))
 
 res <- c(CIs[1],est.AT,CIs[2])
-out <- list(res=res, prob.lev=prob.lev, est.ATb=est.ATb)
+out <- list(res=res, prob.lev=prob.lev, sim.AT=est.ATb, AT.so = est.ATso, mar2=x$margins[2])
+ 
+rm(etap.noi, X.int, X.noi, eti1, eti0, etno, indS, bs, ind.excl, p.int1, p.int0, d.int1, d.int0,
+   p.etn, d.etn, ass.p, ass.pst, C.11, C.10, sig2, peti1s, peti0s, sigma2.st, sigma2s, eti1s, eti0s, d0, d1,
+   p.etns, etnos, etds, ass.ps)    
  
 class(out) <- "AT"
 

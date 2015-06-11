@@ -1,77 +1,87 @@
 print.SemiParBIVProbit <- function(x, ...){
 
-  if(x$BivD=="N")    {cop <- "BIVARIATE GAUSSIAN"                              ;lind <- "atanh(rho)"}
+  if(x$BivD=="N" && x$Model!="BPO0")  {cop <- "BIVARIATE GAUSSIAN"                              ;lind <- "atanh(theta)"}
+  if(x$BivD=="N" && x$Model=="BPO0")  {cop <- "INDEPENDENT GAUSSIAN"                              ;lind <- "atanh(theta)"}  
   if(x$BivD=="F")    {cop <- "BIVARIATE FRANK COPULA"                          ;lind <- "theta"}
   if(x$BivD=="C0")   {cop <- "BIVARIATE CLAYTON COPULA"                        ;lind <- "log(theta)"}
-  if(x$BivD=="C90")  {cop <- "BIVARIATE ROTATED CLAYTON COPULA (90 DEGREES)"   ;lind <- "log(-theta)"}
-  if(x$BivD=="C180") {cop <- "BIVARIATE SURVIVAL CLAYTON COPULA"               ;lind <- "log(theta)"}
-  if(x$BivD=="C270") {cop <- "BIVARIATE ROTATED CLAYTON COPULA (270 DEGREES)"  ;lind <- "log(-theta)"}  
+  if(x$BivD=="C90")  {cop <- "BIVARIATE 90\u00B0 CLAYTON COPULA"   ;lind <- "log(-theta)"}
+  if(x$BivD=="C180") {cop <- "BIVARIATE 180\u00B0 CLAYTON COPULA"               ;lind <- "log(theta)"}
+  if(x$BivD=="C270") {cop <- "BIVARIATE 270\u00B0 CLAYTON COPULA"  ;lind <- "log(-theta)"}  
   if(x$BivD=="J0")   {cop <- "BIVARIATE JOE COPULA"                            ;lind <- "log(theta-1)"}
-  if(x$BivD=="J90")  {cop <- "BIVARIATE ROTATED JOE COPULA (90 DEGREES)"       ;lind <- "log(-theta-1)"}
-  if(x$BivD=="J180") {cop <- "BIVARIATE SURVIVAL JOE COPULA"                   ;lind <- "log(theta-1)"}
-  if(x$BivD=="J270") {cop <- "BIVARIATE ROTATED JOE COPULA (270 DEGREES)"      ;lind <- "log(-theta-1)"}
+  if(x$BivD=="J90")  {cop <- "BIVARIATE 90\u00B0 JOE COPULA"       ;lind <- "log(-theta-1)"}
+  if(x$BivD=="J180") {cop <- "BIVARIATE 180\u00B0 JOE COPULA"                   ;lind <- "log(theta-1)"}
+  if(x$BivD=="J270") {cop <- "BIVARIATE 270\u00B0 JOE COPULA"      ;lind <- "log(-theta-1)"}
   if(x$BivD=="G0")   {cop <- "BIVARIATE GUMBEL COPULA"                         ;lind <- "log(theta-1)"}
-  if(x$BivD=="G90")  {cop <- "BIVARIATE ROTATED GUMBEL COPULA (90 DEGREES)"    ;lind <- "log(-theta-1)"}
-  if(x$BivD=="G180") {cop <- "BIVARIATE SURVIVAL GUMBEL COPULA"                ;lind <- "log(theta-1)"}
-  if(x$BivD=="G270") {cop <- "BIVARIATE ROTATED GUMBEL COPULA (270 DEGREES)"   ;lind <- "log(-theta-1)"} 
+  if(x$BivD=="G90")  {cop <- "BIVARIATE 90\u00B0 GUMBEL COPULA"    ;lind <- "log(-theta-1)"}
+  if(x$BivD=="G180") {cop <- "BIVARIATE 180\u00B0 GUMBEL COPULA"                ;lind <- "log(theta-1)"}
+  if(x$BivD=="G270") {cop <- "BIVARIATE 270\u00B0 GUMBEL COPULA"   ;lind <- "log(-theta-1)"} 
+    
+  cp <- "  theta = "; as.p <- x$theta.a
   
-  if(x$BivD %in% c("N") ) {cp <- "  rho = "; as.p <- x$rho.a} else{ cp <- "  theta = "; as.p <- x$theta.a}
+  if(x$margins[2]=="probit")                     m2l <- "probit"
+  if(x$margins[2] %in% c("N","GU","rGU","LO") )  m2l <- "identity"
+  if(x$margins[2] %in% c("LN","WEI","iG","GA","iGA") ) m2l <- "log" 
 
+  
   cat("\nERRORS' DISTRIBUTION:",cop)
 
   cat("\n\nEQUATION 1")
-  if(x$PL=="P") cat("\nLink function: probit\n")
-
-  if(x$PL=="PP" || x$PL=="RPP"){ 
-    if(round(x$xi1,3)==1) cat("\nLink function: probit\n") else{ 
-  if(x$PL=="PP") cat("\nLink function: power probit\n") 
-  if(x$PL=="RPP") cat("\nLink function: reciprocal power probit\n") }
-  }
-  
-    if(x$PL=="SN"){ 
-      if(round(x$xi1,3)==0) cat("\nLink function: probit\n") else 
-    cat("\nLink function: skew normal\n") 
-  }
-
-
-  print(x$gam1$formula)
+  cat("\nFamily: Bernoulli") 
+  cat("\nLink function: probit")
+  cat("\nFormula: "); print(x$gam1$formula)
 
   cat("\nEQUATION 2")
-  if(x$PL=="P") cat("\nLink function: probit\n")
   
-  if(x$PL=="PP" || x$PL=="RPP"){ 
-    if(round(x$xi2,3)==1) cat("\nLink function: probit\n") else{  
-  if(x$PL=="PP") cat("\nLink function: power probit\n") 
-  if(x$PL=="RPP") cat("\nLink function: reciprocal power probit\n") }
-}
+  if(x$margins[2]=="probit") cat("\nFamily: Bernoulli") 
+  if(x$margins[2]=="N")      cat("\nFamily: Gaussian")  
+  if(x$margins[2]=="GU")     cat("\nFamily: Gumbel")    
+  if(x$margins[2]=="rGU")    cat("\nFamily: reverse Gumbel")  
+  if(x$margins[2]=="LO")     cat("\nFamily: logistic")   
+  if(x$margins[2]=="LN")     cat("\nFamily: log-normal") 
+  if(x$margins[2]=="WEI")    cat("\nFamily: Weibull")   
+  if(x$margins[2]=="iG")     cat("\nFamily: inverse Gaussian") 
+  if(x$margins[2]=="GA")     cat("\nFamily: gamma")    
+  if(x$margins[2]=="iGA")    cat("\nFamily: inverse gamma")    
 
-    if(x$PL=="SN"){ 
-      if(round(x$xi2,3)==0) cat("\nLink function: probit\n") else 
-    cat("\nLink function: skew normal\n") 
-  }
-
-  print(x$gam2$formula)
+  
+ 
+  cat("\nLink function:",m2l,"\n")
+  cat("Formula: "); print(x$gam2$formula)
   
   
   
-  if(!is.null(x$X3)){
+  if(!is.null(x$X3) && is.null(x$X4) ){
   
   cat("\nEQUATION 3")
   cat("\nLink function:",lind,"\n") 
-  
-  f <- x$gam3$formula; environment(f) <- environment(x$gam2$formula) 
-  print(f)
+  cat("Formula: "); print(x$gam3$formula)
   
   }
   
+  if(!is.null(x$X3) && !is.null(x$X4) ){
+  
+  cat("\nEQUATION 3")
+  cat("\nLink function:","log(sigma^2)","\n") 
+  cat("Formula: "); print(x$gam3$formula)  
+  
+  cat("\nEQUATION 4")
+  cat("\nLink function:",lind,"\n") 
+  cat("Formula: "); print(x$gam4$formula)
+  
+  }  
+  
+  
+  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","iGA")  
   
   cat("\n")
             
-  if(x$sel==FALSE) cat("n = ",x$n,cp,format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
+  if(x$Model %in% c("B","BPO") && x$margins[2]=="probit") cat("n = ",x$n,cp,format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
+  if(x$Model == "BPO0")                                   cat("n = ",x$n,"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
+
+  if(x$Model=="BSS")                                      cat("n = ",x$n,"  n.sel = ",x$n.sel,cp,format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
   
-  if(x$sel==TRUE)  cat("n = ",x$n,"  n.sel = ",x$n.sel,cp,format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
-  
-  
+  if(x$Model=="B" && x$margins[2] %in% cont2par ) cat("n = ",x$n,"  sigma^2 = ",x$sigma2.a, cp, format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
+
 
 invisible(x)
 

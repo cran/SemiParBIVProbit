@@ -4,15 +4,17 @@
 \title{Average treatment effect of a binary endogenous variable}
 
 \description{ 
-\code{AT} can be used to calculate the sample average treatment effect of a binary endogenous predictor/treatment, with corresponding 
-confidence/credible intervals.}
+\code{AT} can be used to calculate the sample average treatment effect of a binary endogenous predictor/treatment, with 
+corresponding interval obtained using the delta method or posterior simulation.}
 
 
 
 \usage{
 
-AT(x, eq, nm.bin = "", E = TRUE, treat = TRUE, delta = FALSE, 
-   prob.lev = 0.05, s.meth = "svd", n.sim = 500, naive = FALSE)
+AT(x, eq, nm.bin, E = TRUE, treat = TRUE, naive = FALSE, ind = NULL, 
+   sub.l = 50, delta = FALSE, n.sim = 100, prob.lev = 0.05, hd.plot = FALSE,
+   main = "Histogram and Kernel Density of Simulated Average Effects", 
+   xlab = "Simulated Average Effects", ...)
 
 }
 
@@ -28,23 +30,34 @@ AT(x, eq, nm.bin = "", E = TRUE, treat = TRUE, delta = FALSE,
          for the treated individuals only.}  
 
 \item{treat}{If \code{TRUE} then \code{AT} calculates the AT using the treated only. If \code{FALSE} then it calculates the effect on 
-the control group. This only makes sense if used jointly with \code{E = FALSE}.}  
+the control group. This only makes sense if \code{E = FALSE}.}  
 
-\item{delta}{If \code{TRUE} then an approximate delta method is used for confidence interval calculation, otherwise Bayesian posterior 
-             simulation (the most reliable option, despite a bit slower) 
-             is employed. Note that for models involving asymmetric link functions only posterior simulation is allowed for.}  
+\item{naive}{It indicates whether AT is calculated from a univariate probit model. This option has been 
+             introduced to compare adjusted (for unobserved confounding) and unadjusted estimates. Note that, although
+             the unadjusted estimates do not account for unobserved confounding, they do control for observed confounding.} 
 
-\item{prob.lev}{Probability of the left and right tails of the AT distribution used for interval calculations.} 
+\item{ind}{Binary logical variable. It can be used to calculate the AT for a subset of the data. Note that it does not make sense to use \code{ind} 
+           when some observations are excluded from the AT calculation (e.g., when using \code{E = FALSE}).}  
+  
+\item{sub.l}{Length of subset of observations to use in the calculation of the treatment effect when the outcome of interest is continuous.}  
 
-\item{s.meth}{Matrix decomposition used to determine the matrix root of the covariance 
-              matrix. This is used when \code{delta = FALSE}. See the documentation of the \code{mvtnorm} package for further details.}
+\item{delta}{If \code{TRUE} then the delta method is used for confidence interval calculations, otherwise Bayesian posterior 
+             simulation (the most reliable option, despite a bit slower) is employed.}  
 
 \item{n.sim}{Number of simulated coefficient vectors from the posterior distribution of the estimated model parameters. This is used 
              when \code{delta = FALSE}. It may be increased if more precision is required.} 
 
-\item{naive}{It indicates whether the AT is calculated from a univariate probit model. This option has been 
-             introduced to compare adjusted (for unobserved confounding) and unadjusted estimates. Note that, although
-             the unadjusted estimates do not account for unobserved confounding, they do control for observed confounding.} 
+\item{prob.lev}{Overall probability of the left and right tails of the AT distribution used for interval calculations.} 
+
+\item{hd.plot}{If \code{TRUE} then a plot of the histogram and kernel density estimate of the simulated average effects is produced. This can 
+               only be produced when \code{delta = FALSE}.}
+
+\item{main}{Title for the plot.}
+
+\item{xlab}{Title for the x axis.}
+
+\item{...}{Other graphics parameters to pass on to plotting commands. These are used only when \code{hd.plot = TRUE}.}
+
 
 }
 
@@ -53,10 +66,15 @@ the control group. This only makes sense if used jointly with \code{E = FALSE}.}
 
 AT measures the sample average difference in outcomes under 
 treatment (the binary predictor or treatment assumes value 1) and under 
-control (the binary treatment assumes value 0). Note that this function is only suitable for the 
-calculation of the average treatment effect in recursive bivariate binary models. Posterior simulation 
-and delta method can be used to obtain confidence/credible intervals. The former is typically more reliable at small
+control (the binary treatment assumes value 0). Posterior simulation 
+and delta method can be used to obtain a confidence/credible interval. The former is more reliable, especially at small
 sample sizes. See the references below for details. 
+
+For the case of continuous response, the AT is calculated via numerical integration, which can result in costly computation depending on the
+size of the dataset and number of simulated coefficient vectors used for interval construction. In the model building 
+process, we recommend using a subset of observations to calculate the AT (see \code{sub.l}). In 
+our experience this still provides representative average effects. Once a preferred model has been found, the AT can be calculated using 
+the entire  dataset by setting \code{sub.l} to the number of observations (note that this can be time consuming). 
 
 }
 
@@ -64,10 +82,12 @@ sample sizes. See the references below for details.
 
 \value{
 
-\item{res}{It returns three values: lower confidence interval limit, estimated AT and upper confidence interval limit.}
+\item{res}{It returns three values: lower confidence interval limit, estimated AT and upper interval limit.}
 \item{prob.lev}{Probability level used.}
-\item{est.ATb}{If \code{delta = FALSE} then it returns a vector containing simulated values of the average treatment effect. This 
+\item{sim.AT}{If \code{delta = FALSE} then it returns a vector containing simulated values of the average treatment effect. This 
                is used to calculate intervals.}
+\item{AT.so}{It returns a vector containing the estimated effect for each single observation.}            
+               
 
 }
 
@@ -83,10 +103,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
-Journal of Statistics}, 39(2), 259-279.
-
-Radice R., Marra G. and M. Wojtys (submitted), Copula Regression Spline Models for Binary Outcomes.
+Radice R., Marra G. and M. Wojtys (in press), Copula Regression Spline Models for Binary Outcomes. \emph{Statistics and Computing}.
 
 
 }

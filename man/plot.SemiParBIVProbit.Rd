@@ -5,9 +5,7 @@
 
 
 \description{It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVProbit()} and plots the 
-component smooth functions that make it up on the scale of the linear predictor. 
-
-This function is based on \code{plot.gam()} in \code{mgcv}. Please see the documentation of \code{plot.gam()} for full details. 
+estimated smooth functions on the scale of the linear predictors. This function is a wrapper for \code{plot.gam()} in \code{mgcv}. Please see the documentation of \code{plot.gam()} for full details. 
 
 }
 
@@ -22,7 +20,7 @@ This function is based on \code{plot.gam()} in \code{mgcv}. Please see the docum
 
 \item{eq}{The equation from which smooth terms should be considered for printing.}
 
-\item{...}{Other graphics parameters to pass on to plotting commands, as described for \code{plot.gam} in \code{mgcv}.}
+\item{...}{Other graphics parameters to pass on to plotting commands, as described for \code{plot.gam()} in \code{mgcv}.}
 
 
 }
@@ -30,16 +28,15 @@ This function is based on \code{plot.gam()} in \code{mgcv}. Please see the docum
 
 \details{
 
-This function produces plot showing the smooth terms of a fitted semiparametric bivariate probit model. For plots 
-of 1-D smooths, the x axis of each plot is labelled using the name of the regressor, while the y axis is labelled as \code{s(regr, edf)} 
-where \code{regr} is the regressor name, and \code{edf} the effective degrees of freedom of the smooth. As for 2-D smooths, perspective 
+This function produces plots showing the smooth terms of a fitted semiparametric bivariate probit model. In the case of 1-D smooths, the 
+x axis of each plot is labelled using the name of the regressor, while the y axis is labelled as \code{s(regr, edf)} 
+where \code{regr} is the regressor's name, and \code{edf} the effective degrees of freedom of the smooth. For 2-D smooths, perspective 
 plots are produced with the x axes labelled with the first and second variable names and the y axis 
 is labelled as \code{s(var1, var2, edf)}, which indicates the variables of which the term is a function and the \code{edf} for the term. 
 
-If \code{seWithMean = TRUE} then the intervals include the uncertainty about the overall mean. That is, 
-although each smooth is shown centred, the confidence intervals are obtained as if every other term in the model was 
-constrained to have average 0 (average taken over the covariate values) except for the smooth being plotted. The theoretical arguments 
-and simulation study of Marra and Wood (2012) suggests that \code{seWithMean = TRUE} results in intervals with
+If \code{seWithMean = TRUE} then the intervals include the uncertainty about the overall mean. Note that the smooths are still shown 
+centred. The theoretical arguments 
+and simulation study of Marra and Wood (2012) suggest that \code{seWithMean = TRUE} results in intervals with
 close to nominal frequentist coverage probabilities. 
 
 }
@@ -71,14 +68,13 @@ Marra G. and Wood S.N. (2012), Coverage Properties of Confidence Intervals for G
 
 The function can not deal with smooths of more than 2 variables. 
 
-This function is currently not suitable when plotting on the response scale if asymmetric links are employed.
 
 } 
 
 
 
 \seealso{
-\code{\link{AT}}, \code{\link{est.prev}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{prev}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
 }
 
 

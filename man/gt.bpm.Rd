@@ -4,25 +4,27 @@
 \title{Gradient test}
 
 \description{ 
-\code{gt.bpm} can be used to test the hypothesis of absence of endogeneity, correlated model equations/errors or non-random sample selection.}
+\code{gt.bpm} can be used to test the hypothesis of absence of endogeneity, correlated model equations/errors or non-random sample selection
+in binary bivariate models.}
 
 
 \usage{
 
-gt.bpm(object)
+gt.bpm(x)
 
 }
 
 \arguments{ 
 
-\item{object}{A fitted \code{SemiParBIVProbit} object as produced by \code{SemiParBIVProbit()}.} 
+\item{x}{A fitted \code{SemiParBIVProbit} object as produced by \code{SemiParBIVProbit()}.} 
 
 }
 
 
 \details{
 
-The gradient test was first proposed by Terrell (2002) and it is based on classic likelihood theory. See Marra et al. (submitted) for full details. 
+The gradient test was first proposed by Terrell (2002) and it is based on classic likelihood 
+theory. See Marra et al. (in press) for full details. 
 
 
 
@@ -31,7 +33,7 @@ The gradient test was first proposed by Terrell (2002) and it is based on classi
 
 \value{
 
-It returns a numeric p-value corresponding to the null hypothesis that \eqn{\rho}{\rho} is equal to 0. 
+It returns a numeric p-value corresponding to the null hypothesis that the correlation, \eqn{\theta}{\theta}, is equal to 0. 
 
 
 }
@@ -40,7 +42,7 @@ It returns a numeric p-value corresponding to the null hypothesis that \eqn{\rho
 
 \section{WARNINGS}{
 
-This test's implementation is only valid for models with normal errors and probit links.
+This test's implementation is only valid for bivariate binary models with normal errors.
 
 } 
 
@@ -56,7 +58,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 \references{
 
 
-Marra G., Radice R. and Filippou P. (submitted), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity.
+Marra G., Radice R. and Filippou P. (in press), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity. \emph{Communications in Statistics - Simulation and Computation}.
 
 Terrell G. (2002), The Gradient Statistic. \emph{Computing Science and Statistics}, 34, 206-215.
 

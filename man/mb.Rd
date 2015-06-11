@@ -37,7 +37,7 @@ mb(treat, outc, IV = NULL, Model, B = 100, sig.lev = 0.05)
 
 \item{LB, UP}{Lower and upper bounds for the true effect of interest.}
 \item{CI}{Confidence interval covering the true effect of interest with a fixed probability.}
-\item{av.p}{Estimated effect of interest assuming random assignment.}
+\item{ate.ra}{Estimated effect of interest assuming random assignment.}
 
 
 
@@ -53,7 +53,7 @@ the function returns IV Manski bounds.
 
 For comparison, it also returns the estimated effect assuming random assignment (i.e., the treatment received or selection relies 
 on the assumption of ignorable observed and unobserved selection). Note that this is different from
-what provided by \code{\link{AT}} or \code{\link{est.prev}} when \code{naive = FALSE} as observed confounders are accounted for
+what provided by \code{\link{AT}} or \code{\link{prev}} when \code{naive = TRUE} as observed confounders are accounted for
 and the assumption here is of ignorable unobserved selection.
 
 A confidence interval covering the true ATE/prevalence with a fixed probability is also provided. This is based on the approach 
@@ -64,7 +64,8 @@ The ATE can be at most 1 (or 100 in percentage) and the worst-case Manski's boun
 0 is always included within the possibilites of these bounds. Nevertheless, this may be useful to check whether 
 the effect from a bivariate recursive model is included within the possibilites of the bounds. 
 
-When estimating the prevalance the worst-case Manski's bounds have width equal to the non-response probability,
+When estimating a prevalance the worst-case Manski's bounds have width equal to 
+the non-response probability,
 which provides a measure of the uncertainty about the prevalence caused by non-response. Again, this may be useful to check whether 
 the prevalence from a bivariate non-random sample selection model is included within the possibilites of the bounds.
 

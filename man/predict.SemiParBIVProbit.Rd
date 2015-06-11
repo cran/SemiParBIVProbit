@@ -7,9 +7,7 @@
 
 It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVProbit()} and, for each equation, produces predictions 
 for a new set of values of the model covariates or the original values used for the model fit. 
-Standard errors of predictions can be produced. These are based on the posterior distribution of the model coefficients.
-
-This function is based on \code{predict.gam()} in \code{mgcv}. Please see the documentation of \code{predict.gam()} for full details. 
+Standard errors of predictions can be produced and are based on the posterior distribution of the model coefficients. This function is a wrapper for \code{predict.gam()} in \code{mgcv}. Please see the documentation of \code{predict.gam()} for full details. 
 }
 
 \usage{
@@ -37,14 +35,6 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 }
 
-
-\section{WARNING}{ 
-
-
-This function is currently not suitable when plotting on the response scale if asymmetric links are employed.
-
-
-} 
 
 
 

@@ -4,14 +4,15 @@
 \title{Lagrange Multiplier Test (Score Test)}
 
 \description{ 
-Before fitting a bivariate probit model, \code{LM.bpm} can be used to test the hypothesis of absence of endogeneity, correlated model equations/errors 
+Before fitting a bivariate probit model, \code{LM.bpm} can be used to test the hypothesis of absence of endogeneity, 
+correlated model equations/errors 
 or non-random sample selection.}
 
 
 \usage{
 
 LM.bpm(formula, data = list(), weights = NULL, subset = NULL, Model, 
-       hess = TRUE, infl.fac = 1)
+       hess = TRUE)
 
 }
 
@@ -34,8 +35,6 @@ LM.bpm(formula, data = list(), weights = NULL, subset = NULL, Model,
 
 \item{hess}{If \code{FALSE} then the expected (rather than observed) information matrix is employed.}
 
-\item{infl.fac}{Inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
-             this parameter to a value greater than 1.}
 
 }
 
@@ -43,7 +42,8 @@ LM.bpm(formula, data = list(), weights = NULL, subset = NULL, Model,
 \details{
 
 This Lagrange multiplier test (also known as score test) is used here for testing the null 
-hypothesis that \eqn{\rho}{\rho} is equal to 0 (i.e. no endogeneity, non-random sample selection or correlated model equations/errors, depending 
+hypothesis that \eqn{\theta}{\theta} is equal to 0 (i.e. no endogeneity, non-random sample selection or 
+correlated model equations/errors, depending 
 on  the model being fitted). Its main advantage is that it does 
 not require an estimate of the model parameter vector under the alternative hypothesis. Asymptotically, it takes a Chi-squared distribution 
 with one degree of freedom. Full details can be found in Marra et al. (2014) and Marra et al. (submitted).
@@ -54,14 +54,14 @@ with one degree of freedom. Full details can be found in Marra et al. (2014) and
 
 \value{
 
-It returns a numeric p-value corresponding to the null hypothesis that \eqn{\rho}{\rho} is equal to 0.
+It returns a numeric p-value corresponding to the null hypothesis that the correlation, \eqn{\theta}{\theta}, is equal to 0.
 
 }
 
 
 \section{WARNINGS}{
 
-This test's implementation is only valid for models with normal errors and probit links.
+This test's implementation is only valid for bivariate binary models with normal errors.
 
 } 
 
@@ -76,7 +76,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Marra G., Radice R. and Filippou P. (submitted), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity.
+Marra G., Radice R. and Filippou P. (in press), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity. \emph{Communications in Statistics - Simulation and Computation}.
 
 Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}, 29(3-4), 715-741.
 

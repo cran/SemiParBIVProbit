@@ -1,5 +1,5 @@
-\name{VuongClarke.bcm}
-\alias{VuongClarke.bcm}
+\name{VuongClarke}
+\alias{VuongClarke}
 
 \title{Vuong and Clarke tests}
 
@@ -9,7 +9,7 @@ The Vuong and Clarke tests are likelihood-ratio-based tests that can be used for
 
 \usage{
 
-VuongClarke.bcm(obj1, obj2, sig.lev = 0.05)
+VuongClarke(obj1, obj2, sig.lev = 0.05)
 
 }
 

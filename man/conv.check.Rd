@@ -1,5 +1,5 @@
-\name{sem.checks}
-\alias{sem.checks}
+\name{conv.check}
+\alias{conv.check}
 
 \title{Some convergence diagnostics}
 
@@ -10,7 +10,7 @@ diagnostic information about the fitting procedure.
 
 \usage{
 
-sem.checks(x)
+conv.check(x)
 
 
 }

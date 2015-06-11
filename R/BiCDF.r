@@ -1,5 +1,8 @@
 BiCDF <- function (u1, u2, family, par1, par2 = NULL){
 
+  epsilon <- 0.0000001 # 0.9999999 0.0001 # sqrt(.Machine$double.eps)
+  max.p   <- 0.9999999
+
     if(is.null(u1) == TRUE || is.null(u2) == TRUE) stop("The margins are not set or have length zero.")
     if(any(u1 > 1) || any(u1 < 0)) stop("First margin must be in [0,1].")
     if(any(u2 > 1) || any(u2 < 0)) stop("Second margin must be [0,1].")
@@ -21,6 +24,9 @@ BiCDF <- function (u1, u2, family, par1, par2 = NULL){
     if(family %in% c(4,8,12))      res <- u1 + u2 - 1 + BCDF(1 - u1, 1 - u2, family, par1)      # 180
     if(family %in% c(3,7,11))      res <- u2 - BCDF(1 - u1, u2, family, -par1)                  # 90
     if(family %in% c(5,9,13))      res <- u1 - BCDF(u1, 1 - u2, family, -par1)                  # 270
+
+    res <- ifelse(res > max.p, max.p, res) 
+    res <- ifelse(res < epsilon, epsilon, res) 
 
     res
       

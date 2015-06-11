@@ -1,16 +1,4 @@
 citEntry(
- entry="Article",
- title="Estimation of a semiparametric recursive bivariate probit model in the presence of endogeneity",
- journal="Canadian Journal of Statistics",
- volume= "39",
- number="2",
- pages="259-279",
- year="2011",
- author="Marra G. and Radice R.",
- textVersion="Marra G. and Radice R. (2011), Estimation of a semiparametric recursive bivariate probit model in the presence of endogeneity. Canadian Journal of Statistics, 39(2), 259-279."
- )
- 
-citEntry(
   entry="Article",
   title="A penalized likelihood estimation approach to semiparametric sample selection binary response modeling",
   journal="Electronic Journal of Statistics",
@@ -21,4 +9,11 @@ citEntry(
   textVersion="Marra G. and Radice R. (2013), A penalized likelihood estimation approach to semiparametric sample selection binary response modeling. Electronic Journal of Statistics, 7, 1432-1455."
  )
 
-
+citEntry(
+  entry="Article",
+  title="Copula Regression Spline Models for Binary Outcomes",
+  journal="Statistics and Computing",
+  year="2015", 
+  author="Radice R., Marra G. and Wojtys M.",
+  textVersion="Radice R., Marra G. and Wojtys M. (2015), Copula Regression Spline Models for Binary Outcomes. Statistics and Computing."
+ )

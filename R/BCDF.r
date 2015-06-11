@@ -6,8 +6,9 @@ if(family %in% c(10:13) ) res <- exp( - ( (-log(u1))^par1 + (-log(u2))^par1 )^(1
 
 if(family == 14 ){# Frank -(1/par1)*log(  1 + ( (exp(-par1*u1) - 1)*(exp(-par1*u2) - 1) )/( exp(-par1) - 1 ) ) 
  
-   bit <- 1 - exp(-par1)
+   bit <- -expm1(-par1) # 1 - exp(-par1)
    res <- -(1/par1)*log( (bit - (1 - exp(-par1*u1))*(1 - exp(-par1*u2)))/bit ) 
+   
 }
 
 if(family %in% c(6:9) ){ # Joe 

@@ -1,85 +1,64 @@
-summary.SemiParBIVProbit <- function(object, n.sim = 100, s.meth = "svd", prob.lev = 0.05, thrs1 = 0.5, thrs2 = 0.5, cplot = FALSE, ...){
+summary.SemiParBIVProbit <- function(object, n.sim = 100, prob.lev = 0.05, 
+                                     cm.plot = FALSE, xlim = c(-3, 3), ylim = c(-3, 3), 
+                                     ylab = "Margin 2", xlab = "Margin 1", gm = FALSE, ...){
 
-  testStat <- function (p, X, V, rank = NULL) {
-      qrx <- qr(X)
-      R <- qr.R(qrx)
-      V <- R %*% tcrossprod(V[qrx$pivot, qrx$pivot],R)
-      V <- (V + t(V))/2
-      ed <- eigen(V, symmetric = TRUE)
-      k <- max(0, floor(rank))
-      nu <- abs(rank - k)
 
-          if (rank > k + 0.05 || k == 0) 
-              k <- k + 1
-          nu <- 0
-          rank <- k
-      
-      if (nu > 0) 
-          k1 <- k + 1
-      else k1 <- k
-      r.est <- sum(ed$values > max(ed$values) * .Machine$double.eps^0.9)
-      if (r.est < k1) {
-          k1 <- k <- r.est
-          nu <- 0
-          rank <- r.est
-      }
-      vec <- ed$vectors
-      if (k1 < ncol(vec)) 
-          vec <- vec[, 1:k1, drop = FALSE]
-      if (k == 0) {
-          vec <- t(t(vec) * sqrt(nu/ed$val[1]))
-      }
-      if (nu > 0 && k > 0) {
-          if (k > 1) 
-              vec[, 1:(k - 1)] <- t(t(vec[, 1:(k - 1)])/sqrt(ed$val[1:(k - 
-                  1)]))
-          b12 <- 0.5 * nu * (1 - nu)
-          if (b12 < 0) 
-              b12 <- 0
-          b12 <- sqrt(b12)
-          B <- matrix(c(1, b12, b12, nu), 2, 2)
-          ev <- diag(ed$values[k:k1]^-0.5)
-          B <- ev %*% B %*% ev
-          eb <- eigen(B, symmetric = TRUE)
-          rB <- eb$vectors %*% tcrossprod(diag(sqrt(eb$values)),eb$vectors)
-          vec[, k:k1] <- t(tcrossprod(rB,vec[, k:k1]))
-      }
-      else {
-          vec <- t(t(vec)/sqrt(ed$val[1:k]))
-      }
-      d <- crossprod(vec,R%*%p)
-      d <- sum(d^2)
-      attr(d, "rank") <- rank
-      d
-}
+  testStat <- getFromNamespace("testStat", "mgcv")
+  liu2   <- getFromNamespace("liu2", "mgcv") 
+  filled.contour <- getFromNamespace("filled.contour", "graphics")      
 
-  good <- object$good
+  bs <- SE <- Vb <- epds <- sigma2.st <- sigma2 <- est.RHOb <- et1s <- et2s <- p1s <- p2s <- p11s <- p10s <- p00s <- p01s <- ORs <- GMs <- XX <- Xt <- V <- 1
+  
+  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","iGA")  
+
   n <- object$n; n.sel <- object$n.sel
-  tableN <- table <- list(NULL,NULL,NULL)
-  CIl1 <- CIl2 <- table.R <- table.P <- table.F <- P1 <- P2 <- QPS1 <- QPS2 <- CR1 <- CR1 <- CR2 <- MR <- CIkt <- NULL  
-  epsilon <- sqrt(.Machine$double.eps)
-  est.RHOb <- est.l1 <- est.l2 <- est.OR <- est.GM <-  rep(NA,n.sim) 
+  if(object$margins[2]=="probit") good <- object$good else good <- rep(TRUE,n)   
+  tableN <- table <- list(NULL,NULL,NULL,NULL,NULL,NULL)
+  CIkt <- CIor <- CIgm <- CIsig2 <- NULL  
+  epsilon <- 0.0000001 # 0.9999999 0.0001 # sqrt(.Machine$double.eps)
+  max.p   <- 0.9999999
+  
+  
+  est.RHOb <- rep(NA,n.sim) 
 
  
-  lf.n <- lf <- length(coef(object))
-  F  <- object$F[1:lf,1:lf]          # why do I do 1:l.f? can't remember
-  Vr <- object$Vb[1:lf,1:lf] 
+  lf <- length(object$coefficients)
+  Vb <- object$Vb 
    
-  SE <- sqrt(diag(object$Vb[1:lf,1:lf]))
+  SE <- sqrt(diag(Vb)) 
 
-  bs <- rmvnorm(n.sim, mean = coef(object), sigma=object$Vb, method=s.meth)
-
-  if(object$PL != "P" && object$fitPL!="fixed") { if(object$eqPL=="both") lf.n <- lf-2 else lf.n <- lf-1 }
-
+  
+    if(object$VC$Model != "BPO0") bs <- rMVN(n.sim, mean = object$coefficients, sigma=Vb)  
 
 
+  if(object$VC$Model == "BPO0") epds <- rep(0, 10 )
 
+  if(object$VC$margins[2]=="probit" && object$VC$Model != "BPO0"){
+  
   if( !is.null(object$X3) ) epds <- object$X3[good,]%*%t(bs[,(object$X1.d2+object$X2.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2)])
-  if(  is.null(object$X3) ) epds <- bs[,lf.n]
+  if(  is.null(object$X3) ) epds <- bs[,lf]
+  
+  }
+  
+  if(object$VC$margins[2] %in% cont2par ){
+  
+  if( !is.null(object$X3) ) sigma2.st <- object$X3[good,]%*%t(bs[,(object$X1.d2+object$X2.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2)]) 
+  if(  is.null(object$X3) ) sigma2.st <- bs[,lf-1]
+  
+   sigma2.st <- ifelse( sigma2.st > 20, 20, sigma2.st )  
+   sigma2.st <- ifelse( sigma2.st < -17, -17, sigma2.st ) 
+   sigma2 <- exp(sigma2.st)
+   if(  is.null(object$X3) ) sigma2 <- t(as.matrix(sigma2))
    
-
-   if(object$BivD=="N")                 {est.RHOb <- tanh(epds); est.RHOb <- ifelse(est.RHOb == -1, -0.9999999, est.RHOb)
-                                                                 est.RHOb <- ifelse(est.RHOb == 1 ,  0.9999999, est.RHOb)}
+   CIsig2 <- t(apply(sigma2, MARGIN=1, FUN=quantile, probs=c(prob.lev/2,1-prob.lev/2), na.rm=TRUE ))  
+  
+  if( !is.null(object$X4) ) epds <- object$X4[good,]%*%t(bs[,(object$X1.d2+object$X2.d2+object$X3.d2 + 1):(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2)])
+  if(  is.null(object$X4) ) epds <- bs[,lf]  
+   
+  } 
+        
+   if(object$BivD=="N")                 {est.RHOb <- tanh(epds); est.RHOb <- ifelse(est.RHOb < -max.p, -max.p, est.RHOb)
+                                                                 est.RHOb <- ifelse(est.RHOb >  max.p , max.p, est.RHOb)}
    if(object$BivD=="F")                  est.RHOb <- epds + epsilon
 
    if(object$BivD %in% c("C0", "C180") ) est.RHOb <-   exp(epds) + epsilon  
@@ -94,22 +73,35 @@ summary.SemiParBIVProbit <- function(object, n.sim = 100, s.meth = "svd", prob.l
    est.RHOb <- ifelse(est.RHOb ==  Inf,  8.218407e+307, est.RHOb) 
    est.RHOb <- ifelse(est.RHOb == -Inf, -8.218407e+307, est.RHOb)    
    
+   if(  is.null(object$X3) ) est.RHOb <- t(as.matrix(est.RHOb))
+   
+   CIrs <- t(apply(est.RHOb, MARGIN=1, FUN=quantile, probs=c(prob.lev/2,1-prob.lev/2), na.rm=TRUE ))
+   
+   
+   
+   
+   
+########################   
+   
+   
+if (gm == TRUE){   
 
-   
-   
+
    ####
    # for OR and GM
-   ##
-      
+   ##   
+   
+if(object$VC$margins[2]=="probit" && object$VC$Model != "BPO0"){   
+     
    et1s <- object$X1[good,]%*%t(bs[,1:object$X1.d2])    
    et2s <- object$X2[good,]%*%t(bs[,(object$X1.d2+1):(object$X1.d2+object$X2.d2)]) 
      
    p1s <- pnorm(et1s)
    p1s <- pmax(p1s, epsilon )
-   p1s <- ifelse(p1s==1,0.9999999,p1s)  
+   p1s <- ifelse(p1s > max.p,max.p,p1s)  
    p2s <- pnorm(et2s)
    p2s <- pmax(p2s, epsilon )
-   p2s <- ifelse(p2s==1,0.9999999,p2s) 
+   p2s <- ifelse(p2s > max.p,max.p,p2s) 
    
    p11s <- matrix(NA,dim(p1s)[1],dim(p1s)[2])
      
@@ -117,13 +109,11 @@ summary.SemiParBIVProbit <- function(object, n.sim = 100, s.meth = "svd", prob.l
    if(  is.null(object$X3) ) { for(i in 1:n.sim) p11s[,i] <- BiCDF(p1s[,i], p2s[,i], object$nC, est.RHOb[i])  }
     
  p11s <- pmax(p11s, epsilon )
- p11s <- ifelse(p11s==1,0.9999999,p11s)  
+ p11s <- ifelse(p11s > max.p, max.p, p11s)  
  p10s <- p1s - p11s 
  p00s <- (1 - p2s) - ( p1s - p11s )
  p01s <- p2s - p11s
-
-   est.RHOb <- ifelse(est.RHOb ==  Inf,  8.218407e+307, est.RHOb) 
-   est.RHOb <- ifelse(est.RHOb == -Inf, -8.218407e+307, est.RHOb)  
+ 
 
 ORs <- (p00s*p11s)/(p01s*p10s)
 
@@ -134,53 +124,63 @@ ORs  <- ifelse(ORs  == -Inf, -8.218407e+307, ORs )
 GMs <- colMeans((ORs - 1)/(ORs + 1))
 ORs <- colMeans(ORs)
 
-rm(p11s,p10s,p00s,p01s,p1s,p2s)
+
+  CIor <- as.numeric(quantile(ORs,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
+  CIgm <- as.numeric(quantile(GMs,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
+
+
+}
+
 
 if(object$VC$gc.l == TRUE) gc()
 
+}
  
 #########################
-   
-   
-   
-   
-   
-   if((object$PL=="PP" || object$PL=="RPP") && object$fitPL!="fixed"){ if(object$eqPL=="both"){   est.l1 <- exp(bs[, lf.n+1 ]) + epsilon; est.l2 <- exp(bs[,lf ]) + epsilon}
-                       if(object$eqPL=="first"){  est.l1 <- exp(bs[, lf ]) + epsilon;     est.l2 <- 1}
-                       if(object$eqPL=="second"){ est.l2 <- exp(bs[, lf ]) + epsilon;     est.l1 <- 1}
-                     }  
-                     
-   if(object$PL=="SN" && object$fitPL!="fixed"){ if(object$eqPL=="both"){   est.l1 <- bs[, lf.n+1 ]; est.l2 <- bs[,lf ]}
-                       if(object$eqPL=="first"){  est.l1 <- bs[, lf ];     est.l2 <- 0}
-                       if(object$eqPL=="second"){ est.l2 <- bs[, lf ];     est.l1 <- 0}
-                     }                       
+         
 
-             
-  CIrs <- as.numeric(quantile(est.RHOb,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
   
-  CIor <- as.numeric(quantile(ORs,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
-  CIgm <- as.numeric(quantile(GMs,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
-  
-  rm(est.RHOb, ORs, GMs)
   
   if(object$VC$gc.l == TRUE) gc()
 
-  
-  if(object$PL != "P" && object$fitPL!="fixed"){
-                       CIl1 <- as.numeric(quantile(est.l1,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
-                       CIl2 <- as.numeric(quantile(est.l2,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
-                       }
-
-
   index <- 1:2
-  if(!is.null(object$X3) ) {ind3 <- object$X1.d2 + object$X2.d2 + (1:object$gp3); index <- 1:3} else ind3 <- NULL  
+  ind1 <- 1:object$gp1
+  ind2 <- object$X1.d2 + (1:object$gp2)
+  ind3 <- ind4 <- ind5 <- ind6 <- NULL 
   
- 
-  ind <- list( ind1 = 1:object$gp1,
-               ind2 = object$X1.d2 + (1:object$gp2),
-               ind3 = ind3 )
-
+  if(!is.null(object$X3) ) {
   
+       ind3 <- object$X1.d2 + object$X2.d2 + (1:object$gp3)
+       index <- 1:3
+       
+       if(!is.null(object$X4) ) {
+       
+       ind4 <- object$X1.d2 + object$X2.d2 + object$X3.d2 + (1:object$gp4)
+       index <- 1:4
+       
+                                }
+                                
+       if(!is.null(object$X5) ) {
+       
+       ind5 <- object$X1.d2 + object$X2.d2 + object$X3.d2 + object$X4.d2 + (1:object$gp5)
+       index <- 1:5  
+                                }     
+                                
+       if(!is.null(object$X6) ) {
+       
+       ind6 <- object$X1.d2 + object$X2.d2 + object$X3.d2 + object$X4.d2 + object$X5.d2 + (1:object$gp6)
+       index <- 1:6  
+                                }                                 
+                            
+  }
+                            
+  ind <- list( ind1 = ind1,
+               ind2 = ind2,
+               ind3 = ind3, 
+               ind4 = ind4,
+               ind5 = ind5,
+               ind6 = ind6)
+                
 
   for(i in index){
   estimate <- coef(object)[ind[[i]]]
@@ -192,140 +192,234 @@ if(object$VC$gc.l == TRUE) gc()
   }
 
   
-  if( object$l.sp1!=0 || object$l.sp2!=0 || object$l.sp3!=0 ){
+  if( object$l.sp1!=0 || object$l.sp2!=0 || object$l.sp3!=0 || object$l.sp4!=0 || object$l.sp5!=0 || object$l.sp6!=0){
 
-  	pTerms.df <- pTerms.chi.sq <- pTerms.pv <- edf <- tableN <- list(0,0,0)
-        XX <- cbind(object$X1[good,], object$X2[good,], object$X3[good,])
+  	pTerms.df <- pTerms.chi.sq <- pTerms.pv <- tableN <- list(0,0,0,0,0,0)
+        XX <- object$R
         
            for(i in index){
 
              if(i==1) {mm <- object$l.sp1; if(mm==0) next}
              if(i==2) {mm <- object$l.sp2; if(mm==0) next} 
-             if(i==3) {mm <- object$l.sp3; if(mm==0) break} 
+             if(i==3) {mm <- object$l.sp3; if(mm==0) next} 
+             if(i==4) {mm <- object$l.sp4; if(mm==0) next} 
+             if(i==5) {mm <- object$l.sp5; if(mm==0) next} 
+             if(i==6) {mm <- object$l.sp6; if(mm==0) break} 
   
 		for(k in 1:mm){
 
                         if(i==1){ gam <- object$gam1; ind <-  gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para                                } 
                         if(i==2){ gam <- object$gam2; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para) + object$X1.d2                } 
                         if(i==3){ gam <- object$gam3; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para) + object$X1.d2 + object$X2.d2 }
+                        if(i==4){ gam <- object$gam4; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para) + object$X1.d2 + object$X2.d2 + object$X3.d2 }
+                        if(i==5){ gam <- object$gam5; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para) + object$X1.d2 + object$X2.d2 + object$X3.d2 + object$X4.d2 }
+                        if(i==6){ gam <- object$gam6; ind <- (gam$smooth[[k]]$first.para:gam$smooth[[k]]$last.para) + object$X1.d2 + object$X2.d2 + object$X3.d2 + object$X4.d2 + object$X5.d2 }
+                          
+                        gam$sig2         <- 1
+                        gam$scale.estimated <- FALSE                          
+                          
+                        if(gam$smooth[[k]]$null.space.dim == 0){
                         
-			edf[[i]][k] <- sum(diag(F)[ind])
-			names(edf[[i]])[k] <- gam$smooth[[k]]$label 
+                        LRB <- rbind(XX, t(mroot(object$fit$S.h)))
+			LRB <- cbind(LRB[, -ind], LRB[, ind])
+			ind1 <- (ncol(LRB) - length(ind) + 1):ncol(LRB)
+			Rm <- qr.R(qr(LRB, tol = 0, LAPACK = FALSE))[ind1, ind1]
+                        B <- mroot(object$Ve[ind, ind, drop = FALSE])
+                          
+			b.hat <- coef(object)[ind]
+			d <- Rm %*% b.hat
+			stat <- sum(d^2)
+			ev <- eigen(crossprod(Rm %*% B), symmetric = TRUE, only.values = TRUE)$values
+			ev[ev < 0] <- 0
+			rank <- sum(ev > max(ev) * .Machine$double.eps^0.8)
+			pval <- liu2(stat, ev)                          
+                        Tp <- list(stat = stat, pval = pval, rank = rank)  
+                          
+                        }
+                          
+			if(gam$smooth[[k]]$null.space.dim != 0){
+			
 			b  <- coef(object)[ind]
-			V  <- Vr[ind,ind]
-			Xt <- XX[, ind] 
-			pTerms.df[[i]][k] <- min(ncol(Xt), edf[[i]][k])
-			pTerms.chi.sq[[i]][k] <- Tp <- testStat(b, Xt, V, pTerms.df[[i]][k])
-			pTerms.df[[i]][k] <- attr(Tp, "rank")
-                        pTerms.pv[[i]][k] <- pchisq(pTerms.chi.sq[[i]][k], df = pTerms.df[[i]][k], lower.tail = FALSE)
+			V  <- Vb[ind,ind, drop = FALSE]
+			Xt <- XX[, ind, drop = FALSE] 
+			pTerms.df[[i]][k] <- min(ncol(Xt), object$edf11[[i]][k])
+			Tp <- testStat(b, Xt, V, pTerms.df[[i]][k], type = 0, res.df = -1)
+			
+			}
+			
+			
+			pTerms.chi.sq[[i]][k] <- Tp$stat 
+			pTerms.df[[i]][k] <- Tp$rank
+                        pTerms.pv[[i]][k] <- Tp$pval
 			                 
                 }
-              tableN[[i]] <- cbind(edf[[i]], pTerms.df[[i]], pTerms.chi.sq[[i]], pTerms.pv[[i]])
-              dimnames(tableN[[i]])[[2]] <- c("edf", "Est.rank", "Chi.sq", "p-value")
+                
+              tableN[[i]] <- cbind(object$edf[[i]], pTerms.df[[i]], pTerms.chi.sq[[i]], pTerms.pv[[i]])
+              dimnames(tableN[[i]])[[2]] <- c("edf", "Ref.df", "Chi.sq", "p-value")
+              
             }
 
-  rm(XX, Xt, V)
   if(object$VC$gc.l == TRUE) gc()
 
   }
   
 
 
- if(object$Model=="B"){
+ if(cm.plot == TRUE && object$VC$Model != "BPO0"){
  
- Pre.p <- matrix(NA,n,8)
- Pre.c <- matrix(NA,n,2)
-
-
- Pre.p[,1:6] <- cbind(object$y1[good],object$y2[good],object$p11,object$p10,object$p01,object$p00)
-
- for(i in 1:n) {
-   ind <- sort(Pre.p[i,3:6],index.return=TRUE)$ix[4]
-   if(ind==1) Pre.p[i,7:8] <- c(1,1) 
-   if(ind==2) Pre.p[i,7:8] <- c(1,0) 
-   if(ind==3) Pre.p[i,7:8] <- c(0,1) 
-   if(ind==4) Pre.p[i,7:8] <- c(0,0) 
- }
-
- Pre.p <- Pre.p[,-c(3:6)]
-
- for(i in 1:n){
-   Pre.c[i,1] <- paste(as.character(Pre.p[i,1:2]), collapse="")
-   Pre.c[i,2] <- paste(as.character(Pre.p[i,3:4]), collapse="")
- }
-
- matches <- as.numeric(Pre.c[,1]==Pre.c[,2])
- MR <- mean(matches)*100
-
- c00.p <- c10.p <- c01.p <- c11.p <- 0
-
- for(i in 1:n){
-  if(Pre.c[i,1]=="00" & Pre.c[i,1]==Pre.c[i,2]) c00.p <- c00.p + 1
-  if(Pre.c[i,1]=="10" & Pre.c[i,1]==Pre.c[i,2]) c10.p <- c10.p + 1
-  if(Pre.c[i,1]=="01" & Pre.c[i,1]==Pre.c[i,2]) c01.p <- c01.p + 1
-  if(Pre.c[i,1]=="11" & Pre.c[i,1]==Pre.c[i,2]) c11.p <- c11.p + 1
- }
-
- table.R <- as.data.frame(matrix(table(Pre.c[,1]),2,2,byrow=TRUE))
- table.P <- as.data.frame(matrix(c(c00.p,c01.p,c10.p,c11.p),2,2,byrow=TRUE))
- table.F <- table.P/table.R
- dimnames(table.R)[[1]] <- dimnames(table.R)[[2]] <- dimnames(table.P)[[1]] <- dimnames(table.P)[[2]] <- dimnames(table.F)[[1]] <- dimnames(table.F)[[2]] <- c("0", "1")
+ Cop.pdf <- function (u1, u2, par1, fam) {
  
- P1 <- object$p11 + object$p10
- P2 <- object$p11 + object$p01
- QPS1 <- 1/n*( sum( 2*( object$y1[good] - P1)^2 ) )
- QPS2 <- 1/n*( sum( 2*( object$y2[good] - P2)^2 ) )
-
- P1.b <- ifelse(P1 > thrs1, 1, 0)
- P2.b <- ifelse(P2 > thrs2, 1, 0)
-
- CR1 <- mean(as.numeric(object$y1[good]==P1.b))*100
- CR2 <- mean(as.numeric(object$y2[good]==P2.b))*100
-
+ if(fam == 1) { # N
+     t1 = qnorm(u1)
+     t2 = qnorm(u2)
+     res <- 1/sqrt(1 - par1^2) * exp(-(par1^2 * (t1^2 + t2^2) - 2 * par1 * t1 * t2)/(2 * (1 - par1^2)))
+ } 
+ if(fam == 14) { # F
+     res <- (par1 * (exp(par1) - 1) * exp(par1 * u2 + par1 * u1 + par1))/(exp(par1 * u2 + par1 * u1) - exp(par1 * u2 + par1) - exp(par1 * u1 + par1) + exp(par1))^2
+     }  
+     
+ if(fam %in% c(2, 6, 10)  ){ # 0
+     theta = par1
+     d1 = u1
+     d2 = u2}
+ if(fam %in% c(3, 7, 11)){# 90
+     theta = -par1
+     d1 = 1 - u1
+     d2 = u2}  
+ if(fam %in% c(4, 8, 12)){# 180
+     theta = par1
+     d1 = 1 - u1
+     d2 = 1 - u2}     
+ if(fam %in% c(5, 9, 13)){# 270
+     theta = -par1
+     d1 = u1
+     d2 = 1 - u2}    
+     
+ if(fam %in% c(2:5)) { # C
+     res <- (1 + theta) * (d1 * d2)^(-1 - theta) * (d1^(-theta) + d2^(-theta) - 1)^(-2 - 1/theta)
+ }
+ if(fam %in% c(6:9)) { # G    
+     t1 <- (-log(d1))^(theta) + (-log(d2))^(theta)
+     t2 <- exp(-t1^(1/theta))
+     res <- t2/(d1 * d2) * t1^(-2 + 2/theta) * (log(d1) * log(d2))^(theta - 1) * (1 + (theta - 1) * t1^(-1/theta))
+ }
+ if(fam %in% c(10:13)) { # J 
+     res <- ((1 - d1)^(theta) + (1 - d2)^(theta) - (1 - d1)^(theta) * (1 - d2)^(theta))^(1/(theta) - 2) * (1 - d1)^(theta - 1) * (1 - d2)^(theta - 1) * (theta - 1 + (1 - d1)^(theta) + (1 - d2)^(theta) - (1 - d1)^(theta) * (1 - d2)^(theta))
+ }
+ 
+ res
+ 
  }
  
  
  
 
+  Cplot <- function (fam, par1, mar2, m2, sqs2, resp, ...){    
+
+          size <- 100
+          
+                                                         x1 <- seq(from = xlim[1], to = xlim[2], length.out = size) 
+          if(mar2=="probit")                             x2 <- seq(from = ylim[1], to = ylim[2], length.out = size)              #;             levels <- c(0.01,0.05,0.1,0.15,0.2) } 
+          if(mar2 %in% c("N","GU","rGU","LO"))           x2 <- seq(from = min(resp), to = max(resp), length.out = size)          #;         levels <- c(0.01,0.05,0.1,0.15,0.2) } 
+          if(mar2 %in% c("LN","WEI","iG","GA","iGA") )   x2 <- seq(from = min(resp), to = (ylim[2]-ylim[1]), length.out = size)  #; levels <- c(0.005,0.01,0.03,0.05,0.07,0.09,0.15,0.2) }
+
+                                                         x11 <- rep(x1, each = size)
+                                                         x22 <- rep(x2, times = size)
+          
+                                   if(mar2 != "probit") x2 <- seq(from = ylim[1], to = ylim[2], length.out = size)
+          
+                                   d.x1 <- dnorm(x11)
+                                   p1   <- pnorm(x11) 
+          
+          if(mar2=="probit")      {d.x2 <-  dnorm(x22, mean = 0, sd = 1)
+                                   p2 <-  pnorm(x22, mean = 0, sd = 1)
+          }
+          if(mar2=="N")           {d.x2 <-  dnorm(x22, mean = m2, sd = sqs2)
+          			   p2 <-  pnorm(x22, mean = m2, sd = sqs2)
+          }
+          if(mar2=="LN")          {d.x2 <- dlnorm(x22, meanlog = m2, sdlog = sqs2) 
+          			   p2 <- plnorm(x22, meanlog = m2, sdlog = sqs2)
+          }
+          if(mar2=="GU")          {d.x2 <- exp(-exp((x22 - m2)/sqs2)) * (exp((x22 - m2)/sqs2)*(1/sqs2))   
+          			   p2 <- 1 - exp(-exp((x22 - m2)/sqs2)) 
+          }
+          if(mar2=="rGU")         {d.x2 <- 1/sqs2 * exp( -( (x22-m2)/sqs2 + exp( -( (x22-m2)/sqs2) ) ) ) 
+          			   p2 <- exp(-(exp(-(x22 - m2)/sqs2))) 
+          }
+          if(mar2=="LO")          {d.x2 <- dlogis(x22, m2, sqs2 )       
+                                   p2 <- plogis(x22, m2, sqs2 ) 
+          }
+          if(mar2=="WEI")         {d.x2 <- sqs2/exp(m2)*(x22/exp(m2))^(sqs2-1) * exp(-(x22/exp(m2))^sqs2)            
+          			   p2 <- 1 - exp(-(x22/exp(m2))^sqs2) 
+          }
+          if(mar2=="iG")          {d.x2 <- exp(-0.5 * log(2 * pi) - log(sqs2) - (3/2) * log(x22) - ((x22 - exp(m2))^2)/(2 * sqs2^2 * (exp(m2)^2) * x22))          
+                                   p2 <- pnorm(((x22/exp(m2)) - 1)/(sqs2 * sqrt(x22))) + exp(2/(exp(m2)*sqs2^2))* pnorm(-((x22/exp(m2)) + 1)/(sqs2 * sqrt(x22)))
+          }
+          if(mar2=="GA")          {d.x2 <- dgamma(x22, shape = 1/sqs2, scale = exp(m2) * sqs2)          
+                                   p2 <- pgamma(x22, shape = 1/sqs2, scale = exp(m2) * sqs2)
+          }                        
+          if(mar2=="iGA")         {d.x2 <- exp(1/sqs2 * m2 + 1/sqs2 * log(1/sqs2 + 1) - lgamma(1/sqs2) - (1/sqs2 + 1) * log(x22) - ((exp(m2) * (1/sqs2 + 1))/x22))          
+                                   p2 <- 1-pgamma(((exp(m2) * (1/sqs2 + 1))/x22), shape = 1/sqs2, scale=1)
+          }          
+          
+          
+          md <- Cop.pdf(p1, p2, par1, fam)*d.x1*d.x2    
+          z  <- matrix(data = md, nrow = size, byrow = TRUE)
+             
+          filled.contour(x1, x2, z, color = heat.colors, nlevels = 16, ...) 
+
+          
+          
+ }
  
 
- if(cplot == TRUE){
+ par1 <- object$theta.a 
+
+ if(object$BivD=="N")    {cop <- bquote(paste("Gaussian (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="F")    {cop <- bquote(paste("Frank (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="C0")   {cop <- bquote(paste("Clayton (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="C90")  {cop <- bquote(paste("90",degree," Clayton (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="C180") {cop <- bquote(paste("180",degree, " Clayton (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="C270") {cop <- bquote(paste("270",degree, " Clayton (",hat(theta)," = ",.(round(par1,2)),")",sep=""))} 
+ if(object$BivD=="J0")   {cop <- bquote(paste("Joe (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="J90")  {cop <- bquote(paste("90",degree," Joe (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="J180") {cop <- bquote(paste("180",degree," Joe (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="J270") {cop <- bquote(paste("270",degree," Joe (",hat(theta)," = ",.(round(par1,2)),")",sep=""))} 
+ if(object$BivD=="G0")   {cop <- bquote(paste("Gumbel (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="G90")  {cop <- bquote(paste("90",degree," Gumbel (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="G180") {cop <- bquote(paste("180",degree," Gumbel (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
+ if(object$BivD=="G270") {cop <- bquote(paste("270",degree," Gumbel (",hat(theta)," = ",.(round(par1,2)),")",sep=""))} 
  
- if(object$BivD == "N" ) par1 <- object$rho.a else par1 <- object$theta.a 
  
- if(object$BivD=="N")    {family <- 1;  cop <- bquote(paste("Gaussian (",hat(rho)," = ",.(round(par1,2)),")",sep=""))}
- if(object$BivD=="F")    {family <- 5;  cop <- bquote(paste("Frank (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
- if(object$BivD=="C0")   {family <- 3;  cop <- bquote(paste("Clayton (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
- if(object$BivD=="C90")  {family <- 23; cop <- bquote(paste("Rotated Clayton - 90 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
- if(object$BivD=="C180") {family <- 13; cop <- bquote(paste("Survival Clayton (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
- if(object$BivD=="C270") {family <- 33; cop <- bquote(paste("Rotated Clayton - 270 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))} 
- if(object$BivD=="J0")   {family <- 6;  cop <- bquote(paste("Joe (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
- if(object$BivD=="J90")  {family <- 26; cop <- bquote(paste("Rotated Joe - 90 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
- if(object$BivD=="J180") {family <- 16; cop <- bquote(paste("Survival Joe (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
- if(object$BivD=="J270") {family <- 36; cop <- bquote(paste("Rotated Joe - 270 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))} 
- if(object$BivD=="G0")   {family <- 4;  cop <- bquote(paste("Gumbel (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
- if(object$BivD=="G90")  {family <- 24; cop <- bquote(paste("Rotated Gumbel - 90 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
- if(object$BivD=="G180") {family <- 14; cop <- bquote(paste("Survival Gumbel (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
- if(object$BivD=="G270") {family <- 34; cop <- bquote(paste("Rotated Gumbel - 270 degrees (",hat(theta)," = ",.(round(par1,2)),")",sep=""))} 
+cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","iGA")   
+
+if(object$margins[2] %in% cont2par ){ 
+m2 <- mean(object$eta2) 
+sqs2 <- sqrt(object$sigma2.a)
+} else m2 <- sqs2 <- 0 
+
  
- BiCopMetaContour(object$fit$p1, object$fit$p2, family = family, par = par1, par2 = 0, margins = "norm", main = cop, 
-                  ylab = "Margin 2", xlab = "Margin 1", ...)
-       
+Cplot(fam = object$nC, par1 = par1, main = cop, ylab = ylab, xlab = xlab, mar2 = object$margins[2], 
+      m2 = m2, sqs2 = sqs2, resp = object$y2, ...)  
+  
  }
  
  
-  res <- list(tableP1=table[[1]], tableP2=table[[2]], tableP3=table[[3]],
+rm(bs, SE, Vb, epds, sigma2.st, sigma2, est.RHOb, et1s, et2s, p1s, p2s, p11s, p10s, p00s, p01s, ORs, GMs, XX, Xt, V) 
+ 
+  res <- list(tableP1=table[[1]], tableP2=table[[2]], tableP3=table[[3]], 
+              tableP4=table[[4]], tableP5=table[[5]], tableP6=table[[6]],
               tableNP1=tableN[[1]], tableNP2=tableN[[2]], tableNP3=tableN[[3]], 
-              n=n, rho=object$rho.a, theta=object$theta.a, OR = object$OR, GM = object$GM, 
-              formula1=object$gam1$formula, formula2=object$gam2$formula, formula3=object$gam3$formula, 
-              t.edf=object$t.edf, CIrs=CIrs, CIl1=CIl1, CIl2=CIl2, 
-              sel=object$sel,n.sel=n.sel, CIor = CIor, CIgm = CIgm, 
-              BivD=object$BivD,
-              PL=object$PL, xi1=object$xi1, xi2=object$xi2,
-              table.R=table.R, table.P=table.P, table.F=table.F, MR=MR,
-              P1=P1, P2=P2, QPS1=QPS1, QPS2=QPS2, CR1=CR1, CR2=CR2,
+              tableNP4=tableN[[4]], tableNP5=tableN[[5]], tableNP6=tableN[[6]], 
+              n=n, theta=object$theta.a, sigma2=object$sigma2.a, OR = object$OR, GM = object$GM, 
+              formula1=object$gam1$formula, formula2=object$gam2$formula, formula3=object$gam3$formula,
+              formula4=object$gam4$formula, formula5=object$gam5$formula, formula6=object$gam6$formula,
+              t.edf=object$t.edf, CItheta=CIrs, CIsig2=CIsig2,  
+              n.sel=n.sel, CIor = CIor, CIgm = CIgm, 
+              BivD=object$BivD, margins = object$margins, 
               good=good, Model=object$Model,
-              l.sp1 = object$l.sp1, l.sp2 = object$l.sp2, l.sp3 = object$l.sp3
+              l.sp1 = object$l.sp1, l.sp2 = object$l.sp2, l.sp3 = object$l.sp3, 
+              l.sp4 = object$l.sp4, l.sp5 = object$l.sp5, l.sp6 = object$l.sp6
               )
   class(res) <- "summary.SemiParBIVProbit"
       
@@ -334,5 +428,4 @@ if(object$VC$gc.l == TRUE) gc()
 res
 
 }
-
 

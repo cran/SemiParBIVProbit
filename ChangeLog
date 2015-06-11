@@ -1,3 +1,10 @@
+version 3.4
+- the response for the outcome equation can now be either binary or continuous. 
+- starting value procedure for sample selection case simplified.
+- starting value procedure for dependence parameter modified.
+- post-estimation functions polished a bit.
+- partial observability models.
+
 version 3.3
 - calculation of bivariate cdfs made faster.
 - dependence parameter is now allowed to depend on covariates.

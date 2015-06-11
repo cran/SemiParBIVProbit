@@ -205,7 +205,7 @@ if(class(Cn)=="try-error") Cn <- 1.645 else Cn <- abs(Cn$root)
 CIb1 <- as.numeric(format((rei$LB - Cn*sLBb/sqrt(n))*100, digits = 3, trim=TRUE))   
 CIb2 <- as.numeric(format((rei$UB + Cn*sUBb/sqrt(n))*100, digits = 3, trim=TRUE))
 
-out <- list(LB = LB, UB = UB, CI = c(CIb1,CIb2), av.p = avte, Model = Model, IV = IV) 
+out <- list(LB = LB, UB = UB, CI = c(CIb1,CIb2), ate.ra = avte, Model = Model, IV = IV) 
 
 }
 

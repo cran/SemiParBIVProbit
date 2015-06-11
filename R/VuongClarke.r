@@ -1,4 +1,4 @@
-VuongClarke.bcm <- function(obj1, obj2, sig.lev = 0.05){
+VuongClarke <- function(obj1, obj2, sig.lev = 0.05){
 
 l1 <- obj1$logLik
 l2 <- obj2$logLik

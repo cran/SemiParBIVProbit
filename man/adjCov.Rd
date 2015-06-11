@@ -10,13 +10,13 @@
 
 \usage{
 
-adjCov(object, id)
+adjCov(x, id)
 
 }
 
 \arguments{ 
 
-\item{object}{A fitted \code{SemiParBIVProbit} object as produced by \code{SemiParBIVProbit()}.}
+\item{x}{A fitted \code{SemiParBIVProbit} object as produced by \code{SemiParBIVProbit()}.}
  
 \item{id}{Cluster identifier.} 
 
@@ -33,7 +33,7 @@ the model is fitted as though observations were independent, and subsequently ad
 terminology of Liang and Zeger (1986), this would correspond to using an independence structure within 
 the context of generalized estimating equations. The parameter estimators are still consistent but are inefficient as compared
 to a model which accounts for the correct cluster dependence structure. The covariance matrix of the independence estimators can be adjusted 
-as described Liang and Zeger (1986, Section 2). 
+as described in Liang and Zeger (1986, Section 2). 
 
 }
 

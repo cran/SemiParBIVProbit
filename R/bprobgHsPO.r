@@ -1,8 +1,7 @@
-bprobgHsPO <- function(params, 
-                     sp.xi1, sp.xi2, 
-                     PL, eqPL, valPL, fitPL, 
-                     respvec, VC, 
-                     sp = NULL, qu.mag = NULL){
+bprobgHsPO <- function(params, respvec, VC, sp = NULL, qu.mag = NULL){
+  X1 <- X2 <- X3 <- 1
+  epsilon <- 0.0000001 # 0.9999999 0.0001 # sqrt(.Machine$double.eps)
+  max.p   <- 0.9999999
 
   eta1 <- VC$X1%*%params[1:VC$X1.d2]
   eta2 <- VC$X2%*%params[(VC$X1.d2+1):(VC$X1.d2+VC$X2.d2)]
@@ -11,11 +10,18 @@ bprobgHsPO <- function(params,
   p1 <- pnorm(eta1); d.n1 <- dnorm(eta1)
   p2 <- pnorm(eta2); d.n2 <- dnorm(eta2) 
 
-  epsilon <- sqrt(.Machine$double.eps)
 
-  criteria <- c(0,1)
-  no.good <- apply(apply(cbind(p1,p2), c(1,2), `%in%`, criteria), 1, any)
-  good <- no.good==FALSE
+  p1 <- ifelse(p1 > max.p , max.p , p1) 
+  p1 <- ifelse(p1 < epsilon, epsilon, p1) 
+  p2 <- ifelse(p2 > max.p , max.p , p2) 
+  p2 <- ifelse(p2 < epsilon, epsilon, p2) 
+
+  #criteria <- c(0,1)
+  #no.good <- apply(apply(cbind(p1,p2), c(1,2), `%in%`, criteria), 1, any)
+  #good <- no.good==FALSE
+  
+  good <- rep(TRUE,length(eta1))
+
 
   p1 <- p1[good]
   p2 <- p2[good]
@@ -23,9 +29,9 @@ bprobgHsPO <- function(params,
   d.n2 <- d.n2[good]
   eta1 <- eta1[good] 
   eta2 <- eta2[good] 
-  X1 <- VC$X1[good,]
-  X2 <- VC$X2[good,]
-  if(!is.null(VC$X3)) X3 <- VC$X3[good,] ## New bit
+  X1 <- as.matrix(VC$X1[good,])
+  X2 <- as.matrix(VC$X2[good,])
+  if(!is.null(VC$X3)) X3 <- as.matrix(VC$X3[good,])   ## New bit
   Y  <- respvec$y1[good]
   CY <- respvec$cy[good]
   weights <- VC$weights[good]
@@ -41,33 +47,30 @@ bprobgHsPO <- function(params,
   
   if( VC$BivD %in%  c("C0","C180","C90","C270","J0","J180","J90","J270","G0","G180","G90","G270") ) {
  
-  teta.st <- ifelse( teta.st > 709, 709, teta.st )  
-  teta.st <- ifelse( teta.st < -20, -20, teta.st )  
+  teta.st <- ifelse( teta.st > 20, 20, teta.st )  # 709
+  teta.st <- ifelse( teta.st < -17, -17, teta.st )   # -20
   
   }
   
  
     if(VC$BivD %in% c("N")      ) teta <- tanh(teta.st) # ; if(teta %in% c(-1,1)) teta <- sign(teta)*0.9999999}
     if(VC$BivD=="F")                  teta <- teta.st + epsilon
-    if(VC$BivD %in% c("C0", "C180") ) teta <-    exp(teta.st)       # + epsilon
-    if(VC$BivD %in% c("C90","C270") ) teta <- -( exp(teta.st) )     # + epsilon ) 
-    if(VC$BivD %in% c("J0", "J180","G0", "G180") ) teta <-    exp(teta.st) + 1   #+ epsilon 
-    if(VC$BivD %in% c("J90","J270","G90","G270") ) teta <- -( exp(teta.st) + 1 ) #+ epsilon ) 
-    #if(VC$BivD %in% c("G0", "G180") ) teta <-    exp(teta.st) + 1 
-    #if(VC$BivD %in% c("G90","G270") ) teta <- -( exp(teta.st) + 1 ) 
+    if(VC$BivD %in% c("C0", "C180") ) teta <-    exp(teta.st)       
+    if(VC$BivD %in% c("C90","C270") ) teta <- -( exp(teta.st) )     
+    if(VC$BivD %in% c("J0", "J180","G0", "G180") ) teta <-    exp(teta.st) + 1   
+    if(VC$BivD %in% c("J90","J270","G90","G270") ) teta <- -( exp(teta.st) + 1 ) 
 
-C.copula <- BiCDF(p1, p2, VC$nC, teta)
+
+p11 <-  pmax(BiCDF(p1, p2, VC$nC, teta), epsilon)
 
 ########################################################################################################
 
-
-  p11  <- pmax( C.copula, epsilon )
-  cp11 <- pmax( 1 - p11, epsilon )
+  cp11 <- pmax(1 - p11, epsilon)
   
   l.par <- weights*( Y*log(p11) + CY*log(cp11) )
 
 
-dH <- copgHs(p1,p2,eta1=NULL,eta2=NULL,teta,teta.st,xi1=NULL,xi1.st=NULL,xi2=NULL,xi2.st=NULL,VC$BivD,VC$nC,VC$nu,PL,eqPL)
+dH <- copgHs(p1,p2,eta1=NULL,eta2=NULL,teta,teta.st,VC$BivD)
 
 c.copula.be1   <- dH$c.copula.be1
 c.copula.be2   <- dH$c.copula.be2
@@ -155,7 +158,7 @@ if( is.null(VC$X3) ){
             ) 
             
             
-         res <- -sum(l.par)
+    
          
          G   <- -c( colSums( c(dl.dbe1)*X1 ),
                     colSums( c(dl.dbe2)*X2 ),
@@ -178,7 +181,7 @@ if( !is.null(VC$X3) ){
             ) 
             
             
-         res <- -sum(l.par)
+  
          
          G   <- -c( colSums( c(dl.dbe1)*X1 ),
                     colSums( c(dl.dbe2)*X2 ),
@@ -187,46 +190,21 @@ if( !is.null(VC$X3) ){
 }
 
 
+res <- -sum(l.par)
 
 if( ( VC$l.sp1==0 && VC$l.sp2==0 && VC$l.sp3==0 ) || VC$fp==TRUE) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0) else ps <- pen(params, qu.mag, sp, VC)
 
 
-  if(VC$extra.regI == "pC" && VC$hess==FALSE){
-
-      op <- options(warn = -1)
-      R <- chol(H, pivot = TRUE)
-      options(op)
-      p <- dim(H)[2]
-      ipiv <- piv <- attr(R, "pivot")
-      ipiv[piv] <- 1:p
-      rank <- attr(R, "rank")
-      ind <- 1:rank
-      if (rank < p) R[(rank + 1):p, ] <- 0
-      R <- R[ipiv, ipiv]
-      H <- crossprod(R)
+if(VC$extra.regI == "pC" && VC$hess==FALSE) H <- regH(H, type = 1)
   
-  } 
-
          S.res <- res
-         res <- S.res + ps$S.h1
-         G   <- G + ps$S.h2
-         H   <- H + ps$S.h  
-         
-
-   
+         res   <- S.res + ps$S.h1
+         G     <- G + ps$S.h2
+         H     <- H + ps$S.h  
         
-  if(VC$extra.regI == "sED"){
-  
-  ds <- 0
-  
-  eH <- eigen(H, symmetric = TRUE)
-  if(min(eH$values) < epsilon){ eH$values <- abs(eH$values); ds <- 1 }
-  if(min(eH$values) < epsilon){ eH$values[which(eH$values < epsilon)] <- 0.0000001; ds <- 1 }
-  
-  if(ds == 1) H <- eH$vectors%*%tcrossprod(diag(1/eH$values),eH$vectors)   
-  
-  }  
+if(VC$extra.regI == "sED") H <- regH(H, type = 2)  
    
+rm(X1, X2, X3)  
            
 
          list(value=res, gradient=G, hessian=H, S.h=ps$S.h, l=S.res, l.par=l.par, ps = ps,
@@ -235,7 +213,7 @@ if( ( VC$l.sp1==0 && VC$l.sp2==0 && VC$l.sp3==0 ) || VC$fp==TRUE) ps <- list(S.h
               d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
               d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
               d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho,good=good, 
-              PL=PL, eqPL=eqPL, BivD=VC$BivD, p1=p1, p2=p2)      
+              BivD=VC$BivD, p1=p1, p2=p2)      
 
 }
 

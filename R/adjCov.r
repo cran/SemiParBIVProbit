@@ -1,20 +1,50 @@
-adjCov <- function(object, id){
+adjCov <- function(x, id){
 
-if(object$PL!="P") stop("This correction does not currently work for models with asymmetric links.")
+cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","iGA")  
 
-Vb     <- object$Vb 
+Vb     <- x$Vb 
 
-if(is.null(object$X3) )  mul <- 1
-if(!is.null(object$X3) ) mul <- object$X3[object$good,]
+if( x$margins[2]=="probit" && x$Model != "BPO0"){
 
-scores <- cbind( c(object$fit$dl.dbe1)*object$X1[object$good,], c(object$fit$dl.dbe2)*object$X2[object$good,], object$fit$dl.drho*mul )
+if(is.null(x$X3) )  mul <- 1
+if(!is.null(x$X3) ) mul <- x$X3[x$good,]
+
+scores <- cbind( c(x$fit$dl.dbe1)*x$X1[x$good,], c(x$fit$dl.dbe2)*x$X2[x$good,], c(x$fit$dl.drho)*mul )
+
+}
+
+if( x$Model == "BPO0" ){
+
+scores <- cbind( c(x$fit$dl.dbe1)*x$X1[x$good,], c(x$fit$dl.dbe2)*x$X2[x$good,] )
+
+}
+
+
+
+if( x$margins[2] %in% cont2par ){
+
+if( !is.null(x$X3) && !is.null(x$X4) ) mul1 <- x$X3; mul2 <- x$X4 
+if(  is.null(x$X3) &&  is.null(x$X4) ) mul1 <- mul2 <- 1 
+                                       
+scores <- cbind( c(x$fit$dl.dbe1)*x$X1, 
+                 c(x$fit$dl.dbe2)*x$X2, 
+                 c(x$fit$dl.dsigma.st)*mul1,
+                 c(x$fit$dl.dteta.st)*mul2       )                                           
+}
+
+
+
+
+
 scores <- aggregate.data.frame(scores,by=list(id),FUN=sum)[,-1]
 nclusters <- dim(scores)[1]
 meat   <- (nclusters-1)*var(scores)
 covsan <- Vb %*% meat %*% Vb
-object$Vb <- covsan
+x$Vb <- covsan
 
-object
+rm(scores, nclusters, meat, covsan, Vb)
+
+x
 
 }
 

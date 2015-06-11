@@ -10,13 +10,13 @@
 
 \usage{
 
-adjCovSD(object, design)
+adjCovSD(x, design)
 
 }
 
 \arguments{ 
 
-\item{object}{A fitted \code{SemiParBIVProbit} object as produced by \code{SemiParBIVProbit()}.}
+\item{x}{A fitted \code{SemiParBIVProbit} object as produced by \code{SemiParBIVProbit()}.}
  
 \item{design}{A \code{svydesign} object as produced by \code{svydesign()} from the \code{survey} package.} 
 
