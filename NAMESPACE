@@ -1,4 +1,4 @@
-export(AT, rMVN,
+export(AT, RR, OR, rMVN,
 prev,
 adjCov,
 adjCovSD,
@@ -7,13 +7,13 @@ bprobgHs,mb,
 bprobgHsPO,
 bprobgHsSS,
 bprobgHsContUniv,
-copgHs,
+copgHs, copgHs2,
 logLik.SemiParBIVProbit,
 LM.bpm,
 VuongClarke,
 plot.SemiParBIVProbit,
 predict.SemiParBIVProbit,
-print.AT, 
+print.AT, print.RR, print.OR, 
 print.prev, 
 print.mb,
 print.SemiParBIVProbit,
@@ -35,10 +35,20 @@ importFrom(VGAM,pbinorm,dbinorm)
 import(mgcv)
 importFrom(VineCopula, BiCopTau2Par)
 
+importFrom(graphics, axTicks, abline, hist, lines, par, polygon, plot) 
+importFrom(grDevices, cm.colors, gray, heat.colors, terrain.colors, topo.colors, dev.new)   
+importFrom(stats, dgamma, dlnorm, dlogis, dnorm, density, cor, coef, as.formula, aggregate.data.frame, integrate, 
+           model.matrix, na.omit, na.pass, pbinom, pchisq, pgamma, plnorm, plogis, pnorm, printCoefmat,
+           qnorm, qqnorm, quantile, residuals, rnorm, sd, uniroot, update, var, weighted.mean) 
+importFrom(utils, getFromNamespace)
+
+
 
 S3method(plot, SemiParBIVProbit)
 S3method(summary, SemiParBIVProbit)
 S3method(print, AT)
+S3method(print, RR)
+S3method(print, OR)
 S3method(print, SemiParBIVProbit)
 S3method(print, summary.SemiParBIVProbit)
 S3method(logLik, SemiParBIVProbit)

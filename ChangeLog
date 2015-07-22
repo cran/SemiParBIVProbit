@@ -1,3 +1,10 @@
+version 3.5
+- AT function extended.
+- Three datasets included.
+- prev function improved. 
+- manual polished.
+- OR and RR measures introduced.
+
 version 3.4
 - the response for the outcome equation can now be either binary or continuous. 
 - starting value procedure for sample selection case simplified.

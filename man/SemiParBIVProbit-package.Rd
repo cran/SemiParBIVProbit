@@ -50,9 +50,9 @@ If it makes sense then the dependence parameter of the copula distribution can b
 \code{SemiParBIVProbit} has been originally designed to deal with bivariate binary responses in the contexts of associated 
 error equations, endogeneity, non-random sample selection and partial observability. However, the use of 
 bivariate equation systems in which one response is binary and the other is continuous is allowed for. This case
-is relevant for estimating, for instance, the effect that a binary endogenous variable has on a continuous response. 
+is relevant for estimating, for instance, the effect that a binary endogenous variable has on a continuous response or viceversa. 
 There are many continuous distributions which can be employed within this context and we plan to include several 
-options on a case-study basis. Other bivariate models will be implemented from time to time, depending on the case study at hand. 
+options on a case-study basis. Other bivariate models will be implemented from time to time, depending on the study at hand. 
 
 
 

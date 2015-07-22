@@ -1,7 +1,9 @@
-BiCDF <- function (u1, u2, family, par1, par2 = NULL){
+BiCDF <- function (u1, u2, family, par1, par2 = NULL, test = TRUE){
 
   epsilon <- 0.0000001 # 0.9999999 0.0001 # sqrt(.Machine$double.eps)
   max.p   <- 0.9999999
+
+if(test == TRUE){
 
     if(is.null(u1) == TRUE || is.null(u2) == TRUE) stop("The margins are not set or have length zero.")
     if(any(u1 > 1) || any(u1 < 0)) stop("First margin must be in [0,1].")
@@ -18,6 +20,8 @@ BiCDF <- function (u1, u2, family, par1, par2 = NULL){
     if(  family == 14 && any(par1 == 0))                  stop("The parameter of Frank must be different from 0.") 
     if( (family == 6 || family == 8) && any(par1 <= 1))   stop("The parameter of Joe0/180 must be in (1,oo).")
     if( (family == 7 || family == 9) && any(par1 >= -1))  stop("The parameter of Joe90/270 must be in (-oo,-1).")
+       
+}       
        
     if(family == 1)                res <- pbinorm( qnorm(u1), qnorm(u2), cov12 = par1)
     if(family %in% c(2,6,10,14))   res <- BCDF(u1, u2, family, par1)                            # 0

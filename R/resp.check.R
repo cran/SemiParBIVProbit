@@ -6,7 +6,7 @@ m2 <- c("N","GU","rGU","LO","LN","WEI","iG","GA")
 
 if(!(margin %in% m2) ) stop("Error in margin value. It can be: N, GU, rGU, LO, LN, WEI, iG, GA.") 
 
-if(margin %in% c("LN","WEI","iG","GA") && min(y) < 0) stop("The variable of interest must be positive.")
+if(margin %in% c("LN","WEI","iG","GA") && min(y) <= 0) stop("The variable of interest must be positive.")
 
 y <- na.omit(y)
 
@@ -40,7 +40,8 @@ par(mfrow = c(1, 2))
 hist(y, freq = FALSE, ylim=c(0,max(d,hist(y, plot = FALSE)$density)),
      main=main,
      xlab=xlab, ...)
-xspline(sort(y),d[order(y)],lwd=2)
+#xspline(sort(y),d[order(y)],lwd=2)
+lines(sort(y),d[order(y)],lwd=2)
 
 qqnorm(qnorm(p))
 abline(0, 1, col = "red")

@@ -11,10 +11,10 @@ obtained using the delta method or posterior simulation.}
 
 \usage{
 
-prev(x, sw = NULL, naive = FALSE, ind = NULL, delta = FALSE,  
-         n.sim = 100, prob.lev = 0.05, hd.plot = FALSE, 
-         main = "Histogram and Kernel Density of Simulated Prevalences", 
-         xlab="Simulated Prevalences", ...)
+prev(x, sw = NULL, type = "bivariate", ind = NULL, delta = FALSE,  
+     n.sim = 100, prob.lev = 0.05, hd.plot = FALSE, 
+     main = "Histogram and Kernel Density of Simulated Prevalences", 
+     xlab = "Simulated Prevalences", ...)
 
 }
 
@@ -24,8 +24,7 @@ prev(x, sw = NULL, naive = FALSE, ind = NULL, delta = FALSE,
 
 \item{sw}{Survey weights.}  
 
-\item{naive}{If \code{FALSE} then the prevalence is calculated using the (naive/classic imputation) probit model. This option has 
-             been introduced to compare adjusted (for non-random sample selection) and unadjusted estimates.}
+\item{type}{This argument can take three values: \code{"naive"} (the prevalence is calculated ignoring the presence of observed and unobserved confounders), \code{"univariate"} (the effect is obtained from the univariate probit model which neglects the presence of unobserved confounders) and \code{"bivariate"} (the effect is obtained from the bivariate model which accounts for observed and unobserved confounders).}
              
 \item{ind}{Binary logical variable. It can be used to calculate the prevalence for a subset of the data.} 
 
@@ -53,8 +52,7 @@ prev(x, sw = NULL, naive = FALSE, ind = NULL, delta = FALSE,
 \details{
 
 \code{prev} estimates the overall prevalence of a disease (e.g., HIV) when there are missing values that are not at random. 
-An interval for the estimated prevalence can be obtained using the delta method or posterior simulation. The two methods 
-produce close intervals in most cases (this may be attributed to the shape of the probit link).
+An interval for the estimated prevalence can be obtained using the delta method or posterior simulation. 
 
 
 }
@@ -82,6 +80,8 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 \references{
 
 McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}, 26(2), 229-237.
+
+
 
 }
 

@@ -13,7 +13,7 @@ via the use of penalized thin plate regression splines. Note that, if it makes s
 distribution can be specified as a function of covariates.
 
 \code{SemiParBIVProbit} can also be used to fit bivariate models in which one response is binary and the other is continuous. This case
-is relevant for estimating, for instance, the effect that a binary endogenous variable has on a continuous response. 
+is relevant for estimating, for instance, the effect that a binary endogenous variable has on a continuous response or viceversa. 
 There are many continuous distributions that can be employed within this context and we plan to include several 
 options on a case-study basis. Other bivariate models will be implemented from time to time, depending on the case study at hand.
 
@@ -80,7 +80,8 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
 
 \item{fp}{If \code{TRUE} then a fully parametric model with unpenalised regression splines if fitted. See the example below.}              
 
-\item{hess}{If \code{FALSE} then the expected/Fisher (rather than observed) information matrix is employed.}
+\item{hess}{If \code{FALSE} then the expected/Fisher (rather than observed) information matrix is employed. The Fisher information matrix
+            is not available for cases different from binary treatment and binary outcome.}
 
 \item{infl.fac}{Inflation factor for the model degrees of freedom in the UBRE score. Smoother models can be obtained setting 
              this parameter to a value greater than 1.}
@@ -188,20 +189,16 @@ obtained from the non-converged algorithm (\code{\link{conv.check}} will notify 
 recommend re-specifying the model, using some extra regularisation (see \code{extra.regI}) and/or using some
 rescaling (see \code{parscale}).
 
-In the contexts of endogeneity and non-random sample selection, it would not make much sense to specify the dependence
-parameter as function of the same covariates used for the two main equations and some meaningful grouping should be used instead. This is 
-because, in these situations, the assumption 
-is that 
-the dependence parameter models the 
+In the contexts of endogeneity and non-random sample selection, extra attention is required when specifying
+the dependence parameter as a function of covariates. This is because in these situations the dependence coefficient mainly models the 
 association between the unobserved confounders in the two equations. This option would make sense, for instance, when it is believed that the  
-association coefficient varies across geographical areas. If the interest is not in modelling unobserved confounding then 
-many possible structures may be possible for the dependence parameter and these can be tried out.
+association coefficient varies across geographical areas.
 
 
 } 
 
 \seealso{
-\code{\link{AT}}, \code{\link{adjCov}}, \code{\link{prev}}, \code{\link{gt.bpm}}, \code{\link{LM.bpm}}, \code{\link{VuongClarke}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{conv.check}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
+\code{\link{AT}}, \code{\link{OR}}, \code{\link{RR}}, \code{\link{adjCov}}, \code{\link{prev}}, \code{\link{gt.bpm}}, \code{\link{LM.bpm}}, \code{\link{VuongClarke}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{conv.check}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
 }
 
 \examples{
@@ -269,14 +266,6 @@ f2.x2 <- f2(x2)[order(x2)] - mean(f2(x2))
 f3.x3 <- rep(0, length(x3))
 
 par(mfrow=c(2,2),mar=c(4.5,4.5,2,2))
-plot(out, eq = 1, select = 1, scale = 0); lines(x2, f1.x2, col = "red")
-plot(out, eq = 1, select = 2, scale = 0); lines(x3, f3.x3, col = "red")
-plot(out, eq = 2, select = 1, scale = 0); lines(x2, f2.x2, col = "red")
-plot(out, eq = 2, select = 2, scale = 0); lines(x3, f3.x3, col = "red")
-
-#
-## same plots but CIs 'with intercept' 
-
 plot(out, eq = 1, select = 1, seWithMean = TRUE, scale = 0)
 lines(x2, f1.x2, col = "red")
 plot(out, eq = 1, select = 2, seWithMean = TRUE, scale = 0)
@@ -286,7 +275,6 @@ lines(x2, f2.x2, col = "red")
 plot(out, eq = 2, select = 2, seWithMean = TRUE, scale = 0)
 lines(x3, f3.x3, col = "red")
 
-
 ## p-values suggest to drop x3 from both equations, with a stronger 
 ## evidence for eq. 2. This can be also achieved using shrinkage smoothers
 
@@ -295,9 +283,9 @@ outSS <- SemiParBIVProbit(list(y1 ~ x1 + s(x2, bs = "ts") + s(x3, bs = "cs"),
                           data = dataSim)
 conv.check(outSS)                          
 
-plot(outSS, eq = 1, select = 1, scale = 0)
+plot(outSS, eq = 1, select = 1, scale = 0, shade = TRUE)
 plot(outSS, eq = 1, select = 2, ylim = c(-0.1,0.1))
-plot(outSS, eq = 2, select = 1, scale = 0)
+plot(outSS, eq = 2, select = 1, scale = 0, shade = TRUE)
 plot(outSS, eq = 2, select = 2, ylim = c(-0.1,0.1))
 
 \dontrun{ 
@@ -362,6 +350,7 @@ out <- SemiParBIVProbit(list(y1 ~ x1 + x2,
                         data = dataSim)
 conv.check(out)                        
 summary(out)
+AIC(out); BIC(out)
 
 ## SEMIPARAMETRIC RECURSIVE BIVARIATE PROBIT
 
@@ -370,6 +359,7 @@ out <- SemiParBIVProbit(list(y1 ~ x1 + s(x2),
                         data = dataSim)
 conv.check(out)                        
 summary(out)
+AIC(out); BIC(out)
 
 #
 
@@ -378,11 +368,13 @@ summary(out)
 gt.bpm(out)
 
 #
-## average treatment effect with CI
+## average treatment effect, risk ration and odds ratio with CIs
 
 mb(y1, y2, Model = "B")
-AT(out, eq = 2, nm.bin = "y1") 
-AT(out, eq = 2, nm.bin = "y1", naive = TRUE) 
+AT(out, nm.end = "y1", hd.plot = TRUE) 
+RR(out, nm.end = "y1") 
+OR(out, nm.end = "y1") 
+AT(out, nm.end = "y1", type = "univariate") 
 
 
 ## try a Clayton copula model... 
@@ -392,7 +384,7 @@ outC <- SemiParBIVProbit(list(y1 ~ x1 + s(x2),
                          data = dataSim, BivD = "C0")
 conv.check(outC)                         
 summary(outC)
-AT(outC, eq = 2, nm.bin = "y1") 
+AT(outC, nm.end = "y1") 
 
 ## try a Joe copula model... 
 
@@ -401,7 +393,7 @@ outJ <- SemiParBIVProbit(list(y1 ~ x1 + s(x2),
                          data = dataSim, BivD = "J0")
 conv.check(outJ)
 summary(outJ, cm.plot = TRUE)
-AT(outJ, eq = 2, nm.bin = "y1") 
+AT(outJ, "y1") 
 
 
 VuongClarke(out, outJ)
@@ -417,7 +409,9 @@ conv.check(outFP)
 summary(outFP)
 
 #
-#
+#################
+## See also ?meps
+#################
 
 ############
 ## EXAMPLE 3
@@ -473,12 +467,12 @@ summary(out$gam2)
 ## corrected predicted probability that 'yo' is equal to 1
 
 mb(ys, yo, Model = "BSS")
-prev(out)
-prev(out, naive = TRUE)
+prev(out, hd.plot = TRUE)
+prev(out, type = "univariate", hd.plot = TRUE)
 
 ## estimated smooth function plots
 ## the red line is the true curve
-## the blue line is the naive curve not accounting for selection bias
+## the blue line is the univariate model curve not accounting for selection bias
 
 x1.s <- sort(x1[dataSim$ys>0])
 f21.x1 <- f21(x1.s)[order(x1.s)]-mean(f21(x1.s))
@@ -500,6 +494,9 @@ summary(outC, cm.plot = TRUE)
 prev(outC)
 
 #
+################
+## See also ?hiv
+################
 
 ############
 ## EXAMPLE 4
@@ -560,7 +557,9 @@ x2 <- sort(x2); f1.x2 <- f1(x2)[order(x2)] - mean(f1(x2))
 plot(out, eq = 1, scale = 0); lines(x2, f1.x2, col = "red")
 
 #
-#
+################
+## See also ?war
+################
 
 ############
 ## EXAMPLE 5
@@ -606,8 +605,8 @@ out <- SemiParBIVProbit(list(y1 ~ x1 + s(x2),
                              margins = c("probit","N"), gamlssfit = TRUE)
 conv.check(out)                        
 summary(out)
-AT(out, nm.bin = "y1")
-AT(out, nm.bin = "y1", naive = TRUE)
+AT(out, nm.end = "y1")
+AT(out, nm.end = "y1", type = "univariate")
 
 
 #
@@ -629,8 +628,49 @@ out <- SemiParBIVProbit(list(y1 ~ x1 + s(x2),
                              margins = c("probit","LN"), gamlssfit = TRUE)
 conv.check(out)                        
 summary(out, cm.plot = TRUE)
-AT(out, nm.bin = "y1")
-AT(out, nm.bin = "y1", naive = TRUE)
+AT(out, nm.end = "y1")
+AT(out, nm.end = "y1", type = "univariate")
+
+#
+#
+
+############
+## EXAMPLE 6
+############
+## Generate data with one endogenous continuous variable 
+## and binary outcome
+
+set.seed(0)
+
+n <- 1000
+
+Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
+u     <- rMVN(n, rep(0,2), Sigma)
+
+cov   <- rMVN(n, rep(0,2), Sigma)
+cov   <- pnorm(cov)
+x1 <- round(cov[,1]); x2 <- cov[,2]
+
+f1   <- function(x) cos(pi*2*x) + sin(pi*x)
+f2   <- function(x) x+exp(-30*(x-0.5)^2) 
+
+y1 <-        -0.25 - 2*x1    + f2(x2) + u[,2] 
+y2 <- ifelse(-0.25 - 0.25*y1 + f1(x2) + u[,1] > 0, 1, 0)
+
+dataSim <- data.frame(y1, y2, x1, x2)
+
+
+out <- SemiParBIVProbit(list(y2 ~ y1 + s(x2), 
+                             y1 ~ x1 + s(x2), ~ 1, ~ 1), data = dataSim, 
+                             margins = c("probit","N"), gamlssfit = TRUE)
+conv.check(out)                        
+summary(out)
+AT(out, nm.end = "y1", hd.plot = TRUE)
+AT(out, nm.end = "y1", type = "univariate")
+RR(out, nm.end = "y1", prob.plot = TRUE)
+RR(out, nm.end = "y1", type = "univariate")
+OR(out, nm.end = "y1", hd.plot = TRUE, prob.plot = TRUE)
+OR(out, nm.end = "y1", type = "univariate")
 
 }
 }

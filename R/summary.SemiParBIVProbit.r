@@ -24,11 +24,10 @@ summary.SemiParBIVProbit <- function(object, n.sim = 100, prob.lev = 0.05,
  
   lf <- length(object$coefficients)
   Vb <- object$Vb 
-   
   SE <- sqrt(diag(Vb)) 
 
   
-    if(object$VC$Model != "BPO0") bs <- rMVN(n.sim, mean = object$coefficients, sigma=Vb)  
+  if(object$VC$Model != "BPO0") bs <- rMVN(n.sim, mean = object$coefficients, sigma=Vb)  
 
 
   if(object$VC$Model == "BPO0") epds <- rep(0, 10 )
@@ -154,23 +153,19 @@ if(object$VC$gc.l == TRUE) gc()
        index <- 1:3
        
        if(!is.null(object$X4) ) {
-       
        ind4 <- object$X1.d2 + object$X2.d2 + object$X3.d2 + (1:object$gp4)
        index <- 1:4
-       
-                                }
+       }
                                 
        if(!is.null(object$X5) ) {
-       
        ind5 <- object$X1.d2 + object$X2.d2 + object$X3.d2 + object$X4.d2 + (1:object$gp5)
        index <- 1:5  
-                                }     
+       }     
                                 
        if(!is.null(object$X6) ) {
-       
        ind6 <- object$X1.d2 + object$X2.d2 + object$X3.d2 + object$X4.d2 + object$X5.d2 + (1:object$gp6)
        index <- 1:6  
-                                }                                 
+       }                                 
                             
   }
                             
@@ -365,10 +360,20 @@ if(object$VC$gc.l == TRUE) gc()
           
           md <- Cop.pdf(p1, p2, par1, fam)*d.x1*d.x2    
           z  <- matrix(data = md, nrow = size, byrow = TRUE)
-             
-          filled.contour(x1, x2, z, color = heat.colors, nlevels = 16, ...) 
-
           
+          
+          #cp <- c("#8E063B", "#A63945", "#BC584D" ,"#CF7355", "#DF8B5B" ,"#EAA162", "#F2B468" ,"#F6C56F", "#F6D277", "#F2DD80", "#EBE48B" ,"#E2E6BD")
+          #cp <- c("#3A58B6", "#6458B9" ,"#805ABB", "#965EBB", "#A763BB" ,"#B66AB9", "#C273B8", "#CC7CB6" ,"#D586B4", "#DD91B3", "#E39CB3" ,"#E8A8B4")
+          #cp=c("#023FA5", "#495DA8", "#6B77B2" ,"#868FBD", "#9EA4C6" ,"#B1B5CE", "#C1C4D5","#CED0DA", "#D8D8DE", "#DEDEE1", "#E1E1E2", "#E2E2E2")
+          #cp=c("#023FA5" ,"#7D87B9" ,"#BEC1D4", "#E2E2E2", "#D6BCC0" ,"#BB7784" ,"#8E063B")
+          #cp=c("#3A58B6" ,"#5B58B9" ,"#7259BA", "#855BBB" ,"#945EBB" ,"#A261BB" ,"#AD66BA", "#B76BB9", "#C072B8", "#C878B7", "#D07FB5", "#D687B4", "#DB8FB3", "#E097B3","#E49FB3", "#E8A8B4")
+          #col=cp
+ 
+          filled.contour(x1, x2, z, color = topo.colors, nlevels = 16, ...) 
+          
+          #heat.colors(0:n.col/n.col)color = gray(0:1) cm.colors topo.colors  terrain.colors rainbow(n, s = 1, v = 1, start = 0, end = max(1, n - 1)/n, alpha = 1)
+          # rainbow(n, start=.7, end=.1)   rainbow(10, start=.7, end=.1)
+          #color.palette = gray(0:n.col/n.col)
           
  }
  

@@ -1,19 +1,19 @@
 \name{AT}
 \alias{AT}
 
-\title{Average treatment effect of a binary endogenous variable}
+\title{Average treatment effect of a binary or continuous endogenous variable}
 
 \description{ 
-\code{AT} can be used to calculate the sample average treatment effect of a binary endogenous predictor/treatment, with 
-corresponding interval obtained using the delta method or posterior simulation.}
+\code{AT} can be used to calculate the sample average treatment effect of a binary or continuous endogenous predictor/treatment, with 
+corresponding interval obtained using mainly posterior simulation.}
 
 
 
 \usage{
 
-AT(x, eq, nm.bin, E = TRUE, treat = TRUE, naive = FALSE, ind = NULL, 
+AT(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL, 
    sub.l = 50, delta = FALSE, n.sim = 100, prob.lev = 0.05, hd.plot = FALSE,
-   main = "Histogram and Kernel Density of Simulated Average Effects", 
+   prob.plot = FALSE, main = "Histogram and Kernel Density of Simulated Average Effects", 
    xlab = "Simulated Average Effects", ...)
 
 }
@@ -21,10 +21,8 @@ AT(x, eq, nm.bin, E = TRUE, treat = TRUE, naive = FALSE, ind = NULL,
 \arguments{ 
 
 \item{x}{A fitted \code{SemiParBIVProbit} object as produced by \code{SemiParBIVProbit()}.}
- 
-\item{eq}{Equation containing the binary endogenous predictor of interest.} 
 
-\item{nm.bin}{Name of the binary endogenous variable.} 
+\item{nm.end}{Name of the endogenous variable.} 
 
 \item{E}{If \code{TRUE} then \code{AT} calculates the sample ATE. If \code{FALSE} then it calculates the sample AT 
          for the treated individuals only.}  
@@ -32,9 +30,12 @@ AT(x, eq, nm.bin, E = TRUE, treat = TRUE, naive = FALSE, ind = NULL,
 \item{treat}{If \code{TRUE} then \code{AT} calculates the AT using the treated only. If \code{FALSE} then it calculates the effect on 
 the control group. This only makes sense if \code{E = FALSE}.}  
 
-\item{naive}{It indicates whether AT is calculated from a univariate probit model. This option has been 
-             introduced to compare adjusted (for unobserved confounding) and unadjusted estimates. Note that, although
-             the unadjusted estimates do not account for unobserved confounding, they do control for observed confounding.} 
+\item{type}{This argument can take three values: \code{"naive"} (the effect is calculated ignoring the presence of observed and unobserved 
+            confounders), \code{"univariate"} (the effect is obtained from the univariate model 
+            which neglects the presence of unobserved confounders) and \code{"bivariate"} (the effect is obtained from 
+            the bivariate model which accounts for observed and unobserved confounders).}
+
+
 
 \item{ind}{Binary logical variable. It can be used to calculate the AT for a subset of the data. Note that it does not make sense to use \code{ind} 
            when some observations are excluded from the AT calculation (e.g., when using \code{E = FALSE}).}  
@@ -42,7 +43,8 @@ the control group. This only makes sense if \code{E = FALSE}.}
 \item{sub.l}{Length of subset of observations to use in the calculation of the treatment effect when the outcome of interest is continuous.}  
 
 \item{delta}{If \code{TRUE} then the delta method is used for confidence interval calculations, otherwise Bayesian posterior 
-             simulation (the most reliable option, despite a bit slower) is employed.}  
+             simulation (the most reliable option, despite a bit slower) is employed. This option is only available for binary treatment and 
+             binary outcome.}  
 
 \item{n.sim}{Number of simulated coefficient vectors from the posterior distribution of the estimated model parameters. This is used 
              when \code{delta = FALSE}. It may be increased if more precision is required.} 
@@ -51,6 +53,10 @@ the control group. This only makes sense if \code{E = FALSE}.}
 
 \item{hd.plot}{If \code{TRUE} then a plot of the histogram and kernel density estimate of the simulated average effects is produced. This can 
                only be produced when \code{delta = FALSE}.}
+
+\item{prob.plot}{For the case of continuous endogenous variable and binary outcome, if \code{TRUE} then a plot  
+                 showing probability that the binary outcome is equal to 1 for each value of the endogenous variable 
+                 and respective intervals is produced.}
 
 \item{main}{Title for the plot.}
 
@@ -70,11 +76,15 @@ control (the binary treatment assumes value 0). Posterior simulation
 and delta method can be used to obtain a confidence/credible interval. The former is more reliable, especially at small
 sample sizes. See the references below for details. 
 
-For the case of continuous response, the AT is calculated via numerical integration, which can result in costly computation depending on the
-size of the dataset and number of simulated coefficient vectors used for interval construction. In the model building 
+For the case of continuous response and binary treatment, the AT is calculated via numerical integration, which can result in costly 
+computation depending on the
+size of the dataset and number of simulated coefficient vectors used for interval calculations. In the model building 
 process, we recommend using a subset of observations to calculate the AT (see \code{sub.l}). In 
 our experience this still provides representative average effects. Once a preferred model has been found, the AT can be calculated using 
-the entire  dataset by setting \code{sub.l} to the number of observations (note that this can be time consuming). 
+the entire dataset by setting \code{sub.l} to the number of observations (note that this can be time consuming).
+
+AT can also calculate the effect that a continuous endogenous variable has on a binary outcome. In this case the effect will depend on the 
+unit increment chosen (as shown by the plot produced). An overall AT is provided as usual.
 
 }
 
@@ -86,7 +96,12 @@ the entire  dataset by setting \code{sub.l} to the number of observations (note 
 \item{prob.lev}{Probability level used.}
 \item{sim.AT}{If \code{delta = FALSE} then it returns a vector containing simulated values of the average treatment effect. This 
                is used to calculate intervals.}
-\item{AT.so}{It returns a vector containing the estimated effect for each single observation.}            
+\item{AT.so}{It returns a vector containing the estimated effect for each single observation. This may not be available in some cases.}            
+\item{Effects}{For the case of continuous endogenous variable and binary outcome, it returns a matrix made up of 
+               three columns containing the effects for each unit increase in the endogenous variable and respective intervals.}            
+\item{Pr}{For the case of continuous endogenous variable and binary outcome, it returns a matrix made up of 
+               three columns containing the probability that the binary outcome is equal to 1 for each value of the endogenous variable 
+               and respective intervals.}            
                
 
 }

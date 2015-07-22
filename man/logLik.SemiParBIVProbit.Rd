@@ -26,7 +26,7 @@
 \details{
 
 Modification of the classic \code{logLik} which accounts for the estimated degrees of freedom used in \code{SemiParBIVProbit} objects.
-This function is provided so that information criteria work correctly with \code{SemiParBIVProbit} objects by using the correct degrees 
+This function is provided so that information criteria work correctly with \code{SemiParBIVProbit} objects by using the correct number of degrees 
 of freedom. 
 
 }

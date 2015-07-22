@@ -52,8 +52,9 @@ treatment effect (ATE) when \code{Model = "B"} or prevalence when \code{Model = 
 the function returns IV Manski bounds.
 
 For comparison, it also returns the estimated effect assuming random assignment (i.e., the treatment received or selection relies 
-on the assumption of ignorable observed and unobserved selection). Note that this is different from
-what provided by \code{\link{AT}} or \code{\link{prev}} when \code{naive = TRUE} as observed confounders are accounted for
+on the assumption of ignorable observed and unobserved selection). Note that this is equivalent to 
+what provided by \code{\link{AT}} or \code{\link{prev}} when \code{type = "naive"}, and is different from what obtained
+by \code{\link{AT}} or \code{\link{prev}} when \code{type = "univariate"} as observed confounders are accounted for
 and the assumption here is of ignorable unobserved selection.
 
 A confidence interval covering the true ATE/prevalence with a fixed probability is also provided. This is based on the approach 

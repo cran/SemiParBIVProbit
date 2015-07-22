@@ -8,7 +8,7 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   # model set up and starting values
   ##########################################################################################################################
   
-  i.rho <- sp <- qu.mag <- qu.mag1 <- n.sel <- y1.y2 <- y1.cy2 <- cy1.y2 <- cy1.cy2 <- cy <- cy1 <- gamlss <- NULL  
+  i.rho <- sp <- qu.mag <- qu.mag1 <- n.sel <- y1.y2 <- y1.cy2 <- cy1.y2 <- cy1.cy2 <- cy <- cy1 <- gamlss <- inde <- spgamlss <- NULL  
   end <- X3.d2 <- X4.d2 <- X5.d2 <- X6.d2 <- l.sp3 <- l.sp4 <- l.sp5 <- l.sp6 <- 0
   sp3 <- gp3 <- gam3 <- X3 <- NULL  
   sp4 <- gp4 <- gam4 <- X4 <- NULL  
@@ -406,13 +406,12 @@ names(i.rho) <- "theta.star"
                  sp <- c(sp1, sp2, sp3, sp4, sp5, sp6)
                  qu.mag <- S.m(gam1, gam2, gam3, gam4, gam5, gam6, l.sp1, l.sp2, l.sp3, l.sp4, l.sp5, l.sp6) 
        
-       
-  if(margins[2] %in% m2 && gamlssfit == TRUE ) {qu.mag1 <- S.m(gam1, gam2, gam3, gam4, gam5, gam6, 
-                                          l.sp1, l.sp2, l.sp3, l.sp4, l.sp5, l.sp6, 
-                                          eq1 = "no")                                                                       
-                           sp1 <- c(sp2, sp3, sp4, sp5, sp6)                                                          
-                          }
-                 
+  if( l.sp2!=0 || l.sp3!=0 || l.sp4!=0 || l.sp5!=0 ){     
+  if(margins[2] %in% m2 && gamlssfit == TRUE ){   
+                spgamlss <- c(sp2, sp3, sp4, sp5, sp6)  
+                qu.mag1 <- S.m(gam1, gam2, gam3, gam4, gam5, gam6, l.sp1, l.sp2, l.sp3, l.sp4, l.sp5, l.sp6, eq1 = "no")                                                                                                                                          
+                                              }
+                                                     }
                                                                                            }
 
 ##########################################################
@@ -483,7 +482,7 @@ if(missing(parscale)) parscale <- 1
   
   gamlss <- SemiParBIVProbit.fit(func.opt = bprobgHsContUniv, start.v = start.v1, 
                          rinit = rinit, rmax = rmax, iterlim = 1e+4, iterlimsp = iterlimsp, pr.tolsp = pr.tolsp,
-                         respvec = respvec, VC = VC, sp = sp1, qu.mag = qu.mag1, naive = TRUE)
+                         respvec = respvec, VC = VC, sp = spgamlss, qu.mag = qu.mag1, naive = TRUE)
                          
                          
                          
@@ -535,7 +534,7 @@ if(missing(parscale)) parscale <- 1
                         
   
   if(margins[2]=="probit") n <- sum(as.numeric(SemiParFit$fit$good))  
-  if(Model=="BSS") n.sel <- sum(as.numeric(inde[SemiParFit$fit$good]))
+  if(Model=="BSS")         n.sel <- sum(as.numeric(inde[SemiParFit$fit$good]))
   
   ##########################################################################################################################
   # post estimation
@@ -553,11 +552,12 @@ if(missing(parscale)) parscale <- 1
 
   ##########################################################################################################################
 
-rm(data)
+
 if(gc.l == TRUE) gc()
 
+if( !(Model=="B" && margins[2] != "probit" && end == 2) ) {dataset <- NULL; rm(data) } else { dataset <- data; rm(data) } 
 
-L <- list(fit = SemiParFit$fit, 
+L <- list(fit = SemiParFit$fit, dataset = dataset,
           gam1 = gam1, gam2 = gam2, gam3 = gam3, gam4 = gam4, gam5 = gam5, gam6 = gam6,  
           coefficients = SemiParFit$fit$argument, 
           weights = weights, 
@@ -590,7 +590,7 @@ L <- list(fit = SemiParFit$fit,
           logLik = SemiParFit.p$logLik,
           nC = nC, hess = hess, 
           good = SemiParFit$fit$good,
-          respvec = respvec,
+          respvec = respvec, inde = inde, 
           qu.mag = qu.mag, sigma2 = SemiParFit.p$sigma2, sigma2.a = SemiParFit.p$sigma2.a,
           gp1 = gp1, gp2 = gp2, gp3 = gp3, gp4 = gp4, gp5 = gp5, gp6 = gp6, 
           X2s = SemiParFit.p$X2s, p1n=SemiParFit.p$p1n , p2n = SemiParFit.p$p2n, 

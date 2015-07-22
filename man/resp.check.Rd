@@ -13,7 +13,7 @@ the normalised quantile response.
 \usage{
 
 resp.check(y, margin = "N", main = "Histogram and Density of Response",
-               xlab = "Response", ...)
+           xlab = "Response", ...)
 
 }
 
@@ -36,7 +36,7 @@ resp.check(y, margin = "N", main = "Histogram and Density of Response",
 \details{
 
 Prior to fitting a model with binary-continuous bivariate response, a distribution for the continuous response
-may be chosen by looking at the histogram of the response along with the estimated density from the assumed distribution and at the
+may be chosen by looking at the histogram of the response along with the estimated density from the assumed distribution, and at the
 normalised quantile responses. These will provide a rough guide to the adequacy of the chosen distribution.
 The latter are defined as the quantile standard normal function of the cumulative distribution function of the response with scale and location
 estimated by MLE. These should behave approximately as normally distributed variables (even though the original 

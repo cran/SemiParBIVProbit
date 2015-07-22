@@ -5,7 +5,8 @@
 
 
 \description{It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVProbit()} and plots the 
-estimated smooth functions on the scale of the linear predictors. This function is a wrapper for \code{plot.gam()} in \code{mgcv}. Please see the documentation of \code{plot.gam()} for full details. 
+estimated smooth functions on the scale of the linear predictors. This function is a wrapper for \code{plot.gam()} in \code{mgcv}. Please see 
+the documentation of \code{plot.gam()} for full details. 
 
 }
 

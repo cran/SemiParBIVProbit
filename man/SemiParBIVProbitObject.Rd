@@ -71,7 +71,7 @@
                        
 \item{p1, p2}{Marginal probabilities.}   
 
-\item{p1n, p2n}{Naive marginal probabilities. These are only provided when \code{Method = "BSS"} and are built using two separate fits.} 
+\item{p1n, p2n}{Univariate marginal probabilities. These are only provided when \code{Method = "BSS"} and are built using two separate fits.} 
 
 \item{eta1, eta2, eta3, ...}{Estimated linear predictors for the two equations (as well as the third and fourth equations if present).}
 
