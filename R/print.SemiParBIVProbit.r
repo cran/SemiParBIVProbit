@@ -20,7 +20,7 @@ print.SemiParBIVProbit <- function(x, ...){
   
   if(x$margins[2]=="probit")                     m2l <- "probit"
   if(x$margins[2] %in% c("N","GU","rGU","LO") )  m2l <- "identity"
-  if(x$margins[2] %in% c("LN","WEI","iG","GA","iGA") ) m2l <- "log" 
+  if(x$margins[2] %in% c("LN","WEI","WEI2","iG","GA","iGA","DAGUM") ) m2l <- "log" 
 
   
   cat("\nERRORS' DISTRIBUTION:",cop)
@@ -38,11 +38,12 @@ print.SemiParBIVProbit <- function(x, ...){
   if(x$margins[2]=="rGU")    cat("\nFamily: reverse Gumbel")  
   if(x$margins[2]=="LO")     cat("\nFamily: logistic")   
   if(x$margins[2]=="LN")     cat("\nFamily: log-normal") 
-  if(x$margins[2]=="WEI")    cat("\nFamily: Weibull")   
+  if(x$margins[2]=="WEI")    cat("\nFamily: Weibull") 
+  if(x$margins[2]=="WEI2")   cat("\nFamily: Weibull (type 2)")   
   if(x$margins[2]=="iG")     cat("\nFamily: inverse Gaussian") 
   if(x$margins[2]=="GA")     cat("\nFamily: gamma")    
   if(x$margins[2]=="iGA")    cat("\nFamily: inverse gamma")    
-
+  if(x$margins[2]=="DAGUM")  cat("\nFamily: DAGUM")  
   
  
   cat("\nLink function:",m2l,"\n")
@@ -58,7 +59,7 @@ print.SemiParBIVProbit <- function(x, ...){
   
   }
   
-  if(!is.null(x$X3) && !is.null(x$X4) ){
+  if(!is.null(x$X3) && !is.null(x$X4) &&  is.null(x$X5)){
   
   cat("\nEQUATION 3")
   cat("\nLink function:","log(sigma^2)","\n") 
@@ -68,10 +69,30 @@ print.SemiParBIVProbit <- function(x, ...){
   cat("\nLink function:",lind,"\n") 
   cat("Formula: "); print(x$gam4$formula)
   
+  } 
+  
+  if(!is.null(x$X3) && !is.null(x$X4) && !is.null(x$X5)){
+  
+  cat("\nEQUATION 3")
+  cat("\nLink function:","log(sigma^2)","\n") 
+  cat("Formula: "); print(x$gam3$formula)  
+  
+  cat("\nEQUATION 4")
+  cat("\nLink function:","log(nu)","\n")  
+  cat("Formula: "); print(x$gam4$formula)  
+  
+  cat("\nEQUATION 5")
+  cat("\nLink function:",lind,"\n") 
+  cat("Formula: "); print(x$gam5$formula)
+  
   }  
   
   
-  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","iGA")  
+  
+  
+  cont2par <- c("N","GU","rGU","LO","LN","WEI","WEI2","iG","GA","iGA")  
+  cont3par <- c("DAGUM")  
+  
   
   cat("\n")
             
@@ -81,6 +102,10 @@ print.SemiParBIVProbit <- function(x, ...){
   if(x$Model=="BSS")                                      cat("n = ",x$n,"  n.sel = ",x$n.sel,cp,format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
   
   if(x$Model=="B" && x$margins[2] %in% cont2par ) cat("n = ",x$n,"  sigma^2 = ",x$sigma2.a, cp, format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
+
+  if(x$Model=="B" && x$margins[2] %in% cont3par ) cat("n = ",x$n,"  sigma^2 = ",x$sigma2.a, "  nu = ",x$nu.a, "\ntheta = ", format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
+
+
 
 
 invisible(x)

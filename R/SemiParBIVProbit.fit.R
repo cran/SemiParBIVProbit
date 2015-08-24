@@ -1,12 +1,12 @@
 SemiParBIVProbit.fit  <- function(func.opt, start.v, 
-                                   rinit, rmax, iterlim, iterlimsp, pr.tolsp,
+                                   rinit, rmax, iterlim, iterlimsp, tolsp,
                                    respvec, VC,
                                    sp=NULL, qu.mag=NULL, naive){ 
 
   parsc <- rep(VC$parscale, length(start.v) )  
 
-  fit  <- trust(func.opt, start.v, rinit=rinit, rmax=rmax, parscale=parsc,
-                respvec=respvec, VC=VC, sp=sp, qu.mag=qu.mag, blather=TRUE, iterlim = iterlim)  
+  fit  <- trust(func.opt, start.v, rinit = rinit, rmax = rmax, parscale = parsc,
+                respvec = respvec, VC = VC, sp = sp, qu.mag = qu.mag, blather = TRUE, iterlim = iterlim)  
 
   iter.if <- fit$iterations  
 
@@ -22,7 +22,7 @@ SemiParBIVProbit.fit  <- function(func.opt, start.v,
        stoprule.SP <- 1; conv.sp <- TRUE; iter.inner <- iter.sp <- 0  
        
 
-	  while( stoprule.SP > pr.tolsp ){ 
+	  while( stoprule.SP > tolsp ){ 
 
 
              spo <- sp 
@@ -39,10 +39,10 @@ SemiParBIVProbit.fit  <- function(func.opt, start.v,
                 	sp <- bs.mgfit$sp; iter.sp <- iter.sp + 1; names(sp) <- names(spo) 
                         o.ests <- c(fit$argument) 
 
-             fit <- trust(func.opt, o.ests, rinit=rinit, rmax=rmax,  parscale=parsc,  
-                          respvec=respvec, VC=VC, 
-                          sp=sp, qu.mag=qu.mag, 
-                          blather=TRUE, iterlim=iterlim)
+             fit <- trust(func.opt, o.ests, rinit=rinit, rmax = rmax,  parscale = parsc,  
+                          respvec = respvec, VC = VC, 
+                          sp = sp, qu.mag = qu.mag, 
+                          blather = TRUE, iterlim = iterlim)
                                                             
              iter.inner <- iter.inner + fit$iterations   	                                    
               
@@ -74,14 +74,6 @@ SemiParBIVProbit.fit  <- function(func.opt, start.v,
     
     
     }
-    
-    
-    
-    
-    
-    
-    
-    
 
 
                   list(fit = fit, 

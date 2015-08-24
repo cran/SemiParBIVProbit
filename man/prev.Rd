@@ -75,6 +75,9 @@ An interval for the estimated prevalence can be obtained using the delta method 
 
 Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
+Thanks to Mark E McGovern for suggesting various improvements on this function and Guy Harling 
+for suggesting the introduction of the naive option.
+
 }
 
 \references{

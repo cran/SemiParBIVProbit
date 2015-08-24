@@ -1,13 +1,13 @@
 copgHsAT <- function(p1, p2, teta, BivD){
 
-if(BivD=="N"){
+if(BivD == "N"){
                     
 c.copula.be2 <- pnorm( (qnorm(p1) - teta*qnorm(p2))/sqrt(1 - teta^2)   )  
 
 }
 
 
-if(BivD=="F"){
+if(BivD == "F"){
 
 c.copula.be2 <- -(-1/teta * (1/(1 - exp(-teta)) * ((1 - exp(-teta * p1)) * (exp(-teta * 
     p2) * teta))/(1/(1 - exp(-teta)) * ((1 - exp(-teta)) - (1 - 

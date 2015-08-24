@@ -27,7 +27,7 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
                  margins = c("probit","probit"), gamlssfit = FALSE,
                  fp = FALSE, hess = TRUE, infl.fac = 1, 
                  rinit = 1, rmax = 100, 
-                 iterlimsp = 50, pr.tolsp = 1e-6,
+                 iterlimsp = 50, tolsp = 1e-6,
                  gc.l = FALSE, parscale, extra.regI = "t")
 }
 
@@ -63,7 +63,7 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
 \item{margins}{It indicates the distributions used for the two margins. The first is always probit which means that the response of the 
                first equation is always assumed to be binary. The response for the second equation can be binary (case in which a 
                "probit" link is used), normal ("N"), log-normal ("LN"), Gumbel ("GU"), reverse Gumbel ("rGU"), 
-               logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG") and gamma ("GA").}
+               logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"), Dagum ("DAGUM").}
                
 \item{gamlssfit}{In the case of continuous margin for the outcome equation, if \code{gamlssfit = TRUE} then 
                  a gamlss if fitted for the outcome equation. This is useful to calculate, for instance, the average
@@ -95,7 +95,7 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
 \item{iterlimsp}{A positive integer specifying the maximum number of loops to be performed before the smoothing parameter estimation 
                  step is terminated.} 
 
-\item{pr.tolsp}{Tolerance to use in judging convergence of the algorithm when automatic smoothing parameter estimation is used.} 
+\item{tolsp}{Tolerance to use in judging convergence of the algorithm when automatic smoothing parameter estimation is used.} 
 
 \item{gc.l}{This is relevant when working with big datasets. If \code{TRUE} then the garbage collector is called more often than it is 
 usually done. This keeps the memory footprint down but it will slow down the routine.}
@@ -597,6 +597,7 @@ out <- SemiParBIVProbit(list(y1 ~ x1 + x2,
                         data = dataSim, margins = c("probit","N"))
 conv.check(out)                        
 summary(out)
+post.check(out)
 
 ## SEMIPARAMETRIC RECURSIVE Model
 
@@ -626,7 +627,8 @@ resp.check(y2, margin = "LN")  # seems appropriate
 out <- SemiParBIVProbit(list(y1 ~ x1 + s(x2), 
                              y2 ~ y1 + s(x2), ~ 1, ~ 1), data = dataSim, 
                              margins = c("probit","LN"), gamlssfit = TRUE)
-conv.check(out)                        
+conv.check(out)      
+post.check(out)
 summary(out, cm.plot = TRUE)
 AT(out, nm.end = "y1")
 AT(out, nm.end = "y1", type = "univariate")

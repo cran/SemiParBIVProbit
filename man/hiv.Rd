@@ -78,9 +78,64 @@ library("SemiParBIVProbit")
 data("hiv", package = "SemiParBIVProbit")        
 data("hiv.polys", package = "SemiParBIVProbit")  
 
+#########################################################
+#########################################################
+## The stuff below is useful if the user wishes to employ  
+## a Markov Random Field (MRF) smoother. It provides
+## the instruction to set up polygons automatically
+## and the dataset variable needed to fit a model with 
+## MRF.
+#########################################################
+#########################################################
+#
+# ## hiv.polys was already created and
+# ## made available via the call 
+# ## data("hiv.polys", package = "SemiParBIVProbit") 
+# ## hiv.polys was created using the code below
+#
+# obj <- readRDS("ZMB_adm1.rds") 
+# ## RDS Zambian Level 1 file obtained from 
+# ## http://www.gadm.org. 
+#
+# pol <- polys.setup(obj)
+#
+# hiv.polys <- pol$polys   
+# name <- cbind(names(hiv.polys), pol$names1)
+# name
+#
+## last step was to create a factor variable with range
+## range(name[,1]) where the numerical values were linked   
+## to the regions in name[,2]. This is what was done in 
+## the hiv dataset; see hiv$region. Specifically,
+## the procedure used was
+##
+# reg <- NULL
+# 
+# for(i in 1:dim(hiv)[1]){
+# 
+# if(hiv$region[i] == "Central")       reg[i] <- 1
+# if(hiv$region[i] == "Copperbelt")    reg[i] <- 2
+# if(hiv$region[i] == "Eastern")       reg[i] <- 3
+# if(hiv$region[i] == "Luapula")       reg[i] <- 4
+# if(hiv$region[i] == "Lusaka")        reg[i] <- 5
+# if(hiv$region[i] == "North-Western") reg[i] <- 6
+# if(hiv$region[i] == "Northern")      reg[i] <- 7
+# if(hiv$region[i] == "Southern")      reg[i] <- 8
+# if(hiv$region[i] == "Western")       reg[i] <- 9
+# 
+# }
+# 
+# hiv$region <- as.factor(reg)
+# 
+# 
+#########################################################
+#########################################################
+
 xt <- list(polys = hiv.polys) 
+
 # neighbourhood structure info for MRF  
-            
+# to use in model specification
+
 #########################################################
 # Bivariate brobit model with non-random sample selection
 #########################################################          

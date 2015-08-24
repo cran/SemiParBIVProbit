@@ -1,4 +1,7 @@
-S.m <- function(gam1, gam2, gam3, gam4, gam5, gam6, l.sp1, l.sp2, l.sp3, l.sp4, l.sp5, l.sp6, eq1 = "yes"){
+S.m <- function(gam1, gam2, gam3, gam4, gam5, gam6, l.sp1, l.sp2, l.sp3, l.sp4, l.sp5, l.sp6, eq1 = "yes", margin2){
+
+  m2   <- c("N","GU","rGU","LO","LN","WEI","WEI2","iG","GA")
+  m3   <- c("DAGUM")
 
   Ss <- list()
   off <- rank <- 0 
@@ -6,7 +9,12 @@ S.m <- function(gam1, gam2, gam3, gam4, gam5, gam6, l.sp1, l.sp2, l.sp3, l.sp4, 
   
   l.gam1 <- length(coef(gam1)) 
   
-  if(eq1 == "no"){  l.sp1 <- l.sp4 <- l.sp5 <- l.sp6 <- 0; l.gam1 <- 0   } # introduced for univariate models
+  if(eq1 == "no"){  l.gam1 <- 0 
+  
+    if(margin2 %in% m2)  l.sp1 <- l.sp4 <- l.sp5 <- l.sp6 <- 0 
+    if(margin2 %in% m3)  l.sp1 <- l.sp5 <- l.sp6 <- 0 
+ 
+  } 
   
 	for( j in 1:(l.sp1 + l.sp2 + l.sp3 + l.sp4 + l.sp5 + l.sp6 ) ){
 	

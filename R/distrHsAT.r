@@ -1,4 +1,4 @@
-distrHsAT <- function(y2, eta2, sigma2, margin2){
+distrHsAT <- function(y2, eta2, sigma2, nu, margin2){
 
 if(margin2 == "N"){
 
@@ -20,9 +20,17 @@ if(margin2 == "WEI"){
 
   pdf2          <- sqrt(sigma2)/exp(eta2)*(y2/exp(eta2))^(sqrt(sigma2)-1) * exp(-(y2/exp(eta2))^sqrt(sigma2))
                    
-    p2          <-  1-exp(-(y2/exp(eta2))^sqrt(sigma2)) #  pWEI(y2,exp(eta2), sqrt(sigma2))
+    p2          <-  1-exp(-(y2/exp(eta2))^sqrt(sigma2)) 
 
 }
+
+#if(margin2 == "WEI2"){
+#
+#  pdf2          <- exp(eta2)*sqrt(sigma2)*(exp(eta2)*y2)^(sqrt(sigma2)-1)*exp(-(exp(eta2)*y2)^sqrt(sigma2))
+#                   
+#    p2  <-  1  - exp( - (exp(eta2)*y2)^sqrt(sigma2) )
+#
+#}
 
 
 if(margin2 == "iG"){
@@ -47,6 +55,8 @@ if(margin2 == "LO"){
 
 if(margin2 == "rGU"){
 
+ #sigma2    <- ifelse(sigma2 < 0.006, 0.006, sigma2)
+
   pdf2          <- 1/sqrt(sigma2)*exp(-((y2-eta2)/sqrt(sigma2)+exp(-((y2-eta2)/sqrt(sigma2)))))
     p2          <- exp(-(exp(-(y2-eta2)/sqrt(sigma2))))
                 
@@ -56,8 +66,15 @@ if(margin2 == "rGU"){
 
 if(margin2 == "GU"){
 
-  pdf2          <- exp(-exp((y2 - eta2)/sqrt(sigma2))) * (exp((y2 - eta2)/sqrt(sigma2)) * 
-                   (1/sqrt(sigma2)))
+  #sigma2    <- ifelse(sigma2 < 0.006, 0.006, sigma2)
+  #y2 <- ifelse(y2 > 700, 700, y2 )
+  
+  bit <- (exp((y2 - eta2)/sqrt(sigma2)) * (1/sqrt(sigma2)))
+
+  bit <- ifelse(bit=="Inf", 1e+290, bit)
+  
+  pdf2          <- exp(-exp((y2 - eta2)/sqrt(sigma2))) * bit
+  
     p2          <- 1 - exp(-exp((y2 - eta2)/sqrt(sigma2)))
     
 
@@ -66,7 +83,7 @@ if(margin2 == "GU"){
 
 if(margin2 == "GA"){
 
-
+ sigma2    <- ifelse(sigma2 < 0.006, 0.006, sigma2)
 
  pdf2          <-  dgamma(y2, shape = 1/sigma2, scale = exp(eta2) * sigma2)
                    
@@ -89,12 +106,14 @@ pdf2          <-  exp(1/sigma2 * eta2 + 1/sigma2 * log(1/sigma2 + 1) - lgamma(1/
  }     
 
 
+if(margin2 == "DAGUM"){
+
+pdf2 <- sqrt(sigma2)*nu/y2*( ((y2/exp(eta2))^(sqrt(sigma2)*nu)) /  ( (y2/exp(eta2))^sqrt(sigma2) + 1 )^(nu+1) )            
+
+    p2  <- ( 1 + (y2/exp(eta2))^-sqrt(sigma2) )^-nu 
 
 
-
-
-
-
+}
 
 
 

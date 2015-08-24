@@ -1,6 +1,6 @@
-export(AT, RR, OR, rMVN,
-prev,
-adjCov,
+export(AT, RR, OR, rMVN, post.check,
+prev, distrHs,
+adjCov, copgHsCont,
 adjCovSD,
 gt.bpm,
 bprobgHs,mb,
@@ -26,7 +26,7 @@ SemiParBIVProbit,
 summary.SemiParBIVProbit,
 working.comp,
 resp.check,
-polys.map)
+polys.map, polys.setup)
 
 importFrom(magic, adiag)
 importFrom(survey, svyrecvar, twophasevar, twophase2var, svyCprod)
@@ -34,8 +34,9 @@ importFrom(trust,trust)
 importFrom(VGAM,pbinorm,dbinorm)
 import(mgcv)
 importFrom(VineCopula, BiCopTau2Par)
+importFrom(ggplot2, fortify)
 
-importFrom(graphics, axTicks, abline, hist, lines, par, polygon, plot) 
+importFrom(graphics, axTicks, abline, hist, lines, par, polygon, plot, rug) 
 importFrom(grDevices, cm.colors, gray, heat.colors, terrain.colors, topo.colors, dev.new)   
 importFrom(stats, dgamma, dlnorm, dlogis, dnorm, density, cor, coef, as.formula, aggregate.data.frame, integrate, 
            model.matrix, na.omit, na.pass, pbinom, pchisq, pgamma, plnorm, plogis, pnorm, printCoefmat,

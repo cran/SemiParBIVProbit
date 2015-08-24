@@ -1,9 +1,11 @@
 SemiParBIVProbit.fit.post <- function(SemiParFit, formula.eq2, data, Model, VC, qu.mag=NULL, 
                                       gam1, gam2, gam3, gam4, gam5, gam6){
 
-Ve <- R <- X2s <- lambda1s <- lambda2s <- eta1S <- eta2S <- theta <- edf <- edf1 <- theta.a <- sigma2 <- sigma2.a <- OR <- GM <- p1n <- p2n <- NULL
+Ve <- R <- X2s <- lambda1s <- lambda2s <- eta1S <- eta2S <- theta <- edf <- edf1 <- theta.a <- sigma2 <- sigma2.a <- OR <- GM <- p1n <- p2n <- nu <- nu.a <- NULL
 
-cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","iGA")  
+cont2par <- c("N","GU","rGU","LO","LN","WEI","WEI2","iG","GA","iGA")  
+cont3par <- c("DAGUM")  
+
 
 He <- SemiParFit$fit$hessian
 logLik <- -SemiParFit$fit$l
@@ -55,6 +57,9 @@ if(VC$Model != "BPO0" ){
 }
 
 
+
+
+
 if(VC$margins[2] %in% cont2par ){
 
   if( is.null(VC$X4) ) {sigma2 <- exp(SemiParFit$fit$argument["sigma2.star"]); names(sigma2) <- "sigma2"}
@@ -62,6 +67,22 @@ if(VC$margins[2] %in% cont2par ){
   
   sigma2.a <- mean(sigma2) 
   if( length(sigma2)==1 ) sigma2.a <- sigma2  
+
+}
+
+
+
+
+if(VC$margins[2] %in% cont3par ){
+
+  if( is.null(VC$X4) && is.null(VC$X5) ) {sigma2 <- exp(SemiParFit$fit$argument["sigma2.star"]); names(sigma2) <- "sigma2"
+                                          nu     <- exp(SemiParFit$fit$argument["nu.star"]);     names(nu) <- "nu"}
+  if(!is.null(VC$X4) && !is.null(VC$X5) ){sigma2 <- exp(SemiParFit$fit$etas) 
+                                          nu     <- exp(SemiParFit$fit$etan)   }  
+  
+  sigma2.a <- mean(sigma2)
+  nu.a     <- mean(nu)
+  if( length(sigma2)==1 ) {sigma2.a <- sigma2; nu.a <- nu}  
 
 }
 
@@ -162,7 +183,7 @@ if(VC$gc.l == TRUE) gc()
 
 if( (VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0 || VC$l.sp4!=0 || VC$l.sp5!=0 || VC$l.sp6!=0) ){
 
-  edf <- edf1 <- list(0,0,0,0,0,0)
+  edf <- edf1 <- list(0, 0, 0, 0, 0, 0)
         
      for(i in 1:6){
 
@@ -207,6 +228,7 @@ if( (VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0 || VC$l.sp4!=0 || VC$l.sp5!=0 || 
                       edf1 = edf[[1]], edf2 = edf[[2]], edf3 = edf[[3]], edf4 = edf[[4]], edf5 = edf[[5]], edf6 = edf[[6]],
                       edf1.1 = edf1[[1]], edf1.2 = edf1[[2]], edf1.3 = edf1[[3]], edf1.4 = edf1[[4]], edf1.5 = edf1[[5]], edf1.6 = edf1[[6]],
                       theta = theta, theta.a = theta.a, sigma2 = sigma2, sigma2.a = sigma2.a,
+                      nu = nu, nu.a = nu.a,
                       sp = sp, OR = OR, GM = GM, X2s = X2s, p1n=p1n, p2n=p2n, R = R, Ve = Ve) 
 
 }

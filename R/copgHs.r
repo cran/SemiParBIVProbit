@@ -1,4 +1,4 @@
-copgHs <- function(p1,p2,eta1=NULL,eta2=NULL,teta,teta.st,BivD){
+copgHs <- function(p1, p2, eta1 = NULL, eta2 = NULL, teta, teta.st, BivD){
 
 
 

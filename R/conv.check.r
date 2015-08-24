@@ -1,9 +1,6 @@
 conv.check <- function(x){
 
 e.v <- eigen(x$fit$hessian, symmetric=TRUE, only.values = TRUE)$values
-n.drop <- 0
-tg <- table(x$good==TRUE)
-if( length(tg)==2 ) n.drop <- sum(tg) - tg[2]
 
 cat("\nLargest absolute gradient value:",max(abs(x$fit$gradient)))
 
@@ -25,6 +22,5 @@ if(!is.null(x$conv.sp)){
 if(x$conv.sp == FALSE) cat("Smoothing algorithm reached the max. number of iterations allowed.\n\n")
 }
 
-if(n.drop > 0) cat("WARNING: Number of observations dropped during fitting: ",n.drop,"\n\n", sep = "")
 
 }

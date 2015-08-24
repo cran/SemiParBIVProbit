@@ -99,7 +99,7 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, Model,
   
   
   if( l.sp1!=0 || l.sp2!=0){ sp <- c(sp1, sp2)
-  qu.mag <- S.m(gam1, gam2, gam3 = NULL, gam4 = NULL, gam5 = NULL, gam6 = NULL, l.sp1, l.sp2, l.sp3 = 0, l.sp4 = 0, l.sp5 = 0, l.sp6 = 0) }
+  qu.mag <- S.m(gam1, gam2, gam3 = NULL, gam4 = NULL, gam5 = NULL, gam6 = NULL, l.sp1, l.sp2, l.sp3 = 0, l.sp4 = 0, l.sp5 = 0, l.sp6 = 0, eq1 = "yes", margin2 = "probit") }
 
 
   respvec <- list(y1 = y1,

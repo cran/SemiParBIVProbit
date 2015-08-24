@@ -56,7 +56,7 @@ teta <- -teta
      
      
      
-if(VC$BivD=="N"){
+if(VC$BivD == "N"){
 
 
 der2h.derp2teta <- (((qnorm(p1) - teta * qnorm(p2))/sqrt(1 - teta^2) * (dnorm((qnorm(p1) - teta * qnorm(p2))/sqrt(1 - 
@@ -102,9 +102,6 @@ der2h.derp1p1 <-   -((exp(-(teta^2*(qnorm(p1)^2+qnorm(p2)^2)-(2*teta*qnorm(p1)*q
 
 
         
-
-
-
 
 
 if(VC$BivD %in% c("C0","C90","C180","C270")){
@@ -225,7 +222,7 @@ der2h.derp1p1 <-    -t4*t1*t5*t12-t4*t12*t11*t7*teta*t5/t9;
 
 
 
-if(VC$BivD=="F"){
+if(VC$BivD == "F"){
 
 der2h.derp2teta <-  -(1/((-exp((p1 + p2) *teta) + 
    exp(teta)* (-1 + exp(p1* teta) + exp(p2* teta)))^3))*

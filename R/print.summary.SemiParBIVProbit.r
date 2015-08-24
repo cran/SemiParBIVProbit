@@ -23,7 +23,7 @@ print.summary.SemiParBIVProbit <- function(x, digits = max(3, getOption("digits"
 
   if(x$margins[2]=="probit")                     m2l <- "probit"
   if(x$margins[2] %in% c("N","GU","rGU","LO") )  m2l <- "identity"
-  if(x$margins[2] %in% c("LN","WEI","iG","GA","iGA") )      m2l <- "log"   
+  if(x$margins[2] %in% c("LN","WEI","WEI2","iG","GA","iGA","DAGUM") ) m2l <- "log"   
   
   
   cat(main.t,cop) 
@@ -51,10 +51,13 @@ print.summary.SemiParBIVProbit <- function(x, digits = max(3, getOption("digits"
   if(x$margins[2]=="rGU")    cat("\nFamily: reverse Gumbel")  
   if(x$margins[2]=="LO")     cat("\nFamily: logistic")   
   if(x$margins[2]=="LN")     cat("\nFamily: log-normal") 
-  if(x$margins[2]=="WEI")    cat("\nFamily: Weibull")   
+  if(x$margins[2]=="WEI")    cat("\nFamily: Weibull")  
+  if(x$margins[2]=="WEI2")    cat("\nFamily: Weibull (type 2)")   
   if(x$margins[2]=="iG")     cat("\nFamily: inverse Gaussian")    
   if(x$margins[2]=="GA")     cat("\nFamily: gamma")    
   if(x$margins[2]=="iGA")    cat("\nFamily: inverse gamma")    
+  if(x$margins[2]=="DAGUM")  cat("\nFamily: DAGUM")    
+  
   
   cat("\nLink function:",m2l,"\n")
   cat("Formula: "); print(x$formula2)    
@@ -90,7 +93,7 @@ if(!is.null(x$tableP3) && is.null(x$tableP4)  ){
 } 
 
 
-if(!is.null(x$tableP3) && !is.null(x$tableP4)  ){
+if(!is.null(x$tableP3) && !is.null(x$tableP4) && is.null(x$tableP5)  ){
 
 
   cat("\nEQUATION 3")
@@ -125,12 +128,67 @@ if(!is.null(x$tableP3) && !is.null(x$tableP4)  ){
 } 
 
 
+if(!is.null(x$tableP3) && !is.null(x$tableP4) && !is.null(x$tableP5)  ){
 
-  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","iGA")  
+
+  cat("\nEQUATION 3")
+  cat("\nLink function:","log(sigma^2)","\n") 
+  cat("Formula: "); print(x$formula3)
+  cat("\n")
+  cat("Parametric coefficients:\n")
+  printCoefmat(x$tableP3,digits = digits, signif.stars = signif.stars,na.print = "NA",...)
+  cat("\n")
+
+    if(x$l.sp3!=0){
+    cat("Smooth components' approximate significance:\n")
+    printCoefmat(x$tableNP3,digits = digits, signif.stars = signif.stars,has.Pvalue = TRUE,na.print = "NA",cs.ind = 1,...)
+    cat("\n")
+    }  
+    
+  cat("\nEQUATION 4")
+  cat("\nLink function:","log(nu)","\n") 
+  cat("Formula: "); print(x$formula4)
+  cat("\n")
+  cat("Parametric coefficients:\n")
+  printCoefmat(x$tableP4,digits = digits, signif.stars = signif.stars,na.print = "NA",...)
+  cat("\n")
+
+    if(x$l.sp4!=0){
+    cat("Smooth components' approximate significance:\n")
+    printCoefmat(x$tableNP4,digits = digits, signif.stars = signif.stars,has.Pvalue = TRUE,na.print = "NA",cs.ind = 1,...)
+    cat("\n")
+    }     
+
+
+  cat("\nEQUATION 5")
+  cat("\nLink function:",lind,"\n") 
+  cat("Formula: "); print(x$formula5)
+  cat("\n")
+  cat("Parametric coefficients:\n")
+  printCoefmat(x$tableP5,digits = digits, signif.stars = signif.stars,na.print = "NA",...)
+  cat("\n")
+
+    if(x$l.sp5!=0){
+    cat("Smooth components' approximate significance:\n")
+    printCoefmat(x$tableNP5,digits = digits, signif.stars = signif.stars,has.Pvalue = TRUE,na.print = "NA",cs.ind = 1,...)
+    cat("\n")
+    }    
+    
+} 
+
+
+
+
+
+  cont2par <- c("N","GU","rGU","LO","LN","WEI","WEI2","iG","GA","iGA")  
+  cont3par <- c("DAGUM")  
+  
 
 
   CIrs <- colMeans(x$CItheta, na.rm = TRUE)
-  if(x$margins[2] %in% cont2par) CIsig2 <- colMeans(x$CIsig2, na.rm = TRUE)
+  if(x$margins[2] %in% cont2par)  CIsig2 <- colMeans(x$CIsig2, na.rm = TRUE)
+  if(x$margins[2] %in% cont3par) {CIsig2 <- colMeans(x$CIsig2, na.rm = TRUE) ; CInu <- colMeans(x$CInu, na.rm = TRUE)}
+
 
 
 
@@ -144,6 +202,8 @@ if(!is.null(x$tableP3) && !is.null(x$tableP4)  ){
   if(x$Model=="BSS") cat("\nn = ",x$n,"  n.sel = ",x$n.sel,cp,format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")","\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="") 
      
   if(x$Model=="B" && x$margins[2] %in% cont2par ) cat("\nn = ",x$n,cp,format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")","  sigma^2 = ",format(x$sigma2,digits=nodi),"(",format(CIsig2[1],digits=nodi),",",format(CIsig2[2],digits=nodi),")","\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
+       
+  if(x$Model=="B" && x$margins[2] %in% cont3par ) cat("\nn = ",x$n,cp,format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")","  sigma^2 = ",format(x$sigma2,digits=nodi),"(",format(CIsig2[1],digits=nodi),",",format(CIsig2[2],digits=nodi),")","\nnu = ",format(x$nu,digits = nodi),"(",format(CInu[1],digits=nodi),",",format(CInu[2],digits=nodi),")","  total edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
        
        
 invisible(x)

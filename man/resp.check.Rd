@@ -13,7 +13,7 @@ the normalised quantile response.
 \usage{
 
 resp.check(y, margin = "N", main = "Histogram and Density of Response",
-           xlab = "Response", ...)
+           xlab = "Response", print.par = FALSE, plots = TRUE, ...)
 
 }
 
@@ -27,6 +27,11 @@ resp.check(y, margin = "N", main = "Histogram and Density of Response",
 \item{main}{Title for the plot.}
 
 \item{xlab}{Title for the x axis.}
+
+\item{print.par}{If \code{TRUE} then the estimated parameters used to construct the plots are returned.}
+
+\item{plots}{If \code{FALSE} then no plots are produced and only parameter estimates returned.}
+
 
 \item{...}{Other graphics parameters to pass on to plotting commands.}
 

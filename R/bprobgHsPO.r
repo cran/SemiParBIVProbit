@@ -1,5 +1,7 @@
 bprobgHsPO <- function(params, respvec, VC, sp = NULL, qu.mag = NULL){
-  X1 <- X2 <- X3 <- 1
+
+
+
   epsilon <- 0.0000001 # 0.9999999 0.0001 # sqrt(.Machine$double.eps)
   max.p   <- 0.9999999
 
@@ -16,29 +18,14 @@ bprobgHsPO <- function(params, respvec, VC, sp = NULL, qu.mag = NULL){
   p2 <- ifelse(p2 > max.p , max.p , p2) 
   p2 <- ifelse(p2 < epsilon, epsilon, p2) 
 
-  #criteria <- c(0,1)
-  #no.good <- apply(apply(cbind(p1,p2), c(1,2), `%in%`, criteria), 1, any)
-  #good <- no.good==FALSE
-  
-  good <- rep(TRUE,length(eta1))
 
 
-  p1 <- p1[good]
-  p2 <- p2[good]
-  d.n1 <- d.n1[good]
-  d.n2 <- d.n2[good]
-  eta1 <- eta1[good] 
-  eta2 <- eta2[good] 
-  X1 <- as.matrix(VC$X1[good,])
-  X2 <- as.matrix(VC$X2[good,])
-  if(!is.null(VC$X3)) X3 <- as.matrix(VC$X3[good,])   ## New bit
-  Y  <- respvec$y1[good]
-  CY <- respvec$cy[good]
-  weights <- VC$weights[good]
+
+
 
 ######
   if(is.null(VC$X3))  teta.st <- params[(VC$X1.d2+VC$X2.d2+1)]
-  if(!is.null(VC$X3)) teta.st <- etad <- X3%*%params[(VC$X1.d2+VC$X2.d2+1):(VC$X1.d2+VC$X2.d2+VC$X3.d2)]
+  if(!is.null(VC$X3)) teta.st <- etad <- VC$X3%*%params[(VC$X1.d2+VC$X2.d2+1):(VC$X1.d2+VC$X2.d2+VC$X3.d2)]
 ######  
 
 ########################################################################################################  
@@ -67,7 +54,7 @@ p11 <-  pmax(BiCDF(p1, p2, VC$nC, teta), epsilon)
 
   cp11 <- pmax(1 - p11, epsilon)
   
-  l.par <- weights*( Y*log(p11) + CY*log(cp11) )
+  l.par <- VC$weights*( respvec$y1*log(p11) + respvec$cy*log(cp11) )
 
 
 dH <- copgHs(p1,p2,eta1=NULL,eta2=NULL,teta,teta.st,VC$BivD)
@@ -94,63 +81,63 @@ bit1.b2th <- c.copula2.be2th*d.n2
 bit1.th2 <- dH$bit1.th2
 
 
-  dl.dbe1 <-  weights*d.n1*( Y*c.copula.be1/p11   - CY*c.copula.be1/cp11   )  
+  dl.dbe1 <-  VC$weights*d.n1*( respvec$y1*c.copula.be1/p11   - respvec$cy*c.copula.be1/cp11   )  
                                           
-  dl.dbe2 <-  weights*d.n2*( Y*c.copula.be2/p11   - CY*c.copula.be2/cp11   )
+  dl.dbe2 <-  VC$weights*d.n2*( respvec$y1*c.copula.be2/p11   - respvec$cy*c.copula.be2/cp11   )
                                                   
-  dl.drho <-       weights*( Y*c.copula.theta/p11 - CY*c.copula.theta/cp11 ) 
+  dl.drho <-       VC$weights*( respvec$y1*c.copula.theta/p11 - respvec$cy*c.copula.theta/cp11 ) 
 
 if(VC$hess==TRUE){
 
-  d2l.be1.be1  <- -weights*(Y*(bit1.b1b1*p11-(c.copula.be1*d.n1)^2)/p11^2 -
-                           CY*(bit1.b1b1*cp11+(c.copula.be1*d.n1)^2)/cp11^2 )
+  d2l.be1.be1  <- -VC$weights*(respvec$y1*(bit1.b1b1*p11-(c.copula.be1*d.n1)^2)/p11^2 -
+                           respvec$cy*(bit1.b1b1*cp11+(c.copula.be1*d.n1)^2)/cp11^2 )
 
-  d2l.be2.be2  <- -weights*(Y*(bit1.b2b2*p11 - (c.copula.be2*d.n2)^2 )/p11^2 -
-                           CY*(bit1.b2b2*cp11 + (c.copula.be2*d.n2)^2 )/cp11^2 )
+  d2l.be2.be2  <- -VC$weights*(respvec$y1*(bit1.b2b2*p11 - (c.copula.be2*d.n2)^2 )/p11^2 -
+                           respvec$cy*(bit1.b2b2*cp11 + (c.copula.be2*d.n2)^2 )/cp11^2 )
 
-  d2l.be1.be2  <- -weights*(Y*(bit1.b1b2*p11-(c.copula.be1*d.n1*c.copula.be2*d.n2))/p11^2 -
-                           CY*(bit1.b1b2*cp11+(c.copula.be1*d.n1*c.copula.be2*d.n2))/cp11^2)
+  d2l.be1.be2  <- -VC$weights*(respvec$y1*(bit1.b1b2*p11-(c.copula.be1*d.n1*c.copula.be2*d.n2))/p11^2 -
+                           respvec$cy*(bit1.b1b2*cp11+(c.copula.be1*d.n1*c.copula.be2*d.n2))/cp11^2)
 
-  d2l.be1.rho  <- -weights*(Y*(bit1.b1th*p11-(c.copula.be1*d.n1*c.copula.theta))/p11^2 -
-                           CY*(bit1.b1th*cp11+(c.copula.be1*d.n1*c.copula.theta))/cp11^2)
+  d2l.be1.rho  <- -VC$weights*(respvec$y1*(bit1.b1th*p11-(c.copula.be1*d.n1*c.copula.theta))/p11^2 -
+                           respvec$cy*(bit1.b1th*cp11+(c.copula.be1*d.n1*c.copula.theta))/cp11^2)
 
-  d2l.be2.rho  <- -weights*(Y*(bit1.b2th*p11-(c.copula.be2*d.n2*c.copula.theta))/p11^2 -
-                           CY*(bit1.b2th*cp11+(c.copula.be2*d.n2*c.copula.theta))/cp11^2)
+  d2l.be2.rho  <- -VC$weights*(respvec$y1*(bit1.b2th*p11-(c.copula.be2*d.n2*c.copula.theta))/p11^2 -
+                           respvec$cy*(bit1.b2th*cp11+(c.copula.be2*d.n2*c.copula.theta))/cp11^2)
 
-  d2l.rho.rho  <- -weights*(Y*(bit1.th2*p11-c.copula.theta^2)/p11^2 -
-                           CY*(bit1.th2*cp11+c.copula.theta^2)/cp11^2)
+  d2l.rho.rho  <- -VC$weights*(respvec$y1*(bit1.th2*p11-c.copula.theta^2)/p11^2 -
+                           respvec$cy*(bit1.th2*cp11+c.copula.theta^2)/cp11^2)
 
 }  
   
 if(VC$hess==FALSE){
                           
-  d2l.be1.be1  <- -weights*((bit1.b1b1*p11-(c.copula.be1*d.n1)^2)/p11 -
+  d2l.be1.be1  <- -VC$weights*((bit1.b1b1*p11-(c.copula.be1*d.n1)^2)/p11 -
                             (bit1.b1b1*cp11+(c.copula.be1*d.n1)^2)/cp11 )
 
-  d2l.be2.be2  <- -weights*((bit1.b2b2*p11 - (c.copula.be2*d.n2)^2 )/p11 -
+  d2l.be2.be2  <- -VC$weights*((bit1.b2b2*p11 - (c.copula.be2*d.n2)^2 )/p11 -
                             (bit1.b2b2*cp11 + (c.copula.be2*d.n2)^2 )/cp11 )
 
-  d2l.be1.be2  <- -weights*((bit1.b1b2*p11-(c.copula.be1*d.n1*c.copula.be2*d.n2))/p11 -
+  d2l.be1.be2  <- -VC$weights*((bit1.b1b2*p11-(c.copula.be1*d.n1*c.copula.be2*d.n2))/p11 -
                             (bit1.b1b2*cp11+(c.copula.be1*d.n1*c.copula.be2*d.n2))/cp11)
 
-  d2l.be1.rho  <- -weights*((bit1.b1th*p11-(c.copula.be1*d.n1*c.copula.theta))/p11 -
+  d2l.be1.rho  <- -VC$weights*((bit1.b1th*p11-(c.copula.be1*d.n1*c.copula.theta))/p11 -
                             (bit1.b1th*cp11+(c.copula.be1*d.n1*c.copula.theta))/cp11)
 
-  d2l.be2.rho  <- -weights*((bit1.b2th*p11-(c.copula.be2*d.n2*c.copula.theta))/p11 -
+  d2l.be2.rho  <- -VC$weights*((bit1.b2th*p11-(c.copula.be2*d.n2*c.copula.theta))/p11 -
                             (bit1.b2th*cp11+(c.copula.be2*d.n2*c.copula.theta))/cp11)
 
-  d2l.rho.rho  <- -weights*((bit1.th2*p11-c.copula.theta^2)/p11 -
+  d2l.rho.rho  <- -VC$weights*((bit1.th2*p11-c.copula.theta^2)/p11 -
                             (bit1.th2*cp11+c.copula.theta^2)/cp11)                          
 }
 
        
 if( is.null(VC$X3) ){
 
-  be1.be1 <- crossprod(X1*c(d2l.be1.be1),X1)
-  be2.be2 <- crossprod(X2*c(d2l.be2.be2),X2)
-  be1.be2 <- crossprod(X1*c(d2l.be1.be2),X2)
-  be1.rho <- t(t(rowSums(t(X1*c(d2l.be1.rho)))))
-  be2.rho <- t(t(rowSums(t(X2*c(d2l.be2.rho)))))
+  be1.be1 <- crossprod(VC$X1*c(d2l.be1.be1),VC$X1)
+  be2.be2 <- crossprod(VC$X2*c(d2l.be2.be2),VC$X2)
+  be1.be2 <- crossprod(VC$X1*c(d2l.be1.be2),VC$X2)
+  be1.rho <- t(t(rowSums(t(VC$X1*c(d2l.be1.rho)))))
+  be2.rho <- t(t(rowSums(t(VC$X2*c(d2l.be2.rho)))))
   
   H <- rbind( cbind( be1.be1    , be1.be2    , be1.rho ), 
               cbind( t(be1.be2) , be2.be2    , be2.rho ), 
@@ -160,20 +147,20 @@ if( is.null(VC$X3) ){
             
     
          
-         G   <- -c( colSums( c(dl.dbe1)*X1 ),
-                    colSums( c(dl.dbe2)*X2 ),
+         G   <- -c( colSums( c(dl.dbe1)*VC$X1 ),
+                    colSums( c(dl.dbe2)*VC$X2 ),
                     sum( dl.drho )  )
     
 }
 
 if( !is.null(VC$X3) ){
 
-  be1.be1 <- crossprod(X1*c(d2l.be1.be1),X1)
-  be2.be2 <- crossprod(X2*c(d2l.be2.be2),X2)
-  be1.be2 <- crossprod(X1*c(d2l.be1.be2),X2)
-  be1.rho <- crossprod(X1*c(d2l.be1.rho),X3)
-  be2.rho <- crossprod(X2*c(d2l.be2.rho),X3)
-  rho.rho <- crossprod(X3*c(d2l.rho.rho),X3)
+  be1.be1 <- crossprod(VC$X1*c(d2l.be1.be1),VC$X1)
+  be2.be2 <- crossprod(VC$X2*c(d2l.be2.be2),VC$X2)
+  be1.be2 <- crossprod(VC$X1*c(d2l.be1.be2),VC$X2)
+  be1.rho <- crossprod(VC$X1*c(d2l.be1.rho),VC$X3)
+  be2.rho <- crossprod(VC$X2*c(d2l.be2.rho),VC$X3)
+  rho.rho <- crossprod(VC$X3*c(d2l.rho.rho),VC$X3)
   
   H <- rbind( cbind( be1.be1    , be1.be2    , be1.rho ), 
               cbind( t(be1.be2) , be2.be2    , be2.rho ), 
@@ -183,9 +170,9 @@ if( !is.null(VC$X3) ){
             
   
          
-         G   <- -c( colSums( c(dl.dbe1)*X1 ),
-                    colSums( c(dl.dbe2)*X2 ),
-                    colSums( c(dl.drho)*X3 )  )
+         G   <- -c( colSums( c(dl.dbe1)*VC$X1 ),
+                    colSums( c(dl.dbe2)*VC$X2 ),
+                    colSums( c(dl.drho)*VC$X3 )  )
     
 }
 
@@ -204,7 +191,7 @@ if(VC$extra.regI == "pC" && VC$hess==FALSE) H <- regH(H, type = 1)
         
 if(VC$extra.regI == "sED") H <- regH(H, type = 2)  
    
-rm(X1, X2, X3)  
+
            
 
          list(value=res, gradient=G, hessian=H, S.h=ps$S.h, l=S.res, l.par=l.par, ps = ps,
@@ -212,7 +199,7 @@ rm(X1, X2, X3)
               dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.drho=dl.drho,
               d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
               d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
-              d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho,good=good, 
+              d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho, 
               BivD=VC$BivD, p1=p1, p2=p2)      
 
 }

@@ -1,6 +1,6 @@
 logLik.SemiParBIVProbit <- function (object, ...){
 
-    if (length(list(...))) warning("eobjecttra arguments discarded")
+    if (length(list(...))) warning("extra arguments discarded")
     
     lk  <- object$logLik
     

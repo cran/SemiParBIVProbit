@@ -6,7 +6,9 @@ AT <- function(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL
 etap.noi <- X.int <- X.noi <- eti1 <- eti0 <- etno <- indS <- bs <- ind.excl <- p.int1 <- p.int0 <- d.int1 <- d.int0 <- p.etn <- d.etn <- ass.p <- ass.pst <- C.11 <- C.10 <- sig2 <- peti1s <- peti0s <- sigma2.st <- sigma2s <- eti1s <- eti0s <- d0 <- d1 <- p.etns <- etnos <- etds <- ass.ps <- 1
 diffEf <- fy1.y2 <- est.ATso <- y2 <- CIF <- Pr <- Effects <- NULL
 
-m2 <- c("N","GU","rGU","LO","LN","WEI","iG","GA")
+m2 <- c("N","GU","rGU","LO","LN","WEI","WEI2","iG","GA")
+m3 <- c("DAGUM")
+
 end <- 0
 epsilon <- 0.0000001 # 0.9999999 sqrt(.Machine$double.eps)
 max.p   <- 0.9999999
@@ -14,6 +16,7 @@ est.ATb <- NA
 indD <- list()
 
 
+if(x$margins[2] == "DAGUM") { if( min(sqrt(x$sigma2)) <= 1) stop("Sigma parameter has value(s) smaller than 1, hence the mean is indeterminate.")}
 
 
 if(x$ig[[1]]$response %in% x$ig[[2]]$pred.names ) {end <- 1; eq <- 2} 
@@ -205,17 +208,17 @@ if(type == "bivariate"){
 if(x$margins[2] != "probit"){ 
 
 
-if( x$margins[2] %in% c("N","GU","rGU","LO") )             { lil <- -Inf;    uil <- Inf}
-if( x$margins[2] %in% c("LN","WEI","iG","GA")     )        { lil <- epsilon; uil <- Inf}
+if( x$margins[2] %in% c("N","GU","rGU","LO") )                        { lil <- -Inf;    uil <- Inf}
+if( x$margins[2] %in% c("LN","WEI","WEI2","iG","GA","DAGUM")     )    { lil <- epsilon; uil <- Inf}
 
 
 ###########
 # functions
 ###########
 
-ConExp0 <- function(y2, eti0, sigma2, margin2, p.etn0, ass.p, BivD){   
+ConExp0 <- function(y2, eti0, sigma2, nu, margin2, p.etn0, ass.p, BivD){   
 
-	pp0 <- distrHsAT(y2, eti0, sigma2, margin2) 
+	pp0 <- distrHsAT(y2, eti0, sigma2, nu, margin2) 
 	p2.0   <- pp0$p2
 	pdf2.0 <- pp0$pdf2 
 	dc0 <- copgHsAT(p1=p.etn0, p2=p2.0, teta=ass.p, BivD=BivD)$c.copula.be2	
@@ -223,9 +226,9 @@ ConExp0 <- function(y2, eti0, sigma2, margin2, p.etn0, ass.p, BivD){
 	cond0
                                                                    }
 
-ConExp1 <- function(y2, eti1, sigma2, margin2, p.etn0, ass.p, BivD){   
+ConExp1 <- function(y2, eti1, sigma2, nu, margin2, p.etn0, ass.p, BivD){   
 
-	pp1 <- distrHsAT(y2, eti1, sigma2, margin2)
+	pp1 <- distrHsAT(y2, eti1, sigma2, nu, margin2)
 	p2.1   <- pp1$p2
 	pdf2.1 <- pp1$pdf2 	
 	dc1 <- copgHsAT(p1=p.etn0, p2=p2.1, teta=ass.p, BivD=BivD)$c.copula.be2	
@@ -234,18 +237,18 @@ ConExp1 <- function(y2, eti1, sigma2, margin2, p.etn0, ass.p, BivD){
                                                                    }
                                                                    
 
-integr0 <- function(eti0, sigma2, margin2, p.etn0, ass.p, BivD, lil, uil){
+integr0 <- function(eti0, sigma2, nu, margin2, p.etn0, ass.p, BivD, lil, uil){
 
   integrate(ConExp0, lower=lil, upper=uil, eti0=eti0, 
-            sigma2=sigma2, margin2=margin2, p.etn0=p.etn0, 
+            sigma2=sigma2, nu = nu, margin2=margin2, p.etn0=p.etn0, 
             ass.p=ass.p, BivD=BivD)$value
                          
                        }
 
-integr1 <- function(eti1, sigma2, margin2, p.etn0, ass.p, BivD, lil, uil){
+integr1 <- function(eti1, sigma2, nu, margin2, p.etn0, ass.p, BivD, lil, uil){
 
   integrate(ConExp1, lower=lil, upper=uil, eti1=eti1,  
-            sigma2=sigma2, margin2=margin2, p.etn0=p.etn0, 
+            sigma2=sigma2, nu= nu, margin2=margin2, p.etn0=p.etn0, 
             ass.p=ass.p, BivD=BivD)$value
                          
                        }
@@ -258,16 +261,28 @@ v.integr1 <- Vectorize(integr1)
 
 ass.p  <- x$theta
 sigma2 <- x$sigma2
-if( is.null(x$X3) && is.null(x$X4) ) { ass.p <- rep(ass.p, x$n); sigma2 <- rep(sigma2, x$n)     } 
+nu     <- x$nu
+
+
+
+
+if( is.null(x$X3) && is.null(x$X4) ) { ass.p <- rep(ass.p, x$n); sigma2 <- rep(sigma2, x$n)}
+
+if(x$margins[2] %in% m2) nu <- rep(1, x$n)
+if(x$margins[2] %in% m3 && is.null(x$X5)) nu <- rep(nu, x$n)
+
+
+
+
 
 p.etn0  <- pnorm(-etno)
 p.etn0 <- pmax(p.etn0, epsilon ) 
 p.etn0 <- ifelse(p.etn0 > max.p, max.p, p.etn0)
 
 
-v0 <- v.integr0(eti0=eti0, sigma2=sigma2[ind], margin2=x$VC$margins[2], p.etn0=p.etn0, 
+v0 <- v.integr0(eti0=eti0, sigma2=sigma2[ind], nu = nu[ind], margin2=x$VC$margins[2], p.etn0=p.etn0, 
                 ass.p=ass.p[ind], BivD=x$BivD, lil=lil, uil=uil)
-v1 <- v.integr1(eti1=eti1, sigma2=sigma2[ind], margin2=x$VC$margins[2], p.etn0=p.etn0, 
+v1 <- v.integr1(eti1=eti1, sigma2=sigma2[ind], nu = nu[ind], margin2=x$VC$margins[2], p.etn0=p.etn0, 
                 ass.p=ass.p[ind], BivD=x$BivD, lil=lil, uil=uil)
 
 est.ATso <- (v1 - v0)  
@@ -341,18 +356,29 @@ if(x$margins[2] != "probit"){
 parg2 <- x$gamlss$fit$argument[1:x$X2.d2]
 eti1  <- d1%*%parg2 
 eti0  <- d0%*%parg2
-sig2  <- (exp(x$gamlss$fit$sigma2.st) + epsilon)[ind] 
 
-if(x$margins[2] %in% c("N","LO","iG") )   est.ATso <- x$gamlss$fit$argument[nm.end]  
-if(x$margins[2] == "LN")                  est.ATso <- ( exp(eti1 + sig2/2) - exp(eti0 + sig2/2) ) 
-if(x$margins[2] == "GU")                  est.ATso <- ( ( eti1 - 0.57722*sqrt(sig2) ) - ( eti0 - 0.57722*sqrt(sig2) ) )   
-if(x$margins[2] == "rGU")                 est.ATso <- ( ( eti1 + 0.57722*sqrt(sig2) ) - ( eti0 + 0.57722*sqrt(sig2) ) )                           
-if(x$margins[2] == "WEI")                 est.ATso <- (  eti1*gamma((1/sqrt(sig2)) + 1) - eti0*gamma((1/sqrt(sig2)) + 1)  )                          
-if(x$margins[2] == "GA")                  est.ATso <- (  exp(eti1) - exp(eti0)   )                           
+
+if(length(x$gamlss$fit$sigma2.st) > 1) sig2  <- (exp(x$gamlss$fit$sigma2.st) + epsilon)[ind] else sig2  <- (exp(x$gamlss$fit$sigma2.st) + epsilon)   
+
+
+if(x$margins[2] %in% m3){
+
+if(length(x$gamlss$fit$nu.st) > 1)       nu  <- (exp(x$gamlss$fit$nu.st) + epsilon)[ind] else nu  <- (exp(x$gamlss$fit$nu.st) + epsilon)   
+
+
+}
+
+
+if(x$margins[2] %in% c("N","LO") )   est.ATso <- x$gamlss$fit$argument[nm.end]  
+if(x$margins[2] == "LN")             est.ATso <- ( exp(eti1 + sig2/2) - exp(eti0 + sig2/2) ) 
+if(x$margins[2] == "GU")             est.ATso <- ( ( eti1 - 0.57722*sqrt(sig2) ) - ( eti0 - 0.57722*sqrt(sig2) ) )   
+if(x$margins[2] == "rGU")            est.ATso <- ( ( eti1 + 0.57722*sqrt(sig2) ) - ( eti0 + 0.57722*sqrt(sig2) ) )                           
+if(x$margins[2] == "WEI")            est.ATso <- (  exp(eti1)*gamma((1/sqrt(sig2)) + 1) - exp(eti0)*gamma((1/sqrt(sig2)) + 1)  ) 
+if(x$margins[2] == "WEI2")           est.ATso <- (  exp(eti1)^-1*gamma((1/sqrt(sig2)) + 1) - exp(eti0)^-1*gamma((1/sqrt(sig2)) + 1)  )                          
+if(x$margins[2] %in% c("GA","iG"))   est.ATso <- (  exp(eti1) - exp(eti0)   )   
+if(x$margins[2] %in% c("DAGUM"))     est.ATso <- -exp(eti1)/(sqrt(sig2)*gamma(nu))*gamma(-1/sqrt(sig2))*gamma(1/sqrt(sig2)+nu) - -exp(eti0)/(sqrt(sig2)*gamma(nu))*gamma(-1/sqrt(sig2))*gamma(1/sqrt(sig2)+nu)    
 
                  }  
-
-
 
 } # end naive condition
 
@@ -477,13 +503,30 @@ if(x$margins[2] != "probit"){
  sigma2.st <- ifelse( sigma2.st > 20, 20, sigma2.st )  
  sigma2.st <- ifelse( sigma2.st < -17, -17, sigma2.st ) 
  sigma2s <- exp(sigma2.st)
+ 
+ if(x$margins[2] %in% m3){
+ 
+ if( !is.null(x$X4) ) nu.st <- x$X4[ind,]%*%t(bs[,(x$X2.d2+x$X3.d2+1):(x$X2.d2+x$X3.d2+x$X4.d2)]) 
+ if(  is.null(x$X4) ) nu.st <- bs[,x$X2.d2 + 2]
+   
+ nu.st <- ifelse( nu.st >  20,  20, nu.st )  
+ nu.st <- ifelse( nu.st < -17, -17, nu.st ) 
+ nus   <- exp(nu.st) 
+ 
+ }
                
-if(x$margins[2] %in% c("N","LO","iG") )   est.ATb <- bs[,nm.end] 
-if(x$margins[2] == "LN")                  est.ATb <- colMeans(   exp(eti1s + sigma2s/2) - exp(eti0s + sigma2s/2)                         , na.rm = TRUE    )
-if(x$margins[2] == "GU")                  est.ATb <- colMeans(    ( eti1s - 0.57722*sqrt(sigma2s) ) - ( eti0s - 0.57722*sqrt(sigma2s) )  , na.rm = TRUE    )   
-if(x$margins[2] == "rGU")                 est.ATb <- colMeans(   ( eti1s + 0.57722*sqrt(sigma2s) ) - ( eti0s + 0.57722*sqrt(sigma2s) )   , na.rm = TRUE    )                           
-if(x$margins[2] == "WEI")                 est.ATb <- colMeans(    eti1s*gamma(1/sqrt(sigma2s) + 1) - eti0s*gamma(1/sqrt(sigma2s) + 1)    , na.rm = TRUE    )                            
-if(x$margins[2] == "GA")                  est.ATb <- colMeans(    exp(eti1s) - exp(eti0s)                                                , na.rm = TRUE    )         
+if(x$margins[2] %in% c("N","LO") )  est.ATb <- bs[,nm.end] 
+if(x$margins[2] == "LN")            est.ATb <- colMeans(   exp(eti1s + sigma2s/2) - exp(eti0s + sigma2s/2)                         , na.rm = TRUE    )
+if(x$margins[2] == "GU")            est.ATb <- colMeans(    ( eti1s - 0.57722*sqrt(sigma2s) ) - ( eti0s - 0.57722*sqrt(sigma2s) )  , na.rm = TRUE    )   
+if(x$margins[2] == "rGU")           est.ATb <- colMeans(   ( eti1s + 0.57722*sqrt(sigma2s) ) - ( eti0s + 0.57722*sqrt(sigma2s) )   , na.rm = TRUE    )                           
+if(x$margins[2] == "WEI")           est.ATb <- colMeans(    exp(eti1s)*gamma(1/sqrt(sigma2s) + 1) - exp(eti0s)*gamma(1/sqrt(sigma2s) + 1)    , na.rm = TRUE    ) 
+if(x$margins[2] == "WEI2")          est.ATb <- colMeans(    exp(eti1s)^-1*gamma(1/sqrt(sigma2s) + 1) - exp(eti0s)^-1*gamma(1/sqrt(sigma2s) + 1)    , na.rm = TRUE    )                            
+if(x$margins[2] %in% c("GA","iG"))  est.ATb <- colMeans(    exp(eti1s) - exp(eti0s)                                                , na.rm = TRUE    )         
+if(x$margins[2] %in% c("DAGUM"))    est.ATb <- colMeans(    -exp(eti1s)/(sqrt(sigma2s)*gamma(nus))*gamma(-1/sqrt(sigma2s))*gamma(1/sqrt(sigma2s)+nus) - -exp(eti0s)/(sqrt(sigma2s)*gamma(nus))*gamma(-1/sqrt(sigma2s))*gamma(1/sqrt(sigma2s)+nus)                                                , na.rm = TRUE    )         
+         
+         
+         
+         
          
                              }
 
@@ -527,7 +570,28 @@ if(type == "bivariate"){
    sigma2.st <- ifelse( sigma2.st < -17, -17, sigma2.st ) 
    sigma2s <- exp(sigma2.st)
   
-  } 
+  }
+  
+   if(x$VC$margins[2] %in% m3 ){
+   
+   if( !is.null(x$X3) ) sigma2.st <- x$X3[ind,]%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)]) 
+   if(  is.null(x$X3) ) sigma2.st <- bs[,p.rho - 2]
+   
+   if( !is.null(x$X4) ) nu.st <- x$X4[ind,]%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2)]) 
+   if(  is.null(x$X4) ) nu.st <- bs[,p.rho - 1]   
+   
+   if( !is.null(x$X5) ) etds <- x$X5[ind,]%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2 + 1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2)])
+   if(  is.null(x$X5) ) etds <- bs[,p.rho]  
+   
+   sigma2.st <- ifelse( sigma2.st > 20, 20, sigma2.st )  
+   sigma2.st <- ifelse( sigma2.st < -17, -17, sigma2.st ) 
+   sigma2s <- exp(sigma2.st)
+   
+   nu.st <- ifelse( nu.st > 20, 20, nu.st )  
+   nu.st <- ifelse( nu.st < -17, -17, nu.st ) 
+   nus <- exp(nu.st)   
+  
+  }  
  
  
  
@@ -555,13 +619,18 @@ if(type == "bivariate"){
 
 if(x$margins[2] != "probit"){                     
 
+
 if( is.null(x$X3) && is.null(x$X4) ) { ass.ps <- matrix(ass.ps,  ncol = n.sim, nrow=dim(eti0s)[1],byrow = TRUE)
                                       sigma2s <- matrix(sigma2s, ncol = n.sim, nrow=dim(eti0s)[1],byrow = TRUE)  } 
+ 
+if(x$VC$margins[2] %in% m2) nus <- matrix(1, ncol = n.sim, nrow=dim(eti0s)[1],byrow = TRUE)
+if(x$VC$margins[2] %in% m3){ if(is.null(x$X5) ) nus <- matrix(nus, ncol = n.sim, nrow=dim(eti0s)[1],byrow = TRUE) }
+
 
 for(i in 1:n.sim){ #### can this loop be avoided? ####
 
-v0 <- v.integr0(eti0=eti0s[,i], sigma2=sigma2s[,i], margin2=x$VC$margins[2], p.etn0=p.etns[,i], ass.p=ass.ps[,i], BivD=x$BivD, lil=lil, uil=uil)
-v1 <- v.integr1(eti1=eti1s[,i], sigma2=sigma2s[,i], margin2=x$VC$margins[2], p.etn0=p.etns[,i], ass.p=ass.ps[,i], BivD=x$BivD, lil=lil, uil=uil)
+v0 <- v.integr0(eti0=eti0s[,i], sigma2=sigma2s[,i], nu=nus[,i], margin2=x$VC$margins[2], p.etn0=p.etns[,i], ass.p=ass.ps[,i], BivD=x$BivD, lil=lil, uil=uil)
+v1 <- v.integr1(eti1=eti1s[,i], sigma2=sigma2s[,i], nu=nus[,i], margin2=x$VC$margins[2], p.etn0=p.etns[,i], ass.p=ass.ps[,i], BivD=x$BivD, lil=lil, uil=uil)
 
  est.ATb[i] <- mean( (v1 - v0), na.rm = TRUE   ) 
 
@@ -697,6 +766,7 @@ if(type == "naive") stop("Please fit a bivariate model with intercept and endoge
  data <- x$dataset[ind,]
  
  fy1.y2 <- est.ATb <- NULL
+ nu <- 1
  fy1.y2S <- matrix(NA, n.sim, ly2)
  diffEfS <- matrix(NA, n.sim, ly2 - 1) 
 
@@ -711,6 +781,8 @@ if(type == "bivariate"){
 
  if( !is.null(x$X3) && !is.null(x$X4) ) {sig2 <- x$sigma2[ind]; thet <- x$theta[ind]} else {sig2 <- x$sigma2; thet <- x$theta}
 
+ if(x$VC$margins[2] %in% m3) { if(!is.null(x$X5)) nu <- x$nu[ind] else nu <- x$nu }
+
  
 ###########
 
@@ -720,7 +792,7 @@ data[, 2] <- y2[i]
 
 eta1 <- as.matrix( predict.gam(x$gam1, newdata = data, type = "lpmatrix") )%*%x$coef[ind.int]  
 
-p2 <- distrHsAT(y2[i], eta2, sig2, x$margins[2])$p2  
+p2 <- distrHsAT(y2[i], eta2, sig2, nu, x$margins[2])$p2  
 p1 <- pnorm(-eta1) 
 
 h <- copgHs2(p1, p2, eta1 = NULL, eta2 = NULL, thet, 1, x$BivD)$c.copula.be2 
@@ -737,7 +809,11 @@ fy1.y2[i] <- mean(1 - h)
 ###########
  
 p.rho <- length(coef(x)) 
-etnos <- as.matrix(x$X2[ind,])%*%t(bs[, ind.noi])  
+etnos <- as.matrix(x$X2[ind,])%*%t(bs[, ind.noi]) 
+
+
+
+if(x$VC$margins[2] %in% m2){
  
 if( !is.null(x$X3) ) sigma2.st <- x$X3[ind,]%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)]) 
 if(  is.null(x$X3) ) sigma2.st <- bs[, p.rho - 1]
@@ -748,6 +824,33 @@ if(  is.null(x$X4) ) etds <- bs[,p.rho]
 sigma2.st <- ifelse( sigma2.st > 20, 20, sigma2.st )  
 sigma2.st <- ifelse( sigma2.st < -17, -17, sigma2.st ) 
 sigma2s <- exp(sigma2.st)
+
+}
+
+ if(x$VC$margins[2] %in% m3 ){
+ 
+ if( !is.null(x$X3) ) sigma2.st <- x$X3[ind,]%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)]) 
+ if(  is.null(x$X3) ) sigma2.st <- bs[,p.rho - 2]
+ 
+ if( !is.null(x$X4) ) nu.st <- x$X4[ind,]%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2)]) 
+ if(  is.null(x$X4) ) nu.st <- bs[,p.rho - 1]   
+ 
+ if( !is.null(x$X5) ) etds <- x$X5[ind,]%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2 + 1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2)])
+ if(  is.null(x$X5) ) etds <- bs[,p.rho]  
+ 
+ sigma2.st <- ifelse( sigma2.st > 20, 20, sigma2.st )  
+ sigma2.st <- ifelse( sigma2.st < -17, -17, sigma2.st ) 
+ sigma2s <- exp(sigma2.st)
+ 
+ nu.st <- ifelse( nu.st > 20, 20, nu.st )  
+ nu.st <- ifelse( nu.st < -17, -17, nu.st ) 
+ nus <- exp(nu.st)   
+
+}  
+ 
+
+
+
   
   
 if(x$BivD=="F")                   ass.ps <- etds + epsilon
@@ -769,13 +872,18 @@ ass.ps <- ifelse(ass.ps == -Inf, -8.218407e+307, ass.ps )
  
 if( is.null(x$X3) && is.null(x$X4) ) { ass.ps <- matrix(ass.ps,  ncol = n.sim, nrow=dim(etnos)[1],byrow = TRUE)
                                       sigma2s <- matrix(sigma2s, ncol = n.sim, nrow=dim(etnos)[1],byrow = TRUE)  }  
+
+if(x$VC$margins[2] %in% m2) nus <- matrix(1, ncol = n.sim, nrow=dim(etnos)[1],byrow = TRUE)
+if(x$VC$margins[2] %in% m3){ if(is.null(x$X5) ) nus <- matrix(nus, ncol = n.sim, nrow=dim(etnos)[1],byrow = TRUE) }                                      
+                                      
+                                      
  
  for(j in 1:ly2){
  
    data[, 2] <- y2[j] 
    etins <- as.matrix( predict.gam(x$gam1, newdata = data, type = "lpmatrix") )%*%t(bs[, ind.int])      
                   
-   p2s <- distrHsAT(y2[j], etnos, sigma2s, x$margins[2])$p2 
+   p2s <- distrHsAT(y2[j], etnos, sigma2s, nus, x$margins[2])$p2 
    p1s <- pnorm(-etins)    
    h <- copgHs2(p1s, p2s, eta1 = NULL, eta2 = NULL, ass.ps, 1, x$BivD)$c.copula.be2                   
    fy1.y2S[, j] <- apply(1 - h, MARGIN = 2, FUN = mean, na.rm=TRUE)

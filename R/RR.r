@@ -6,12 +6,14 @@ RR <- function(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL
 etap.noi <- X.int <- X.noi <- eti1 <- eti0 <- etno <- indS <- bs <- ind.excl <- p.int1 <- p.int0 <- d.int1 <- d.int0 <- p.etn <- d.etn <- ass.p <- ass.pst <- C.11 <- C.10 <- sig2 <- peti1s <- peti0s <- sigma2.st <- sigma2s <- eti1s <- eti0s <- d0 <- d1 <- p.etns <- etnos <- etds <- ass.ps <- delta.AT <- 1
 diffEf <- fy1.y2 <- est.ATso <- y2 <- CIF <- Pr <- Effects <- NULL
 
-m2 <- c("N","GU","rGU","LO","LN","WEI","iG","GA")
+m2 <- c("N","GU","rGU","LO","LN","WEI","WEI2","iG","GA")
+m3 <- c("DAGUM")
 end <- 0
 epsilon <- 0.0000001 # 0.9999999 sqrt(.Machine$double.eps)
 max.p   <- 0.9999999
 est.ATb <- NA
 indD <- list()
+
 
 if(x$ig[[1]]$response %in% x$ig[[2]]$pred.names ) {end <- 1; eq <- 2} 
 if(x$ig[[2]]$response %in% x$ig[[1]]$pred.names ) {end <- 2; eq <- 1} 
@@ -24,7 +26,7 @@ if(missing(nm.end)) stop("You must provide the name of the endogenous variable."
 
 
 if(x$Model=="BSS" || x$Model=="BPO" || x$Model=="BPO0" || end==0) stop("Calculation of this effect is valid for recursive models only.")
-if(x$gamlssfit == FALSE && type == "univariate" && x$margins[2] %in% m2) stop("You need to fit the univariate model to obtain the RR. Refit the model and set gamlssfit = TRUE.")
+if(x$gamlssfit == FALSE && type == "univariate" && x$margins[2] %in% c(m2,m3)) stop("You need to fit the univariate model to obtain the RR. Refit the model and set gamlssfit = TRUE.")
 if(is.character(nm.end)==FALSE) stop("nm.end is not a character!")
 if( !is.null(ind) && E == FALSE) stop("ind is not designed to be used when some observations are excluded from the RR's calculation.")
 if( type == "naive" && E == FALSE) stop("It does not make sense to calculate the naive estimate from the treated only.")
@@ -86,6 +88,7 @@ CIs <- exp( c(log(est.AT) - sv, log(est.AT) + sv) )
 est.ATb <- est.ATso <- NULL
 
 }
+
 
 
 if(type == "naive" && x$margins[2] != "probit") stop("Please fit a bivariate model with intercept and endogenous variable only and then use RR with the univariate type option.")
@@ -340,9 +343,11 @@ if(type == "bivariate"){
  bs <- rMVN(n.sim, mean = coef(x), sigma = x$Vb) 
  
  eta2 <- x$eta2[ind] 
+ nu <- 1
 
 
  if( !is.null(x$X3) && !is.null(x$X4) ) {sig2 <- x$sigma2[ind]; thet <- x$theta[ind]} else {sig2 <- x$sigma2; thet <- x$theta}
+ if(x$VC$margins[2] %in% m3) { if(!is.null(x$X5)) nu <- x$nu[ind] else nu <- x$nu }
 
  
 ###########
@@ -353,7 +358,7 @@ data[, 2] <- y2[i]
 
 eta1 <- as.matrix( predict.gam(x$gam1, newdata = data, type = "lpmatrix") )%*%x$coef[ind.int]  
 
-p2 <- distrHsAT(y2[i], eta2, sig2, x$margins[2])$p2  
+p2 <- distrHsAT(y2[i], eta2, sig2, nu, x$margins[2])$p2  
 p1 <- pnorm(-eta1) 
 
 h <- copgHs2(p1, p2, eta1 = NULL, eta2 = NULL, thet, 1, x$BivD)$c.copula.be2 
@@ -371,6 +376,8 @@ fy1.y2[i] <- mean(1 - h)
 p.rho <- length(coef(x)) 
 etnos <- as.matrix(x$X2[ind,])%*%t(bs[, ind.noi])  
  
+if(x$VC$margins[2] %in% m2){
+ 
 if( !is.null(x$X3) ) sigma2.st <- x$X3[ind,]%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)]) 
 if(  is.null(x$X3) ) sigma2.st <- bs[, p.rho - 1]
 
@@ -380,6 +387,36 @@ if(  is.null(x$X4) ) etds <- bs[,p.rho]
 sigma2.st <- ifelse( sigma2.st > 20, 20, sigma2.st )  
 sigma2.st <- ifelse( sigma2.st < -17, -17, sigma2.st ) 
 sigma2s <- exp(sigma2.st)
+
+}
+
+ if(x$VC$margins[2] %in% m3 ){
+ 
+ if( !is.null(x$X3) ) sigma2.st <- x$X3[ind,]%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)]) 
+ if(  is.null(x$X3) ) sigma2.st <- bs[,p.rho - 2]
+ 
+ if( !is.null(x$X4) ) nu.st <- x$X4[ind,]%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2)]) 
+ if(  is.null(x$X4) ) nu.st <- bs[,p.rho - 1]   
+ 
+ if( !is.null(x$X5) ) etds <- x$X5[ind,]%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2 + 1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2)])
+ if(  is.null(x$X5) ) etds <- bs[,p.rho]  
+ 
+ sigma2.st <- ifelse( sigma2.st > 20, 20, sigma2.st )  
+ sigma2.st <- ifelse( sigma2.st < -17, -17, sigma2.st ) 
+ sigma2s <- exp(sigma2.st)
+ 
+ nu.st <- ifelse( nu.st > 20, 20, nu.st )  
+ nu.st <- ifelse( nu.st < -17, -17, nu.st ) 
+ nus <- exp(nu.st)   
+
+}  
+
+
+  
+  
+  
+  
+  
   
   
 if(x$BivD=="F")                   ass.ps <- etds + epsilon
@@ -402,6 +439,8 @@ ass.ps <- ifelse(ass.ps == -Inf, -8.218407e+307, ass.ps )
 if( is.null(x$X3) && is.null(x$X4) ) { ass.ps <- matrix(ass.ps,  ncol = n.sim, nrow=dim(etnos)[1],byrow = TRUE)
                                       sigma2s <- matrix(sigma2s, ncol = n.sim, nrow=dim(etnos)[1],byrow = TRUE)  }  
  
+if(x$VC$margins[2] %in% m2) nus <- matrix(1, ncol = n.sim, nrow=dim(etnos)[1], byrow = TRUE)
+if(x$VC$margins[2] %in% m3){ if(is.null(x$X5) ) nus <- matrix(nus, ncol = n.sim, nrow=dim(etnos)[1],byrow = TRUE) } 
  
  
  for(j in 1:ly2){
@@ -409,7 +448,7 @@ if( is.null(x$X3) && is.null(x$X4) ) { ass.ps <- matrix(ass.ps,  ncol = n.sim, n
    data[, 2] <- y2[j] 
    etins <- as.matrix( predict.gam(x$gam1, newdata = data, type = "lpmatrix") )%*%t(bs[, ind.int])      
                   
-   p2s <- distrHsAT(y2[j], etnos, sigma2s, x$margins[2])$p2 
+   p2s <- distrHsAT(y2[j], etnos, sigma2s, nus, x$margins[2])$p2 
    p1s <- pnorm(-etins)    
    h <- copgHs2(p1s, p2s, eta1 = NULL, eta2 = NULL, ass.ps, 1, x$BivD)$c.copula.be2                   
    fy1.y2S[, j] <- apply(1 - h, MARGIN = 2, FUN = mean, na.rm=TRUE)
