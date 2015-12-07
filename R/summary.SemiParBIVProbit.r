@@ -1,6 +1,7 @@
 summary.SemiParBIVProbit <- function(object, n.sim = 100, prob.lev = 0.05, 
                                      cm.plot = FALSE, xlim = c(-3, 3), ylim = c(-3, 3), 
-                                     ylab = "Margin 2", xlab = "Margin 1", gm = FALSE, ...){
+                                     ylab = "Margin 2", xlab = "Margin 1", gm = FALSE, 
+                                     n.grid = 1000, n.dig = 2, ...){
 
 
   testStat <- getFromNamespace("testStat", "mgcv")
@@ -82,9 +83,17 @@ summary.SemiParBIVProbit <- function(object, n.sim = 100, prob.lev = 0.05,
      
      CIsig2 <- t(apply(sigma2, MARGIN = 1, FUN = quantile, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE ))  
      
+     
+     if(object$VC$margins[2] == "DAGUM"){
+     
      nu.st <- ifelse( nu.st > 20, 20, nu.st )  
      nu.st <- ifelse( nu.st < -17, -17, nu.st ) 
      nu <- exp(nu.st)
+     
+     }
+     
+
+     
      if(  is.null(object$X4) ) nu <- t(as.matrix(nu))
      
      CInu <- t(apply(nu, MARGIN = 1, FUN = quantile, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE ))      
@@ -158,18 +167,18 @@ if(object$VC$margins[2]=="probit" && object$VC$Model != "BPO0"){
  p01s <- p2s - p11s
  
 
-ORs <- (p00s*p11s)/(p01s*p10s)
+ ORs <- (p00s*p11s)/(p01s*p10s)
 
-ORs  <- ifelse(ORs  ==  Inf,  8.218407e+307, ORs ) 
-ORs  <- ifelse(ORs  == -Inf, -8.218407e+307, ORs ) 
-
-
-GMs <- colMeans((ORs - 1)/(ORs + 1))
-ORs <- colMeans(ORs)
+ ORs  <- ifelse(ORs  ==  Inf,  8.218407e+307, ORs ) 
+ ORs  <- ifelse(ORs  == -Inf, -8.218407e+307, ORs ) 
 
 
-  CIor <- as.numeric(quantile(ORs,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
-  CIgm <- as.numeric(quantile(GMs,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
+ GMs <- colMeans((ORs - 1)/(ORs + 1))
+ ORs <- colMeans(ORs)
+
+
+ CIor <- as.numeric(quantile(ORs,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
+ CIgm <- as.numeric(quantile(GMs,c(prob.lev/2,1-prob.lev/2),na.rm=TRUE))
 
 
 }
@@ -380,17 +389,17 @@ if(object$VC$gc.l == TRUE) gc()
            if(mar2=="iG")          {d.x2 <- exp(-0.5 * log(2 * pi) - log(sqs2) - (3/2) * log(x22) - ((x22 - exp(m2))^2)/(2 * sqs2^2 * (exp(m2)^2) * x22))          
                                     p2 <- pnorm(((x22/exp(m2)) - 1)/(sqs2 * sqrt(x22))) + exp(2/(exp(m2)*sqs2^2))* pnorm(-((x22/exp(m2)) + 1)/(sqs2 * sqrt(x22)))
            }
-           if(mar2=="GA")          {d.x2 <- dgamma(x22, shape = 1/sqs2, scale = exp(m2) * sqs2)          
-                                    p2 <- pgamma(x22, shape = 1/sqs2, scale = exp(m2) * sqs2)
+           if(mar2=="GA")          {d.x2 <- dgamma(x22, shape = 1/sqs2^2, scale = exp(m2) * sqs2^2)          
+                                    p2 <- pgamma(x22, shape = 1/sqs2^2, scale = exp(m2) * sqs2^2)
            }                        
            if(mar2=="iGA")         {d.x2 <- exp(1/sqs2 * m2 + 1/sqs2 * log(1/sqs2 + 1) - lgamma(1/sqs2) - (1/sqs2 + 1) * log(x22) - ((exp(m2) * (1/sqs2 + 1))/x22))          
                                     p2 <- 1-pgamma(((exp(m2) * (1/sqs2 + 1))/x22), shape = 1/sqs2, scale=1)
            }   
            if(mar2=="DAGUM")       {d.x2 <- sqs2*nu/x22 *( ( (x22/exp(m2)^(-1/sqs2))^(sqs2*nu) )/  (  ((x22/exp(m2)^(-1/sqs2))^sqs2 + 1)^(nu+1) )  )
                                     p2 <- (1 + (x22/exp(m2)^(-1/sqs2))^-sqs2)^-nu
-           }          
-           
-           
+           }  
+       
+
            list(p2 = p2, d.x2 = d.x2)
            
            
@@ -446,12 +455,8 @@ if(object$VC$gc.l == TRUE) gc()
 
   Cplot <- function (fam, par1, mar2, m2, sqs2, nu, resp, ...){   
   
-  
-          
+ 
           size <- 100
-
-          
-          
           
                              x1 <- seq(from = xlim[1], to = xlim[2], length.out = size)               
           if(mar2=="probit") x2 <- seq(from = ylim[1], to = ylim[2], length.out = size)              #; levels <- c(0.01,0.05,0.1,0.15,0.2) } 
@@ -460,22 +465,16 @@ if(object$VC$gc.l == TRUE) gc()
                             x11 <- rep(x1, each = size)
                             x22 <- rep(x2, times = size)
           
-        if(mar2 != "probit") x2 <- x2 - mean(x2) # seq(from = ylim[1], to = ylim[2], length.out = size)
+          # if(mar2 != "probit") x2 <- x2 - mean(x2) # seq(from = ylim[1], to = ylim[2], length.out = size)
           
                                    d.x1 <- dnorm(x11)
                                    p1   <- pnorm(x11) 
           
-          
-          
           resf <- funcm2(x22, m2, sqs2, nu, mar2)
-          
-          
-          
           
           md <- Cop.pdf(p1, resf$p2, par1, fam)*d.x1*resf$d.x2    
           z  <- matrix(data = md, nrow = size, byrow = TRUE)
-          
-                    
+      
           filled.contour(x1, x2, z, color = topo.colors, nlevels = 16, ...) 
           
 
@@ -489,11 +488,15 @@ if(object$VC$gc.l == TRUE) gc()
 
   if(object$margins[2] %in% c(c1,c2)){
 
-  if(object$margins[2] %in% c2) test.resp <- seq(from = 0.0001, to = max(object$y2), length.out = 1000)
-  if(object$margins[2] %in% c1) test.resp <- seq(from = min(object$y2), to = max(object$y2), length.out = 1000)
+  if(object$margins[2] %in% c2) test.resp <- seq(from = 0.0001, to = max(object$y2), length.out = n.grid)
+
+  if(object$margins[2] %in% c1) test.resp <- seq(from = min(object$y2), to = max(object$y2), length.out = n.grid)
   
-  test.dens <- round( funcm2(test.resp, m2, sqs2, nu, object$VC$margins[2])$d.x2, 2)
+  test.dens <- round( funcm2(test.resp, m2, sqs2, nu, object$VC$margins[2])$d.x2, n.dig)
   resp <- test.resp[which(test.dens != 0)]
+  
+  if( length(resp) < 2 ) stop("Your grid is too coarse. Increase n.grid value.")
+  
  
   } else resp <- object$y2
   

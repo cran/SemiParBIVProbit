@@ -24,7 +24,10 @@ prev(x, sw = NULL, type = "bivariate", ind = NULL, delta = FALSE,
 
 \item{sw}{Survey weights.}  
 
-\item{type}{This argument can take three values: \code{"naive"} (the prevalence is calculated ignoring the presence of observed and unobserved confounders), \code{"univariate"} (the effect is obtained from the univariate probit model which neglects the presence of unobserved confounders) and \code{"bivariate"} (the effect is obtained from the bivariate model which accounts for observed and unobserved confounders).}
+\item{type}{This argument can take three values: \code{"naive"} (the prevalence is calculated ignoring the presence of observed 
+            and unobserved confounders), \code{"univariate"} (the effect is obtained from the univariate probit/single imputation model 
+            which neglects the presence of unobserved confounders) and \code{"bivariate"} (the effect is obtained from the bivariate model 
+            which accounts for observed and unobserved confounders).}
              
 \item{ind}{Binary logical variable. It can be used to calculate the prevalence for a subset of the data.} 
 
@@ -73,10 +76,11 @@ An interval for the estimated prevalence can be obtained using the delta method 
 
 \author{
 
+
+Authors: Giampiero Marra, Rosalba Radice, Guy Harling, Mark E McGovern 
+
 Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
-Thanks to Mark E McGovern for suggesting various improvements on this function and Guy Harling 
-for suggesting the introduction of the naive option.
 
 }
 

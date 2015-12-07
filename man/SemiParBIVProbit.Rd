@@ -589,8 +589,7 @@ dataSim <- data.frame(y1, y2, x1, x2)
 
 ## RECURSIVE Model
 
-resp.check(y2, margin = "GU") # does not seem appropriate
-resp.check(y2, margin = "N")  # seems appropriate
+resp.check(y2, margin = "N") 
 
 out <- SemiParBIVProbit(list(y1 ~ x1 + x2, 
                              y2 ~ y1 + x2), 
@@ -609,37 +608,13 @@ summary(out)
 AT(out, nm.end = "y1")
 AT(out, nm.end = "y1", type = "univariate")
 
-
-#
-## Generate data with one endogenous binary variable 
-## and continuous outcome following a log-normal distribution
-
-
-set.seed(0)
-
-y2 <- rlnorm(n, meanlog = - 0.25 - 1.25*y1 + f2(x2), sdlog = sqrt(0.5))
-
-dataSim <- data.frame(y1, y2, x1, x2)
-
-resp.check(y2, margin = "WEI") # does not seem appropriate
-resp.check(y2, margin = "LN")  # seems appropriate
-
-out <- SemiParBIVProbit(list(y1 ~ x1 + s(x2), 
-                             y2 ~ y1 + s(x2), ~ 1, ~ 1), data = dataSim, 
-                             margins = c("probit","LN"), gamlssfit = TRUE)
-conv.check(out)      
-post.check(out)
-summary(out, cm.plot = TRUE)
-AT(out, nm.end = "y1")
-AT(out, nm.end = "y1", type = "univariate")
-
 #
 #
 
 ############
 ## EXAMPLE 6
 ############
-## Generate data with one endogenous continuous variable 
+## Generate data with one endogenous continuous exposure 
 ## and binary outcome
 
 set.seed(0)
@@ -664,7 +639,7 @@ dataSim <- data.frame(y1, y2, x1, x2)
 
 out <- SemiParBIVProbit(list(y2 ~ y1 + s(x2), 
                              y1 ~ x1 + s(x2), ~ 1, ~ 1), data = dataSim, 
-                             margins = c("probit","N"), gamlssfit = TRUE)
+                             margins = c("probit","N"))
 conv.check(out)                        
 summary(out)
 AT(out, nm.end = "y1", hd.plot = TRUE)

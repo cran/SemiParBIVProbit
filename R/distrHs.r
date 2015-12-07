@@ -16,7 +16,7 @@ der2p2.dersigma2.stdernu.st = 1
 
 eps <- 1e-06; eps2 <- eps*eps 
 
-cont2par <- c("WEI","WEI2","iG","LO","rGU","GU","GA","iGA","DAGUM")
+cont2par <- c("WEI","WEI2","iG","LO","rGU","GU","GA","iGA")
 cont3par <- c("DAGUM")
 
 
@@ -25,8 +25,8 @@ cont3par <- c("DAGUM")
 
 if(naive == FALSE) {
 
-if(margin2 == "GA")  fp <- function(sigma2) pgamma(y2, shape = 1/sigma2, scale = exp(eta2) * sigma2)
-if(margin2 == "iGA") fp <- function(sigma2) 1 - pgamma(((exp(eta2) * (1/sigma2 + 1))/y2), shape = 1/sigma2, scale=1)
+if(margin2 %in% c("GA"))         fp <- function(sigma2) pgamma(y2, shape = 1/sigma2, scale = exp(eta2) * sigma2)
+if(margin2 == "iGA")             fp <- function(sigma2) 1 - pgamma(((exp(eta2) * (1/sigma2 + 1))/y2), shape = 1/sigma2, scale=1)
 
 
 if(margin2 %in% c("GA","iGA")){
@@ -267,12 +267,9 @@ der2p2.dersigma2dernu <- -(sqrt(sigma2)*(nu*exp(eta2*sqrt(sigma2))*log(exp(-eta2
 
 }
 
+
+
 ####
-
-
-
-
-
 
 
 
@@ -916,14 +913,11 @@ der2p2.dereta2dersigma2 <- -(exp(-exp((y2 - eta2)/sqrt(sigma2))) * (exp((y2 - et
 
 
 
-if(margin2 == "GA"){
-
-
+if(margin2 %in% c("GA")){
 
 
 sigma2    <- ifelse(sigma2 < 0.006, 0.006, sigma2)
 sigma2.st <- log(sigma2) 
-
 
 
  pdf2  <-  dgamma(y2, shape = 1/sigma2, scale = exp(eta2) * sigma2)
@@ -1072,8 +1066,6 @@ der2p2.dereta2dersigma2 <- -((exp(-eta2 - (exp(-eta2)* y2)/sigma2)* y2* ((exp(-e
 
 
 
-
-
 if(margin2 == "iGA"){
 
 
@@ -1180,7 +1172,7 @@ der2p2.dereta2dersigma2 <- -((exp(eta2 - (exp(eta2)* (1 + 1/sigma2))/y2) *((exp(
 
 
 
-if(margin2 %in% cont2par){
+if(margin2 %in% c(cont2par,cont3par)){
 
 
 
@@ -1192,10 +1184,12 @@ der2pdf2.dereta2dersigma2.st <- der2pdf2.dereta2dersigma2 *  dersigma2.dersigma2
 
 
 if(margin2 %in% cont3par){
-der2pdf2.dereta2dernu.st     <- der2pdf2.dereta2dernu *      dernu.dernu.st
+
+der2pdf2.dereta2dernu.st     <- der2pdf2.dereta2dernu * dernu.dernu.st
 der2pdf2.sigma2.st2dernu.st  <- der2pdf2.dersigma2dernu * dersigma2.dersigma2.st * dernu.dernu.st                              
 derpdf2.dernu.st             <- derpdf2.nu * dernu.dernu.st 
-der2pdf2.dernu.st2           <- der2pdf2.dernu2 *     dernu.dernu.st^2 +         derpdf2.nu  * dernu.dernu.st     
+der2pdf2.dernu.st2           <- der2pdf2.dernu2 * dernu.dernu.st^2 +  derpdf2.nu  * dernu.dernu.st 
+
 }
 
 
@@ -1208,10 +1202,12 @@ der2p2.dereta2dersigma2.st   <- der2p2.dereta2dersigma2 *  dersigma2.dersigma2.s
 
 
 if(margin2 %in% cont3par){
+
 derp2.nu.st                  <- derp2.dernu *  dernu.dernu.st 
 der2p2.dernu.st2             <- der2p2.dernu2 * dernu.dernu.st^2 + derp2.dernu * dernu.dernu.st
 der2p2.dereta2dernu.st       <- der2p2.dereta2dernu * dernu.dernu.st 
 der2p2.dersigma2.stdernu.st  <- der2p2.dersigma2dernu * dersigma2.dersigma2.st * dernu.dernu.st
+
 }
 
 

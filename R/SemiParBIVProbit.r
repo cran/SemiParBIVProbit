@@ -182,10 +182,10 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
 
     if( margins[2] %in% c("LN") ) y2 <- log(y2) 
     
-    if( margins[2] %in% c("N","LO","GU","rGU") ) formula.eq2 <- update(formula.eq2, (. + mean(.))/2 ~ . )  
-    if( margins[2] %in% c("LN") )                formula.eq2 <- update(formula.eq2, (log(.) + mean(log(.)))/2 ~ . )  
-    if( margins[2] %in% c("iG","GA","DAGUM") )   formula.eq2 <- update(formula.eq2, log((. + mean(.))/2) ~ . )    
-    if( margins[2] %in% c("WEI") )               formula.eq2 <- update(formula.eq2, log( exp(log(.) + 0.5772/(1.283/sqrt(var(log(.)))))  ) ~ . )     
+    if( margins[2] %in% c("N","LO","GU","rGU") )        formula.eq2 <- update(formula.eq2, (. + mean(.))/2 ~ . )  
+    if( margins[2] %in% c("LN") )                       formula.eq2 <- update(formula.eq2, (log(.) + mean(log(.)))/2 ~ . )  
+    if( margins[2] %in% c("iG","GA","DAGUM") )          formula.eq2 <- update(formula.eq2, log((. + mean(.))/2) ~ . )    
+    if( margins[2] %in% c("WEI") )                      formula.eq2 <- update(formula.eq2, log( exp(log(.) + 0.5772/(1.283/sqrt(var(log(.)))))  ) ~ . )     
   
     gam2         <- eval(substitute(gam(formula.eq2, gamma=infl.fac, weights=weights, data=data),list(weights=weights)))
     gam2$formula <- formula.eq2r   
@@ -303,21 +303,31 @@ names(i.rho) <- "theta.star"
         
         if(class(par.est)=="try-error") {
         
- 		if( margins[2] %in% c("N","LN") )   log.sig2 <- log(var(y2))  
-		if( margins[2] %in% c("LO") )       log.sig2 <- log( 3*var(y2)/pi^2 )   
+ 		if( margins[2] %in% c("N","LN") )    log.sig2 <- log(var(y2))  
+		if( margins[2] %in% c("LO") )        log.sig2 <- log( 3*var(y2)/pi^2 )   
 		#if( margins[2] %in% c("LN") )       log.sig2 <- log(var(log(y2)))             
-		if( margins[2] %in% c("iG") )       log.sig2 <- log( var(y2)/mean(y2)^3 )      
-		if( margins[2] %in% c("GU","rGU") ) log.sig2 <- log(6*var(y2)/pi^2)   
-		if( margins[2] %in% c("WEI") )      log.sig2 <- log( (1.283/sqrt(var(log(y2))))^2 )              
-		if( margins[2] %in% c("GA") )       log.sig2 <- log(var(y2)/mean(y2)^2)           
-        	if( margins[2] %in% c("DAGUM") )    log.sig2 <- log(sqrt(2))          
+		if( margins[2] %in% c("iG") )        log.sig2 <- log( var(y2)/mean(y2)^3 )      
+		if( margins[2] %in% c("GU","rGU") )  log.sig2 <- log(6*var(y2)/pi^2)   
+		if( margins[2] %in% c("WEI") )       log.sig2 <- log( (1.283/sqrt(var(log(y2))))^2 )              
+		if( margins[2] %in% c("GA") )        log.sig2 <- log(var(y2)/mean(y2)^2)           
+        	if( margins[2] %in% c("DAGUM") )     log.sig2 <- log(sqrt(2))          
         
         } else log.sig2 <- par.est[2]
         
         names(log.sig2) <- "sigma2.star"
         
+        
+        
         if( margins[2] %in% c("DAGUM") ){
+        
+              if( margins[2] == "DAGUM" ){
         	if(class(par.est)=="try-error") log.nu <- log(1) else log.nu <- par.est[3]
+              }
+              
+              #if( margins[2] == "ZAGA" ){
+              #if(class(par.est)=="try-error") log.nu <- qlogis(0.5) else log.nu <- par.est[3]
+              #}              
+        	
         	names(log.nu) <- "nu.star"
         }
         

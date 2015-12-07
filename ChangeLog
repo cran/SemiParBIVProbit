@@ -1,3 +1,7 @@
+version 3.6-1
+- starting value procedure for continuous distributions improved.
+- At calculation corrected. Thanks to Vanessa Didelez for spotting this.
+
 version 3.6
 - Dagum distribution included.
 - polys.setup function extended to handle difficult domains.

@@ -7,7 +7,12 @@ m3 <- c("DAGUM")
 
 if(!(margin %in% c(m2,m3)) ) stop("Error in margin value. It can be: N, GU, rGU, LO, LN, WEI, iG, GA, DAGUM.") 
 
+#if( margin == "ZAGA" ) stop("This distribution is not ready yet.") 
+
+
 if(margin %in% c("LN","WEI","WEI2","iG","GA","DAGUM") && min(y, na.rm = TRUE) <= 0) stop("The response must be positive.")
+#if(margin %in% c("ZAGA")                              && min(y, na.rm = TRUE) < 0)  stop("The response must be equal or greater than 0.")
+
 
 y <- na.omit(y)
 
@@ -35,15 +40,20 @@ if( margin %in% c("rGU") )      st.v <- c( mean(y) - 0.57722*sqrt(var(y)/1.64493
 if( margin %in% c("WEI") )      st.v <- c( log( mean( exp(log(y) + 0.5772/(1.283/sqrt(var(log(y))))) )  ) , log( ( 1.283/sqrt(var(log(y))) )^2 ) ) 
 if( margin %in% c("GA") )       st.v <- c( log(mean((y + mean(y))/2)), log(var(y)/mean(y)^2)  ) # log( 1^2 )             
 if( margin %in% c("DAGUM") )    st.v <- c( log(mean((y + mean(y))/2)), log(sqrt(2)), log(1) )
+#if( margin %in% c("ZAGA") )     st.v <- c( log(mean((y + mean(y))/2)), log(var(y)/mean(y)^2), qlogis(0.5)  )   
+
+
+
+
 
 if( margin %in% m2 ) names(st.v) <- c("eta2", "sigma2.star")
-if( margin %in% m3 ) names(st.v) <- c("eta2", "sigma2.star","nu.star")
+if( margin %in% m3 ) names(st.v) <- c("eta2", "sigma2.star", "nu.star")
 
 
-if(margin != "DAGUM") univfit <-  try(trust(bprobgHsContUniv, st.v, rinit = 1, rmax = 100, respvec = respvec, 
+if(margin %in% m2) univfit <-  try(trust(bprobgHsContUniv, st.v, rinit = 1, rmax = 100, respvec = respvec, 
                                             VC = VC, sp = NULL, qu.mag = NULL, blather = TRUE), silent = TRUE)
                                             
-if(margin == "DAGUM") univfit <-  try(trust(bprobgHsContUniv3, st.v, rinit = 1, rmax = 100, respvec = respvec, 
+if(margin %in% m3) univfit <-  try(trust(bprobgHsContUniv3, st.v, rinit = 1, rmax = 100, respvec = respvec, 
                                             VC = VC, sp = NULL, qu.mag = NULL, blather = TRUE), silent = TRUE)                                            
                  
                  
@@ -56,8 +66,15 @@ if(class(univfit) == "try-error") stop("The parameters of the chosen distributio
 
 if(margin == "LN") y <- exp(y)
 
-if(margin != "DAGUM") pp <- distrHsAT(y, univfit$argument[1], exp(univfit$argument[2]), 1, margin)
+#if(margin == "ZAGA") y <- y[y>0]
+
+
+
+
+if(margin %in% m2)    pp <- distrHsAT(y, univfit$argument[1], exp(univfit$argument[2]), 1, margin)
 if(margin == "DAGUM") pp <- distrHsAT(y, univfit$argument[1], exp(univfit$argument[2]), exp(univfit$argument[3]), margin)
+#if(margin == "ZAGA")  pp <- distrHsAT(y, univfit$argument[1], exp(univfit$argument[2]), plogis(univfit$argument[3]), margin)
+
 
 
 p <- pp$p2

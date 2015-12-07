@@ -52,12 +52,13 @@ print.summary.SemiParBIVProbit <- function(x, digits = max(3, getOption("digits"
   if(x$margins[2]=="LO")     cat("\nFamily: logistic")   
   if(x$margins[2]=="LN")     cat("\nFamily: log-normal") 
   if(x$margins[2]=="WEI")    cat("\nFamily: Weibull")  
-  if(x$margins[2]=="WEI2")    cat("\nFamily: Weibull (type 2)")   
+  if(x$margins[2]=="WEI2")   cat("\nFamily: Weibull (type 2)")   
   if(x$margins[2]=="iG")     cat("\nFamily: inverse Gaussian")    
   if(x$margins[2]=="GA")     cat("\nFamily: gamma")    
   if(x$margins[2]=="iGA")    cat("\nFamily: inverse gamma")    
   if(x$margins[2]=="DAGUM")  cat("\nFamily: DAGUM")    
-  
+  #if(x$margins[2]=="ZAGA")   cat("\nFamily: Zero adjusted gamma")  
+
   
   cat("\nLink function:",m2l,"\n")
   cat("Formula: "); print(x$formula2)    
@@ -146,7 +147,8 @@ if(!is.null(x$tableP3) && !is.null(x$tableP4) && !is.null(x$tableP5)  ){
     }  
     
   cat("\nEQUATION 4")
-  cat("\nLink function:","log(nu)","\n") 
+  if(x$margins[2]=="DAGUM") cat("\nLink function:","log(nu)","\n")  
+  #if(x$margins[2]=="ZAGA")  cat("\nLink function:","logit(nu)","\n")  
   cat("Formula: "); print(x$formula4)
   cat("\n")
   cat("Parametric coefficients:\n")

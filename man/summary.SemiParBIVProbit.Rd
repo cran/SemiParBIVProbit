@@ -12,7 +12,7 @@ It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVPro
 
 \method{summary}{SemiParBIVProbit}(object, n.sim = 100, prob.lev = 0.05, cm.plot = FALSE, 
         xlim = c(-3, 3), ylim = c(-3, 3), 
-        ylab = "Margin 2", xlab = "Margin 1", gm = FALSE, ...)
+        ylab = "Margin 2", xlab = "Margin 1", gm = FALSE, n.grid = 1000, n.dig = 2, ...)
                       
 }
 
@@ -27,14 +27,18 @@ to calculate intervals for the association parameter, dispersion coefficient and
 
 \item{prob.lev}{Probability of the left and right tails of the posterior distribution used for interval calculations.} 
                     
-\item{cm.plot}{If \code{TRUE} then a filled bivariate contour meta plot corresponding to the assumed bivariate model errors with estimated 
-             association parameter (and dispersion parameter if present) is produced.}   
+\item{cm.plot}{If \code{TRUE} then a filled bivariate contour meta plot corresponding to the assumed (estimated) bivariate model is produced.}   
              
 \item{xlim, ylim}{Limits of the bivariate contour meta plot.}    
 
 \item{ylab, xlab}{Labels for the bivariate contour meta plot.} 
 
 \item{gm}{If \code{TRUE} then intervals for the gamma measure and odds ratio are calculated.} 
+                     
+\item{n.grid}{Number of grid points used in contour plot construction. This is relevant for continuous margins.} 
+
+\item{n.dig}{Number of digit points used in rounding bivariate pdf values for contour plot construction. This is relevant for continuous margins.} 
+
                          
 \item{...}{Other graphics parameters to pass on to plotting commands. These are used only when \code{cm.plot=TRUE}.}
 

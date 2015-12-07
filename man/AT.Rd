@@ -12,7 +12,7 @@ corresponding interval obtained using mainly posterior simulation.}
 \usage{
 
 AT(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL, 
-   sub.l = 50, delta = FALSE, n.sim = 100, prob.lev = 0.05, hd.plot = FALSE,
+   delta = FALSE, n.sim = 100, prob.lev = 0.05, hd.plot = FALSE,
    prob.plot = FALSE, main = "Histogram and Kernel Density of Simulated Average Effects", 
    xlab = "Simulated Average Effects", ...)
 
@@ -40,8 +40,6 @@ the control group. This only makes sense if \code{E = FALSE}.}
 \item{ind}{Binary logical variable. It can be used to calculate the AT for a subset of the data. Note that it does not make sense to use \code{ind} 
            when some observations are excluded from the AT calculation (e.g., when using \code{E = FALSE}).}  
   
-\item{sub.l}{Length of subset of observations to use in the calculation of the treatment effect when the outcome of interest is continuous.}  
-
 \item{delta}{If \code{TRUE} then the delta method is used for confidence interval calculations, otherwise Bayesian posterior 
              simulation (the most reliable option, despite a bit slower) is employed. This option is only available for binary treatment and 
              binary outcome.}  
@@ -76,15 +74,8 @@ control (the binary treatment assumes value 0). Posterior simulation
 and delta method can be used to obtain a confidence/credible interval. The former is more reliable, especially at small
 sample sizes. See the references below for details. 
 
-For the case of continuous response and binary treatment, the AT is calculated via numerical integration, which can result in costly 
-computation depending on the
-size of the dataset and number of simulated coefficient vectors used for interval calculations. In the model building 
-process, we recommend using a subset of observations to calculate the AT (see \code{sub.l}). In 
-our experience this still provides representative average effects. Once a preferred model has been found, the AT can be calculated using 
-the entire dataset by setting \code{sub.l} to the number of observations (note that this can be time consuming).
-
 AT can also calculate the effect that a continuous endogenous variable has on a binary outcome. In this case the effect will depend on the 
-unit increment chosen (as shown by the plot produced). An overall AT is provided as usual.
+unit increment chosen (as shown by the plot produced). An overall AT is provided as well.
 
 }
 

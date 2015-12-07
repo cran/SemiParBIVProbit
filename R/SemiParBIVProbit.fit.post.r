@@ -75,10 +75,23 @@ if(VC$margins[2] %in% cont2par ){
 
 if(VC$margins[2] %in% cont3par ){
 
+if(VC$margins[2] == "DAGUM"){
+
   if( is.null(VC$X4) && is.null(VC$X5) ) {sigma2 <- exp(SemiParFit$fit$argument["sigma2.star"]); names(sigma2) <- "sigma2"
                                           nu     <- exp(SemiParFit$fit$argument["nu.star"]);     names(nu) <- "nu"}
   if(!is.null(VC$X4) && !is.null(VC$X5) ){sigma2 <- exp(SemiParFit$fit$etas) 
-                                          nu     <- exp(SemiParFit$fit$etan)   }  
+                                          nu     <- exp(SemiParFit$fit$etan)   } 
+                           }  
+                           
+#if(VC$margins[2] == "ZAGA"){
+#
+#  if( is.null(VC$X4) && is.null(VC$X5) ) {sigma2 <- exp(SemiParFit$fit$argument["sigma2.star"]); names(sigma2) <- "sigma2"
+#                                          nu     <- plogis(SemiParFit$fit$argument["nu.star"]);     names(nu) <- "nu"}
+#  if(!is.null(VC$X4) && !is.null(VC$X5) ){sigma2 <- exp(SemiParFit$fit$etas) 
+#                                          nu     <- plogis(SemiParFit$fit$etan)   } 
+#                           }                           
+                                          
+                                          
   
   sigma2.a <- mean(sigma2)
   nu.a     <- mean(nu)

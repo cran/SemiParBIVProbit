@@ -21,8 +21,16 @@ if(!is.null(VC$X3)){
   teta.st   <- etad <- VC$X5%*%params[(VC$X1.d2+VC$X2.d2+VC$X3.d2+VC$X4.d2+1):(VC$X1.d2+VC$X2.d2+VC$X3.d2+VC$X4.d2+VC$X5.d2)]
 }  
   
+  
+  #sigma2.st <- ifelse(sigma2.st > 4, 4, sigma2.st)  # new 
+
+ 
   sigma2 <- exp(sigma2.st) + epsilon
-  nu     <- exp(nu.st) + epsilon
+  if(VC$margins[2] == "DAGUM") nu <- exp(nu.st) + epsilon
+
+
+  
+  
 
  eta2 <- ifelse( eta2 > 600, 600, eta2 )
  eta2 <- ifelse( eta2 < -17, -17, eta2 )  

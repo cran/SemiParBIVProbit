@@ -81,7 +81,7 @@ if(margin2 == "GU"){
 }
 
 
-if(margin2 == "GA"){
+if(margin2 %in% c("GA")){
 
  sigma2    <- ifelse(sigma2 < 0.006, 0.006, sigma2)
 
@@ -90,6 +90,27 @@ if(margin2 == "GA"){
     p2          <-  pgamma(y2, shape = 1/sigma2, scale = exp(eta2) * sigma2)
     
     }
+    
+ 
+#if(margin2 %in% c("ZAGA")){
+#
+#
+#
+#pdf2 <- ifelse(y2 == 0, nu, pdf2 )      
+#                   
+#p2   <- ifelse(y2 == 0, nu, p2)
+#
+#
+##pdf2 <- ifelse(y2 == 0, nu, (1 - nu) * pdf2 )      
+##                   
+##p2   <- ifelse(y2 == 0, nu, nu + (1 - nu) * p2)
+#
+#
+#    
+#    } 
+    
+    
+    
     
     
     

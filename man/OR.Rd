@@ -1,10 +1,10 @@
 \name{OR}
 \alias{OR}
 
-\title{Average odds ratio of a binary or continuous endogenous variable}
+\title{Average causal odds ratio of a binary or continuous endogenous variable}
 
 \description{ 
-\code{OR} can be used to calculate the sample average odds ratio of a binary or continuous endogenous predictor/treatment, with 
+\code{OR} can be used to calculate the sample average causal odds ratio of a binary or continuous endogenous predictor/treatment, with 
 corresponding interval obtained using posterior simulation.}
 
 
@@ -12,7 +12,7 @@ corresponding interval obtained using posterior simulation.}
 \usage{
 
 OR(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL, 
-   delta = FALSE, n.sim = 100, prob.lev = 0.05, hd.plot = FALSE,
+   n.sim = 100, prob.lev = 0.05, hd.plot = FALSE,
    prob.plot = FALSE, main = "Histogram and Kernel Density of Simulated Odds Ratios", 
    xlab = "Simulated Odds Ratios", ...)
 
@@ -36,8 +36,6 @@ the presence of unobserved confounders) and \code{"bivariate"} (the effect is ob
 
 \item{ind}{Binary logical variable. It can be used to calculate the OR for a subset of the data. Note that it does not make sense to use \code{ind} 
            when some observations are excluded from the OR calculation (e.g., when using \code{E = FALSE}).}  
-
-\item{delta}{This option may be available in future, although it will be unreliable at small sample sizes.}  
 
 \item{n.sim}{Number of simulated coefficient vectors from the posterior distribution of the estimated model parameters. This is used 
              when \code{delta = FALSE}. It may be increased if more precision is required.} 
@@ -63,7 +61,7 @@ the presence of unobserved confounders) and \code{"bivariate"} (the effect is ob
 
 \details{
 
-OR calculates the sample average odds ratio for a binary or continuous treatment. Posterior simulation is used to obtain a 
+OR calculates the sample average causal odds ratio for a binary or continuous treatment. Posterior simulation is used to obtain a 
 confidence/credible interval. 
 
 
@@ -75,13 +73,13 @@ confidence/credible interval.
 
 \item{res}{It returns three values: lower confidence interval limit, estimated OR and upper interval limit.}
 \item{prob.lev}{Probability level used.}
-\item{sim.OR}{If \code{delta = FALSE} then it returns a vector containing simulated values of the average OR. This 
+\item{sim.OR}{It returns a vector containing simulated values of the average OR. This 
                is used to calculate intervals.}
 \item{OR.so}{It returns a vector containing the estimated effect for each single observation. This may not be available in some cases.}            
-\item{Ratios}{For the case of continuous endogenous variable and binary outcome, it returns a matrix made up of 
+\item{Ratios}{For the case of continuous endogenous treatment and binary outcome, it returns a matrix made up of 
                three columns containing the odds ratios for each unit increase in the endogenous variable and respective intervals.}            
-\item{Pr}{For the case of continuous endogenous variable and binary outcome, it returns a matrix made up of 
-               three columns containing the probability that the binary outcome is equal to 1 for each value of the endogenous variable 
+\item{Pr}{For the case of continuous endogenous exposure and binary outcome, it returns a matrix made up of 
+               three columns containing the probability that the binary outcome is equal to 1 for each value of the endogenous variable, 
                and respective intervals.}               
 
 }

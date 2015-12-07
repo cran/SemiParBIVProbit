@@ -21,6 +21,7 @@ print.SemiParBIVProbit <- function(x, ...){
   if(x$margins[2]=="probit")                     m2l <- "probit"
   if(x$margins[2] %in% c("N","GU","rGU","LO") )  m2l <- "identity"
   if(x$margins[2] %in% c("LN","WEI","WEI2","iG","GA","iGA","DAGUM") ) m2l <- "log" 
+  
 
   
   cat("\nERRORS' DISTRIBUTION:",cop)
@@ -44,6 +45,8 @@ print.SemiParBIVProbit <- function(x, ...){
   if(x$margins[2]=="GA")     cat("\nFamily: gamma")    
   if(x$margins[2]=="iGA")    cat("\nFamily: inverse gamma")    
   if(x$margins[2]=="DAGUM")  cat("\nFamily: DAGUM")  
+  #if(x$margins[2]=="ZAGA")   cat("\nFamily: Zero adjusted gamma")  
+  
   
  
   cat("\nLink function:",m2l,"\n")
@@ -77,10 +80,13 @@ print.SemiParBIVProbit <- function(x, ...){
   cat("\nLink function:","log(sigma^2)","\n") 
   cat("Formula: "); print(x$gam3$formula)  
   
-  cat("\nEQUATION 4")
-  cat("\nLink function:","log(nu)","\n")  
-  cat("Formula: "); print(x$gam4$formula)  
   
+  cat("\nEQUATION 4")
+  if(x$margins[2]=="DAGUM") cat("\nLink function:","log(nu)","\n")  
+  #if(x$margins[2]=="ZAGA")  cat("\nLink function:","logit(nu)","\n")  
+  cat("Formula: "); print(x$gam4$formula)  
+    
+
   cat("\nEQUATION 5")
   cat("\nLink function:",lind,"\n") 
   cat("Formula: "); print(x$gam5$formula)

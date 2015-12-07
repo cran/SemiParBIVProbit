@@ -3,7 +3,7 @@
 
 \title{Internal Function}
 
-\description{Reduced version of \code{copgHs}. Useful to speed up comptutations when using \code{AT}.
+\description{Reduced version of \code{copgHs}. Useful to speed up computations in some cases.
 
 
 }

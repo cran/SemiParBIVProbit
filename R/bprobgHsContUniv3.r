@@ -11,9 +11,14 @@ if(!is.null(VC$X3)) sigma2.st <- VC$X3%*%params[(VC$X2.d2+1):(VC$X2.d2+VC$X3.d2)
 if(is.null(VC$X4))  nu.st <- params[(VC$X2.d2 + 2)] 
 if(!is.null(VC$X4)) nu.st <- VC$X4%*%params[(VC$X2.d2+VC$X3.d2+1):(VC$X2.d2+VC$X3.d2+VC$X4.d2)]
 
+#sigma2.st <- ifelse(sigma2.st > 4, 4, sigma2.st) # new 
 
 sigma2 <- exp(sigma2.st) + epsilon
-nu     <- exp(nu.st) + epsilon
+
+
+  if(VC$margins[2] == "DAGUM") nu <- exp(nu.st) + epsilon
+
+
 
   eta2 <- ifelse( eta2 > 600, 600, eta2 )
   eta2 <- ifelse( eta2 < -17, -17, eta2 )  

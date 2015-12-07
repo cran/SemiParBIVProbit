@@ -1,10 +1,10 @@
 \name{RR}
 \alias{RR}
 
-\title{Average risk ratio of a binary or continuous endogenous variable}
+\title{Average causal risk ratio of a binary or continuous endogenous variable}
 
 \description{ 
-\code{RR} can be used to calculate the sample average risk ratio of a binary or continuous endogenous predictor/treatment, with 
+\code{RR} can be used to calculate the sample average causal risk ratio of a binary or continuous endogenous predictor/treatment, with 
 corresponding interval obtained using posterior simulation.}
 
 
@@ -12,7 +12,7 @@ corresponding interval obtained using posterior simulation.}
 \usage{
 
 RR(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL, 
-   delta = FALSE, n.sim = 100, prob.lev = 0.05, hd.plot = FALSE,
+   n.sim = 100, prob.lev = 0.05, hd.plot = FALSE,
    prob.plot = FALSE, main = "Histogram and Kernel Density of Simulated Risk Ratios", 
    xlab = "Simulated Risk Ratios", ...)
 
@@ -34,8 +34,6 @@ the control group. This only makes sense if \code{E = FALSE}.}
 
 \item{ind}{Binary logical variable. It can be used to calculate the RR for a subset of the data. Note that it does not make sense to use \code{ind} 
            when some observations are excluded from the RR calculation (e.g., when using \code{E = FALSE}).}  
-
-\item{delta}{This option may be available in future, although it will be unreliable at small sample sizes.}  
 
 \item{n.sim}{Number of simulated coefficient vectors from the posterior distribution of the estimated model parameters. This is used 
              when \code{delta = FALSE}. It may be increased if more precision is required.} 
@@ -61,7 +59,7 @@ the control group. This only makes sense if \code{E = FALSE}.}
 
 \details{
 
-RR calculates the sample average risk ratio of the probabilities of positive outcome under 
+RR calculates the sample average causal risk ratio of the probabilities of positive outcome under 
 treatment (the binary predictor or treatment assumes value 1) and under 
 control (the binary treatment assumes value 0). Posterior simulation is used to obtain a 
 confidence/credible interval. 
@@ -77,13 +75,13 @@ RR works also for the case of continuous endogenous treatment variable.
 
 \item{res}{It returns three values: lower confidence interval limit, estimated RR and upper interval limit.}
 \item{prob.lev}{Probability level used.}
-\item{sim.RR}{If \code{delta = FALSE} then it returns a vector containing simulated values of the average RR. This 
+\item{sim.RR}{It returns a vector containing simulated values of the average RR. This 
                is used to calculate intervals.}
 \item{RR.so}{It returns a vector containing the estimated effect for each single observation. This may not be available in some cases.}            
 \item{Ratios}{For the case of continuous endogenous variable and binary outcome, it returns a matrix made up of 
                three columns containing the risk ratios for each unit increase in the endogenous variable and respective intervals.}            
-\item{Pr}{For the case of continuous endogenous variable and binary outcome, it returns a matrix made up of 
-               three columns containing the probability that the binary outcome is equal to 1 for each value of the endogenous variable 
+\item{Pr}{For the case of continuous endogenous exposure and binary outcome, it returns a matrix made up of 
+               three columns containing the probability that the binary outcome is equal to 1 for each value of the endogenous variable, 
                and respective intervals.}               
 
 }
