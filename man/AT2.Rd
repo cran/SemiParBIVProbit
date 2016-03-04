@@ -58,6 +58,14 @@ with a continuous outcome) takes values 0 and 1. Posterior simulation is used to
 
 
 
+\section{WARNINGS}{
+
+This function is not suitable for \code{SemiParBIVProbit()}.
+
+} 
+
+
+
 
 
 

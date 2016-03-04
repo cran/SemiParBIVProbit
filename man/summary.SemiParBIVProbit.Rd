@@ -12,7 +12,8 @@ It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVPro
 
 \method{summary}{SemiParBIVProbit}(object, n.sim = 100, prob.lev = 0.05, cm.plot = FALSE, 
         xlim = c(-3, 3), ylim = c(-3, 3), 
-        ylab = "Margin 2", xlab = "Margin 1", gm = FALSE, n.grid = 1000, n.dig = 2, ...)
+        ylab = "Margin 2", xlab = "Margin 1", 
+        gm = FALSE, n.grid = 1000, n.dig = 2, ...)
                       
 }
 

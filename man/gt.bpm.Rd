@@ -5,7 +5,7 @@
 
 \description{ 
 \code{gt.bpm} can be used to test the hypothesis of absence of endogeneity, correlated model equations/errors or non-random sample selection
-in binary bivariate models.}
+in binary bivariate probit models.}
 
 
 \usage{
@@ -42,7 +42,7 @@ It returns a numeric p-value corresponding to the null hypothesis that the corre
 
 \section{WARNINGS}{
 
-This test's implementation is only valid for bivariate binary models with normal errors.
+This test's implementation is only valid for bivariate binary probit models with normal errors.
 
 } 
 

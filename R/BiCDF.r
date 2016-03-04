@@ -12,7 +12,9 @@ if(test == TRUE){
     if( length(par1) < 1 ) stop("The dependence parameter must be set.")
     if( length(par1) > 1 && length(par1) != length(u2) ) stop("The dependence parameter has length different from the number of observations.")
     
-    if(  family == 1 && any( abs(par1) >= 1) )            stop("The parameter of Gaussian must be in (-1,1).")
+    if(  family == 1  && any( abs(par1) >= 1) )  stop("The parameter of Gaussian must be in (-1,1).")
+    if(  family == 55 && any( abs(par1) >= 1) )  stop("The parameter of AMH must be in (-1,1).")
+    if(  family == 56 && any( abs(par1) >= 1) )  stop("The parameter of FGM must be in (-1,1).")
     if( (family == 2 || family == 4) && any(par1 <= 0) )  stop("The parameter of Clayton0/180 must be positive.")
     if( (family == 3 || family == 5) && any(par1 >= 0) )  stop("The parameter of Clayton90/270 must be negative.")
     if( (family == 10 || family == 12) && any(par1 < 1))  stop("The parameter of Gumbel0/180 must be in [1,oo).")
@@ -23,11 +25,11 @@ if(test == TRUE){
        
 }       
        
-    if(family == 1)                res <- pbinorm( qnorm(u1), qnorm(u2), cov12 = par1)
-    if(family %in% c(2,6,10,14))   res <- BCDF(u1, u2, family, par1)                            # 0
-    if(family %in% c(4,8,12))      res <- u1 + u2 - 1 + BCDF(1 - u1, 1 - u2, family, par1)      # 180
-    if(family %in% c(3,7,11))      res <- u2 - BCDF(1 - u1, u2, family, -par1)                  # 90
-    if(family %in% c(5,9,13))      res <- u1 - BCDF(u1, 1 - u2, family, -par1)                  # 270
+    if(family == 1)                     res <- pbinorm( qnorm(u1), qnorm(u2), cov12 = par1)
+    if(family %in% c(2,6,10,14,55,56))  res <- BCDF(u1, u2, family, par1)                            # 0
+    if(family %in% c(4,8,12))           res <- u1 + u2 - 1 + BCDF(1 - u1, 1 - u2, family, par1)      # 180
+    if(family %in% c(3,7,11))           res <- u2 - BCDF(1 - u1, u2, family, -par1)                  # 90
+    if(family %in% c(5,9,13))           res <- u1 - BCDF(u1, 1 - u2, family, -par1)                  # 270
 
     res <- ifelse(res > max.p, max.p, res) 
     res <- ifelse(res < epsilon, epsilon, res) 

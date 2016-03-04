@@ -32,6 +32,25 @@ regH <- function(H, type = 1){
   } 
   
   
+  
+  
+  if(type == 3){
+  
+  D <- diag(abs(diag(H))^-.5)
+  H1 <- D%*%H%*%D
+  
+  
+  #ds <- 0
+  #
+  #eH <- eigen(H, symmetric = TRUE)
+  #if(min(eH$values) < epsilon){ eH$values <- abs(eH$values); ds <- 1 }
+  #if(min(eH$values) < epsilon){ eH$values[which(eH$values < epsilon)] <- 0.0000001; ds <- 1 }
+  #
+  #if(ds == 1) H <- eH$vectors%*%tcrossprod(diag(1/eH$values),eH$vectors)   
+  #
+  }   
+  
+  
   H
      
 }

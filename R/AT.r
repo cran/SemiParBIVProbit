@@ -1,14 +1,25 @@
-AT <- function(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL, delta = FALSE, 
-   n.sim = 100, prob.lev = 0.05, hd.plot = FALSE, prob.plot = FALSE, 
+AT <- function(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL, 
+   n.sim = 100, prob.lev = 0.05, length.out = NULL, hd.plot = FALSE, te.plot = FALSE, 
    main = "Histogram and Kernel Density of Simulated Average Effects", 
    xlab = "Simulated Average Effects", ...){
+
+
+if(x$Cont == "YES") stop("This function is not suitable for bivariate models with continuous margins.")
+
+
+delta <- FALSE
+
+CIs <- est.AT <- NULL
+
 
 etap.noi <- X.int <- X.noi <- eti1 <- eti0 <- etno <- indS <- bs <- ind.excl <- p.int1 <- p.int0 <- d.int1 <- d.int0 <- p.etn <- d.etn <- ass.p <- ass.pst <- C.11 <- C.10 <- sig2 <- peti1s <- peti0s <- sigma2.st <- sigma2s <- eti1s <- eti0s <- d0 <- d1 <- p.etns <- etnos <- etds <- ass.ps <- 1
 diffEf <- fy1.y2 <- est.ATso <- y2 <- CIF <- Pr <- Effects <- C.11 <- C.10 <- NULL
 
-m2  <- c("N","GU","rGU","LO","LN","WEI","WEI2","iG","GA")
-m3  <- c("DAGUM")
-mat <- c("DAGUM","GU","rGU","LO","LN","WEI","WEI2","iG","GA")
+m2  <- x$VC$m2 
+m3  <- x$VC$m3 
+bin.link <- x$VC$bl  
+mat <- c("SM","DAGUM","GU","rGU","LO","LN","WEI","iG","GA","BE") # excludes "N"
+
 
 end <- 0
 epsilon <- 0.0000001 # 0.9999999 sqrt(.Machine$double.eps)
@@ -19,11 +30,16 @@ indD <- list()
 if(x$ig[[1]]$response %in% x$ig[[2]]$pred.names ) {end <- 1; eq <- 2} 
 if(x$ig[[2]]$response %in% x$ig[[1]]$pred.names ) {end <- 2; eq <- 1}    
 
-if(x$margins[2] == "DAGUM" && eq == 2) { if( min(sqrt(x$sigma2)) <= 1) stop("Sigma parameter has value(s) smaller than 1, hence the mean is indeterminate.")}
+if(x$margins[2] == "DAGUM" && eq == 2) { if( min(sqrt(x$sigma2)) <= 1) stop("sigma parameter has value(s) smaller than 1, hence the mean is indeterminate.")}
+if(x$margins[2] == "SM"    && eq == 2) { if( min(sqrt(x$sigma2)*x$nu) <= 1) stop("sigma*nu has value(s) smaller than 1, hence the mean is indeterminate.")}
 
 
 if( !( type %in% c("naive","univariate","bivariate") ) ) stop("Error in parameter type value. It should be one of: naive, univariate or bivariate.")
-if(x$margins[2] != "probit" && delta == TRUE) stop("Delta method option not available.")
+
+
+# if(x$margins[2] != "probit" && delta == TRUE) stop("Delta method option not available.")
+
+
 if(missing(nm.end)) stop("You must provide the name of the endogenous variable.")
 
 if(x$Model=="BSS" || x$Model=="BPO" || x$Model=="BPO0" || end==0) stop("Calculation of this average treatment effect is valid for recursive models only.")
@@ -53,7 +69,7 @@ if(is.null(ind)) ind <- 1:x$n
 
 if(E == FALSE ) {
 
- if(x$margins[2] != "probit") ind <- 1:x$n  
+ if( !(x$margins[2] %in% bin.link)) ind <- 1:x$n  
  
  if(eq==1) X.int <- as.matrix(x$X1[ind,])
  if(eq==2) X.int <- as.matrix(x$X2[ind,]) 
@@ -68,12 +84,12 @@ if(E == FALSE ) {
 
 ######################################################################
 
-if(type == "naive" && x$margins[2] != "probit") stop("Please fit a bivariate model with intercept and endogenous variable only and then use AT with the univariate type option.")
+if(type == "naive" && !(x$margins[2] %in% bin.link) ) stop("Please fit a bivariate model with intercept and endogenous variable only and then use AT with the univariate type option.")
 
 ######################################################################
 ######################################################################
 
-if(type == "naive" && x$margins[2] == "probit"){ ## binary binary case with eq = 1 or eq = 2
+if(type == "naive" && x$margins[2] %in% bin.link){ ## binary binary case with eq = 1 or eq = 2
 
 if(eq==2){
 y1 <- x$y1[ind] 
@@ -103,7 +119,7 @@ est.ATb <- est.ATso <- NULL
 ######################################################################
 ######################################################################
 
-if(type != "naive" && x$margins[2] == "probit"){ ## binary binary case with eq = 1 or eq = 2
+if(type != "naive" && x$margins[2] %in% bin.link){ ## binary binary case with eq = 1 or eq = 2
 
 #############
 
@@ -143,39 +159,43 @@ if(type == "univariate"){
 
 #############
 
-p.int1 <- pmax(pnorm(eti1), epsilon ) 
-p.int1 <- ifelse(p.int1 > max.p,max.p,p.int1) 
-p.int0 <- pmax(pnorm(eti0), epsilon ) 
-p.int0 <- ifelse(p.int0 > max.p,max.p,p.int0) 
+p.int1 <- probm(eti1, x$margins[eq])$pr 
+p.int0 <- probm(eti0, x$margins[eq])$pr
 
-est.ATso <- (p.int1 - p.int0) 
+est.AT <- mean(p.int1, na.rm = TRUE) - mean(p.int0, na.rm = TRUE) 
 
-est.AT <- mean( est.ATso, na.rm = TRUE )
 
 #############
 
-if(delta == TRUE){
-
-   if(type == "univariate") var <- ngam$Vp
-   if(type == "bivariate")  var <- x$Vb[ind.int,ind.int]
-   
-   dATT <- colMeans(  ( c(dnorm(eti1))*d1 - c(dnorm(eti0))*d0 )  )
-   delta.AT <- sqrt( t(dATT)%*%var%*%dATT )
-                     
-                 }
 
 if(delta == FALSE){
 
  if(type == "univariate") {bs <- rMVN(n.sim, mean = coef(ngam), sigma=ngam$Vp); eti1s <- d1%*%t(bs);           eti0s <- d0%*%t(bs) }
  if(type == "bivariate")  {bs <- rMVN(n.sim, mean = coef(x), sigma=x$Vb);       eti1s <- d1%*%t(bs[,ind.int]); eti0s <- d0%*%t(bs[,ind.int]) } 
 
- peti1s <- pmax(pnorm(eti1s), epsilon )  
- peti1s <- ifelse(peti1s > max.p,max.p,peti1s)  
- peti0s <- pmax(pnorm(eti0s), epsilon ) 
- peti0s <- ifelse(peti0s > max.p,max.p,peti0s)  
- est.ATb <- colMeans(  (peti1s - peti0s) , na.rm = TRUE    ) 
+ peti1s  <- probm(eti1s, x$margins[eq])$pr 
+ peti0s  <- probm(eti0s, x$margins[eq])$pr 
+ est.ATb <- colMeans(peti1s, na.rm = TRUE) - colMeans(peti0s, na.rm = TRUE) 
+ 
+ CIs <- as.numeric(quantile(est.ATb, c(prob.lev/2, 1 - prob.lev/2), na.rm = TRUE))
 
                    }
+
+
+
+  if(hd.plot == TRUE && delta == FALSE){
+  
+  if(x$margins[2] %in% c(m2, m3) && eq == 2) mult <- 1 else mult <- 100
+  
+  hist(est.ATb*mult, freq = FALSE, main=main, 
+       xlab=xlab, 
+       ylim=c(0,max(density(est.ATb*mult)$y,hist(est.ATb*mult, plot = FALSE)$density)), ...)
+  lines(density(est.ATb*mult))
+
+                     }
+
+
+
 
 
 }
@@ -184,88 +204,84 @@ if(delta == FALSE){
 ######################################################################
 
 
-if(type != "naive" && x$margins[2] != "probit" && eq == 1){
+
+if(type != "naive" && !(x$margins[2] %in% bin.link) && eq == 1){
 
 
- y2   <- c( min(floor(x$y2)) : max(ceiling(x$y2)) ) 
+if(is.null(length.out)) length.out <- length( seq( min(ceiling(x$y2)) , max(floor(x$y2)) ) ) 
+y2   <- round( seq( min(ceiling(x$y2)) , max(floor(x$y2)), length.out = length.out  ), 2 ) 
+ 
  ly2  <- length(y2)
- data <- x$dataset[ind,] 
+ data <- x$dataset[ind,]
  
- fy1.y2 <- est.ATb <- NULL
- nu <- 1
- fy1.y2S <- matrix(NA, n.sim, ly2)
- diffEfS <- matrix(NA, n.sim, ly2 - 1) 
-
- ind.int <- 1:x$X1.d2 
+ if(type == "bivariate")  {
+                           ind.int <- 1:x$X1.d2
+                           bs <- rMVN(n.sim, mean = coef(x), sigma = x$Vb) 
+                           coefe  <- x$coef[ind.int] 
+                           coefes <- t(bs[, ind.int]) 
  
- if(type == "bivariate"){
-              bs <- rMVN(n.sim, mean = coef(x), sigma = x$Vb)
-              coefe  <- x$coef[ind.int]
-              coefes <- t(bs[, ind.int])
+                          }
  
- }
+ if(type == "univariate") {bs <- rMVN(n.sim, mean = coef(x$gam1), sigma = x$gam1$Vp) 
+                           coefe  <- x$gam1$coefficient 
+                           coefes <- t(bs) 
+                          }
  
- if(type == "univariate"){ 
-              bs <- rMVN(n.sim, mean = coef(x$gam1), sigma = x$gam1$Vp)
-              coefe <- x$gam1$coefficient
-              coefes <- t(bs)
- }             
  
-
-###########
-
-for(i in 1:ly2) { 
-
-	data[, 2] <- y2[i]
-
-	eta1 <- as.matrix( predict.gam(x$gam1, newdata = data, type = "lpmatrix") )%*%coefe  
-
-	p1 <- pnorm(eta1) 
-	fy1.y2[i] <- mean(p1)
-
-               }
-
-                                                  
- for(j in 1:ly2){
  
-   data[, 2] <- y2[j] 
-   
-   etins <- as.matrix( predict.gam(x$gam1, newdata = data, type = "lpmatrix") )%*%coefes
-                  
-   p1s <- pnorm(etins)    
-   fy1.y2S[, j] <- apply(p1s, MARGIN = 2, FUN = mean, na.rm=TRUE)
-                    
-                 }
+ 
+ 
+ 
+sratio <- function(x1, x2) x1 - x2  
+fy1.y2 <- fy1.y2S <- list()
+diffE  <- NA 
 
-###########
+diffES <- list()
+diffEfSquant <- as.data.frame(matrix(NA, ly2 - 1, 2))
 
-diffEf <- diff(fy1.y2)
-est.AT <- mean(diffEf)
 
-diffEfS <- t(apply(fy1.y2S, MARGIN = 1, FUN = diff)) 
-est.ATb <- apply(diffEfS, MARGIN = 1, FUN = mean) 
+for(i in 1:ly2) {
 
-CIF    <- t(apply(fy1.y2S, MARGIN=2, FUN=quantile, probs=c(prob.lev/2,1-prob.lev/2), na.rm=TRUE ))
-CIDiff <- t(apply(diffEfS, MARGIN=2, FUN=quantile, probs=c(prob.lev/2,1-prob.lev/2), na.rm=TRUE ))
+data[, 2]   <- y2[i]
+lpm    <- as.matrix( predict.gam(x$gam1, newdata = data, type = "lpmatrix") )
+eta1   <- lpm%*%coefe
+etins  <- lpm%*%coefes
 
-Pr <- data.frame(Pr = fy1.y2, CIF)
-names(Pr)[2:3] <- dimnames(CIF)[[2]]
-dimnames(Pr)[[1]] <- y2
+fy1.y2[[i]]  <- mean(probm(eta1, x$margins[eq])$pr )
+fy1.y2S[[i]] <- colMeans( probm(etins, x$margins[eq])$pr  )
 
-Effects <- data.frame(Effects = diffEf, CIDiff)  
-names(Effects)[2:3] <- dimnames(CIDiff)[[2]]
+}
+
+
+
+
+for(i in 1:(ly2-1)) {
+
+  diffE[i]          <- sratio(fy1.y2[[i+1]] , fy1.y2[[i]])
+  diffES[[i]]       <- sratio(fy1.y2S[[i+1]], fy1.y2S[[i]])      
+  diffEfSquant[i, ] <- quantile(diffES[[i]], probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE) 
+                            } 
+
+
+
+
+Effects <- data.frame(Effects = diffE, diffEfSquant)  
+names(Effects)[2:3] <- names(quantile(c(1,1), probs = c(prob.lev/2,1-prob.lev/2)))
 dimnames(Effects)[[1]] <- y2[2:ly2]
 
 
-if(prob.plot == TRUE){
+if(te.plot == TRUE){
 
-plot(y2, fy1.y2, ylab = "Pr(Response=1|Treatment)", xlab = "Treatment", pch = 16, ylim = c(min(CIF[,1]),max(CIF[,2])))
-lines(y2, fy1.y2, type = "l")
-for (i in 1:ly2) lines( y = c(CIF[i,1], CIF[i,2]), x = c(y2[i],y2[i]) )
+plot(y2[2:ly2], diffE, ylab = "TE", xlab = "Treatment", pch = 16, ylim = c(min(diffEfSquant[,1]),max(diffEfSquant[,2])))
+lines(y2[2:ly2], diffE, type = "l")
+for (i in 1:(ly2-1)) lines( y = c(diffEfSquant[i,1], diffEfSquant[i,2]), x = c(y2[i+1],y2[i+1]))
 
-if(hd.plot == TRUE) dev.new()
+}
 
-                     }
+
+
+
+
 
 
 }
@@ -286,6 +302,9 @@ if(type != "naive" && x$margins[2] == "N" && eq == 2){
                            est.AT  <- est.ATso <- x$coefficients[nm.end]
                            est.ATb <- bs[, nm.end]        
                            }
+                           
+ CIs <- as.numeric(quantile(est.ATb, c(prob.lev/2, 1 - prob.lev/2), na.rm = TRUE))
+                           
 
 }
   
@@ -295,45 +314,17 @@ if(type != "naive" && x$margins[2] == "N" && eq == 2){
 ######################################################################
 
 
-  if(hd.plot == TRUE && type != "naive"){
-  
-  if(x$margins[2] %in% c(m2, m3) && eq == 2) mult <- 1 else mult <- 100
-  
-  hist(est.ATb*mult, freq = FALSE, main=main, 
-       xlab=xlab, 
-       ylim=c(0,max(density(est.ATb*mult)$y,hist(est.ATb*mult, plot = FALSE)$density)), ...)
-  lines(density(est.ATb*mult))
 
-                                         }
-
-
-
-if( !(type == "naive" && x$margins[2] == "probit") ){
-
-if(type != "naive" && x$margins[2] == "probit" && delta == TRUE){ 
-
-                   esd.AT <- delta.AT*qnorm(prob.lev/2,lower.tail = FALSE) 
-                   CIs <- c(est.AT - esd.AT, est.AT + esd.AT)
-                   
-               }else CIs <- as.numeric(quantile(est.ATb, c(prob.lev/2, 1 - prob.lev/2), na.rm = TRUE))
-
-
-}
-
-
-
-
-
-
+rm(etap.noi, X.int, X.noi, eti1, eti0, etno, indS, bs, ind.excl, p.int1, p.int0, d.int1, d.int0,
+   p.etn, d.etn, ass.p, ass.pst, C.11, C.10, sig2, peti1s, peti0s, sigma2.st, sigma2s, eti1s, eti0s, d0, d1,
+   p.etns, etnos, etds, ass.ps) 
 
 res <- c(CIs[1], est.AT, CIs[2])
 
-out <- list(res=res, prob.lev=prob.lev, sim.AT=est.ATb, AT.so = est.ATso, mar2=x$margins[2], type = type, 
-            Effects = Effects, Pr = Pr, treat = y2, eq = eq)
+out <- list(res=res, prob.lev=prob.lev, sim.AT=est.ATb, mar2=x$margins[2], type = type, 
+            Effects = Effects, treat = y2, eq = eq, bl = x$VC$bl)
  							 
-rm(etap.noi, X.int, X.noi, eti1, eti0, etno, indS, bs, ind.excl, p.int1, p.int0, d.int1, d.int0,
-   p.etn, d.etn, ass.p, ass.pst, C.11, C.10, sig2, peti1s, peti0s, sigma2.st, sigma2s, eti1s, eti0s, d0, d1,
-   p.etns, etnos, etds, ass.ps)    
+   
  
 class(out) <- "AT"
 
@@ -344,24 +335,5 @@ out
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

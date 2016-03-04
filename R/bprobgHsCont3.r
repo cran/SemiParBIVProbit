@@ -10,9 +10,9 @@ bprobgHsCont3 <- function(params, respvec, VC, sp = NULL, qu.mag = NULL, AT = FA
   
   
 if(is.null(VC$X3)){  
-  sigma2.st <- params[(VC$X1.d2 + VC$X2.d2 + 1)]
-  nu.st     <- params[(VC$X1.d2 + VC$X2.d2 + 2)]
-  teta.st   <- params[(VC$X1.d2 + VC$X2.d2 + 3)]
+  sigma2.st <- etas <- params[(VC$X1.d2 + VC$X2.d2 + 1)]
+  nu.st     <- etan <- params[(VC$X1.d2 + VC$X2.d2 + 2)]
+  teta.st   <- etad <- params[(VC$X1.d2 + VC$X2.d2 + 3)]
 } 
 
 if(!is.null(VC$X3)){  
@@ -22,18 +22,17 @@ if(!is.null(VC$X3)){
 }  
   
   
-  #sigma2.st <- ifelse(sigma2.st > 4, 4, sigma2.st)  # new 
+    sstr1 <- esp.tr(sigma2.st, VC$margins[2])  
+    sigma2.st <- sstr1$vrb.st 
+    sigma2    <- sstr1$vrb 
 
- 
-  sigma2 <- exp(sigma2.st) + epsilon
-  if(VC$margins[2] == "DAGUM") nu <- exp(nu.st) + epsilon
+    
+sstr1 <- esp.tr(nu.st, VC$margins[2])  
+nu.st <- sstr1$vrb.st 
+nu    <- sstr1$vrb 
 
-
-  
-  
-
- eta2 <- ifelse( eta2 > 600, 600, eta2 )
- eta2 <- ifelse( eta2 < -17, -17, eta2 )  
+    eta2 <- eta.tr(eta2, VC$margins[2])
+    
 
  dHs  <- distrHs(respvec$y2, eta2, sigma2, sigma2.st, nu, nu.st, margin2=VC$margins[2], naive = FALSE)
   
@@ -65,28 +64,15 @@ if(!is.null(VC$X3)){
  der2p2.dersigma2.stdernu.st   <- dHs$der2p2.dersigma2.stdernu.st            
  der2pdf2.dersigma2.stdernu.st <- dHs$der2pdf2.sigma2.st2dernu.st 
   
-  p1 <- pnorm(-eta1)
-  p1 <- ifelse(p1 > max.p, max.p, p1) 
-  p1 <- ifelse(p1 < epsilon, epsilon, p1) 
+  pd1 <- probm(eta1, VC$margins[1], bc = TRUE) 
+  
+  p1 <- 1 - pd1$pr #   pnorm(-eta1)
 
 ########################################################################################################  
   
-  if( VC$BivD %in% c("N") ) teta.st <- ifelse(abs(teta.st) > 8.75, sign(teta.st)*8.75, teta.st )  
-  
-  if( VC$BivD %in%  c("C0","C180","C90","C270","J0","J180","J90","J270","G0","G180","G90","G270") ) {
- 
-  teta.st <- ifelse( teta.st > 20, 20, teta.st )  # 709
-  teta.st <- ifelse( teta.st < -17, -17, teta.st )   # -20
-  
-  }
-  
- 
-    if(VC$BivD %in% c("N")      )     teta <- tanh(teta.st)                        
-    if(VC$BivD=="F")                  teta <- teta.st + epsilon
-    if(VC$BivD %in% c("C0", "C180") ) teta <-    exp(teta.st)                      
-    if(VC$BivD %in% c("C90","C270") ) teta <- -( exp(teta.st) )                     
-    if(VC$BivD %in% c("J0", "J180","G0", "G180") ) teta <-    exp(teta.st) + 1     
-    if(VC$BivD %in% c("J90","J270","G90","G270") ) teta <- -( exp(teta.st) + 1 )   
+resT    <- teta.tr(VC, teta.st)
+teta.st <- resT$teta.st
+teta    <- resT$teta
     
 
 ########################################################################################################
@@ -94,9 +80,6 @@ if(!is.null(VC$X3)){
 dH <- copgHs(p1,p2,eta1=NULL,eta2=NULL,teta,teta.st,VC$BivD)
 
 h <- dH$c.copula.be2  
-h <- ifelse(h > max.p, max.p, h) 
-h <- ifelse(h < epsilon  , epsilon  , h) 
-
 
 l.par <- VC$weights*( respvec$cy*log(h) + respvec$y1*log(1 - h) + log(pdf2) )
   
@@ -104,8 +87,10 @@ l.par <- VC$weights*( respvec$cy*log(h) + respvec$y1*log(1 - h) + log(pdf2) )
  
   c.copula2.be2    <- dH$c.copula2.be2 
   c.copula2.be1be2 <- dH$c.copula2.be1be2   
-  c.copula2.be2th  <- dH$c.copula2.be2th  
-  derp1.dereta1    <- -dnorm(-eta1) 
+  c.copula2.be2th  <- dH$c.copula2.be2th 
+  
+  derp1.dereta1    <- pd1$derp1.dereta1 
+  
   derh.dereta1     <- c.copula2.be1be2 * derp1.dereta1
   derh.dereta2     <- c.copula2.be2 * derp2.dereta2
 
@@ -130,7 +115,7 @@ l.par <- VC$weights*( respvec$cy*log(h) + respvec$y1*log(1 - h) + log(pdf2) )
   der2h.derp1p1              <- BITS$der2h.derp1p1
   
  
-  der2p1.dereta1eta1 <- eta1 * dnorm(-eta1)      
+  der2p1.dereta1eta1 <- pd1$der2p1.dereta1eta1     
                     
   der2h.dereta2.dereta2         <- der2h.derp2p2*derp2.dereta2^2 + c.copula2.be2*der2p2.dereta2eta2                                        
   der2h.derteta.st2             <- der2h.derteta.teta.st*derteta.derteta.st^2 + c.copula2.be2th/derteta.derteta.st* der2teta.derteta.stteta.st                                                                                        
@@ -302,21 +287,21 @@ if(VC$extra.regI == "sED") H <- regH(H, type = 2)
               eta1 = eta1, eta2 = eta2, etad = etad, etan = etan,
               dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.dsigma.st = dl.dsigma.st, 
               dl.dnu.st = dl.dnu.st, dl.dteta.st = dl.dteta.st,
-d2l.be1.be1     = d2l.be1.be1    , 
-d2l.be2.be2     = d2l.be2.be2    ,
-d2l.rho.rho     = d2l.rho.rho    ,
-d2l.sigma.sigma = d2l.sigma.sigma,
-d2l.nu.nu       = d2l.nu.nu      ,          
-d2l.be1.be2     = d2l.be1.be2    ,
-d2l.be1.rho     = d2l.be1.rho    ,
-d2l.be1.sigma   = d2l.be1.sigma  ,
-d2l.be1.nu      = d2l.be1.nu     ,
-d2l.be2.rho     = d2l.be2.rho    ,
-d2l.be2.sigma   = d2l.be2.sigma  ,
-d2l.be2.nu      = d2l.be2.nu     ,
-d2l.rho.sigma   = d2l.rho.sigma  ,
-d2l.rho.nu      = d2l.rho.nu     ,
-d2l.sigma.nu    = d2l.sigma.nu   ,            
+#d2l.be1.be1     = d2l.be1.be1    , 
+#d2l.be2.be2     = d2l.be2.be2    ,
+#d2l.rho.rho     = d2l.rho.rho    ,
+#d2l.sigma.sigma = d2l.sigma.sigma,
+#d2l.nu.nu       = d2l.nu.nu      ,          
+#d2l.be1.be2     = d2l.be1.be2    ,
+#d2l.be1.rho     = d2l.be1.rho    ,
+#d2l.be1.sigma   = d2l.be1.sigma  ,
+#d2l.be1.nu      = d2l.be1.nu     ,
+#d2l.be2.rho     = d2l.be2.rho    ,
+#d2l.be2.sigma   = d2l.be2.sigma  ,
+#d2l.be2.nu      = d2l.be2.nu     ,
+#d2l.rho.sigma   = d2l.rho.sigma  ,
+#d2l.rho.nu      = d2l.rho.nu     ,
+#d2l.sigma.nu    = d2l.sigma.nu   ,            
 BivD=VC$BivD, p1=1-p1, p2=p2, theta.star = teta.st)      
 
 }

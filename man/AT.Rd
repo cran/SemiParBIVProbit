@@ -4,16 +4,17 @@
 \title{Average treatment effect of a binary or continuous endogenous variable}
 
 \description{ 
-\code{AT} can be used to calculate the sample average treatment effect of a binary or continuous endogenous predictor/treatment, with 
-corresponding interval obtained using mainly posterior simulation.}
+\code{AT} can be used to calculate the treatment effect of a binary or continuous endogenous predictor/treatment, with 
+corresponding interval obtained using posterior simulation.}
 
 
 
 \usage{
 
 AT(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL, 
-   delta = FALSE, n.sim = 100, prob.lev = 0.05, hd.plot = FALSE,
-   prob.plot = FALSE, main = "Histogram and Kernel Density of Simulated Average Effects", 
+   n.sim = 100, prob.lev = 0.05, length.out = NULL,
+   hd.plot = FALSE, te.plot = FALSE, 
+   main = "Histogram and Kernel Density of Simulated Average Effects", 
    xlab = "Simulated Average Effects", ...)
 
 }
@@ -39,21 +40,22 @@ the control group. This only makes sense if \code{E = FALSE}.}
 
 \item{ind}{Binary logical variable. It can be used to calculate the AT for a subset of the data. Note that it does not make sense to use \code{ind} 
            when some observations are excluded from the AT calculation (e.g., when using \code{E = FALSE}).}  
-  
-\item{delta}{If \code{TRUE} then the delta method is used for confidence interval calculations, otherwise Bayesian posterior 
-             simulation (the most reliable option, despite a bit slower) is employed. This option is only available for binary treatment and 
-             binary outcome.}  
 
 \item{n.sim}{Number of simulated coefficient vectors from the posterior distribution of the estimated model parameters. This is used 
              when \code{delta = FALSE}. It may be increased if more precision is required.} 
 
 \item{prob.lev}{Overall probability of the left and right tails of the AT distribution used for interval calculations.} 
 
-\item{hd.plot}{If \code{TRUE} then a plot of the histogram and kernel density estimate of the simulated average effects is produced. This can 
-               only be produced when \code{delta = FALSE}.}
+\item{length.out}{Ddesired length of the sequence to be used when calculating the effect that a continuous
+                  treatment has on a binary outcome.}
 
-\item{prob.plot}{For the case of continuous endogenous variable and binary outcome, if \code{TRUE} then a plot  
-                 showing probability that the binary outcome is equal to 1 for each value of the endogenous variable 
+
+
+\item{hd.plot}{If \code{TRUE} then a plot of the histogram and kernel density estimate of the simulated average effects is produced. This can 
+               only be produced when when binary responses are used.}
+
+\item{te.plot}{For the case of continuous endogenous variable and binary outcome, if \code{TRUE} then a plot  
+                 showing the treatment effects that the binary outcome is equal to 1 for each incremental value of the endogenous variable 
                  and respective intervals is produced.}
 
 \item{main}{Title for the plot.}
@@ -68,14 +70,13 @@ the control group. This only makes sense if \code{E = FALSE}.}
 
 \details{
 
-AT measures the sample average difference in outcomes under 
+AT measures the average difference in outcomes under 
 treatment (the binary predictor or treatment assumes value 1) and under 
 control (the binary treatment assumes value 0). Posterior simulation 
-and delta method can be used to obtain a confidence/credible interval. The former is more reliable, especially at small
-sample sizes. See the references below for details. 
+is used to obtain a confidence/credible interval. See the references below for details. 
 
 AT can also calculate the effect that a continuous endogenous variable has on a binary outcome. In this case the effect will depend on the 
-unit increment chosen (as shown by the plot produced). An overall AT is provided as well.
+unit increment chosen (as shown by the plot produced). 
 
 }
 
@@ -85,14 +86,11 @@ unit increment chosen (as shown by the plot produced). An overall AT is provided
 
 \item{res}{It returns three values: lower confidence interval limit, estimated AT and upper interval limit.}
 \item{prob.lev}{Probability level used.}
-\item{sim.AT}{If \code{delta = FALSE} then it returns a vector containing simulated values of the average treatment effect. This 
+\item{sim.AT}{It returns a vector containing simulated values of the average treatment effect. This 
                is used to calculate intervals.}
-\item{AT.so}{It returns a vector containing the estimated effect for each single observation. This may not be available in some cases.}            
 \item{Effects}{For the case of continuous endogenous variable and binary outcome, it returns a matrix made up of 
-               three columns containing the effects for each unit increase in the endogenous variable and respective intervals.}            
-\item{Pr}{For the case of continuous endogenous variable and binary outcome, it returns a matrix made up of 
-               three columns containing the probability that the binary outcome is equal to 1 for each value of the endogenous variable 
-               and respective intervals.}            
+               three columns containing the effects for each incremental value in the endogenous variable and respective intervals.}            
+           
                
 
 }
@@ -128,7 +126,6 @@ Radice R., Marra G. and M. Wojtys (in press), Copula Regression Spline Models fo
 \keyword{ATE} 
 \keyword{average treatment effect} 
 \keyword{bayesian posterior simulation}
-\keyword{delta method}
 
 
 

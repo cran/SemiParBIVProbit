@@ -99,7 +99,10 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, Model,
   
   
   if( l.sp1!=0 || l.sp2!=0){ sp <- c(sp1, sp2)
-  qu.mag <- S.m(gam1, gam2, gam3 = NULL, gam4 = NULL, gam5 = NULL, gam6 = NULL, l.sp1, l.sp2, l.sp3 = 0, l.sp4 = 0, l.sp5 = 0, l.sp6 = 0, eq1 = "yes", margin2 = "probit") }
+  qu.mag <- S.m(gam1, gam2, gam3 = NULL, gam4 = NULL, gam5 = NULL, gam6 = NULL, gam7 = NULL, 
+                l.sp1, l.sp2, l.sp3 = 0, l.sp4 = 0, l.sp5 = 0, l.sp6 = 0, l.sp7 = 0, 
+                length(coef(gam1)) ) 
+                           }
 
 
   respvec <- list(y1 = y1,
@@ -122,7 +125,8 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, Model,
              hess = hess,
              Model = Model,
              end = end, fp = fp,
-             BivD = BivD, nC = 1, extra.regI = FALSE, margins = c("probit","probit"))
+             BivD = BivD, nC = 1, extra.regI = FALSE, margins = c("probit","probit"),
+             bl = c("probit", "logit", "cloglog", "cauchit") )
 
 
 params <- c(coef(gam1),coef(gam2),0)

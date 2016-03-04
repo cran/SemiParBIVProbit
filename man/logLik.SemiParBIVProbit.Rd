@@ -1,10 +1,10 @@
 \name{logLik.SemiParBIVProbit}
 \alias{logLik.SemiParBIVProbit}
 
-\title{Extract the log likelihood for a fitted SemiParBIVProbit}
+\title{Extract the log likelihood for a fitted SemiParBIVProbit or copulaReg}
 
 
-\description{It extracts the log-likelihood for a fitted \code{SemiParBIVProbit} model.
+\description{It extracts the log-likelihood for a fitted \code{SemiParBIVProbit} or \code{copulaReg} model.
 
 }
 

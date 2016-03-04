@@ -31,7 +31,7 @@ LM.bpm(formula, data = list(), weights = NULL, subset = NULL, Model,
 \item{subset}{Optional vector specifying a subset of observations to be used in the fitting process.}
 
 \item{Model}{It indicates the type of model to be used in the analysis. Possible values are "B" (bivariate model) and 
-             "BSS" (bivariate model with sample selection).}
+             "BSS" (bivariate model with sample selection). The two marginal equations have probit links.}
 
 \item{hess}{If \code{FALSE} then the expected (rather than observed) information matrix is employed.}
 
@@ -46,7 +46,7 @@ hypothesis that \eqn{\theta}{\theta} is equal to 0 (i.e. no endogeneity, non-ran
 correlated model equations/errors, depending 
 on  the model being fitted). Its main advantage is that it does 
 not require an estimate of the model parameter vector under the alternative hypothesis. Asymptotically, it takes a Chi-squared distribution 
-with one degree of freedom. Full details can be found in Marra et al. (2014) and Marra et al. (submitted).
+with one degree of freedom. Full details can be found in Marra et al. (2014) and Marra et al. (in press).
 
 
 }
@@ -61,7 +61,7 @@ It returns a numeric p-value corresponding to the null hypothesis that the corre
 
 \section{WARNINGS}{
 
-This test's implementation is only valid for bivariate binary models with normal errors.
+This test's implementation is ONLY valid for bivariate binary probit models with normal errors.
 
 } 
 

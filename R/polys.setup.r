@@ -6,7 +6,7 @@ polys.setup <- function(object){
 
 
 obj <- fortify(object)
-OBJ <- obj[,c(1, 2, 5, 7)] 
+OBJ <- obj[, c("long","lat","piece","id")] 
 
 pr <- c((min(as.numeric(names(table(OBJ[,3])))) + 1) : (max(as.numeric(names(table(OBJ[,3]))))) )  
 

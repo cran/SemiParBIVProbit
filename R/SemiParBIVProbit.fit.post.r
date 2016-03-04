@@ -3,12 +3,13 @@ SemiParBIVProbit.fit.post <- function(SemiParFit, formula.eq2, data, Model, VC, 
 
 Ve <- R <- X2s <- lambda1s <- lambda2s <- eta1S <- eta2S <- theta <- edf <- edf1 <- theta.a <- sigma2 <- sigma2.a <- OR <- GM <- p1n <- p2n <- nu <- nu.a <- NULL
 
-cont2par <- c("N","GU","rGU","LO","LN","WEI","WEI2","iG","GA","iGA")  
-cont3par <- c("DAGUM")  
+cont2par  <- VC$m2 
+cont3par  <- VC$m3 
+bin.link  <- VC$bl  
 
 
 He <- SemiParFit$fit$hessian
-logLik <- -SemiParFit$fit$l
+if(VC$margins[2] != "LN") logLik <- -SemiParFit$fit$l else logLik <- -SemiParFit$fit$l.ln 
 
 epsilon <- 0.0000001 
 max.p   <- 0.9999999
@@ -44,26 +45,16 @@ dimnames(SemiParFit$fit$hessian)[[1]] <- dimnames(SemiParFit$fit$hessian)[[2]] <
 if(VC$hess == FALSE) SemiParFit$fit$Fisher <- SemiParFit$fit$hessian
 
 
-# this can be simplified by taking only one output
 
-
-if(VC$Model == "BPO0" ) dep <- 0
-
-if(VC$Model != "BPO0" ){
-
-  if( is.null(VC$X3) ) {dep <- SemiParFit$fit$argument["theta.star"]; names(dep) <- "theta"}  
-  if(!is.null(VC$X3) )  dep <- SemiParFit$fit$etad  
-
-}
-
-
-
-
+##################################################################
 
 if(VC$margins[2] %in% cont2par ){
 
-  if( is.null(VC$X4) ) {sigma2 <- exp(SemiParFit$fit$argument["sigma2.star"]); names(sigma2) <- "sigma2"}
-  if(!is.null(VC$X4) )  sigma2 <- exp(SemiParFit$fit$etas)  
+sigma2 <- exp(SemiParFit$fit$etas)
+if( is.null(VC$X4) ) names(sigma2) <- "sigma2"
+
+#  if( is.null(VC$X4) ) {sigma2 <- exp(SemiParFit$fit$argument["sigma2.star"]); names(sigma2) <- "sigma2"}
+#  if(!is.null(VC$X4) )    
   
   sigma2.a <- mean(sigma2) 
   if( length(sigma2)==1 ) sigma2.a <- sigma2  
@@ -71,28 +62,27 @@ if(VC$margins[2] %in% cont2par ){
 }
 
 
-
+#################################################################
 
 if(VC$margins[2] %in% cont3par ){
 
-if(VC$margins[2] == "DAGUM"){
+if(VC$margins[2] %in% c("DAGUM","SM")){
 
-  if( is.null(VC$X4) && is.null(VC$X5) ) {sigma2 <- exp(SemiParFit$fit$argument["sigma2.star"]); names(sigma2) <- "sigma2"
-                                          nu     <- exp(SemiParFit$fit$argument["nu.star"]);     names(nu) <- "nu"}
-  if(!is.null(VC$X4) && !is.null(VC$X5) ){sigma2 <- exp(SemiParFit$fit$etas) 
-                                          nu     <- exp(SemiParFit$fit$etan)   } 
+sigma2 <- exp(SemiParFit$fit$etas)
+nu     <- exp(SemiParFit$fit$etan)
+
+if( is.null(VC$X4) && is.null(VC$X5) ) {names(sigma2) <- "sigma2"; names(nu) <- "nu"}
+
+#  if( is.null(VC$X4) && is.null(VC$X5) ) {sigma2 <- exp(SemiParFit$fit$argument["sigma2.star"]); names(sigma2) <- "sigma2"
+#                                          nu     <- exp(SemiParFit$fit$argument["nu.star"]);     names(nu) <- "nu"}
+#  if(!is.null(VC$X4) && !is.null(VC$X5) ){ 
+#                                             } 
+                                          
+                                          
+                                          
                            }  
                            
-#if(VC$margins[2] == "ZAGA"){
-#
-#  if( is.null(VC$X4) && is.null(VC$X5) ) {sigma2 <- exp(SemiParFit$fit$argument["sigma2.star"]); names(sigma2) <- "sigma2"
-#                                          nu     <- plogis(SemiParFit$fit$argument["nu.star"]);     names(nu) <- "nu"}
-#  if(!is.null(VC$X4) && !is.null(VC$X5) ){sigma2 <- exp(SemiParFit$fit$etas) 
-#                                          nu     <- plogis(SemiParFit$fit$etan)   } 
-#                           }                           
-                                          
-                                          
-  
+
   sigma2.a <- mean(sigma2)
   nu.a     <- mean(nu)
   if( length(sigma2)==1 ) {sigma2.a <- sigma2; nu.a <- nu}  
@@ -100,28 +90,38 @@ if(VC$margins[2] == "DAGUM"){
 }
 
 
-  if( VC$BivD == "N" ) {theta <- tanh(dep); theta <- ifelse(theta < -max.p, -max.p, theta)
-                                            theta <- ifelse(theta >  max.p , max.p, theta) } 
-  
-  if( VC$BivD != "N" ) {th.st <- dep 
 
-    if(VC$BivD=="F") theta <- th.st + epsilon 
-  
-    if(VC$BivD %in% c("C0", "C180") ) theta <- exp(th.st) + epsilon
-    if(VC$BivD %in% c("C90","C270") ) theta <- -(exp(th.st) + epsilon)
+############################################################################################
+# THETA
+############################################################################################
 
-    if(VC$BivD %in% c("J0", "J180","G0", "G180") ) theta <-    1 + exp(th.st) + epsilon
-    if(VC$BivD %in% c("J90","J270","G90","G270") ) theta <- -( 1 + exp(th.st) + epsilon )
-       
-    theta <- ifelse(theta == Inf ,  8.218407e+307, theta )
-    theta <- ifelse(theta == -Inf, -8.218407e+307, theta )    
-       
-   
-        }
+
+if(VC$Model == "BPO0" ) dep <- theta <- 0
+
+if(VC$Model != "BPO0" ){
+
+  dep <- SemiParFit$fit$etad
+  if( is.null(VC$X3) ) names(dep) <- "theta" 
+
+resT  <- teta.tr(VC, dep)
+theta <- resT$teta   
         
         
-theta.a  <- mean(theta) 
+theta.a  <- mean(theta)   
 
+}
+
+
+
+
+
+ # if( is.null(VC$X3) ) {dep <- SemiParFit$fit$argument["theta.star"]; names(dep) <- "theta"}  
+ # if(!is.null(VC$X3) )  dep <- SemiParFit$fit$etad  
+  #if( is.null(VC$X3) ) {dep <- SemiParFit$fit$argument["theta.star"]; names(dep) <- "theta"}  
+  #if(!is.null(VC$X3) ) 
+
+
+############################################################################################
 
    
   if(Model=="BSS"){
@@ -142,11 +142,8 @@ theta.a  <- mean(theta)
 
 if(Model=="BSS" || Model=="BPO" || Model=="BPO0"){
 
-  p1 <- pmax(pnorm(SemiParFit$fit$eta1), epsilon) 
-  p2 <- pmax(pnorm(SemiParFit$fit$eta2), epsilon) 
-  p1 <- ifelse(p1 > max.p, max.p, p1)
-  p2 <- ifelse(p2 > max.p, max.p, p2)
-  
+  p1 <- probm(SemiParFit$fit$eta1, VC$margins[1])$pr 
+  p2 <- probm(SemiParFit$fit$eta2, VC$margins[2])$pr # eta2 modified above
   
    p11 <- BiCDF(p1, p2, VC$nC, theta)
   
@@ -166,7 +163,7 @@ if(Model=="BSS" || Model=="BPO" || Model=="BPO0"){
 ######################
 
 
-if(VC$margins[2]=="probit"){
+if(VC$margins[2] %in% bin.link){
 
 p00 <- SemiParFit$fit$p00 
 p01 <- SemiParFit$fit$p01 

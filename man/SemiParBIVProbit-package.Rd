@@ -2,7 +2,7 @@
 \alias{SemiParBIVProbit-package}
 \docType{package}
 
-\title{Semiparametric Bivariate Regression Models}
+\title{Semiparametric Copula Bivariate Regression Models}
 
 \description{
 \code{\link{SemiParBIVProbit}} provides a function for fitting bivariate binary models with semiparametric 
@@ -11,8 +11,11 @@ the bivariate distribution employed can be specified as a function of a semipara
 achieved automatically and interval calculations are based on a Bayesian approach.
 
 \code{SemiParBIVProbit} has been originally designed to deal with binary responses only. However, the use of 
-bivariate equation systems in which one response is binary and the other is continuous is allowed for. Other models
-will be incorporated from time to time on a case-study basis.
+bivariate equation systems in which one response is binary and the other is continuous is allowed for. 
+
+Function \code{copulaReg} allows the user to model two continuous margins. 
+
+Other models will be incorporated from time to time on a case-study basis.
 
 
 }
@@ -27,7 +30,7 @@ an adaptation of a low level smoothness estimation fitting procedure from the pa
  
 \code{SemiParBIVProbit} supports the use of many smoothers as extracted from \code{mgcv}. Estimation is by penalized 
 maximum likelihood with automatic smoothness estimation achieved 
-by using the approximate Un-Biased Risk Estimator (UBRE), which can also be viewed as an approximate AIC. 
+by using an approximate AIC. 
 
 Confidence intervals for smooth components and nonlinear functions of the model
 parameters are derived using a Bayesian approach. Approximate p-values for testing 
@@ -54,6 +57,7 @@ is relevant for estimating, for instance, the effect that a binary endogenous va
 There are many continuous distributions which can be employed within this context and we plan to include several 
 options on a case-study basis. Other bivariate models will be implemented from time to time, depending on the study at hand. 
 
+Function \code{copulaReg} allows the user to employ two continuous margins.
 
 
 
@@ -79,6 +83,8 @@ Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariat
 
 Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, 7, 1432-1455.
 
+Marra G. and Radice R. (submitted), Flexible Bivariate Copula-Based Regression Models.
+
 Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}, 29(3-4), 715-741.
 
 Marra G., Radice R. and Filippou P. (in press), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity. \emph{Communications in Statistics - Simulation and Computation}.
@@ -91,7 +97,7 @@ Radice R., Marra G. and M. Wojtys (in press), Copula Regression Spline Models fo
 }
 
 
-\seealso{  \code{\link{SemiParBIVProbit}}  }
+\seealso{  \code{\link{SemiParBIVProbit}}, \code{\link{copulaReg}}  }
 
 
 \keyword{endogeneity} 

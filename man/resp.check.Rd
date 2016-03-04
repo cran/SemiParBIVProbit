@@ -6,14 +6,15 @@
 \description{ 
 
 It produces a histogram of the response along with the estimated density from the assumed distribution as well as a normal Q-Q plot for 
-the normalised quantile response. 
+the normalised quantile response. It also provides the log-likelihood for AIC calculation, for instance.
 
 }
 
 \usage{
 
 resp.check(y, margin = "N", main = "Histogram and Density of Response",
-           xlab = "Response", print.par = FALSE, plots = TRUE, ...)
+           xlab = "Response", print.par = FALSE, plots = TRUE, 
+           loglik = FALSE, ...)
 
 }
 
@@ -22,7 +23,8 @@ resp.check(y, margin = "N", main = "Histogram and Density of Response",
 \item{y}{Response.}
  
 \item{margin}{The distributions allowed are: normal ("N"), log-normal ("LN"), 
-              Gumbel ("GU"), reverse Gumbel ("rGU"), logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA").} 
+              Gumbel ("GU"), reverse Gumbel ("rGU"), logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"),
+              Dagum ("DAGUM"), Singh-Maddala ("SM"), beta ("BE").} 
 
 \item{main}{Title for the plot.}
 
@@ -32,6 +34,7 @@ resp.check(y, margin = "N", main = "Histogram and Density of Response",
 
 \item{plots}{If \code{FALSE} then no plots are produced and only parameter estimates returned.}
 
+\item{loglik}{If \code{TRUE} then it returns the logLik.}
 
 \item{...}{Other graphics parameters to pass on to plotting commands.}
 
@@ -40,12 +43,14 @@ resp.check(y, margin = "N", main = "Histogram and Density of Response",
 
 \details{
 
-Prior to fitting a model with binary-continuous bivariate response, a distribution for the continuous response
+Prior to fitting a model with binary-continuous or continuous-continuous bivariate response, a distribution for the continuous response(s)
 may be chosen by looking at the histogram of the response along with the estimated density from the assumed distribution, and at the
 normalised quantile responses. These will provide a rough guide to the adequacy of the chosen distribution.
 The latter are defined as the quantile standard normal function of the cumulative distribution function of the response with scale and location
 estimated by MLE. These should behave approximately as normally distributed variables (even though the original 
 observations are not). Therefore, a normal Q-Q plot is appropriate here. 
+
+If \code{loglik = TRUE} then this function also provides the log-likelihood for AIC calculation, for instance.
 
 }
 

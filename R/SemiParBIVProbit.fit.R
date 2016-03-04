@@ -1,31 +1,78 @@
 SemiParBIVProbit.fit  <- function(func.opt, start.v, 
                                    rinit, rmax, iterlim, iterlimsp, tolsp,
                                    respvec, VC,
-                                   sp=NULL, qu.mag=NULL, naive){ 
+                                   sp = NULL, qu.mag = NULL){ 
 
   parsc <- rep(VC$parscale, length(start.v) )  
+  
+  sc <- TRUE
 
-  fit  <- trust(func.opt, start.v, rinit = rinit, rmax = rmax, parscale = parsc,
-                respvec = respvec, VC = VC, sp = sp, qu.mag = qu.mag, blather = TRUE, iterlim = iterlim)  
+  fit  <- try( trust(func.opt, start.v, rinit = rinit, rmax = rmax, parscale = parsc,
+                     respvec = respvec, VC = VC, sp = sp, qu.mag = qu.mag, blather = TRUE, 
+                     iterlim = iterlim), silent = sc)   
+
+  if(class(fit) == "try-error"){
+  
+  
+    fit  <- try( trust(func.opt, start.v, rinit = rinit, rmax = rmax, parscale = parsc,
+                       respvec = respvec, VC = VC, sp = sp, qu.mag = qu.mag, blather = TRUE, 
+                       iterlim = iterlim/4), silent = sc)  
+                     
+        if(class(fit) == "try-error"){
+        
+            fit  <- try( trust(func.opt, start.v, rinit = rinit, rmax = rmax, parscale = parsc,
+                               respvec = respvec, VC = VC, sp = sp, qu.mag = qu.mag, blather = TRUE, 
+                               iterlim = iterlim/10), silent = sc)   
+
+if(class(fit) == "try-error" && VC$Cont == "NO"  && VC$gamlssfit == FALSE) stop("It is not possible to fit the model. Try re-fitting the model and setting gamlssfit = TRUE.\n Also, read the WARNINGS section in ?SemiParBIVProbit.")
+if(class(fit) == "try-error" && VC$Cont == "NO"  && VC$gamlssfit == TRUE)  stop("It is not possible to fit the model. Read the WARNINGS section in ?SemiParBIVProbit.")         
+if(class(fit) == "try-error" && VC$Cont == "YES" && VC$gamlssfit == FALSE) stop("It is not possible to fit the model. Try re-fitting the model and setting gamlssfit = TRUE.\n Also, read the WARNINGS section in ?copulaReg.")
+if(class(fit) == "try-error" && VC$Cont == "YES" && VC$gamlssfit == TRUE)  stop("It is not possible to fit the model. Read the WARNINGS section in ?copulaReg.")
+             
+             
+                                     }
+                     
+  }
+
 
   iter.if <- fit$iterations  
 
   conv.sp <- iter.sp <- iter.inner <- bs.mgfit <- wor.c <- magpp <- NULL
   
+  #####################################################################
   
-  if(naive == TRUE) l.sp1 <- 0 else l.sp1 <- VC$l.sp1
+  l.sp1 <- VC$l.sp1 
+  l.sp2 <- VC$l.sp2 
+  l.sp3 <- VC$l.sp3 
+  l.sp4 <- VC$l.sp4 
+  l.sp5 <- VC$l.sp5 
+  l.sp6 <- VC$l.sp6 
+  l.sp7 <- VC$l.sp7 
   
+  if(VC$Cont == "NO" && VC$margins[2] %in% VC$m2 && respvec$univ == 1) l.sp1 <- l.sp4 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
+  if(VC$Cont == "NO" && VC$margins[2] %in% VC$m3 && respvec$univ == 1) l.sp1 <- l.sp5 <- l.sp6 <- l.sp7 <- 0  
+  
+  if(VC$Cont == "YES" && VC$margins[1] %in% VC$m2 && respvec$univ == 2) l.sp2 <- l.sp4 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
+  if(VC$Cont == "YES" && VC$margins[1] %in% VC$m3 && respvec$univ == 2) l.sp2 <- l.sp4 <- l.sp6 <- l.sp7 <- 0
 
+  if(VC$Cont == "YES" && VC$margins[2] %in% VC$m2 && respvec$univ == 3) l.sp1 <- l.sp3 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
+  if(VC$Cont == "YES" && VC$margins[2] %in% VC$m3 && respvec$univ == 3) l.sp1 <- l.sp3 <- l.sp5 <- l.sp7 <- 0
 
-    if((VC$fp==FALSE && (l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0 || VC$l.sp4!=0 || VC$l.sp5!=0 || VC$l.sp6!=0)) ){
+  #####################################################################
+  
+  
+    if((VC$fp==FALSE && (l.sp1!=0 || l.sp2!=0 || l.sp3!=0 || l.sp4!=0 || l.sp5!=0 || l.sp6!=0 || l.sp7!=0)) ){
 
        stoprule.SP <- 1; conv.sp <- TRUE; iter.inner <- iter.sp <- 0  
+
        
 
 	  while( stoprule.SP > tolsp ){ 
 
-
-             spo <- sp 
+             fito   <- fit$l
+             o.ests <- c(fit$argument) 
+             spo    <- sp 
+             
              wor.c <- working.comp(fit) 
   
                 	bs.mgfit <- try(magic(y = wor.c$Z,  
@@ -33,33 +80,46 @@ SemiParBIVProbit.fit  <- function(func.opt, start.v,
                 	                      sp= sp, S = qu.mag$Ss,
                         	              off = qu.mag$off, rank = qu.mag$rank,
                                 	      gcv = FALSE,
-                                	      gamma = VC$infl.fac), silent = TRUE)
+                                	      gamma = VC$infl.fac), silent = sc)
                 		if(class(bs.mgfit)=="try-error") {conv.sp <- FALSE; break} 
                 		
                 	sp <- bs.mgfit$sp; iter.sp <- iter.sp + 1; names(sp) <- names(spo) 
-                        o.ests <- c(fit$argument) 
+                        
 
-             fit <- trust(func.opt, o.ests, rinit=rinit, rmax = rmax,  parscale = parsc,  
+             fit <- try( trust(func.opt, o.ests, rinit=rinit, rmax = rmax,  parscale = parsc,  
                           respvec = respvec, VC = VC, 
                           sp = sp, qu.mag = qu.mag, 
-                          blather = TRUE, iterlim = iterlim)
-                                                            
+                          blather = TRUE, iterlim = iterlim), silent = sc) 
+                          
+                          
+                          
+                          if(class(fit) == "try-error"){conv.sp <- FALSE
+                          
+                                                         fit <- try( trust(func.opt, o.ests, rinit=rinit, rmax = rmax,  parscale = parsc,  
+			                                              respvec = respvec, VC = VC, 
+			                                              sp = spo, qu.mag = qu.mag, 
+                                                                      blather = TRUE, iterlim = iterlim), silent = sc)  
+                                                                      
+if(class(fit) == "try-error" && VC$Cont == "NO"  && VC$gamlssfit == FALSE) stop("It is not possible to fit the model. Try re-fitting the model and setting gamlssfit = TRUE.\n Also, read the WARNINGS section in ?SemiParBIVProbit.")
+if(class(fit) == "try-error" && VC$Cont == "NO"  && VC$gamlssfit == TRUE)  stop("It is not possible to fit the model. Read the WARNINGS section in ?SemiParBIVProbit.")         
+if(class(fit) == "try-error" && VC$Cont == "YES" && VC$gamlssfit == FALSE) stop("It is not possible to fit the model. Try re-fitting the model and setting gamlssfit = TRUE.\n Also, read the WARNINGS section in ?copulaReg.")
+if(class(fit) == "try-error" && VC$Cont == "YES" && VC$gamlssfit == TRUE)  stop("It is not possible to fit the model. Read the WARNINGS section in ?copulaReg.")
+                                                                                     
+                                                        # break
+                          } 
+                          
+                                                             
              iter.inner <- iter.inner + fit$iterations   	                                    
               
              if(iter.sp >= iterlimsp){conv.sp <- FALSE; break }
 
-             stoprule.SP <- max(abs(o.ests - c(fit$argument)))
+             stoprule.SP <- abs(fit$l - fito)/(0.1 + abs(fit$l))  # max(abs(o.ests - c(fit$argument)))
                   
            
-          }
+          } # end smoothing fitting loop
           
 
        if(VC$gc.l == TRUE) gc()   
-       
-       #wor.c <- working.comp(fit) 
-       #bs.mgfit <- magic(y = wor.c$Z,X = wor.c$X,sp= sp, S = qu.mag$Ss,
-       #                  off = qu.mag$off, rank = qu.mag$rank,
-       #                  gcv = FALSE, gamma = VC$infl.fac)
        
        magpp <- magic.post.proc(wor.c$X, bs.mgfit)
        

@@ -7,14 +7,11 @@ bprobgHsPO0 <- function(params, respvec, VC, sp = NULL, qu.mag = NULL){
   eta1 <- VC$X1%*%params[1:VC$X1.d2]
   eta2 <- VC$X2%*%params[(VC$X1.d2+1):(VC$X1.d2+VC$X2.d2)]
 
-  p1 <- pnorm(eta1); d.n1 <- dnorm(eta1)
-  p2 <- pnorm(eta2); d.n2 <- dnorm(eta2) 
-
-
-  p1 <- ifelse(p1 > max.p , max.p , p1) 
-  p1 <- ifelse(p1 < epsilon, epsilon, p1) 
-  p2 <- ifelse(p2 > max.p , max.p , p2) 
-  p2 <- ifelse(p2 < epsilon, epsilon, p2) 
+  pd1 <- probm(eta1, VC$margins[1], only.pr = FALSE)
+  pd2 <- probm(eta2, VC$margins[2], only.pr = FALSE)
+  
+  p1 <- pd1$pr; d.n1 <- pd1$d.n 
+  p2 <- pd2$pr; d.n2 <- pd2$d.n  
 
 
 
@@ -23,7 +20,7 @@ bprobgHsPO0 <- function(params, respvec, VC, sp = NULL, qu.mag = NULL){
   
 teta.st <- teta <- 0  
   
-p11 <-  pmax(BiCDF(p1, p2, VC$nC, teta), epsilon)
+p11 <-  BiCDF(p1, p2, VC$nC, teta)
 
 ########################################################################################################
 
@@ -35,14 +32,12 @@ p11 <-  pmax(BiCDF(p1, p2, VC$nC, teta), epsilon)
 c.copula.be1 <- p2                          
 c.copula.be2 <- p1
 
-c.copula2.be1    <- c.copula2.be2 <- 0    
-c.copula2.be1be2 <- 1
+derf1.dereta1 <- pd1$der2p.dereta
+derf2.dereta2 <- pd2$der2p.dereta
 
-
-bit1.b1b1 <- c.copula2.be1*(d.n1)^2-c.copula.be1*d.n1*eta1
-bit1.b2b2 <- c.copula2.be2*(d.n2)^2-c.copula.be2*d.n2*eta2
-bit1.b1b2 <- c.copula2.be1be2 * d.n1 * d.n2
-
+bit1.b1b1 <- c.copula.be1*derf1.dereta1 
+bit1.b2b2 <- c.copula.be2*derf2.dereta2
+bit1.b1b2 <- d.n1*d.n2
 
   dl.dbe1 <-  VC$weights*d.n1*( respvec$y1*c.copula.be1/p11   - respvec$cy*c.copula.be1/cp11   )                                     
   dl.dbe2 <-  VC$weights*d.n2*( respvec$y1*c.copula.be2/p11   - respvec$cy*c.copula.be2/cp11   )
@@ -121,8 +116,8 @@ if(VC$extra.regI == "sED") H <- regH(H, type = 2)
          list(value=res, gradient=G, hessian=H, S.h=ps$S.h, l=S.res, l.par=l.par, ps = ps,
               p11=p11, cp11=cp11, eta1=eta1, eta2=eta2,  
               dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2,
-              d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
-              d2l.be1.be2=d2l.be1.be2,
+              #d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
+              #d2l.be1.be2=d2l.be1.be2,
               BivD=VC$BivD, p1=p1, p2=p2)      
 
 }

@@ -1,8 +1,8 @@
 export(AT, AT2, RR, OR, rMVN, post.check,
-prev, distrHs,
-adjCov, copgHsCont,
+prev, distrHs, numch, numgh,distrHsAT,
+adjCov, copgHsCont, BCDF, BiCDF, jc.probs,
 adjCovSD,
-gt.bpm,
+gt.bpm, esp.tr, eta.tr, teta.tr,copgHsAT,
 bprobgHs,mb,
 bprobgHsPO,
 bprobgHsSS,
@@ -17,13 +17,18 @@ print.AT, print.AT2, print.RR, print.OR,
 print.prev, 
 print.mb,
 print.SemiParBIVProbit,
+print.copulaReg,
 print.summary.SemiParBIVProbit,
+print.summary.copulaReg,
 S.m, 
 conv.check,
 SemiParBIVProbit.fit.post,
 SemiParBIVProbit.fit,
 SemiParBIVProbit,
+copulaReg.fit.post,
+copulaReg,
 summary.SemiParBIVProbit,
+summary.copulaReg,
 working.comp,
 resp.check,
 polys.map, polys.setup)
@@ -33,26 +38,30 @@ importFrom(survey, svyrecvar, twophasevar, twophase2var, svyCprod)
 importFrom(trust,trust)
 importFrom(VGAM,pbinorm,dbinorm)
 import(mgcv)
-importFrom(VineCopula, BiCopTau2Par)
+importFrom(VineCopula, BiCopTau2Par, BiCopPar2Tau)
 importFrom(ggplot2, fortify)
+importFrom(matrixStats, rowQuantiles, colQuantiles, colWeightedMeans)
 
 importFrom(graphics, axTicks, abline, hist, lines, par, polygon, plot, rug) 
 importFrom(grDevices, cm.colors, gray, heat.colors, terrain.colors, topo.colors, dev.new)   
 importFrom(stats, qlogis, plogis, dgamma, dlnorm, dlogis, dnorm, density, cor, coef, as.formula, aggregate.data.frame, integrate, 
            model.matrix, na.omit, na.pass, pbinom, pchisq, pgamma, plnorm, pnorm, printCoefmat,
-           qnorm, qqnorm, quantile, residuals, rnorm, sd, uniroot, update, var, weighted.mean) 
+           qnorm, qqnorm, quantile, residuals, rnorm, sd, uniroot, update, var, weighted.mean, dbeta, pbeta) 
 importFrom(utils, getFromNamespace)
 
 
 
 S3method(plot, SemiParBIVProbit)
 S3method(summary, SemiParBIVProbit)
+S3method(summary, copulaReg)
 S3method(print, AT)
 S3method(print, AT2)
 S3method(print, RR)
 S3method(print, OR)
 S3method(print, SemiParBIVProbit)
+S3method(print, copulaReg)
 S3method(print, summary.SemiParBIVProbit)
+S3method(print, summary.copulaReg)
 S3method(logLik, SemiParBIVProbit)
 S3method(predict, SemiParBIVProbit)
 S3method(print, prev)

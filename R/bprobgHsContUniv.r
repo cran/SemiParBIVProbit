@@ -1,19 +1,72 @@
 bprobgHsContUniv <- function(params, respvec, VC, sp = NULL, qu.mag = NULL, AT = FALSE){
 
-eta2 <- VC$X2%*%params[1:VC$X2.d2]
-
 epsilon <- 0.0000001 # 0.9999999 0.0001 # sqrt(.Machine$double.eps)
 
+
+#########################################################################
+
+if(VC$Cont == "NO"){
+
+eta2 <- VC$X2%*%params[1:VC$X2.d2]
+eta2 <- eta.tr(eta2, VC$margins[2])
+
 if(is.null(VC$X3))  sigma2.st <- params[(VC$X2.d2 + 1)] 
-if(!is.null(VC$X3)) sigma2.st <- VC$X3%*%params[(VC$X2.d2+1):(VC$X2.d2+VC$X3.d2)]
+if(!is.null(VC$X3)) sigma2.st <- VC$X3%*%params[(VC$X2.d2+1):(VC$X2.d2+VC$X3.d2)] 
+                    
+    sstr1 <- esp.tr(sigma2.st, VC$margins[2])  
+    sigma2.st <- sstr1$vrb.st 
+    sigma2    <- sstr1$vrb 
 
-sigma2 <- exp(sigma2.st) + epsilon
 
-  eta2 <- ifelse( eta2 > 600, 600, eta2 )
-  eta2 <- ifelse( eta2 < -17, -17, eta2 )  
-  
 dHs  <- distrHs(respvec$y2, eta2, sigma2, sigma2.st, nu = 1, nu.st = 1, margin2=VC$margins[2], naive = TRUE)
-  
+
+}
+
+#########################################################################
+#########################################################################
+
+
+if(VC$Cont == "YES" && respvec$univ == 2){ # interested in first equation
+
+
+eta2 <- VC$X1%*%params[1:VC$X1.d2] # this is eta1 but changed to eta2 for convenience
+eta2 <- eta.tr(eta2, VC$margins[1])
+
+if(is.null(VC$X3))  sigma2.st <- params[(VC$X1.d2 + 1)] 
+if(!is.null(VC$X3)) sigma2.st <- VC$X3%*%params[(VC$X1.d2+1):(VC$X1.d2+VC$X3.d2)]
+
+    sstr1 <- esp.tr(sigma2.st, VC$margins[1])  
+    sigma2.st <- sstr1$vrb.st 
+    sigma2    <- sstr1$vrb 
+
+
+dHs  <- distrHs(respvec$y1, eta2, sigma2, sigma2.st, nu = 1, nu.st = 1, margin2=VC$margins[1], naive = TRUE)
+
+}
+
+
+if(VC$Cont == "YES" && respvec$univ == 3){ # interested in second equation
+
+eta2 <- VC$X2%*%params[1:VC$X2.d2]
+eta2 <- eta.tr(eta2, VC$margins[2])
+
+if(is.null(VC$X3))  sigma2.st <- params[(VC$X2.d2 + 1)] 
+if(!is.null(VC$X3)) sigma2.st <- VC$X4%*%params[(VC$X2.d2+1):(VC$X2.d2+VC$X4.d2)]
+
+
+    sstr1 <- esp.tr(sigma2.st, VC$margins[2])  
+    sigma2.st <- sstr1$vrb.st 
+    sigma2    <- sstr1$vrb 
+
+dHs  <- distrHs(respvec$y2, eta2, sigma2, sigma2.st, nu = 1, nu.st = 1, margin2=VC$margins[2], naive = TRUE)
+
+
+}
+
+#########################################################################
+#########################################################################
+
+
 pdf2                         <- dHs$pdf2
 derpdf2.dereta2              <- dHs$derpdf2.dereta2 
 derpdf2.dersigma2.st         <- dHs$derpdf2.dersigma2.st  
@@ -39,45 +92,125 @@ d2l.be.sigma     <- -VC$weights*( (der2pdf2.dereta2dersigma2.st*pdf2 - derpdf2.d
 ########################################################################################################
      
 
+if(VC$Cont == "NO"){
+
+
 if( is.null(VC$X3) ){
 
   G   <- c( colSums( c(dl.dbe)*VC$X2 ) ,
-            sum( dl.dsigma.st )
-          )
+            sum( dl.dsigma.st ) )
                 
-
   be.be    <- crossprod(VC$X2*c(d2l.be.be),VC$X2)
   be.sigma <- t(t(rowSums(t(VC$X2*c(d2l.be.sigma))))) 
 
   H <- rbind( cbind( be.be      , be.sigma             ), 
-              cbind( t(be.sigma), sum(d2l.sigma.sigma) )  
-            ) 
-  
+              cbind( t(be.sigma), sum(d2l.sigma.sigma) )  ) 
 }
-
-
 
 
 if( !is.null(VC$X3) ){
 
   G   <- c( colSums( c(dl.dbe)*VC$X2        ) ,
-            colSums( c(dl.dsigma.st)*VC$X3  )
-          )
+            colSums( c(dl.dsigma.st)*VC$X3  ) )
                 
   be.be    <- crossprod(VC$X2*c(d2l.be.be),VC$X2)
   be.sigma <- crossprod(VC$X2*c(d2l.be.sigma),VC$X3)
   si.sigma <- crossprod(VC$X3*c(d2l.sigma.sigma),VC$X3)  
 
   H <- rbind( cbind( be.be      , be.sigma  ), 
-              cbind( t(be.sigma), si.sigma  )  
-            )  
-   
-    
+              cbind( t(be.sigma), si.sigma  )  ) 
+              
+}
+
+if( (VC$l.sp2==0 && VC$l.sp3==0 ) || VC$fp==TRUE) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0) else ps <- pen(params, qu.mag, sp, VC, respvec$univ)
+
 }
 
 
 
-if( (VC$l.sp2==0 && VC$l.sp3==0 ) || VC$fp==TRUE) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0) else ps <- pen(params, qu.mag, sp, VC, eq1 = "no")
+if(VC$Cont == "YES" && respvec$univ == 2){
+
+
+if( is.null(VC$X3) ){
+
+  G   <- c( colSums( c(dl.dbe)*VC$X1 ) ,
+            sum( dl.dsigma.st )
+          )
+                
+  be.be    <- crossprod(VC$X1*c(d2l.be.be),VC$X1)
+  be.sigma <- t(t(rowSums(t(VC$X1*c(d2l.be.sigma))))) 
+
+  H <- rbind( cbind( be.be      , be.sigma             ), 
+              cbind( t(be.sigma), sum(d2l.sigma.sigma) )  
+            ) 
+}
+
+
+if( !is.null(VC$X3) ){
+
+  G   <- c( colSums( c(dl.dbe)*VC$X1        ) ,
+            colSums( c(dl.dsigma.st)*VC$X3  )
+          )
+                
+  be.be    <- crossprod(VC$X1*c(d2l.be.be),VC$X1)
+  be.sigma <- crossprod(VC$X1*c(d2l.be.sigma),VC$X3)
+  si.sigma <- crossprod(VC$X3*c(d2l.sigma.sigma),VC$X3)  
+
+  H <- rbind( cbind( be.be      , be.sigma  ), 
+              cbind( t(be.sigma), si.sigma  )  
+            )  
+}
+
+
+
+if( (VC$l.sp1==0 && VC$l.sp3==0 ) || VC$fp==TRUE) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0) else ps <- pen(params, qu.mag, sp, VC, respvec$univ)
+
+}
+
+
+
+
+
+if(VC$Cont == "YES" && respvec$univ == 3){
+
+
+if( is.null(VC$X3) ){
+
+  G   <- c( colSums( c(dl.dbe)*VC$X2 ) ,
+            sum( dl.dsigma.st )
+          )
+                
+  be.be    <- crossprod(VC$X2*c(d2l.be.be),VC$X2)
+  be.sigma <- t(t(rowSums(t(VC$X2*c(d2l.be.sigma))))) 
+
+  H <- rbind( cbind( be.be      , be.sigma             ), 
+              cbind( t(be.sigma), sum(d2l.sigma.sigma) )  
+            ) 
+}
+
+
+if( !is.null(VC$X3) ){
+
+  G   <- c( colSums( c(dl.dbe)*VC$X2        ) ,
+            colSums( c(dl.dsigma.st)*VC$X4  )
+          )
+                
+  be.be    <- crossprod(VC$X2*c(d2l.be.be),VC$X2)
+  be.sigma <- crossprod(VC$X2*c(d2l.be.sigma),VC$X4)
+  si.sigma <- crossprod(VC$X4*c(d2l.sigma.sigma),VC$X4)  
+
+  H <- rbind( cbind( be.be      , be.sigma  ), 
+              cbind( t(be.sigma), si.sigma  )  
+            )  
+}
+
+
+
+if( (VC$l.sp2==0 && VC$l.sp4==0 ) || VC$fp==TRUE) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0) else ps <- pen(params, qu.mag, sp, VC, respvec$univ)
+
+}
+
+
 
 
 if(VC$extra.regI == "pC") H <- regH(H, type = 1)
@@ -90,41 +223,10 @@ if(VC$extra.regI == "pC") H <- regH(H, type = 1)
 if(VC$extra.regI == "sED") H <- regH(H, type = 2) 
   
 
-         list(value=res, gradient=G, hessian=H, S.h=ps$S.h, l=S.res, l.par=l.par, ps = ps, sigma2.st = sigma2.st,
-              eta2=eta2, 
-dl.dbe          = dl.dbe,            
-dl.dsigma.st    = dl.dsigma.st,
-d2l.be.be       = d2l.be.be,
-d2l.sigma.sigma = d2l.sigma.sigma,
-d2l.be.sigma    = d2l.be.sigma,
-              BivD=VC$BivD)      
+list(value=res, gradient=G, hessian=H, S.h=ps$S.h, l=S.res, l.par=l.par, ps = ps, sigma2.st = sigma2.st,
+     BivD=VC$BivD, eta2 = eta2, sigma2 = sigma2, nu = NULL)      
+
 
 }
-
-
-
-
-     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

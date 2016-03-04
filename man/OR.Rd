@@ -1,10 +1,10 @@
 \name{OR}
 \alias{OR}
 
-\title{Average causal odds ratio of a binary or continuous endogenous variable}
+\title{Causal odds ratio of a binary or continuous endogenous variable}
 
 \description{ 
-\code{OR} can be used to calculate the sample average causal odds ratio of a binary or continuous endogenous predictor/treatment, with 
+\code{OR} can be used to calculate the causal odds ratio of a binary or continuous endogenous predictor/treatment, with 
 corresponding interval obtained using posterior simulation.}
 
 
@@ -12,8 +12,9 @@ corresponding interval obtained using posterior simulation.}
 \usage{
 
 OR(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL, 
-   n.sim = 100, prob.lev = 0.05, hd.plot = FALSE,
-   prob.plot = FALSE, main = "Histogram and Kernel Density of Simulated Odds Ratios", 
+   n.sim = 100, prob.lev = 0.05, length.out = NULL, hd.plot = FALSE,
+   or.plot = FALSE, 
+   main = "Histogram and Kernel Density of Simulated Odds Ratios", 
    xlab = "Simulated Odds Ratios", ...)
 
 }
@@ -42,11 +43,14 @@ the presence of unobserved confounders) and \code{"bivariate"} (the effect is ob
 
 \item{prob.lev}{Overall probability of the left and right tails of the OR distribution used for interval calculations.} 
 
-\item{hd.plot}{If \code{TRUE} then a plot of the histogram and kernel density estimate of the simulated odds ratios is produced. This can 
-               only be produced when \code{delta = FALSE}.}
+\item{length.out}{Ddesired length of the sequence to be used when calculating the effect that a continuous
+                  treatment has on a binary outcome.}
 
-\item{prob.plot}{For the case of continuous endogenous variable and binary outcome, if \code{TRUE} then a plot  
-                 showing probability that the binary outcome is equal to 1 for each value of the endogenous variable 
+\item{hd.plot}{If \code{TRUE} then a plot of the histogram and kernel density estimate of the simulated odds ratios is produced. This can 
+               only be produced when binary responses are used.}
+
+\item{or.plot}{For the case of continuous endogenous variable and binary outcome, if \code{TRUE} then a plot (on the log scale)  
+                 showing the odd ratios that the binary outcome is equal to 1 for each incremental value of the endogenous variable 
                  and respective intervals is produced.}
 
 \item{main}{Title for the plot.}
@@ -61,7 +65,7 @@ the presence of unobserved confounders) and \code{"bivariate"} (the effect is ob
 
 \details{
 
-OR calculates the sample average causal odds ratio for a binary or continuous treatment. Posterior simulation is used to obtain a 
+OR calculates the causal odds ratio for a binary or continuous treatment. Posterior simulation is used to obtain a 
 confidence/credible interval. 
 
 
@@ -74,14 +78,10 @@ confidence/credible interval.
 \item{res}{It returns three values: lower confidence interval limit, estimated OR and upper interval limit.}
 \item{prob.lev}{Probability level used.}
 \item{sim.OR}{It returns a vector containing simulated values of the average OR. This 
-               is used to calculate intervals.}
-\item{OR.so}{It returns a vector containing the estimated effect for each single observation. This may not be available in some cases.}            
+               is used to calculate intervals.}           
 \item{Ratios}{For the case of continuous endogenous treatment and binary outcome, it returns a matrix made up of 
-               three columns containing the odds ratios for each unit increase in the endogenous variable and respective intervals.}            
-\item{Pr}{For the case of continuous endogenous exposure and binary outcome, it returns a matrix made up of 
-               three columns containing the probability that the binary outcome is equal to 1 for each value of the endogenous variable, 
-               and respective intervals.}               
-
+               three columns containing the odds ratios for each incremental value in the endogenous variable and respective intervals.}            
+          
 }
 
 

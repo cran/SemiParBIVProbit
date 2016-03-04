@@ -1,58 +1,41 @@
 bprobgHs <- function(params, respvec, VC, sp = NULL, qu.mag = NULL, AT = FALSE){
 
  
-  epsilon <- 0.0000001 # 0.9999999 0.0001 # sqrt(.Machine$double.eps)
+  epsilon <- 0.0000001 
   max.p   <- 0.9999999
 
   eta1 <- VC$X1%*%params[1:VC$X1.d2]
   eta2 <- VC$X2%*%params[(VC$X1.d2+1):(VC$X1.d2+VC$X2.d2)]
-  etad <- NULL ## New bit
-
-  p1 <- pnorm(eta1); d.n1 <- dnorm(eta1)
-  p2 <- pnorm(eta2); d.n2 <- dnorm(eta2) 
+  etad <- NULL 
   
-  p1 <- ifelse(p1 > max.p, max.p, p1) 
-  p1 <- ifelse(p1 < epsilon, epsilon, p1) 
-  p2 <- ifelse(p2 > max.p, max.p, p2) 
-  p2 <- ifelse(p2 < epsilon, epsilon, p2) 
-
-
+  pd1 <- probm(eta1, VC$margins[1], only.pr = FALSE)
+  pd2 <- probm(eta2, VC$margins[2], only.pr = FALSE)
+  
+  p1 <- pd1$pr; d.n1 <- pd1$d.n 
+  p2 <- pd2$pr; d.n2 <- pd2$d.n  
   
   
-######
-  if(is.null(VC$X3))  teta.st <- params[(VC$X1.d2+VC$X2.d2+1)]
+  der2p1.dereta12 <- pd1$der2p.dereta
+  der2p2.dereta22 <- pd2$der2p.dereta
+  
+                         
+  if(is.null(VC$X3))  teta.st <- etad <- params[(VC$X1.d2+VC$X2.d2+1)]
   if(!is.null(VC$X3)) teta.st <- etad <- VC$X3%*%params[(VC$X1.d2+VC$X2.d2+1):(VC$X1.d2+VC$X2.d2+VC$X3.d2)]
-######  
-  
+ 
 
-  
 ########################################################################################################  
   
-  if( VC$BivD %in% c("N") ) teta.st <- ifelse(abs(teta.st) > 8.75, sign(teta.st)*8.75, teta.st )  
-  
-  if( VC$BivD %in%  c("C0","C180","C90","C270","J0","J180","J90","J270","G0","G180","G90","G270") ) {
- 
-  teta.st <- ifelse( teta.st > 20, 20, teta.st )  # 709
-  teta.st <- ifelse( teta.st < -17, -17, teta.st )   # -20 
-  
-  }
-  
- 
-    if(VC$BivD %in% c("N")      )     teta <- tanh(teta.st)                        
-    if(VC$BivD=="F")                  teta <- teta.st + epsilon
-    if(VC$BivD %in% c("C0", "C180") ) teta <-    exp(teta.st)                      
-    if(VC$BivD %in% c("C90","C270") ) teta <- -( exp(teta.st) )                     
-    if(VC$BivD %in% c("J0", "J180","G0", "G180") ) teta <-    exp(teta.st) + 1     
-    if(VC$BivD %in% c("J90","J270","G90","G270") ) teta <- -( exp(teta.st) + 1 )   
+resT    <- teta.tr(VC, teta.st)
+teta.st <- resT$teta.st
+teta    <- resT$teta 
     
-
-p11 <- pmax(BiCDF(p1, p2, VC$nC, teta), epsilon)
+p11 <- BiCDF(p1, p2, VC$nC, teta)
 
 ########################################################################################################
 
   p10 <- pmax(p1 - p11, epsilon)
   p01 <- pmax(p2 - p11, epsilon)
-  p00 <- pmax(1- p11 - p10 - p01, epsilon)
+  p00 <- pmax(1 - p11 - p10 - p01, epsilon)
 
   l.par <- VC$weights*( respvec$y1.y2*log(p11) + respvec$y1.cy2*log(p10) + respvec$cy1.y2*log(p01) + respvec$cy1.cy2*log(p00) )
 
@@ -66,18 +49,19 @@ c.copula2.be1 <- dH$c.copula2.be1
 c.copula2.be2 <- dH$c.copula2.be2 
 
 
-bit1.b1b1 <- c.copula2.be1*(d.n1)^2-c.copula.be1*d.n1*eta1
-bit2.b1b1 <- -d.n1*eta1-bit1.b1b1
+bit1.b1b1 <- c.copula2.be1*d.n1^2 + c.copula.be1*der2p1.dereta12                                                                                                                                
+bit2.b1b1 <- -c.copula2.be1*d.n1^2  + (1-c.copula.be1)*der2p1.dereta12
 bit3.b1b1 <- -bit1.b1b1
 bit4.b1b1 <- -bit2.b1b1
 
-bit1.b2b2 <- c.copula2.be2*(d.n2)^2-c.copula.be2*d.n2*eta2
+
+bit1.b2b2 <- c.copula2.be2*d.n2^2 + c.copula.be2*der2p2.dereta22                                                                                                                             
 bit2.b2b2 <- -bit1.b2b2
-bit3.b2b2 <- -d.n2*eta2-bit1.b2b2
+bit3.b2b2 <- -c.copula2.be2*d.n2^2 + (1-c.copula.be2)*der2p2.dereta22
 bit4.b2b2 <- -bit3.b2b2
 
 c.copula2.be1be2 <- dH$c.copula2.be1be2
-bit1.b1b2 <- c.copula2.be1be2 * d.n1 *d.n2
+bit1.b1b2 <- c.copula2.be1be2*d.n1*d.n2
 bit2.b1b2 <- -bit1.b1b2
 bit3.b1b2 <- -bit1.b1b2
 bit4.b1b2 <- bit1.b1b2
@@ -328,11 +312,11 @@ if(VC$extra.regI == "sED") H <- regH(H, type = 2)
   
 
          list(value=res, gradient=G, hessian=H, S.h=ps$S.h, l=S.res, l.par=l.par, ps = ps, 
-              p11=p11, p10=p10, p01=p01, p00=p00, eta1=eta1, eta2=eta2, etad=etad,
+              p11=p11, p10=p10, p01=p01, p00=p00, eta1=eta1, eta2=eta2, etad=etad, 
               dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.drho=dl.drho,
-              d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
-              d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
-              d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho, 
+              #d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
+              #d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
+              #d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho, 
               BivD=VC$BivD, p1=p1, p2=p2, theta.star = teta.st)      
 
 }

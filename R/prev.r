@@ -2,28 +2,22 @@ prev <- function(x, sw = NULL, type = "bivariate", ind = NULL, delta = FALSE, n.
                       hd.plot = FALSE, main = "Histogram and Kernel Density of Simulated Prevalences", 
        xlab="Simulated Prevalences", ...){
 
+
+if(x$Cont == "YES") stop("This function is not suitable for bivariate models with continuous margins.")
+
 lb <- wm <- ub <- qz <- sv <- Vv <- G <- X2sg <- 1
 wms <- NA
 
 if(x$Model=="B" || x$Model=="BPO") stop("This function is suitable for sample selection models only.")
 
-
-
 if( !( type %in% c("naive","univariate","bivariate") ) ) stop("Error in parameter type value. It should be one of: naive, univariate or bivariate.")
-
 
 
 X2sg <- x$X2s
 
 
-
-
-
 if(type == "univariate")                    {eta2 <- X2sg%*%coef(x$gam2); Vv <- x$gam2$Vp}  
 if(type == "bivariate" || type == "naive")  {eta2 <- x$eta2;              Vv <- x$Vb}
-
-
-
 
 if( !is.null(ind) ){ 
 
@@ -39,33 +33,17 @@ if(!is.null(sw)) sw <- sw[ind]
 }
 
 
-
-
-
-
 if(is.null(sw)) sw <- rep(1,length(eta2)) 
-
-
-
-
-
 
 if( length(sw)!=length(eta2) ) stop("sw must have the same length as the number of observations used in fitting.") 
 
 
 
+#######
 
-wm <- weighted.mean(pnorm(eta2), w=sw)
+wm <- weighted.mean(probm(eta2, x$margins[2])$pr, w=sw)
 
-
-
-
-
-
-
-
-
-
+#######
 
 
 
@@ -74,11 +52,9 @@ if(type != "naive"){
 
 
 
-
 if(delta == TRUE){
 
-core <- apply( c(dnorm(eta2))*X2sg, 2, weighted.mean,  w = sw)
-
+core <- colWeightedMeans( c( probm(eta2, x$margins[2], only.pr = FALSE)$d.n )*X2sg, w = sw, na.rm = FALSE) 
 
 if( is.null(x$X3) ) zerod <- 0
 if(!is.null(x$X3) ) zerod <- rep(0, x$X3.d2)
@@ -106,17 +82,15 @@ if(delta == FALSE){
 
   if(type == "bivariate")   coefm <- x$coefficients       
   if(type == "univariate")  coefm <- x$gam2$coefficients    
-
-  # bs <- rmvnorm(n.sim, mean = coefm, sigma=Vv, method=s.meth)
   
    bs <- rMVN(n.sim, mean = coefm, sigma=Vv)
   
   
   if(type == "bivariate") bs <- bs[, x$X1.d2 + (1 : x$X2.d2) ]
  
-  p2s <- pnorm(X2sg%*%t(bs)) 
-  wms <- apply(p2s, MARGIN=2, FUN=weighted.mean, w=sw)  
-  bb <- quantile(wms, probs=c(prob.lev/2,1-prob.lev/2), na.rm=TRUE )
+  p2s <- probm( X2sg%*%t(bs) , x$margins[2])$pr 
+  wms <- colWeightedMeans( p2s, w = sw, na.rm = FALSE)
+  bb <- quantile(wms, probs = c(prob.lev/2,1-prob.lev/2), na.rm=TRUE )
 
   lb <- bb[1]
   ub <- bb[2] 

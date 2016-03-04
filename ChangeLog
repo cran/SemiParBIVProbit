@@ -1,3 +1,8 @@
+version 3.7
+- copula additive models for continuous margins implemented. The new function is copulaReg().
+- more link functions available for binary responses.
+- manual updated.
+
 version 3.6-1
 - starting value procedure for continuous distributions improved.
 - At calculation corrected. Thanks to Vanessa Didelez for spotting this.

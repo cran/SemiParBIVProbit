@@ -1,5 +1,9 @@
 gt.bpm <- function(x) {
 
+
+if(x$Cont == "YES") stop("This function is not suitable for bivariate models with continuous margins.")
+
+
 dl.drho <- d.n1n2 <- p01 <- p00 <- p10 <- p11 <- eta1 <- eta2 <- 1
 if(x$BivD!="N") stop("This test's implementation is currently valid for bivariate normal errors only.")
 if(!is.null(x$X3) ) stop("This test is not designed for a varying correlation coefficient model.")
