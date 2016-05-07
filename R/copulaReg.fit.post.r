@@ -1,4 +1,4 @@
-copulaReg.fit.post <- function(SemiParFit, data, VC, qu.mag=NULL, 
+copulaReg.fit.post <- function(SemiParFit, VC, qu.mag=NULL, 
                                       gam1, gam2, gam3, gam4, gam5, gam6, gam7){
 
 Ve <- R <- theta <- edf <- edf1 <- NULL
@@ -17,7 +17,8 @@ epsilon <- 0.0000001
 max.p   <- 0.9999999
                                                                                                          
     He.eig <- eigen(He, symmetric=TRUE)
-    if(min(He.eig$values) < epsilon) He.eig$values[which(He.eig$values < epsilon)] <- epsilon
+    if(min(He.eig$values) < sqrt(.Machine$double.eps) && sign( min( sign(He.eig$values) ) ) == -1) He.eig$values <- abs(He.eig$values)  
+    if(min(He.eig$values) < sqrt(.Machine$double.eps) ) { pep <- which(He.eig$values < sqrt(.Machine$double.eps)); He.eig$values[pep] <- epsilon }
     Vb <- He.eig$vectors%*%tcrossprod(diag(1/He.eig$values),He.eig$vectors)  # this could be taken from magic as well 
     Vb <- (Vb + t(Vb) ) / 2 
     
@@ -52,10 +53,7 @@ sigma21 <- esp.tr(SemiParFit$fit$etas1, VC$margins[1])$vrb
 sigma22 <- esp.tr(SemiParFit$fit$etas2, VC$margins[2])$vrb    
   
   
-#  if( is.null(VC$X3) ) {sigma21 <- esp.tr(SemiParFit$fit$argument["sigma2.1.star"], VC$margins[1])$vrb; names(sigma21) <- "sigma21"
-#                        sigma22 <- esp.tr(SemiParFit$fit$argument["sigma2.2.star"], VC$margins[2])$vrb; names(sigma22) <- "sigma22" }
- 
- 
+
 if( is.null(VC$X3) ) {names(sigma21) <- "sigma21"
                       names(sigma22) <- "sigma22" } 
   
@@ -74,31 +72,12 @@ if( is.null(VC$X3) ) {names(sigma21) <- "sigma21"
 # NUs
 ############################################################################################  
 
-#if(VC$margins[1] %in% cont3par ){  
-#
-#   if( is.null(VC$X3) ) {nu1 <- exp(SemiParFit$fit$argument["nu.1.star"]); names(nu1) <- "nu1"}
-#   if(!is.null(VC$X3) ) nu1 <- exp(SemiParFit$fit$etan1)                        
-##
-#    nu1.a <- mean(nu1)
-#    if( length(nu1)==1 ) nu1.a <- nu1  
-#
-#}
-#
-#if(VC$margins[2] %in% cont3par ){  
-#
-#   if( is.null(VC$X3) ) {nu2 <- exp(SemiParFit$fit$argument["nu.2.star"]); names(nu2) <- "nu2"}
-#   if(!is.null(VC$X3) ) nu2 <- exp(SemiParFit$fit$etan2)                        
-#
-#    nu2.a <- mean(nu2)
-#    if( length(nu2)==1 ) nu2.a <- nu2  
-#
-#}
 
 
 if(VC$margins[1] %in% cont3par ){  
 
 
-nu1 <- exp(SemiParFit$fit$etan1)  
+nu1 <- esp.tr(SemiParFit$fit$etan1, VC$margins[1])$vrb    
 if( is.null(VC$X3) ) names(nu1) <- "nu1"
 
 nu1.a <- mean(nu1)
@@ -111,7 +90,7 @@ if( length(nu1)==1 ) nu1.a <- nu1
 
 if(VC$margins[2] %in% cont3par ){  
 
-nu2 <- exp(SemiParFit$fit$etan2)  
+nu2 <- esp.tr(SemiParFit$fit$etan2, VC$margins[2])$vrb    
 if( is.null(VC$X3) ) names(nu2) <- "nu2"
                        
 nu2.a <- mean(nu2)
@@ -126,9 +105,7 @@ if( length(nu2)==1 ) nu2.a <- nu2
 
 dep <- SemiParFit$fit$etad
 if( is.null(VC$X3) ) names(dep) <- "theta"
-
-#if( is.null(VC$X3) ) {dep <- SemiParFit$fit$argument["theta.star"]; names(dep) <- "theta"}  
-#  if(!is.null(VC$X3) )    
+  
 
 resT  <- teta.tr(VC, dep)
 theta <- resT$teta        
@@ -205,7 +182,7 @@ if( (VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0 || VC$l.sp4!=0 || VC$l.sp5!=0 || 
                       theta = theta, theta.a = theta.a, tau = tau, tau.a= tau.a,
                       sigma21 = sigma21, sigma22 = sigma22, sigma21.a = sigma2.1.a, sigma22.a = sigma2.2.a,
                       nu1 = nu1, nu1.a = nu1.a, nu2= nu2, nu2.a = nu2.a,
-                      sp = sp, R = R, Ve = Ve, tau = tau) 
+                      sp = sp, R = R, Ve = Ve) 
 
 }
 

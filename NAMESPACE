@@ -1,12 +1,12 @@
-export(AT, AT2, RR, OR, rMVN, post.check,
+export(AT, AT2, RR, OR, rMVN, post.check,mm,Amat,
 prev, distrHs, numch, numgh,distrHsAT,
-adjCov, copgHsCont, BCDF, BiCDF, jc.probs,
+adjCov, copgHsCont, BCDF, BiCDF, jc.probs,probm,
 adjCovSD,
 gt.bpm, esp.tr, eta.tr, teta.tr,copgHsAT,
-bprobgHs,mb,
+bprobgHs,mb, H.tri, g.tri, triprobgHs, H.triSS, g.triSS, triprobgHsSS,
 bprobgHsPO,
 bprobgHsSS,
-bprobgHsContUniv,
+bprobgHsContUniv, 
 copgHs, copgHs2,
 logLik.SemiParBIVProbit,
 LM.bpm,
@@ -17,18 +17,28 @@ print.AT, print.AT2, print.RR, print.OR,
 print.prev, 
 print.mb,
 print.SemiParBIVProbit,
+print.SemiParTRIVProbit,
 print.copulaReg,
+print.copulaSampleSel,
 print.summary.SemiParBIVProbit,
+print.summary.SemiParTRIVProbit,
 print.summary.copulaReg,
+print.summary.copulaSampleSel,
 S.m, 
 conv.check,
 SemiParBIVProbit.fit.post,
+SemiParTRIVProbit.fit.post,
 SemiParBIVProbit.fit,
 SemiParBIVProbit,
+SemiParTRIVProbit,
 copulaReg.fit.post,
 copulaReg,
+copulaSampleSel.fit.post,
+copulaSampleSel,
 summary.SemiParBIVProbit,
+summary.SemiParTRIVProbit,
 summary.copulaReg,
+summary.copulaSampleSel,
 working.comp,
 resp.check,
 polys.map, polys.setup)
@@ -42,6 +52,8 @@ importFrom(VineCopula, BiCopTau2Par, BiCopPar2Tau)
 importFrom(ggplot2, fortify)
 importFrom(matrixStats, rowQuantiles, colQuantiles, colWeightedMeans)
 
+
+importFrom(mnormt, pmnorm)
 importFrom(graphics, axTicks, abline, hist, lines, par, polygon, plot, rug) 
 importFrom(grDevices, cm.colors, gray, heat.colors, terrain.colors, topo.colors, dev.new)   
 importFrom(stats, qlogis, plogis, dgamma, dlnorm, dlogis, dnorm, density, cor, coef, as.formula, aggregate.data.frame, integrate, 
@@ -53,15 +65,21 @@ importFrom(utils, getFromNamespace)
 
 S3method(plot, SemiParBIVProbit)
 S3method(summary, SemiParBIVProbit)
+S3method(summary, SemiParTRIVProbit)
 S3method(summary, copulaReg)
+S3method(summary, copulaSampleSel)
 S3method(print, AT)
 S3method(print, AT2)
 S3method(print, RR)
 S3method(print, OR)
 S3method(print, SemiParBIVProbit)
+S3method(print, SemiParTRIVProbit)
 S3method(print, copulaReg)
+S3method(print, copulaSampleSel)
 S3method(print, summary.SemiParBIVProbit)
+S3method(print, summary.SemiParTRIVProbit)
 S3method(print, summary.copulaReg)
+S3method(print, summary.copulaSampleSel)
 S3method(logLik, SemiParBIVProbit)
 S3method(predict, SemiParBIVProbit)
 S3method(print, prev)

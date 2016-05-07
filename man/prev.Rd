@@ -11,7 +11,7 @@ obtained using the delta method or posterior simulation.}
 
 \usage{
 
-prev(x, sw = NULL, type = "bivariate", ind = NULL, delta = FALSE,  
+prev(x, sw = NULL, type = "simultaneous", ind = NULL, delta = FALSE,  
      n.sim = 100, prob.lev = 0.05, hd.plot = FALSE, 
      main = "Histogram and Kernel Density of Simulated Prevalences", 
      xlab = "Simulated Prevalences", ...)
@@ -25,8 +25,9 @@ prev(x, sw = NULL, type = "bivariate", ind = NULL, delta = FALSE,
 \item{sw}{Survey weights.}  
 
 \item{type}{This argument can take three values: \code{"naive"} (the prevalence is calculated ignoring the presence of observed 
-            and unobserved confounders), \code{"univariate"} (the effect is obtained from the univariate probit/single imputation model 
-            which neglects the presence of unobserved confounders) and \code{"bivariate"} (the effect is obtained from the bivariate model 
+            and unobserved confounders), \code{"univariate"} (the prevalence is obtained from the univariate probit/single imputation model 
+            which neglects the presence of unobserved confounders) and \code{"simultaneous"} (the prevalence is obtained from the 
+            bivariate/trivariate model 
             which accounts for observed and unobserved confounders).}
              
 \item{ind}{Binary logical variable. It can be used to calculate the prevalence for a subset of the data.} 
@@ -103,8 +104,8 @@ McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption
 ## see examples for SemiParBIVProbit
 }
 
-\keyword{semiparametric bivariate probit modelling} 
-\keyword{bivariate probit model} 
+\keyword{semiparametric bivariate modelling} 
+\keyword{semiparametric trivariate probit modelling} 
 \keyword{prevalence} 
 \keyword{delta method}
 \keyword{non-random sample selection} 

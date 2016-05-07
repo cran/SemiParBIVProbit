@@ -1,7 +1,7 @@
 print.summary.copulaReg <- function(x, digits = max(3, getOption("digits") - 3),
                                              signif.stars = getOption("show.signif.stars"),...){
 
-   cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","BE")  
+   cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK")  
    cont3par <- c("DAGUM","SM") 
  
   if(x$BivD=="FGM")  {cop <- "FGM"                ;lind <- "atanh"} 
@@ -24,17 +24,17 @@ print.summary.copulaReg <- function(x, digits = max(3, getOption("digits") - 3),
      
    main.t <- "\nCOPULA:  "     
    cp <- "  theta = "; as.p <- x$theta.a
-   ct <- "  K's tau = "; kt.p <- x$tau.a
+   ct <- "  tau = "; kt.p <- x$tau.a
    s1 <- "sigma2.1 = "; s1.p <- x$sigma21.a
    s2 <- "sigma2.2 = "; s2.p <- x$sigma22.a 
    n1 <- "nu.1 = "; n1.p <- x$nu1.a
    n2 <- "nu.2 = "; n2.p <- x$nu2.a 
    
  
-   if(x$margins[1] %in% c("N","GU","rGU","LO") )  m1l <- "identity"
-   if(x$margins[2] %in% c("N","GU","rGU","LO") )  m2l <- "identity"
-   if(x$margins[1] %in% c("LN","WEI","iG","GA","DAGUM","SM") ) m1l <- "log" 
-   if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM") ) m2l <- "log" 
+   if(x$margins[1] %in% c("N","GU","rGU","LO","GAi") )  m1l <- "identity"
+   if(x$margins[2] %in% c("N","GU","rGU","LO","GAi") )  m2l <- "identity"
+   if(x$margins[1] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK") ) m1l <- "log" 
+   if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK") ) m2l <- "log" 
    if(x$margins[1] %in% c("BE") )                              m1l <- "qlogis" 
    if(x$margins[2] %in% c("BE") )                              m2l <- "qlogis"    
    
@@ -49,10 +49,13 @@ print.summary.copulaReg <- function(x, digits = max(3, getOption("digits") - 3),
   if(x$margins[1]=="LN")     cat("\nMARGIN 1: log-normal") 
   if(x$margins[1]=="WEI")    cat("\nMARGIN 1: Weibull") 
   if(x$margins[1]=="iG")     cat("\nMARGIN 1: inverse Gaussian") 
-  if(x$margins[1]=="GA")     cat("\nMARGIN 1: gamma")  
+  if(x$margins[1]%in%c("GA","GAi"))     cat("\nMARGIN 1: gamma")  
   if(x$margins[1]=="BE")     cat("\nMARGIN 1: beta")    
   if(x$margins[1]=="DAGUM")  cat("\nMARGIN 1: Dagum")  
   if(x$margins[1]=="SM")     cat("\nMARGIN 1: Singh-Maddala") 
+  if(x$margins[1]=="FISK")     cat("\nMARGIN 1: Fisk") 
+  
+  
 
   if(x$margins[2]=="N")      cat("\nMARGIN 2: Gaussian")  
   if(x$margins[2]=="GU")     cat("\nMARGIN 2: Gumbel")    
@@ -61,10 +64,12 @@ print.summary.copulaReg <- function(x, digits = max(3, getOption("digits") - 3),
   if(x$margins[2]=="LN")     cat("\nMARGIN 2: log-normal") 
   if(x$margins[2]=="WEI")    cat("\nMARGIN 2: Weibull") 
   if(x$margins[2]=="iG")     cat("\nMARGIN 2: inverse Gaussian") 
-  if(x$margins[2]=="GA")     cat("\nMARGIN 2: gamma")   
+  if(x$margins[2]%in%c("GA","GAi"))     cat("\nMARGIN 2: gamma")   
   if(x$margins[2]=="BE")     cat("\nMARGIN 2: beta")    
   if(x$margins[2]=="DAGUM")  cat("\nMARGIN 2: Dagum")
   if(x$margins[2]=="SM")     cat("\nMARGIN 2: Singh-Maddala") 
+  if(x$margins[2]=="FISK")   cat("\nMARGIN 2: Fisk") 
+  
   
   
   
@@ -416,32 +421,33 @@ print.summary.copulaReg <- function(x, digits = max(3, getOption("digits") - 3),
   nodi <- 3
   
   
-  if( x$margins[1] %in% cont2par && x$margins[2] %in% cont2par ) cat("\nn = ",x$n,cp,format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")",
+  if( x$margins[1] %in% cont2par && x$margins[2] %in% cont2par ) cat(s1,format(s1.p,digits=nodi),"(",format(CIsig21[1],digits=nodi),",",format(CIsig21[2],digits=nodi),")",
+                                                                     "  ",s2,format(s2.p,digits=nodi),"(",format(CIsig22[1],digits=nodi),",",format(CIsig22[2],digits=nodi),")",
+                                                                     "\ntheta = ",format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")",
                                                                      ct,format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")",
-                                                                     "\n",s1,format(s1.p,digits=nodi),"(",format(CIsig21[1],digits=nodi),",",format(CIsig21[2],digits=nodi),")",
-                                                                     "  ",s2,format(s2.p,digits=nodi),"(",format(CIsig22[1],digits=nodi),",",format(CIsig22[2],digits=nodi),")","\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
+                                                                     "\nn = ",x$n, "  total edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
 
-  if( x$margins[1] %in% cont3par && x$margins[2] %in% cont3par ) cat("\nn = ",x$n,cp,format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")",
-                                                                     ct,format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")",
-                                                                     "\n",s1,format(s1.p,digits=nodi),"(",format(CIsig21[1],digits=nodi),",",format(CIsig21[2],digits=nodi),")",
+  if( x$margins[1] %in% cont3par && x$margins[2] %in% cont3par ) cat(s1,format(s1.p,digits=nodi),"(",format(CIsig21[1],digits=nodi),",",format(CIsig21[2],digits=nodi),")",
                                                                      "  ",s2,format(s2.p,digits=nodi),"(",format(CIsig22[1],digits=nodi),",",format(CIsig22[2],digits=nodi),")",
                                                                      "\n",n1,format(n1.p,digits=nodi),"(",format(CInu1[1],digits=nodi),",",format(CInu1[2],digits=nodi),")",
-                                                                     "  ",n2,format(n2.p,digits=nodi),"(",format(CInu2[1],digits=nodi),",",format(CInu2[2],digits=nodi),")",                                                                     
-                                                                     "\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
-
-if( x$margins[1] %in% cont2par && x$margins[2] %in% cont3par ) cat("\nn = ",x$n,cp,format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")",
+                                                                     "  ",n2,format(n2.p,digits=nodi),"(",format(CInu2[1],digits=nodi),",",format(CInu2[2],digits=nodi),")",   
+                                                                     "\ntheta = ",format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")",
                                                                      ct,format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")",
-                                                                     "\n",s1,format(s1.p,digits=nodi),"(",format(CIsig21[1],digits=nodi),",",format(CIsig21[2],digits=nodi),")",
+                                                                     "\nn = ",x$n,"  total edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
+
+if( x$margins[1] %in% cont2par && x$margins[2] %in% cont3par ) cat(  s1,format(s1.p,digits=nodi),"(",format(CIsig21[1],digits=nodi),",",format(CIsig21[2],digits=nodi),")",
                                                                      "  ",s2,format(s2.p,digits=nodi),"(",format(CIsig22[1],digits=nodi),",",format(CIsig22[2],digits=nodi),")",
-                                                                     "\n",n2,format(n2.p,digits=nodi),"(",format(CInu2[1],digits=nodi),",",format(CInu2[2],digits=nodi),")",                                                                     
-                                                                     "\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
+                                                                     "\n",n2,format(n2.p,digits=nodi),"(",format(CInu2[1],digits=nodi),",",format(CInu2[2],digits=nodi),")", 
+                                                                     "\ntheta = ",format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")",
+                                                                     ct,format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")",
+                                                                     "\nn = ",x$n, "  total edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
                           
-  if( x$margins[1] %in% cont3par && x$margins[2] %in% cont2par ) cat("\nn = ",x$n,cp,format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")",
-                                                                     ct,format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")",
-                                                                     "\n",s1,format(s1.p,digits=nodi),"(",format(CIsig21[1],digits=nodi),",",format(CIsig21[2],digits=nodi),")",
+  if( x$margins[1] %in% cont3par && x$margins[2] %in% cont2par ) cat(s1,format(s1.p,digits=nodi),"(",format(CIsig21[1],digits=nodi),",",format(CIsig21[2],digits=nodi),")",
                                                                      "  ",s2,format(s2.p,digits=nodi),"(",format(CIsig22[1],digits=nodi),",",format(CIsig22[2],digits=nodi),")",
                                                                      "\n",n1,format(n1.p,digits=nodi),"(",format(CInu1[1],digits=nodi),",",format(CInu1[2],digits=nodi),")",
-                                                                     "\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
+                                                                     "\ntheta = ",format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")",
+                                                                     ct,format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")",
+                                                                     "\nn = ",x$n, "  total edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
        
        
 invisible(x)

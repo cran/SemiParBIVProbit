@@ -41,7 +41,9 @@ bin.link  <- object$VC$bl
 
   if(object$VC$margins[2] %in% bin.link && object$VC$Model != "BPO0"){
   
-  if( !is.null(object$X3) ) epds <- object$X3%*%t(bs[,(object$X1.d2+object$X2.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2)])
+  if(object$VC$Model == "BSS")  X3x <- object$X3s else X3x <- object$X3 
+  
+  if( !is.null(object$X3) ) epds <- X3x%*%t(bs[,(object$X1.d2+object$X2.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2)])
   if(  is.null(object$X3) ) epds <- bs[,lf]
   
   }
@@ -118,7 +120,26 @@ bin.link  <- object$VC$bl
    if( is.null(object$X3) ) CIrs <- t(CIrs) 
 
      
+######################
+# Association measure
+######################
+
+if(!(object$VC$BivD %in% c("AMH","FGM"))) tau <- BiCopPar2Tau(family = object$VC$nCa, par = est.RHOb) 
+if(object$VC$BivD == "AMH")               tau <- 1 - (2/3)/est.RHOb^2*(est.RHOb + (1-est.RHOb)^2*log(1-est.RHOb))
+if(object$VC$BivD == "FGM")               tau <- 2/9*est.RHOb 
+
+CIkt <- rowQuantiles(tau, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE)
+
+if( is.null(object$X3) ) CIkt <- t(CIkt)    
+   
+        
 ########################   
+   
+   
+   
+   
+   
+   
    
    
 if (gm == TRUE){   
@@ -305,7 +326,7 @@ if(object$VC$gc.l == TRUE) gc()
  if(cm.plot == TRUE && object$VC$Model != "BPO0"){
  
  c1   <- c("N","GU","rGU","LO")
- c2   <- c("LN","WEI","iG","GA","DAGUM","SM","BE") 
+ c2   <- c("LN","WEI","iG","GA","GAi","DAGUM","SM","BE","FISK") 
   
  m2 <- s2 <- nu2 <- 0 
  par1 <- object$theta.a 
@@ -414,7 +435,7 @@ rm(bs, SE, Vb, epds, sigma2.st, sigma2, est.RHOb, et1s, et2s, p1s, p2s, p11s, p1
               formula1=object$gam1$formula, formula2=object$gam2$formula, formula3=object$gam3$formula,
               formula4=object$gam4$formula, formula5=object$gam5$formula, formula6=object$gam6$formula,
               t.edf=object$t.edf, CItheta=CIrs, CIsig2=CIsig2, CInu=CInu,  
-              n.sel=n.sel, CIor = CIor, CIgm = CIgm, 
+              n.sel=n.sel, CIor = CIor, CIgm = CIgm, CIkt = CIkt, tau=object$tau, tau.a=object$tau.a,  
               BivD=object$BivD, margins = object$margins, bin.link = bin.link, 
               Model=object$Model,
               l.sp1 = object$l.sp1, l.sp2 = object$l.sp2, l.sp3 = object$l.sp3, 

@@ -38,6 +38,10 @@ regH <- function(H, type = 1){
   
   D <- diag(abs(diag(H))^-.5)
   H1 <- D%*%H%*%D
+  H1inv <- D%*%solve(H1)%*%D
+  
+  # does not solve much on a well specified model
+  # we need to do this using the inverse
   
   
   #ds <- 0

@@ -1,7 +1,7 @@
-SemiParBIVProbit.fit.post <- function(SemiParFit, formula.eq2, data, Model, VC, qu.mag=NULL, 
+SemiParBIVProbit.fit.post <- function(SemiParFit, Model, VC, qu.mag=NULL, 
                                       gam1, gam2, gam3, gam4, gam5, gam6){
 
-Ve <- R <- X2s <- lambda1s <- lambda2s <- eta1S <- eta2S <- theta <- edf <- edf1 <- theta.a <- sigma2 <- sigma2.a <- OR <- GM <- p1n <- p2n <- nu <- nu.a <- NULL
+Ve <- R <- X2s <- lambda1s <- X3s <- lambda2s <- eta1S <- eta2S <- theta <- edf <- edf1 <- theta.a <- sigma2 <- sigma2.a <- OR <- GM <- p1n <- p2n <- nu <- nu.a <- NULL
 
 cont2par  <- VC$m2 
 cont3par  <- VC$m3 
@@ -15,7 +15,8 @@ epsilon <- 0.0000001
 max.p   <- 0.9999999
                                                                                                          
     He.eig <- eigen(He, symmetric=TRUE)
-    if(min(He.eig$values) < epsilon) He.eig$values[which(He.eig$values < epsilon)] <- epsilon
+   if(min(He.eig$values) < sqrt(.Machine$double.eps) && sign( min( sign(He.eig$values) ) ) == -1) He.eig$values <- abs(He.eig$values)  
+    if(min(He.eig$values) < sqrt(.Machine$double.eps) ) { pep <- which(He.eig$values < sqrt(.Machine$double.eps)); He.eig$values[pep] <- epsilon }
     Vb <- He.eig$vectors%*%tcrossprod(diag(1/He.eig$values),He.eig$vectors)  # this could be taken from magic as well 
     Vb <- (Vb + t(Vb) ) / 2 
     
@@ -50,12 +51,9 @@ if(VC$hess == FALSE) SemiParFit$fit$Fisher <- SemiParFit$fit$hessian
 
 if(VC$margins[2] %in% cont2par ){
 
-sigma2 <- exp(SemiParFit$fit$etas)
+sigma2 <- esp.tr(SemiParFit$fit$etas, VC$margins[2])$vrb 
 if( is.null(VC$X4) ) names(sigma2) <- "sigma2"
 
-#  if( is.null(VC$X4) ) {sigma2 <- exp(SemiParFit$fit$argument["sigma2.star"]); names(sigma2) <- "sigma2"}
-#  if(!is.null(VC$X4) )    
-  
   sigma2.a <- mean(sigma2) 
   if( length(sigma2)==1 ) sigma2.a <- sigma2  
 
@@ -68,21 +66,13 @@ if(VC$margins[2] %in% cont3par ){
 
 if(VC$margins[2] %in% c("DAGUM","SM")){
 
-sigma2 <- exp(SemiParFit$fit$etas)
-nu     <- exp(SemiParFit$fit$etan)
+sigma2 <- esp.tr(SemiParFit$fit$etas, VC$margins[2])$vrb 
+nu     <- esp.tr(SemiParFit$fit$etan, VC$margins[2])$vrb 
 
 if( is.null(VC$X4) && is.null(VC$X5) ) {names(sigma2) <- "sigma2"; names(nu) <- "nu"}
-
-#  if( is.null(VC$X4) && is.null(VC$X5) ) {sigma2 <- exp(SemiParFit$fit$argument["sigma2.star"]); names(sigma2) <- "sigma2"
-#                                          nu     <- exp(SemiParFit$fit$argument["nu.star"]);     names(nu) <- "nu"}
-#  if(!is.null(VC$X4) && !is.null(VC$X5) ){ 
-#                                             } 
-                                          
-                                          
-                                          
+           
                            }  
                            
-
   sigma2.a <- mean(sigma2)
   nu.a     <- mean(nu)
   if( length(sigma2)==1 ) {sigma2.a <- sigma2; nu.a <- nu}  
@@ -98,27 +88,16 @@ if( is.null(VC$X4) && is.null(VC$X5) ) {names(sigma2) <- "sigma2"; names(nu) <- 
 
 if(VC$Model == "BPO0" ) dep <- theta <- 0
 
-if(VC$Model != "BPO0" ){
+if(!(VC$Model %in% c("BPO0","BSS")) ){
 
   dep <- SemiParFit$fit$etad
   if( is.null(VC$X3) ) names(dep) <- "theta" 
 
-resT  <- teta.tr(VC, dep)
-theta <- resT$teta   
-        
+theta <- teta.tr(VC, dep)$teta   
         
 theta.a  <- mean(theta)   
 
 }
-
-
-
-
-
- # if( is.null(VC$X3) ) {dep <- SemiParFit$fit$argument["theta.star"]; names(dep) <- "theta"}  
- # if(!is.null(VC$X3) )  dep <- SemiParFit$fit$etad  
-  #if( is.null(VC$X3) ) {dep <- SemiParFit$fit$argument["theta.star"]; names(dep) <- "theta"}  
-  #if(!is.null(VC$X3) ) 
 
 
 ############################################################################################
@@ -126,16 +105,33 @@ theta.a  <- mean(theta)
    
   if(Model=="BSS"){
 
-  param <- SemiParFit$fit$argument[-c(1:VC$X1.d2)] 
-  param <- param[1:VC$X2.d2]
-  X2s   <- try(predict.gam(gam2, newdata = data, type="lpmatrix"), silent = TRUE)
-  if(class(X2s)=="try-error") stop("Check that the range of the covariate values in the selected sample is the same as that in the complete dataset.") 
-
-  SemiParFit$fit$eta2 <- X2s%*%param
+  SemiParFit$fit$eta2 <- VC$X2s%*%SemiParFit$fit$argument[(VC$X1.d2+1):(VC$X1.d2+VC$X2.d2)]
   
   p1n <- predict.gam(gam1, type="response")
-  p2n <- predict.gam(gam2, newdata = data, type="response")
-   
+  p2n <- probm(VC$X2s%*%coef(gam2), VC$margins[2])$pr
+ 
+
+if(!is.null(VC$X3)) {
+
+SemiParFit$fit$etad <- VC$X3s%*%SemiParFit$fit$argument[(VC$X1.d2+VC$X2.d2+1):(VC$X1.d2+VC$X2.d2+VC$X3.d2)]
+
+theta <- teta.tr(VC, SemiParFit$fit$etad)$teta 
+
+}
+
+
+if(is.null(VC$X3)){
+
+  dep <- SemiParFit$fit$etad
+  names(dep) <- "theta" 
+  theta <- teta.tr(VC, dep)$teta   
+        
+                  }
+        
+  theta.a <- mean(theta)   
+                   
+ 
+
 }
 
 
@@ -162,6 +158,14 @@ if(Model=="BSS" || Model=="BPO" || Model=="BPO0"){
 # Association measures
 ######################
 
+if(!(VC$BivD %in% c("AMH","FGM"))) tau <- BiCopPar2Tau(family = VC$nCa, par = theta)
+if(VC$BivD == "AMH")               tau <- 1 - (2/3)/theta^2*(theta + (1-theta)^2*log(1-theta))
+if(VC$BivD == "FGM")               tau <- 2/9*theta 
+tau.a <- mean(tau) 
+if( length(tau)==1 ) tau.a <- tau 
+
+
+####
 
 if(VC$margins[2] %in% bin.link){
 
@@ -238,8 +242,8 @@ if( (VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0 || VC$l.sp4!=0 || VC$l.sp5!=0 || 
                       edf1 = edf[[1]], edf2 = edf[[2]], edf3 = edf[[3]], edf4 = edf[[4]], edf5 = edf[[5]], edf6 = edf[[6]],
                       edf1.1 = edf1[[1]], edf1.2 = edf1[[2]], edf1.3 = edf1[[3]], edf1.4 = edf1[[4]], edf1.5 = edf1[[5]], edf1.6 = edf1[[6]],
                       theta = theta, theta.a = theta.a, sigma2 = sigma2, sigma2.a = sigma2.a,
-                      nu = nu, nu.a = nu.a,
-                      sp = sp, OR = OR, GM = GM, X2s = X2s, p1n=p1n, p2n=p2n, R = R, Ve = Ve) 
+                      nu = nu, nu.a = nu.a, tau = tau, tau.a= tau.a,
+                      sp = sp, OR = OR, GM = GM, p1n=p1n, p2n=p2n, R = R, Ve = Ve) 
 
 }
 

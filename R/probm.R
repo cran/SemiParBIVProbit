@@ -14,11 +14,11 @@ if( margin == "probit" ){
   
   d.n <- dnorm(eta)
   d.n <- ifelse(d.n < epsilon, epsilon, d.n )
-  der2p.dereta <- -(eta * dnorm(eta))
+  der2p.dereta <- -(eta * dnorm(eta))          # second deriv
   
   }
   
-  if(bc == TRUE){
+  if(bc == TRUE){ # RECALL that this is deriv of Y = 0 wrt eta1 and not the usual case of Y = 1!!
   derp1.dereta1      <- -dnorm(-eta)         # First derivative of 1-prob(eta1) respect to eta1.
   der2p1.dereta1eta1 <- eta * dnorm(-eta)  ## This is the second derivative of 1 - p1 respect to eta1  
   }  
@@ -113,8 +113,7 @@ if( margin == "cauchit" ){
 }
 
 
-  pr  <- ifelse(pr > max.p, max.p, pr) 
-  pr  <- ifelse(pr < epsilon, epsilon, pr) 
+  pr <- mm(pr) 
   
     
     

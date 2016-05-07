@@ -137,31 +137,50 @@ c.copula2.be2t <-  (exp(teta +
      p1)* teta) - exp(teta)* (-1 + exp(p2* teta) + exp(p1* teta)))^2
 
 
-bit1.th2 <- bit1.th2ATE <- ((((1 - (1 - ((1 - exp(-(p1 * teta))) * (1 - exp(-(p2 * 
-    teta))) + exp(-teta)))/(1 - exp(-teta))) * exp(-teta) - (p1 * 
-    (1 - exp(-(p2 * teta))) * exp(-(p1 * teta)) + p2 * (1 - exp(-(p1 * 
-    teta))) * exp(-(p2 * teta))))/(((1 - ((1 - exp(-(p1 * teta))) * 
-    (1 - exp(-(p2 * teta))) + exp(-teta)))/(1 - exp(-teta)))^2 * 
-    (1 - exp(-teta))^2) + 1/(teta * (1 - ((1 - exp(-(p1 * teta))) * 
-    (1 - exp(-(p2 * teta))) + exp(-teta))))) * ((1 - (1 - ((1 - 
-    exp(-(p1 * teta))) * (1 - exp(-(p2 * teta))) + exp(-teta)))/(1 - 
-    exp(-teta))) * exp(-teta) - (p1 * (1 - exp(-(p2 * teta))) * 
-    exp(-(p1 * teta)) + p2 * (1 - exp(-(p1 * teta))) * exp(-(p2 * 
-    teta)))) + (((1 - (1 - ((1 - exp(-(p1 * teta))) * (1 - exp(-(p2 * 
-    teta))) + exp(-teta)))/(1 - exp(-teta))) * exp(-teta) - (p1 * 
-    (1 - exp(-(p2 * teta))) * exp(-(p1 * teta)) + p2 * (1 - exp(-(p1 * 
-    teta))) * exp(-(p2 * teta))))/(1 - ((1 - exp(-(p1 * teta))) * 
-    (1 - exp(-(p2 * teta))) + exp(-teta))) - 2 * ((log(1 - ((1 - 
-    exp(-(p1 * teta))) * (1 - exp(-(p2 * teta))) + exp(-teta))) - 
-    log(1 - exp(-teta)))/teta))/teta + (((2 * exp(-teta) - ((1 - 
-    ((1 - exp(-(p1 * teta))) * (1 - exp(-(p2 * teta))) + exp(-teta))) * 
-    (1 + 2 * (exp(-teta)/(1 - exp(-teta)))) + 2 * (p1 * (1 - 
-    exp(-(p2 * teta))) * exp(-(p1 * teta))) + 2 * (p2 * (1 - 
-    exp(-(p1 * teta))) * exp(-(p2 * teta)))))/(1 - exp(-teta)) + 
-    1) * exp(-teta) + p1 * exp(-(p1 * teta)) * (p2 * exp(-(p2 * 
-    teta)) - p1 * (1 - exp(-(p2 * teta)))) + p2 * exp(-(p2 * 
-    teta)) * (p1 * exp(-(p1 * teta)) - p2 * (1 - exp(-(p1 * teta)))))/(1 - 
-    ((1 - exp(-(p1 * teta))) * (1 - exp(-(p2 * teta))) + exp(-teta))))/teta
+bit1.th2 <- bit1.th2ATE <- 1/teta^2 * ((1/(1 - exp(-teta)) * (exp(-teta) - (exp(-teta * 
+    p1) * p1 * (1 - exp(-teta * p2)) + (1 - exp(-teta * p1)) * 
+    (exp(-teta * p2) * p2))) - exp(-teta)/(1 - exp(-teta))^2 * 
+    ((1 - exp(-teta)) - (1 - exp(-teta * p1)) * (1 - exp(-teta * 
+        p2))))/(1/(1 - exp(-teta)) * ((1 - exp(-teta)) - (1 - 
+    exp(-teta * p1)) * (1 - exp(-teta * p2))))) - 2 * teta/(teta^2)^2 * 
+    log(1/(1 - exp(-teta)) * ((1 - exp(-teta)) - (1 - exp(-teta * 
+        p1)) * (1 - exp(-teta * p2)))) + (1/teta^2 * ((1/(1 - 
+    exp(-teta)) * (exp(-teta) - (exp(-teta * p1) * p1 * (1 - 
+    exp(-teta * p2)) + (1 - exp(-teta * p1)) * (exp(-teta * p2) * 
+    p2))) - exp(-teta)/(1 - exp(-teta))^2 * ((1 - exp(-teta)) - 
+    (1 - exp(-teta * p1)) * (1 - exp(-teta * p2))))/(1/(1 - exp(-teta)) * 
+    ((1 - exp(-teta)) - (1 - exp(-teta * p1)) * (1 - exp(-teta * 
+        p2))))) - -1/teta * ((1/(1 - exp(-teta)) * (exp(-teta) + 
+    (exp(-teta * p1) * p1 * (exp(-teta * p2) * p2) - exp(-teta * 
+        p1) * p1 * p1 * (1 - exp(-teta * p2)) + (exp(-teta * 
+        p1) * p1 * (exp(-teta * p2) * p2) - (1 - exp(-teta * 
+        p1)) * (exp(-teta * p2) * p2 * p2)))) + exp(-teta)/(1 - 
+    exp(-teta))^2 * (exp(-teta) - (exp(-teta * p1) * p1 * (1 - 
+    exp(-teta * p2)) + (1 - exp(-teta * p1)) * (exp(-teta * p2) * 
+    p2))) + (exp(-teta)/(1 - exp(-teta))^2 * (exp(-teta) - (exp(-teta * 
+    p1) * p1 * (1 - exp(-teta * p2)) + (1 - exp(-teta * p1)) * 
+    (exp(-teta * p2) * p2))) - (exp(-teta)/(1 - exp(-teta))^2 + 
+    exp(-teta) * (2 * (exp(-teta) * (1 - exp(-teta))))/((1 - 
+        exp(-teta))^2)^2) * ((1 - exp(-teta)) - (1 - exp(-teta * 
+    p1)) * (1 - exp(-teta * p2)))))/(1/(1 - exp(-teta)) * ((1 - 
+    exp(-teta)) - (1 - exp(-teta * p1)) * (1 - exp(-teta * p2)))) + 
+    (1/(1 - exp(-teta)) * (exp(-teta) - (exp(-teta * p1) * p1 * 
+        (1 - exp(-teta * p2)) + (1 - exp(-teta * p1)) * (exp(-teta * 
+        p2) * p2))) - exp(-teta)/(1 - exp(-teta))^2 * ((1 - exp(-teta)) - 
+        (1 - exp(-teta * p1)) * (1 - exp(-teta * p2)))) * (1/(1 - 
+        exp(-teta)) * (exp(-teta) - (exp(-teta * p1) * p1 * (1 - 
+        exp(-teta * p2)) + (1 - exp(-teta * p1)) * (exp(-teta * 
+        p2) * p2))) - exp(-teta)/(1 - exp(-teta))^2 * ((1 - exp(-teta)) - 
+        (1 - exp(-teta * p1)) * (1 - exp(-teta * p2))))/(1/(1 - 
+        exp(-teta)) * ((1 - exp(-teta)) - (1 - exp(-teta * p1)) * 
+        (1 - exp(-teta * p2))))^2))
+    
+    
+    
+    
+    
+    
+    
 
 
 }

@@ -1,5 +1,36 @@
 adjCovSD <- function(x, design){
 
+
+
+
+
+if(x$VC$triv == TRUE){
+
+
+if( !is.null(x$X3) ) {mul2 <- x$X4; mul3 <- x$X5; mul4 <- x$X6} 
+if(  is.null(x$X3) )  mul2 <- mul3 <- mul4 <- 1 
+                                       
+estfun <- cbind( c(x$fit$dl.de1)*x$X1, 
+                 c(x$fit$dl.de2)*x$X2, 
+                 c(x$fit$dl.de3)*x$X3,
+                 c(x$fit$dl.dtheta12.st)*mul2,
+                 c(x$fit$dl.dtheta13.st)*mul3,
+                 c(x$fit$dl.dtheta23.st)*mul4  ) 
+
+}
+
+
+
+
+
+
+
+
+
+if(x$VC$triv == FALSE){
+
+
+
 cont2par <- x$VC$m2   
 cont3par <- x$VC$m3  
 bin.link <- x$VC$bl  
@@ -144,14 +175,10 @@ estfun <- cbind( c(x$fit$dl.dbe1)*x$X1,
 
  
 
-
-
-
-
 }
 
 
-
+} # end TRIV
 
 
 

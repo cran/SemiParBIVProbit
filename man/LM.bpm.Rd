@@ -94,7 +94,6 @@ Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence o
 }
 
 \keyword{semiparametric bivariate probit modelling} 
-\keyword{bivariate probit model} 
 \keyword{lagrange multiplier test} 
 \keyword{score test} 
 \keyword{endogeneity}

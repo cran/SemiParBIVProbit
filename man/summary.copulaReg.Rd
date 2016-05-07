@@ -1,5 +1,6 @@
 \name{summary.copulaReg}
 \alias{summary.copulaReg}
+\alias{print.summary.copulaReg}
 
 \title{copulaReg summary}
 
@@ -8,17 +9,26 @@ It takes a fitted \code{copulaReg} object produced by \code{copulaReg()} and pro
 
 }
 
+
 \usage{
 
 \method{summary}{copulaReg}(object, n.sim = 100, prob.lev = 0.05, cm.plot = FALSE, 
         ylab = "Margin 2", xlab = "Margin 1", n.grid = 1000, n.dig = 2, ...)
-                      
+   
+
+
+\method{print}{summary.copulaReg}(x, digits = max(3, getOption("digits") - 3), 
+           signif.stars = getOption("show.signif.stars"), ...)
+ 
 }
 
 
 \arguments{ 
 
 \item{object}{A fitted \code{copulaReg} object as produced by \code{copulaReg()}.}
+
+\item{x}{\code{summary.copulaReg} object produced by \code{summary.copulaReg()}.}
+
 
 \item{n.sim}{The number of simulated coefficient vectors from the posterior distribution of the estimated model parameters. This is used 
 to calculate intervals for the association parameter, dispersion coefficient etc. It may be increased if
@@ -34,6 +44,12 @@ to calculate intervals for the association parameter, dispersion coefficient etc
 
 \item{n.dig}{Number of digit points used in rounding bivariate pdf values for contour plot construction. This is relevant for continuous margins.} 
            
+
+\item{digits}{Number of digits printed in output.} 
+
+\item{signif.stars}{By default significance stars are printed alongside output.} 
+           
+           
 \item{...}{Other graphics parameters to pass on to plotting commands. These are used only when \code{cm.plot=TRUE}.}
 
 }
@@ -42,6 +58,9 @@ to calculate intervals for the association parameter, dispersion coefficient etc
 \details{ 
 
 This function is very similar to \code{summary.SemiParBIVProbit()}.
+
+\code{print.summary.copulaReg} prints model term summaries. 
+
 
 }
 

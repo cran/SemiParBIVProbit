@@ -2,10 +2,31 @@ post.check <- function(x, main = "Histogram and Density Estimate of Residuals",
                           main2 = "Histogram and Density Estimate of Residuals",
                            xlab = "Quantile Residuals", xlab2 = "Quantile Residuals", ...){
 
+if(x$triv == TRUE ) stop("This function is not suitable for trivariate probit models.")
+
+
 if(x$Cont == "NO"){
 
-p <- distrHsAT(x$y2, x$eta2, x$sigma2, x$nu, x$margins[2])$p2 
+
+y2     <- x$y2
+eta2   <- x$eta2
+sigma2 <- x$sigma2
+nu     <- x$nu
+
+if(x$VC$ccss == "yes"){
+
+eta2 <- eta2[x$inde]
+
+if(!is.null(x$X3)){
+sigma2 <- sigma2[x$inde]
+nu     <- nu[x$inde]
+                  }
+                      }
+
+
+p <- distrHsAT(y2, eta2, sigma2, nu, x$margins[2])$p2 
 qqp <- qnorm(p)
+if(x$VC$ccss == "yes") qqp <- qqp - mean(qqp) 
 
 
 par(mfrow = c(1, 2))
@@ -50,6 +71,8 @@ qqnorm(qqp)
 abline(0, 1, col = "red")
 
 }
+
+
 
 
 

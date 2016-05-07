@@ -103,8 +103,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 ## see examples for SemiParBIVProbit
 }
 
-\keyword{semiparametric bivariate probit modelling} 
-\keyword{bivariate probit model} 
+\keyword{semiparametric bivariate modelling} 
 \keyword{OR} 
 \keyword{odds ratio} 
 \keyword{bayesian posterior simulation}

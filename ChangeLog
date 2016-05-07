@@ -1,3 +1,8 @@
+version 3.7-1
+- Fisk distribution included. Total number of available continuous distributions is now 12.
+- manual updated.
+- various functions polished.
+
 version 3.7
 - copula additive models for continuous margins implemented. The new function is copulaReg().
 - more link functions available for binary responses.

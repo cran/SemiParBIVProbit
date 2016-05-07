@@ -51,6 +51,9 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, Model,
   y1 <- gam1$y
   n <- length(y1) 
   if(l.sp1 != 0) sp1 <- gam1$sp else sp1 <- NULL 
+  
+  
+  inde <- rep(TRUE, n)
 
 
   if(Model=="B"){
@@ -79,14 +82,15 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, Model,
   gam2 <- eval(substitute(gam(formula.eq2, binomial(link="probit"), weights=weights, 
                               data=data, subset=inde),list(weights=weights,inde=inde)))                              
   X2.d2 <- length(coef(gam2))
-  X2 <- matrix(0,length(inde),X2.d2,dimnames = list(c(1:length(inde)),c(names(coef(gam2)))) )
-  X2[inde, ] <- model.matrix(gam2) 
-  y2 <- rep(0,length(inde)); y2[inde] <- gam2$y
+  #X2 <- matrix(0,length(inde),X2.d2,dimnames = list(c(1:length(inde)),c(names(coef(gam2)))) )
+  #X2[inde, ] <- model.matrix(gam2) 
+  X2 <- model.matrix(gam2) 
+  y2 <- gam2$y # rep(0,length(inde)); y2[inde] <- gam2$y
   l.sp2 <- length(gam2$sp)
   
   cy1 <- (1-y1)
-  y1.y2 <- y1*y2
-  y1.cy2 <- y1*(1-y2)
+  y1.y2 <- y1[inde]*y2
+  y1.cy2 <- y1[inde]*(1-y2)
   
   func.opt <- bprobgHsSS 
 
@@ -114,7 +118,7 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, Model,
                   cy1 = cy1)
   
   VC <- list(X1 = X1, 
-             X2 = X2, X3 = NULL,
+             X2 = X2, X3 = NULL, inde = inde,
              X1.d2 = X1.d2, 
              X2.d2 = X2.d2,
              gp1 = gp1, 
@@ -126,7 +130,7 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, Model,
              Model = Model,
              end = end, fp = fp,
              BivD = BivD, nC = 1, extra.regI = FALSE, margins = c("probit","probit"),
-             bl = c("probit", "logit", "cloglog", "cauchit") )
+             bl = c("probit", "logit", "cloglog", "cauchit"), triv = FALSE )
 
 
 params <- c(coef(gam1),coef(gam2),0)

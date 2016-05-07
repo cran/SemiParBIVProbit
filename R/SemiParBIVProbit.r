@@ -18,32 +18,33 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   sp5 <- gp5 <- gam5 <- X5 <- NULL   
   sp6 <- gp6 <- gam6 <- X6 <- NULL  
   sp7 <- gp7 <- gam7 <- X7 <- NULL   
+  X2s <- X3s <- NULL
+  
     
   opc  <- c("N","C0","C90","C180","C270","J0","J90","J180","J270","G0","G90","G180","G270","F","AMH","FGM")
   scc  <- c("C0", "C180", "J0", "J180", "G0", "G180")
   sccn <- c("C90", "C270", "J90", "J270", "G90", "G270")
   mb   <- c("B", "BSS", "BPO", "BPO0")
-  m2   <- c("N","GU","rGU","LO","LN","WEI","iG","GA","BE")
+  m2   <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK")
   m3   <- c("DAGUM","SM")
   
   bl   <- c("probit", "logit", "cloglog") # , "cauchit") 
 
   l.flist <- length(formula)
-  
+  if(!is.list(formula)) stop("You must specify a list of equations.")
 
   #if(margins[2]%in% c(m2,m3)) stop("Check next release for final tested version of this model.")
   
   if(Model == "BPO" && BivD != "N") stop("This model is not defined for copulae.")
   if(Model == "BPO" && margins[1] != "probit" && margins[2] != "probit") stop("This model is not defined for the chosen margins.")
 
-  
   if(!(Model %in% mb)) stop("Error in parameter Model value. It should be one of: B, BSS, BPO, BPO0.")
   if(!(BivD %in% opc)) stop("Error in parameter BivD value. It should be one of: N, C0, C90, C180, C270, J0, J90, J180, J270, G0, G90, G180, G270, F, AMH, FGM.")
   if(!(extra.regI %in% c("t","pC","sED"))) stop("Error in parameter extra.regI value. It should be one of: t, pC or sED.")
   
   if(!(margins[1] %in% bl) ) stop("Error in first margin value. It can be: probit, logit, cloglog.")
-  if(!(margins[2] %in% c(bl,m2,m3)) ) stop("Error in second margin value. It can be: probit, logit, cloglog, N, GU, rGU, LO, LN, WEI, iG, GA, DAGUM, SM, BE.")  
-  if(margins[2] %in% m2 && (Model == "BPO" || Model == "BSS" || Model == "BPO0") ) stop("For continuous responses, only bivariate models are allowed for.")   
+  if(!(margins[2] %in% c(bl,m2,m3)) ) stop("Error in second margin value. It can be: probit, logit, cloglog, N, GU, rGU, LO, LN, WEI, iG, GA, GAi, DAGUM, SM, BE, FISK.")  
+  if(margins[2] %in% m2 && (Model == "BPO" || Model == "BSS" || Model == "BPO0") ) stop("For continuous responses, selection or partial observability models are not allowed for.")   
   
   if(l.flist > 2 && margins[2] %in% m2){ if(l.flist!=4) stop("You need to specify four equations.") } 
   if(l.flist > 2 && margins[2] %in% m3){ if(l.flist!=5) stop("You need to specify five equations.") }  
@@ -53,11 +54,9 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   if( l.flist > 4 && margins[2] %in% m2)     stop("The chosen model can not have more than four equations.")
   if( l.flist > 5 && margins[2] %in% m3)     stop("The chosen model can not have more than five equations.")
 
- 
  #######################################################################################  
  # formula check  
  #######################################################################################  
-  
   
     if(l.flist > 2){
     
@@ -86,35 +85,86 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
 
  #######################################################################################  
   
- 
+  mf  <- match.call(expand.dots = FALSE)
+  or2 <- as.character(formula[[2]][2])
   ig <- interpret.gam(formula)
-  mf <- match.call(expand.dots = FALSE)
 
-  if( l.flist == 2 ) pred.n <- union(ig[[1]]$pred.names,c(ig[[2]]$pred.names, ig[[2]]$response))
-  if( l.flist == 3 ) pred.n <- union(ig[[1]]$pred.names,c(ig[[2]]$pred.names, ig[[3]]$pred.names, ig[[2]]$response))
-  if( l.flist == 4 ) pred.n <- union(ig[[1]]$pred.names,c(ig[[2]]$pred.names, ig[[3]]$pred.names, ig[[4]]$pred.names, ig[[2]]$response))
-  if( l.flist == 5 ) pred.n <- union(ig[[1]]$pred.names,c(ig[[2]]$pred.names, ig[[3]]$pred.names, ig[[4]]$pred.names, ig[[5]]$pred.names, ig[[2]]$response))
-  if( l.flist == 6 ) pred.n <- union(ig[[1]]$pred.names,c(ig[[2]]$pred.names, ig[[3]]$pred.names, ig[[4]]$pred.names, ig[[5]]$pred.names, ig[[6]]$pred.names, ig[[2]]$response))
+  if( l.flist == 2 ){  
+    v1 <- all.vars(as.formula(formula[[1]]))[1]
+    v1 <- c(v1, ig[[1]]$pred.names)
+    v2 <- all.vars(as.formula(formula[[2]]))[1]
+    v2 <- c(v2, ig[[2]]$pred.names)
+    pred.n <- union(v1,c(v2,or2))
+                    }
   
+  if( l.flist == 3 ){  
+    v1 <- all.vars(as.formula(formula[[1]]))[1]
+    v1 <- c(v1, ig[[1]]$pred.names)
+    v2 <- all.vars(as.formula(formula[[2]]))[1]
+    v2 <- c(v2, ig[[2]]$pred.names)
+    v3 <- ig[[3]]$pred.names 
+    
+    pred.n <- union(v1,c(v2,v3,or2))
+                    } 
   
-  fake.formula <- paste(ig[[1]]$response, "~", paste(pred.n, collapse = " + ")) 
-  environment(fake.formula) <- environment(ig$fake.formula)
+  if( l.flist == 4 ){  
+    v1 <- all.vars(as.formula(formula[[1]]))[1]
+    v1 <- c(v1, ig[[1]]$pred.names)
+    v2 <- all.vars(as.formula(formula[[2]]))[1]
+    v2 <- c(v2, ig[[2]]$pred.names)
+    v3 <- ig[[3]]$pred.names  
+    v4 <- ig[[4]]$pred.names  
+    pred.n <- union(v1,c(v2,v3,v4,or2))
+                    } 
+  
+  if( l.flist == 5 ){  
+    v1 <- all.vars(as.formula(formula[[1]]))[1]
+    v1 <- c(v1, ig[[1]]$pred.names)
+    v2 <- all.vars(as.formula(formula[[2]]))[1]
+    v2 <- c(v2, ig[[2]]$pred.names)
+    v3 <- ig[[3]]$pred.names 
+    v4 <- ig[[4]]$pred.names
+    v5 <- ig[[5]]$pred.names 
+    pred.n <- union(v1,c(v2,v3,v4,v5,or2))
+                    }   
+  
+  if( l.flist == 6 ){  
+    v1 <- all.vars(as.formula(formula[[1]]))[1]
+    v1 <- c(v1, ig[[1]]$pred.names)
+    v2 <- all.vars(as.formula(formula[[2]]))[1]
+    v2 <- c(v2, ig[[2]]$pred.names)
+    v3 <- ig[[3]]$pred.names
+    v4 <- ig[[4]]$pred.names
+    v5 <- ig[[5]]$pred.names  
+    v6 <- ig[[6]]$pred.names
+    pred.n <- union(v1,c(v2,v3,v4,v5,v6,or2))
+                    }   
+                    
+                    
+  fake.formula <- paste(v1[1], "~", paste(pred.n, collapse = " + ")) 
+  environment(fake.formula) <- environment(formula[[1]])
   mf$formula <- fake.formula 
   mf$Model <- mf$BivD <- mf$margins <- mf$fp <- mf$hess <- mf$infl.fac <- mf$rinit <- mf$rmax <- mf$iterlimsp <- mf$tolsp <- mf$gc.l <- mf$parscale <- mf$extra.regI <- mf$gamlssfit <- NULL                           
   mf$drop.unused.levels <- TRUE 
+  
   if(Model=="BSS") mf$na.action <- na.pass
+  
   mf[[1]] <- as.name("model.frame")
   data <- eval(mf, parent.frame())
   
-  if(gc.l == TRUE) gc()
-        
-  if(Model=="BSS"){ 
-     indS <- as.logical(data[,ig[[1]]$response])==FALSE 
-     indS <- ifelse( is.na(indS), FALSE, indS) 
-     data[indS, ig[[2]]$response] <- ifelse( is.na(data[indS, ig[[2]]$response]), 0, data[indS, ig[[2]]$response]) 
-     data <- na.omit(data)
-     }
-  
+    if(gc.l == TRUE) gc()  
+
+   if(Model=="BSS"){     
+   
+     indS <- data[, v1[1]]    
+     indS[is.na(indS)] <- 0   
+     indS <- as.logical(indS)  
+     data[indS == FALSE, v2[1]] <- 0.01  
+     data <- na.omit(data)   
+   
+                   }
+                                      
+ 
   if(is.null(weights)) {weights <- rep(1,dim(data)[1]) 
                         data$weights <- weights
                         names(data)[length(names(data))] <- "(weights)"} else weights <- data[,"(weights)"]    
@@ -124,9 +174,10 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   
   
   if(Model=="B"){
-  if(ig[[1]]$response %in% ig[[2]]$pred.names ) end <- 1
-  if(ig[[2]]$response %in% ig[[1]]$pred.names ) end <- 2
-  }
+    if(v1[1] %in% v2[-1]) end <- 1
+    if(v2[1] %in% v1[-1]) end <- 2
+                }
+
 
   ct  <- data.frame( c(opc),
                     c(1:14,55,56) 
@@ -151,6 +202,10 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   y1 <- gam1$y
   n <- length(y1) 
   if(l.sp1 != 0) sp1 <- gam1$sp
+  
+ ###############
+  
+ inde <- rep(TRUE, n) 
 
  ##############################################################
  # Equation 2 for BPO and binary B
@@ -184,27 +239,29 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
 
   if(Model=="B" && !(margins[2] %in% bl) ){
   
+  
     formula.eq2r <- formula.eq2   
+    y2 <- y2.test <- data[, v2[1]]
+    
+    if( v2[1] != as.character(formula.eq2r[2]) ) y2.test <- try(data[, as.character(formula.eq2r[2])], silent = TRUE)  
+    if(class(y2.test) == "try-error") stop("Please check the syntax for the response of the second equation.")     
+  
+    if(margins[2] %in% c("LN","WEI","iG","GA","GAi","DAGUM","SM","FISK") && min(y2.test, na.rm = TRUE) <= 0) stop("The response of the second margin must be positive.")    
+    if(margins[2] %in% c("BE") && (min(y2.test, na.rm = TRUE) <= 0 || max(y2.test, na.rm = TRUE) >= 1) ) stop("The response of the second margin must be in the interval (0,1).")
         
-    y2 <- data[ , as.character(formula.eq2[[2]])]
-    
-    if(margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM") && min(y2, na.rm = TRUE) <= 0) stop("The response of the second margin must be positive.")    
-    if(margins[2] %in% c("BE") && min(y2, na.rm = TRUE) <= 0 && max(y2, na.rm = TRUE) >= 1 ) stop("The response of the second margin must be in the interval (0,1).")
-    
-    
-
-    if( margins[2] %in% c("LN") ) y2 <- log(y2) 
-    
-    if( margins[2] %in% c("N","LO","GU","rGU") )        formula.eq2 <- update(formula.eq2, (. + mean(.))/2 ~ . )  
-    if( margins[2] %in% c("LN") )                       formula.eq2 <- update(formula.eq2, (log(.) + mean(log(.)))/2 ~ . )  
-    if( margins[2] %in% c("iG","GA","DAGUM","SM") )     formula.eq2 <- update(formula.eq2, log((. + mean(.))/2) ~ . )    
-    if( margins[2] %in% c("WEI") )                      formula.eq2 <- update(formula.eq2, log( exp(log(.) + 0.5772/(1.283/sqrt(var(log(.)))))  ) ~ . )     
-    if( margins[2] %in% c("BE") )                       formula.eq2 <- update(formula.eq2, qlogis((. + mean(.))/2) ~ . )    
+    if( margins[2] %in% c("N","LO","GU","rGU","GAi") )            formula.eq2 <- update(formula.eq2, (. + mean(.))/2 ~ . )  
+    if( margins[2] %in% c("LN") )                                 formula.eq2 <- update(formula.eq2, (log(.) + mean(log(.)))/2 ~ . )  
+    if( margins[2] %in% c("iG","GA","DAGUM","SM","FISK") )        formula.eq2 <- update(formula.eq2, log((. + mean(.))/2) ~ . )    
+    if( margins[2] %in% c("WEI") )                                formula.eq2 <- update(formula.eq2, log( exp(log(.) + 0.5772/(1.283/sqrt(var(log(.)))))  ) ~ . )     
+    if( margins[2] %in% c("BE") )                                 formula.eq2 <- update(formula.eq2, qlogis((. + mean(.))/2) ~ . )    
   
-  
-   
     gam2         <- eval(substitute(gam(formula.eq2, gamma=infl.fac, weights=weights, data=data),list(weights=weights)))
-    gam2$formula <- formula.eq2r   
+    gam2$formula <- formula.eq2r  
+    names(gam2$model)[1] <- as.character(formula.eq2r[2])
+
+    y2 <- y2.test  
+    if( margins[2] %in% c("LN") ) y2 <- log(y2) 
+
      
     X2 <- model.matrix(gam2)
     X2.d2 <- dim(X2)[2]
@@ -221,21 +278,29 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
 
   if(Model=="BSS"){
 
-  inde <- y1 > 0
+  inde <- as.logical(y1)
 
   gam2 <- eval(substitute(gam(formula.eq2, binomial(link = margins[2]), gamma=infl.fac, weights=weights, 
                               data=data, subset=inde),list(weights=weights,inde=inde)))  
-                              
+  
+######
+# TEST
+######
+X2s <- try(predict.gam(gam2, newdata = data[,-dim(data)[2]], type = "lpmatrix"), silent = TRUE)
+if(class(X2s)=="try-error") stop("Check that the numbers of factor variables' levels\nin the selected sample are the same as those in the complete dataset.\nRead the Details section in ?SemiParBIVProbit for more information.") 
+######  
+  
   X2.d2 <- length(coef(gam2))
-  X2 <- matrix(0,length(inde),X2.d2,dimnames = list(c(1:length(inde)),c(names(coef(gam2)))) )
-  X2[inde, ] <- model.matrix(gam2) 
-  y2 <- rep(0,length(inde)); y2[inde] <- gam2$y; n.sel <- sum(as.numeric(inde))
+  X2 <- model.matrix(gam2) 
+  y2 <- gam2$y
+  n.sel <- sum(as.numeric(inde))
+  
   l.sp2 <- length(gam2$sp)
   if(l.sp2 != 0) sp2 <- gam2$sp 
   
   cy1 <- (1-y1)
-  y1.y2 <- y1*y2
-  y1.cy2 <- y1*(1-y2)
+  y1.y2 <- y1[inde]*y2
+  y1.cy2 <- y1[inde]*(1-y2)
 
   }
   
@@ -325,9 +390,9 @@ names(i.rho) <- "theta.star"
 		if( margins[2] %in% c("iG") )        log.sig2 <- log( var(y2)/mean(y2)^3 )      
 		if( margins[2] %in% c("GU","rGU") )  log.sig2 <- log(6*var(y2)/pi^2)   
 		if( margins[2] %in% c("WEI") )       log.sig2 <- log( (1.283/sqrt(var(log(y2))))^2 )              
-		if( margins[2] %in% c("GA") )        log.sig2 <- log(var(y2)/mean(y2)^2)           
-        	if( margins[2] %in% c("DAGUM","SM") )log.sig2 <- log(sqrt(2)) # log(0.01) #         # 0.1     
-        	if( margins[2] %in% c("BE"))         log.sig2 <- qlogis( var(y2)/( mean(y2)*(1-mean(y2)) )  )        
+		if( margins[2] %in% c("GA","GAi") )          log.sig2 <- log(var(y2)/mean(y2)^2)           
+        	if( margins[2] %in% c("DAGUM","SM","FISK") ) log.sig2 <- log(sqrt(2)) # log(0.01) #         # 0.1     
+        	if( margins[2] %in% c("BE"))                 log.sig2 <- qlogis( var(y2)/( mean(y2)*(1-mean(y2)) )  )        
         	
         
         } else log.sig2 <- par.est[2]
@@ -383,18 +448,32 @@ names(i.rho) <- "theta.star"
     nad <- "theta" 
     formula.eq3 <- as.formula( paste(nad,"~",formula.eq3[2],sep="") )
     
-    #theta <- rep(i.rho, n) #+ seqq 
-    
     set.seed(1)
-    theta <- rnorm(n, i.rho, 0.001)      # rep(i.rho, n)     #+ seqq   
+    theta <- rnorm(n, i.rho, 0.001)    
     rm(list=".Random.seed", envir=globalenv()) 
     
-    gam3 <- gam(formula.eq3, data = data, gamma = ngc) 
+    gam3 <- gam(formula.eq3, data = data, gamma = ngc, subset=inde) 
+    
+    
+    
+   if(Model=="BSS"){ 
+    
+    ######
+    # TEST
+    ######
+    X3s <- try(predict.gam(gam3, newdata = data[,-dim(data)[2]], type = "lpmatrix"), silent = TRUE)
+    if(class(X3s)=="try-error") stop("Check that the numbers of factor variables' levels\nin the selected sample are the same as those in the complete dataset.\nRead the Details section in ?SemiParBIVProbit for more information.") 
+    ######      
+   
+   }
+    
+    
+    
     l.sp3 <- length(gam3$sp)
     
     if(l.sp3 != 0){
     ngc <- 2
-    while( any(round(summary(gam3)$edf, 1) > 1) ) {gam3 <- gam(formula.eq3, data = data, gamma = ngc + 1); ngc <- ngc + 1; if(ngc > 5) break}  
+    while( any(round(summary(gam3)$edf, 1) > 1) ) {gam3 <- gam(formula.eq3, data = data, gamma = ngc + 1, subset=inde); ngc <- ngc + 1; if(ngc > 5) break}  
                    } 
                    
     
@@ -610,7 +689,7 @@ if(missing(parscale)) parscale <- 1
   respvec1 <- respvec; respvec1$univ <- 1  
   
   
-  VC <- list(X1 = X1, 
+  VC <- list(X1 = X1, inde = inde,
              X2 = X2, 
              X3 = X3,
              X4 = X4, 
@@ -641,13 +720,14 @@ if(missing(parscale)) parscale <- 1
              infl.fac = infl.fac,
              weights = weights,
              fp = fp,
-             hess = hess,
+             hess = hess, nCa = nCa,
              Model = Model, gamlssfit = gamlssfit,
              end = end,
              BivD = BivD,
              nC = nC, gc.l = gc.l, n = n, extra.regI = extra.regI,
              parscale = parscale, margins = margins,
-             Cont = "NO", m2 = m2, m3 = m3, bl = bl) # original n only needed in SemiParBIVProbit.fit
+             Cont = "NO", ccss = "no", m2 = m2, m3 = m3, bl = bl,
+             X2s = X2s, X3s = X3s, triv = FALSE) # original n only needed in SemiParBIVProbit.fit
              
   if(gc.l == TRUE) gc()           
              
@@ -736,6 +816,8 @@ if(missing(parscale)) parscale <- 1
   ##########################################################################################################################
   ##########################################################################################################################
 
+  if(Model %in% c("BSS", "BPO", "BPO0") || (Model == "B" && margins[2] %in% bl)  )  gamlssfit <- VC$gamlssfit <- TRUE # useful for error massage and joint probs
+
   SemiParFit <- SemiParBIVProbit.fit(func.opt = func.opt, start.v = start.v, 
                          rinit = rinit, rmax = rmax, iterlim = 100, iterlimsp = iterlimsp, tolsp = tolsp,
                          respvec = respvec, VC = VC, sp = sp, qu.mag = qu.mag) 
@@ -744,7 +826,8 @@ if(missing(parscale)) parscale <- 1
   # post estimation
   ##########################################################################################################################
 
-  SemiParFit.p <- SemiParBIVProbit.fit.post(SemiParFit = SemiParFit, formula.eq2 = formula.eq2, data = data, 
+
+  SemiParFit.p <- SemiParBIVProbit.fit.post(SemiParFit = SemiParFit, 
                                             Model = Model, VC = VC, 
                                             qu.mag = qu.mag, gam1 = gam1, gam2 = gam2, gam3 = gam3,
                                             gam4 = gam4, gam5 = gam5, gam6 = gam6)
@@ -824,9 +907,10 @@ L <- list(fit = SemiParFit$fit, dataset = dataset, formula = formula,
           sigma2 = SemiParFit.p$sigma2, sigma2.a = SemiParFit.p$sigma2.a,
           nu = SemiParFit.p$nu,     nu.a = SemiParFit.p$nu.a,
           gp1 = gp1, gp2 = gp2, gp3 = gp3, gp4 = gp4, gp5 = gp5, gp6 = gp6, gp7 = gp7, 
-          X2s = SemiParFit.p$X2s, p1n=SemiParFit.p$p1n , p2n = SemiParFit.p$p2n, 
-          VC = VC, Model = Model, ig = ig, magpp = SemiParFit$magpp,
-          gamlss = gamlss, gamlssfit = gamlssfit, Cont = "NO", l.flist = l.flist)
+          X2s = X2s, X3s = X3s, p1n=SemiParFit.p$p1n , p2n = SemiParFit.p$p2n, 
+          VC = VC, Model = Model, magpp = SemiParFit$magpp,
+          gamlss = gamlss, gamlssfit = gamlssfit, Cont = "NO", tau = SemiParFit.p$tau, 
+          tau.a = SemiParFit.p$tau.a, l.flist = l.flist, v1 = v1, v2 = v2, triv = FALSE)
 
 class(L) <- "SemiParBIVProbit"
 

@@ -1,4 +1,7 @@
-jc.probs <- function(x, y1, y2, type = "bivariate", cond = 0, intervals = FALSE, n.sim = 100, prob.lev = 0.05){
+jc.probs <- function(x, y1, y2, newdata, type = "bivariate", cond = 0, intervals = FALSE, n.sim = 100, prob.lev = 0.05){
+
+if(x$triv == TRUE ) stop("This function is currently not suitable for trivariate probit models.")
+
 
 if(missing(y1)) stop("You must provide a value for y1.")
 if(missing(y2)) stop("You must provide a value for y2.")
@@ -12,9 +15,10 @@ nu1 <- nu2 <- nu <- 1
 CIp12 <- NULL
 bin.link <- x$VC$bl  
 
-
 if(!(type %in% c("bivariate","independence"))) stop("Error in parameter type value. It should be one of: bivariate, independence.")
 if(!(cond %in% c(0,1,2))) stop("Error in parameter cond value. It should be one of: 0, 1, 2.")
+
+if( type %in% c("independence") && x$VC$gamlssfit == FALSE) stop("You need to re-fit the model and set gamlssfit = TRUE to obtain probabilities under independence.")
 
 if( x$VC$Cont == "NO" && !(x$margins[2] %in% bin.link) && !(y1 %in% c(0,1)) ) stop("The value for y1 must be either 0 or 1.")
 
@@ -22,11 +26,8 @@ if( x$VC$Cont == "NO" && x$margins[2] %in% bin.link){ if( !(y1 %in% c(0,1)) || !
 
 
 
-
-
-
-
-
+######################################################################################################
+######################################################################################################
 
 if(x$VC$Cont == "YES"){ ###
 
@@ -34,12 +35,72 @@ if(x$VC$Cont == "YES"){ ###
 if(type == "bivariate"){ ##
 
 
-p1  <- distrHsAT(y1, x$eta1, x$sigma21, x$nu1, x$margins[1])$p2 # I need to evaluate this at the y point of interest
-p2  <- distrHsAT(y2, x$eta2, x$sigma22, x$nu2, x$margins[2])$p2 # so it can not be taken from the fitted model
-p12 <- BiCDF(p1, p2, x$nC, x$theta)
+
+if(!missing(newdata)){
+
+nu1 <- nu2 <- NA
+
+eta1 <- predict.SemiParBIVProbit(x, eq = 1, newdata = newdata)
+eta2 <- predict.SemiParBIVProbit(x, eq = 2, newdata = newdata)
+
+if( !is.null(x$X3) ){
+
+sigma21 <- esp.tr(predict.SemiParBIVProbit(x, eq = 3, newdata = newdata), x$margins[1])$vrb
+sigma22 <- esp.tr(predict.SemiParBIVProbit(x, eq = 4, newdata = newdata), x$margins[2])$vrb
+
+if(x$margins[1] %in% cont3par && x$margins[2] %in% cont3par){ eq.nu1 <- 5;  eq.nu2 <- 6;  eq.th <- 7}
+if(x$margins[1] %in% cont2par && x$margins[2] %in% cont2par){ eq.nu1 <- NA; eq.nu2 <- NA; eq.th <- 5}
+if(x$margins[1] %in% cont2par && x$margins[2] %in% cont3par){ eq.nu1 <- NA; eq.nu2 <- 5;  eq.th <- 6}
+if(x$margins[1] %in% cont3par && x$margins[2] %in% cont2par){ eq.nu1 <- 5;  eq.nu2 <- NA; eq.th <- 6}
+
+if(x$margins[1] %in% cont3par) nu1 <- esp.tr(predict.SemiParBIVProbit(x, eq = eq.nu1, newdata = newdata), x$margins[1])$vrb
+if(x$margins[2] %in% cont3par) nu2 <- esp.tr(predict.SemiParBIVProbit(x, eq = eq.nu2, newdata = newdata), x$margins[2])$vrb
+
+theta <- teta.tr(x$VC, predict.SemiParBIVProbit(x, eq = eq.th, newdata = newdata))$teta
+
+}
+
+if( is.null(x$X3) ){
+
+sigma21 <- x$sigma21
+sigma22 <- x$sigma22
+
+nu1 <- x$nu1 
+nu2 <- x$nu2
+
+theta <- x$theta 
+
+
+}
+
+
+}
+
+
+
+if(missing(newdata)){
+
+eta1 <- x$eta1
+eta2 <- x$eta2
+
+sigma21 <- x$sigma21
+sigma22 <- x$sigma22
+
+nu1 <- x$nu1 
+nu2 <- x$nu2
+
+theta <- x$theta 
+
+}
+
+
+p1  <- distrHsAT(y1, eta1, sigma21, nu1, x$margins[1])$p2 # I need to evaluate this at the y point of interest
+p2  <- distrHsAT(y2, eta2, sigma22, nu2, x$margins[2])$p2 # so it can not be taken from the fitted model
+p12 <- BiCDF(p1, p2, x$nC, theta)
 
 if(cond == 1) p12 <- p12/p1
 if(cond == 2) p12 <- p12/p2
+
 
 
 
@@ -53,8 +114,17 @@ lf <- length(x$coefficients)
 # etas
 #############  
 
-eta1s <- eta.tr( x$X1%*%t(bs[,1:x$X1.d2])                     , x$VC$margins[1]) 
-eta2s <- eta.tr( x$X2%*%t(bs[,(x$X1.d2+1):(x$X1.d2+x$X2.d2)]) , x$VC$margins[2])
+# try with 1 number
+
+if(!missing(newdata)){ X1 <- predict.SemiParBIVProbit(x, eq = 1, newdata = newdata, type = "lpmatrix") 
+                       X2 <- predict.SemiParBIVProbit(x, eq = 2, newdata = newdata, type = "lpmatrix") }
+                       
+if( missing(newdata)){ X1 <- x$X1 
+                       X2 <- x$X2 }                       
+
+
+eta1s <- eta.tr( X1%*%t(bs[,1:x$X1.d2])                     , x$VC$margins[1]) 
+eta2s <- eta.tr( X2%*%t(bs[,(x$X1.d2+1):(x$X1.d2+x$X2.d2)]) , x$VC$margins[2])
 
 #############  
 # thetas
@@ -63,10 +133,41 @@ eta2s <- eta.tr( x$X2%*%t(bs[,(x$X1.d2+1):(x$X1.d2+x$X2.d2)]) , x$VC$margins[2])
 if(  is.null(x$X3) ) epds <- bs[,lf]
   
   	if( !is.null(x$X3) ){ 
-  if(x$VC$margins[1] %in% cont2par && x$VC$margins[2] %in% cont2par) epds <- x$X5%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2)])
- if((x$VC$margins[1] %in% cont3par && x$VC$margins[2] %in% cont2par) || (x$VC$margins[1] %in% cont2par && x$VC$margins[2] %in% cont3par) ) epds <- x$X6%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2+x$X6.d2)])
-  if(x$VC$margins[1] %in% cont3par && x$VC$margins[2] %in% cont3par) epds <- x$X7%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2+x$X6.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2+x$X6.d2+x$X7.d2)])
-  	                          }
+  	
+  	
+  	
+  if(x$VC$margins[1] %in% cont2par && x$VC$margins[2] %in% cont2par){
+  
+  
+       if(!missing(newdata)) X5 <- predict.SemiParBIVProbit(x, eq = 5, newdata = newdata, type = "lpmatrix")               
+       if( missing(newdata)) X5 <- x$X5 
+ 
+       epds <- X5%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2)])
+ 
+  }
+ 
+  if((x$VC$margins[1] %in% cont3par && x$VC$margins[2] %in% cont2par) || (x$VC$margins[1] %in% cont2par && x$VC$margins[2] %in% cont3par) ){
+  
+       if(!missing(newdata)) X6 <- predict.SemiParBIVProbit(x, eq = 6, newdata = newdata, type = "lpmatrix")               
+       if( missing(newdata)) X6 <- x$X6   
+  
+       epds <- X6%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2+x$X6.d2)])
+  
+  }
+  
+  if(x$VC$margins[1] %in% cont3par && x$VC$margins[2] %in% cont3par){
+  
+       if(!missing(newdata)) X7 <- predict.SemiParBIVProbit(x, eq = 7, newdata = newdata, type = "lpmatrix")               
+       if( missing(newdata)) X7 <- x$X7    
+  
+       epds <- X7%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2+x$X6.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2+x$X6.d2+x$X7.d2)])
+  
+  }
+  
+  
+                            }
+  	                        
+
 
 est.RHOb <- teta.tr(x$VC, epds)$teta
    
@@ -88,9 +189,16 @@ if((x$VC$margins[1] %in% cont2par && x$VC$margins[2] %in% cont3par) || (x$VC$mar
   
   
       if( !is.null(x$X3) ) {
+      
+      
+       if(!missing(newdata)){ X3 <- predict.SemiParBIVProbit(x, eq = 3, newdata = newdata, type = "lpmatrix")
+                              X4 <- predict.SemiParBIVProbit(x, eq = 4, newdata = newdata, type = "lpmatrix") }
+       if( missing(newdata)){ X3 <- x$X3; X4 <- x$X4 }        
+      
+      
 
-       sigma2.1.star <- x$X3%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)]) 
-       sigma2.2.star <- x$X4%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2)]) 
+       sigma2.1.star <- X3%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)]) 
+       sigma2.2.star <- X4%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2)]) 
 
                                 }  
 
@@ -110,9 +218,14 @@ if(x$VC$margins[1] %in% cont3par && x$VC$margins[2] %in% cont3par ){
                             nu2.st <- bs[, pn2]  } # t(as.matrix(bs[, pn2]))  } 
   
   if( !is.null(x$X3) ) {  
+  
+  
+       if(!missing(newdata)){ X5 <- predict.SemiParBIVProbit(x, eq = 5, newdata = newdata, type = "lpmatrix")
+                              X6 <- predict.SemiParBIVProbit(x, eq = 6, newdata = newdata, type = "lpmatrix") }
+       if( missing(newdata)){ X5 <- x$X5; X6 <- x$X6 }   
  
-       nu1.st <- x$X5%*%t(bs[,(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + 1):(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + x$X5.d2)]) 
-       nu2.st <- x$X6%*%t(bs[,(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + x$X5.d2 + 1):(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + x$X5.d2 + x$X6.d2)])
+       nu1.st <- X5%*%t(bs[,(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + 1):(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + x$X5.d2)]) 
+       nu2.st <- X6%*%t(bs[,(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + x$X5.d2 + 1):(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + x$X5.d2 + x$X6.d2)])
   
                        }   
    
@@ -126,7 +239,11 @@ if(x$VC$margins[1] %in% cont2par && x$VC$margins[2] %in% cont3par ){
   
   if( is.null(x$X3) )  {  pn2 <- lf - 1; nu2.st <- bs[, pn2]  } # nu2.st <- t(as.matrix(bs[, pn2]))
   
-  if( !is.null(x$X3) ) nu2.st <- x$X5%*%t(bs[,(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + 1):(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + x$X5.d2)]) 
+  
+       if(!missing(newdata)){ X5 <- predict.SemiParBIVProbit(x, eq = 5, newdata = newdata, type = "lpmatrix")}
+       if( missing(newdata)){ X5 <- x$X5}     
+  
+  if( !is.null(x$X3) ) nu2.st <- X5%*%t(bs[,(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + 1):(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + x$X5.d2)]) 
   
   nu2 <- esp.tr(nu2.st, x$VC$margins[2])$vrb   
 
@@ -138,7 +255,10 @@ if(x$VC$margins[1] %in% cont3par && x$VC$margins[2] %in% cont2par ){
     
   if( is.null(x$X3) )  {  pn1 <- lf - 1; nu1.st <- bs[, pn1]  } # nu1.st <- t(as.matrix(bs[, pn1])) 
   
-  if( !is.null(x$X3) ) nu1.st <- x$X5%*%t(bs[,(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + 1):(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + x$X5.d2)]) 
+       if(!missing(newdata)){ X5 <- predict.SemiParBIVProbit(x, eq = 5, newdata = newdata, type = "lpmatrix")}
+       if( missing(newdata)){ X5 <- x$X5}    
+  
+  if( !is.null(x$X3) ) nu1.st <- X5%*%t(bs[,(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + 1):(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + x$X5.d2)]) 
   
   nu1 <- esp.tr(nu1.st, x$VC$margins[1])$vrb  
    
@@ -185,10 +305,63 @@ if(cond == 2) p12s <- p12s/p2s
 
 if(type == "independence"){
 
-if(x$gamlssfit == FALSE) stop("You need to re-fit the model and set gamlssfit = TRUE to obtain probabilities under independence.")
 
-p1  <- distrHsAT(y1, x$gamlss1$fit$eta2, x$gamlss1$fit$sigma2, x$gamlss1$fit$nu, x$margins[1])$p2
-p2  <- distrHsAT(y2, x$gamlss2$fit$eta2, x$gamlss2$fit$sigma2, x$gamlss2$fit$nu, x$margins[2])$p2
+
+if(!missing(newdata)){
+
+nu1 <- nu2 <- NA
+
+eta1 <- predict.SemiParBIVProbit(x, eq = 1, newdata = newdata, type = "lpmatrix")%*%x$gamlss1$fit$argument[1:x$X1.d2]
+eta2 <- predict.SemiParBIVProbit(x, eq = 2, newdata = newdata, type = "lpmatrix")%*%x$gamlss2$fit$argument[1:x$X2.d2]
+
+if( !is.null(x$X3) ){ 
+
+sigma21 <- esp.tr(predict.SemiParBIVProbit(x, eq = 3, newdata = newdata, type = "lpmatrix")%*%x$gamlss1$fit$argument[(x$X1.d2+1):(x$X1.d2+x$X3.d2)], x$margins[1])$vrb
+sigma22 <- esp.tr(predict.SemiParBIVProbit(x, eq = 4, newdata = newdata, type = "lpmatrix")%*%x$gamlss2$fit$argument[(x$X2.d2+1):(x$X2.d2+x$X4.d2)], x$margins[2])$vrb
+
+if(x$margins[1] %in% cont3par && x$margins[2] %in% cont3par){ eq.nu1 <- 5;  eq.nu2 <- 6  ; indn1 <- (x$X1.d2 + x$X3.d2 + 1):(x$X1.d2 + x$X3.d2 + x$X5.d2); indn2 <- (x$X2.d2 + x$X4.d2 + 1):(x$X2.d2 + x$X4.d2 + x$X6.d2)}
+if(x$margins[1] %in% cont2par && x$margins[2] %in% cont2par){ eq.nu1 <- NA; eq.nu2 <- NA ; indn1 <- NA; indn2 <- NA}
+if(x$margins[1] %in% cont2par && x$margins[2] %in% cont3par){ eq.nu1 <- NA; eq.nu2 <- 5  ; indn1 <- NA; indn2 <- (x$X2.d2 + x$X4.d2 + 1):(x$X2.d2 + x$X4.d2 + x$X5.d2)}
+if(x$margins[1] %in% cont3par && x$margins[2] %in% cont2par){ eq.nu1 <- 5;  eq.nu2 <- NA ; indn1 <- (x$X1.d2 + x$X3.d2 + 1):(x$X1.d2 + x$X3.d2 + x$X5.d2); indn2 <- NA}
+
+if(x$margins[1] %in% cont3par) nu1 <- esp.tr(predict.SemiParBIVProbit(x, eq = eq.nu1, newdata = newdata, type = "lpmatrix")%*%x$gamlss1$fit$argument[indn1], x$margins[1])$vrb
+if(x$margins[2] %in% cont3par) nu2 <- esp.tr(predict.SemiParBIVProbit(x, eq = eq.nu2, newdata = newdata, type = "lpmatrix")%*%x$gamlss2$fit$argument[indn2], x$margins[2])$vrb
+
+}
+
+if( is.null(x$X3) ){ 
+
+sigma21 <- x$gamlss1$fit$sigma2
+sigma22 <- x$gamlss2$fit$sigma2
+
+nu1 <- x$gamlss1$fit$nu
+nu2 <- x$gamlss2$fit$nu
+
+}
+
+}
+
+
+
+if(missing(newdata)){
+
+
+eta1 <- x$gamlss1$fit$eta2
+eta2 <- x$gamlss2$fit$eta2
+
+sigma21 <- x$gamlss1$fit$sigma2
+sigma22 <- x$gamlss2$fit$sigma2
+
+nu1 <- x$gamlss1$fit$nu
+nu2 <- x$gamlss2$fit$nu
+
+}
+
+
+
+
+p1  <- distrHsAT(y1, eta1, sigma21, nu1, x$margins[1])$p2
+p2  <- distrHsAT(y2, eta2, sigma22, nu2, x$margins[2])$p2
 p12 <- p1*p2
 
 if(cond == 1) p12 <- p2
@@ -204,10 +377,14 @@ bs2 <- rMVN(n.sim, mean = x$gamlss2$fit$argument, sigma=x$gamlss2$magpp$Vb)
 
 #############  
 # etas
-#############  
+############# 
 
-eta1s <- eta.tr( x$X1%*%t(bs1[,1:x$X1.d2]), x$VC$margins[1]) 
-eta2s <- eta.tr( x$X2%*%t(bs2[,1:x$X2.d2]), x$VC$margins[2]) 
+if(!missing(newdata)){ X1 <- predict.SemiParBIVProbit(x, eq = 1, newdata = newdata, type = "lpmatrix")
+                       X2 <- predict.SemiParBIVProbit(x, eq = 2, newdata = newdata, type = "lpmatrix")}
+if( missing(newdata)){ X1 <- x$X1; X2 <- x$X2}  
+
+eta1s <- eta.tr( X1%*%t(bs1[,1:x$X1.d2]), x$VC$margins[1]) 
+eta2s <- eta.tr( X2%*%t(bs2[,1:x$X2.d2]), x$VC$margins[2]) 
 
 #############  
 # sigmas
@@ -223,8 +400,12 @@ eta2s <- eta.tr( x$X2%*%t(bs2[,1:x$X2.d2]), x$VC$margins[2])
   
       if( !is.null(x$X3) ) {
 
-       sigma2.1.star <- x$X3%*%t(bs1[,(x$X1.d2+1):(x$X1.d2+x$X3.d2)]) 
-       sigma2.2.star <- x$X4%*%t(bs2[,(x$X2.d2+1):(x$X2.d2+x$X4.d2)]) 
+if(!missing(newdata)){ X3 <- predict.SemiParBIVProbit(x, eq = 3, newdata = newdata, type = "lpmatrix")
+                       X4 <- predict.SemiParBIVProbit(x, eq = 4, newdata = newdata, type = "lpmatrix")}
+if( missing(newdata)){ X3 <- x$X3; X4 <- x$X4}  
+
+       sigma2.1.star <- X3%*%t(bs1[,(x$X1.d2+1):(x$X1.d2+x$X3.d2)]) 
+       sigma2.2.star <- X4%*%t(bs2[,(x$X2.d2+1):(x$X2.d2+x$X4.d2)]) 
 
                            }  
 
@@ -243,8 +424,14 @@ if(x$VC$margins[1] %in% cont3par && x$VC$margins[2] %in% cont3par ){
                         } 
   
   if( !is.null(x$X3) ) {  
-       nu1.st <- x$X5%*%t(bs1[,(x$X1.d2 + x$X3.d2 + 1):(x$X1.d2 + x$X3.d2 + x$X5.d2)]) 
-       nu2.st <- x$X6%*%t(bs2[,(x$X2.d2 + x$X4.d2 + 1):(x$X2.d2 + x$X4.d2 + x$X6.d2)])
+  
+  
+if(!missing(newdata)){ X5 <- predict.SemiParBIVProbit(x, eq = 5, newdata = newdata, type = "lpmatrix")
+                       X6 <- predict.SemiParBIVProbit(x, eq = 6, newdata = newdata, type = "lpmatrix")}
+if( missing(newdata)){ X5 <- x$X5; X6 <- x$X6}    
+  
+       nu1.st <- X5%*%t(bs1[,(x$X1.d2 + x$X3.d2 + 1):(x$X1.d2 + x$X3.d2 + x$X5.d2)]) 
+       nu2.st <- X6%*%t(bs2[,(x$X2.d2 + x$X4.d2 + 1):(x$X2.d2 + x$X4.d2 + x$X6.d2)])
                        }   
    
 nu1 <- esp.tr(nu1.st, x$VC$margins[1])$vrb   
@@ -256,7 +443,20 @@ nu2 <- esp.tr(nu2.st, x$VC$margins[2])$vrb
 if(x$VC$margins[1] %in% cont2par && x$VC$margins[2] %in% cont3par ){  
   
   if( is.null(x$X3) )  nu2.st <- bs2[, x$X2.d2 + 2] # t(as.matrix(bs2[, x$X2.d2 + 2]))  
-  if( !is.null(x$X3) ) nu2.st <- x$X5%*%t(bs2[,(x$X2.d2 + x$X4.d2 + 1):(x$X2.d2 + x$X4.d2 + x$X5.d2)]) 
+  
+  
+  if( !is.null(x$X3) ){
+  
+  
+    if(!missing(newdata)){ X5 <- predict.SemiParBIVProbit(x, eq = 5, newdata = newdata, type = "lpmatrix")}
+    if( missing(newdata)){ X5 <- x$X5}  
+  
+    nu2.st <- X5%*%t(bs2[,(x$X2.d2 + x$X4.d2 + 1):(x$X2.d2 + x$X4.d2 + x$X5.d2)]) 
+  
+  
+                      }
+  
+  
                        nu2    <- esp.tr(nu2.st, x$VC$margins[2])$vrb   
 } 
   
@@ -265,8 +465,18 @@ if(x$VC$margins[1] %in% cont2par && x$VC$margins[2] %in% cont3par ){
 if(x$VC$margins[1] %in% cont3par && x$VC$margins[2] %in% cont2par ){  
     
   if( is.null(x$X3) )  nu1.st <- bs1[, x$X1.d2 + 2] # t(as.matrix(bs1[, x$X1.d2 + 2]))   
-  if( !is.null(x$X3) ) nu1.st <- x$X5%*%t(bs1[,(x$X1.d2 + x$X3.d2 + 1):(x$X1.d2 + x$X3.d2 + x$X5.d2)])                  
-                       nu1    <- esp.tr(nu1.st, x$VC$margins[1])$vrb    
+
+
+  if( !is.null(x$X3) ){
+    
+    if(!missing(newdata)){ X5 <- predict.SemiParBIVProbit(x, eq = 5, newdata = newdata, type = "lpmatrix")}
+    if( missing(newdata)){ X5 <- x$X5}    
+  
+    nu1.st <- X5%*%t(bs1[,(x$X1.d2 + x$X3.d2 + 1):(x$X1.d2 + x$X3.d2 + x$X5.d2)])                  
+  
+                      }
+  
+  nu1    <- esp.tr(nu1.st, x$VC$margins[1])$vrb    
 }  
 
 
@@ -302,6 +512,8 @@ if(cond == 2) p12s <- p1s
 
 
 
+######################################################################################################
+######################################################################################################
 
 
 
@@ -314,24 +526,74 @@ if(cond == 2) p12s <- p1s
 
 
 
-
-if(x$VC$Cont == "NO" && !(x$margins[2] %in% bin.link)){ 
+if( x$VC$Cont == "NO" && !(x$margins[2] %in% bin.link) ){ 
 
 
 if(type == "bivariate"){
 
+
+if(!missing(newdata)){
+
+nu <- NA
+
+p1   <- predict.SemiParBIVProbit(x, eq = 1, newdata = newdata, type = "response")
+eta2 <- predict.SemiParBIVProbit(x, eq = 2, newdata = newdata)
+
+
+if( !is.null(x$X3) ){
+
+sigma2 <- esp.tr(predict.SemiParBIVProbit(x, eq = 3, newdata = newdata), x$margins[2])$vrb
+
+if(x$margins[2] %in% cont2par) eq.th <- 4
+if(x$margins[2] %in% cont3par){ eq.nu <- 4; eq.th <- 5}
+
+if(x$margins[2] %in% cont3par) nu <- esp.tr(predict.SemiParBIVProbit(x, eq = eq.nu, newdata = newdata), x$margins[2])$vrb
+
+theta <- teta.tr(x$VC, predict.SemiParBIVProbit(x, eq = eq.th, newdata = newdata))$teta
+
+}
+
+
+if( is.null(x$X3) ){
+
+sigma2 <- x$sigma2
+nu     <- x$nu 
+theta  <- x$theta 
+
+}
+
+
+}
+
+
+
+if(missing(newdata)){
+
+p1   <- x$p1
+eta2 <- x$eta2
+
+sigma2 <- x$sigma2
+nu     <- x$nu 
+theta  <- x$theta 
+
+}
+
+
 if(y1 == 0 || y1 == 1){              ### joint prob of y1=0 and y2=x ###
-p1  <- x$p1
+
 p0  <- 1 - p1         
-p2  <- distrHsAT(y2, x$eta2, x$sigma2, x$nu, x$margins[2])$p2
-p12 <- BiCDF(p0, p2, x$nC, x$theta)
+p2  <- distrHsAT(y2, eta2, sigma2, nu, x$margins[2])$p2
+p12 <- BiCDF(p0, p2, x$nC, theta)
 
 if(cond == 1) p12 <- p12/p0
 if(cond == 2) p12 <- p12/p2
 
                       }
 
+
+
 if(y1 == 1){                         ### joint prob of y1=1 and y2=x ###
+
 p12  <- p2 - p12
 
 if(cond == 1) p12 <- p12/p1
@@ -339,6 +601,11 @@ if(cond == 2) p12 <- p12/p2
 
            }
            
+
+
+
+
+
            
            
 if(intervals == TRUE){
@@ -347,10 +614,18 @@ bs <- rMVN(n.sim, mean = x$coefficients, sigma = x$Vb)
 
 #############  
 # etas
-#############  
+############# 
 
-p1s   <- probm( x$X1%*%t(bs[,1:x$X1.d2]), x$VC$margins[1])$pr 
-eta2s <- eta.tr( x$X2%*%t(bs[,(x$X1.d2+1):(x$X1.d2+x$X2.d2)]) , x$VC$margins[2])
+if(!missing(newdata)){ X1  <- predict.SemiParBIVProbit(x, eq = 1, newdata = newdata, type = "lpmatrix") 
+                       X2s <- predict.SemiParBIVProbit(x, eq = 2, newdata = newdata, type = "lpmatrix") }
+                       
+if( missing(newdata)){ X1 <- x$X1 
+                       if(x$VC$ccss == "yes") X2s <- x$X2s else X2s <- x$X2  
+                       }  
+
+
+p1s   <- probm( X1%*%t(bs[,1:x$X1.d2]), x$VC$margins[1])$pr 
+eta2s <- eta.tr( X2s%*%t(bs[,(x$X1.d2+1):(x$X1.d2+x$X2.d2)]) , x$VC$margins[2])
 
 #############  
 # thetas
@@ -359,9 +634,30 @@ eta2s <- eta.tr( x$X2%*%t(bs[,(x$X1.d2+1):(x$X1.d2+x$X2.d2)]) , x$VC$margins[2])
 if( is.null(x$X3) ) epds <- bs[,length(x$coefficients)]
   
 if( !is.null(x$X3) ){ 
-  if(x$VC$margins[2] %in% cont2par) epds <- x$X4%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2)])
-  if(x$VC$margins[2] %in% cont3par) epds <- x$X5%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2)])
-  	             }
+  if(x$VC$margins[2] %in% cont2par){   
+  
+  
+if(!missing(newdata)){ X4s <- predict.SemiParBIVProbit(x, eq = 4, newdata = newdata, type = "lpmatrix")}
+                       
+if( missing(newdata)){ if(x$VC$ccss == "yes") X4s <- x$X4s else X4s <- x$X4}    
+  
+                epds <- X4s%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2)])
+  
+                                   }
+                                   
+  if(x$VC$margins[2] %in% cont3par){
+  
+if(!missing(newdata)){ X5s <- predict.SemiParBIVProbit(x, eq = 5, newdata = newdata, type = "lpmatrix")}
+                       
+if( missing(newdata)){ if(x$VC$ccss == "yes") X5s <- x$X5s else X5s <- x$X5}    
+  
+                epds <- X5s%*%t(bs[,(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2+x$X4.d2+x$X5.d2)])
+                
+                                   }
+  
+  
+  
+  }
 
 est.RHOb <- teta.tr(x$VC, epds)$teta
    
@@ -370,8 +666,16 @@ est.RHOb <- teta.tr(x$VC, epds)$teta
 #############  
 
       if( is.null(x$X3) )   sigma2.star <- bs[, x$X1.d2 + x$X2.d2 + 1] 
-      if( !is.null(x$X3) )  sigma2.star <- x$X3%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)]) 
-
+      if( !is.null(x$X3) ) {
+      
+if(!missing(newdata)){ X3s <- predict.SemiParBIVProbit(x, eq = 3, newdata = newdata, type = "lpmatrix")}
+                       
+if( missing(newdata)){ if(x$VC$ccss == "yes") X3s <- x$X3s else X3s <- x$X3}        
+                
+            sigma2.star <- X3s%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)]) 
+  
+                           }
+  
 sigma2 <- esp.tr(sigma2.star, x$VC$margins[2])$vrb   
     
 #############  
@@ -381,7 +685,14 @@ sigma2 <- esp.tr(sigma2.star, x$VC$margins[2])$vrb
 if( x$VC$margins[2] %in% cont3par ){  
     
   if( is.null(x$X3)  ) nu.st <- bs[, x$X1.d2 + x$X2.d2 + 2] # t(as.matrix(bs[,  x$X1.d2 + x$X2.d2 + 2]))
-  if( !is.null(x$X3) ) nu.st <- x$X4%*%t(bs[,(x$X1.d2 + x$X2.d2 + x$X3.d2 + 1):(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2)]) 
+  if( !is.null(x$X3) ){
+  
+if(!missing(newdata)){ X4s <- predict.SemiParBIVProbit(x, eq = 4, newdata = newdata, type = "lpmatrix")}                    
+if( missing(newdata)){ if(x$VC$ccss == "yes") X4s <- x$X4s else X4s <- x$X4}    
+  
+              nu.st <- X4s%*%t(bs[,(x$X1.d2 + x$X2.d2 + x$X3.d2 + 1):(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2)]) 
+  
+                      }
   
  nu <- esp.tr(nu.st, x$VC$margins[2])$vrb   
   
@@ -437,16 +748,52 @@ if(cond == 2) p12s <- p12s/p2s
 
 
 
-
-
-
-
 if(type == "independence"){
 
-if(y1 == 0 || y1 == 1){                              
-p1  <- probm( x$X1%*%x$gam1$coefficients, x$VC$margins[1])$pr
+
+
+if(!missing(newdata)){
+
+nu     <- NA
+p1     <- probm(predict.SemiParBIVProbit(x, eq = 1, newdata = newdata, type = "lpmatrix")%*%x$gam1$coefficients, x$VC$margins[1])$pr
+eta2   <- predict.SemiParBIVProbit(x, eq = 2, newdata = newdata, type = "lpmatrix")%*%x$gamlss$fit$argument[1:x$X2.d2]
+
+
+if( !is.null(x$X3) ){
+
+sigma2 <- esp.tr(predict.SemiParBIVProbit(x, eq = 3, newdata = newdata, type = "lpmatrix")%*%x$gamlss$fit$argument[(x$X2.d2+1):(x$X2.d2+x$X3.d2)], x$margins[2])$vrb
+if(x$margins[2] %in% cont3par) nu <- esp.tr(predict.SemiParBIVProbit(x, eq = 4, newdata = newdata, type = "lpmatrix")%*%x$gamlss$fit$argument[(x$X2.d2 + x$X3.d2 + 1):(x$X2.d2 + x$X3.d2 + x$X4.d2)], x$margins[2])$vrb
+
+}
+
+if( is.null(x$X3) ){
+
+sigma2 <- x$gamlss$fit$sigma2
+nu     <- x$gamlss$fit$nu 
+
+
+}
+
+}
+
+
+
+if(missing(newdata)){
+
+p1   <- probm(predict.SemiParBIVProbit(x, eq = 1, type = "lpmatrix")%*%x$gam1$coefficients, x$VC$margins[1])$pr
+eta2 <- x$gamlss$fit$eta2
+
+sigma2 <- x$gamlss$fit$sigma2
+nu     <- x$gamlss$fit$nu 
+
+}
+
+
+
+if(y1 == 0 || y1 == 1){  
+
 p0  <- 1 - p1                     
-p2  <- distrHsAT(y2, x$gamlss$fit$eta2, x$gamlss$fit$sigma2, x$gamlss$fit$nu, x$margins[2])$p2
+p2  <- distrHsAT(y2, eta2, sigma2, nu, x$margins[2])$p2
 p12 <- p0*p2
 
 if(cond == 1) p12 <- p2
@@ -481,15 +828,30 @@ bs2 <- rMVN(n.sim, mean = x$gamlss$fit$argument, sigma=x$gamlss$magpp$Vb)
 # etas
 #############  
 
-p1s   <- probm(  x$X1%*%t(bs1[,1:x$X1.d2]) , x$VC$margins[1])$pr 
-eta2s <- eta.tr( x$X2%*%t(bs2[,1:x$X2.d2]) , x$VC$margins[2])
+if(!missing(newdata)){ X1  <- predict.SemiParBIVProbit(x, eq = 1, newdata = newdata, type = "lpmatrix") 
+                       X2s <- predict.SemiParBIVProbit(x, eq = 2, newdata = newdata, type = "lpmatrix") }
+                       
+if( missing(newdata)){ X1 <- x$X1 
+                       if(x$VC$ccss == "yes") X2s <- x$X2s else X2s <- x$X2  
+                       } 
+  
+p1s   <- probm(   X1%*%t(bs1[,1:x$X1.d2]) , x$VC$margins[1])$pr   
+eta2s <- eta.tr( X2s%*%t(bs2[,1:x$X2.d2]) , x$VC$margins[2])
 
 #############  
 # sigmas
 #############  
 
       if( is.null(x$X3) )   sigma2.star <- bs2[, x$X2.d2 + 1] 
-      if( !is.null(x$X3) )  sigma2.star <- x$X3%*%t(bs2[,(x$X2.d2+1):(x$X2.d2+x$X3.d2)]) 
+      
+      if( !is.null(x$X3) ){
+      
+if(!missing(newdata)){ X3s <- predict.SemiParBIVProbit(x, eq = 3, newdata = newdata, type = "lpmatrix")}                     
+if( missing(newdata)){ if(x$VC$ccss == "yes") X3s <- x$X3s else X3s <- x$X3}        
+      
+                      sigma2.star <- X3s%*%t(bs2[,(x$X2.d2+1):(x$X2.d2+x$X3.d2)]) 
+
+                          }
 
 sigma2 <- esp.tr(sigma2.star, x$VC$margins[2])$vrb   
     
@@ -500,8 +862,15 @@ sigma2 <- esp.tr(sigma2.star, x$VC$margins[2])$vrb
 if( x$VC$margins[2] %in% cont3par ){  
     
   if( is.null(x$X3)  ) nu.st <- bs2[,  x$X2.d2 + 2] # t(as.matrix(bs2[,  x$X2.d2 + 2]))
-  if( !is.null(x$X3) ) nu.st <- x$X4%*%t(bs[,(x$X2.d2 + x$X3.d2 + 1):(x$X2.d2 + x$X3.d2 + x$X4.d2)]) 
   
+  if( !is.null(x$X3) ){
+  
+if(!missing(newdata)){ X4s <- predict.SemiParBIVProbit(x, eq = 4, newdata = newdata, type = "lpmatrix")}                      
+if( missing(newdata)){ if(x$VC$ccss == "yes") X4s <- x$X4s else X4s <- x$X4}     
+  
+             nu.st <- X4s%*%t(bs2[,(x$X2.d2 + x$X3.d2 + 1):(x$X2.d2 + x$X3.d2 + x$X4.d2)]) 
+                      }
+                      
  nu <- esp.tr(nu.st, x$VC$margins[2])$vrb   
   
 } 
@@ -551,7 +920,8 @@ if(cond == 2) p12s <- p1s
 
 
 
-
+##################################################################################################
+##################################################################################################
 
 
 
@@ -570,12 +940,37 @@ if(x$VC$Cont == "NO" && x$margins[2] %in% bin.link){
 
 if(type == "bivariate"){
 
+
+if(!missing(newdata)){
+
+p1 <- predict.SemiParBIVProbit(x, eq = 1, newdata = newdata, type = "response")
+p2 <- predict.SemiParBIVProbit(x, eq = 2, newdata = newdata, type = "response")
+
+if(!is.null(x$X3)) theta <- teta.tr(x$VC, predict.SemiParBIVProbit(x, eq = 3, newdata = newdata))$teta
+if(is.null(x$X3))  theta  <- x$theta 
+
+}
+
+
+
+if(missing(newdata)){
+
 p1 <- x$p1
 p2 <- x$p2
 
+theta  <- x$theta 
+
+}
+
+
+
+p12 <- BiCDF(p1, p2, x$nC, theta) 
+
+
+
 if(y1 == 1 && y2 == 1){ 
 
-  p12 <- x$p11     
+  p12 <- p12 
   if(cond == 1) p12 <- p12/p1
   if(cond == 2) p12 <- p12/p2
 
@@ -583,7 +978,7 @@ if(y1 == 1 && y2 == 1){
 
 if(y1 == 1 && y2 == 0){ 
 
-  p12 <- x$p10     
+  p12 <- pmax(p1 - p12, epsilon)      
   if(cond == 1) p12 <- p12/p1
   if(cond == 2) p12 <- p12/(1-p2)
 
@@ -591,7 +986,7 @@ if(y1 == 1 && y2 == 0){
 
 if(y1 == 0 && y2 == 1){ 
 
-  p12 <- x$p01     
+  p12 <- pmax(p2 - p12, epsilon)      
   if(cond == 1) p12 <- p12/(1-p1)
   if(cond == 2) p12 <- p12/p2
 
@@ -599,7 +994,7 @@ if(y1 == 0 && y2 == 1){
 
 if(y1 == 0 && y2 == 0){ 
 
-  p12 <- x$p00     
+  p12 <- pmax(1 - p12 - pmax(p1 - p12, epsilon) - pmax(p2 - p12, epsilon) , epsilon)      
   if(cond == 1) p12 <- p12/(1-p1)
   if(cond == 2) p12 <- p12/(1-p2)
 
@@ -614,12 +1009,19 @@ bs <- rMVN(n.sim, mean = x$coefficients, sigma = x$Vb)
 
 #############  
 # etas
-#############  
+############# 
 
-p1s <- probm( x$X1%*%t(bs[,1:x$X1.d2]), x$VC$margins[1])$pr 
-if(x$Model != "BSS") p2s <- probm( x$X2%*%t(bs[,(x$X1.d2+1):(x$X1.d2+x$X2.d2)]) , x$VC$margins[2])$pr
-if(x$Model == "BSS") p2s <- probm( x$X2s%*%t(bs[,(x$X1.d2+1):(x$X1.d2+x$X2.d2)]) , x$VC$margins[2])$pr
 
+if(!missing(newdata)){ X1  <- predict.SemiParBIVProbit(x, eq = 1, newdata = newdata, type = "lpmatrix") 
+                       X2s <- predict.SemiParBIVProbit(x, eq = 2, newdata = newdata, type = "lpmatrix") }
+                       
+if( missing(newdata)){ X1 <- x$X1 
+                       if(x$Model == "BSS") X2s <- x$X2s else X2s <- x$X2  
+                       } 
+
+
+p1s <- probm( X1%*%t(bs[,1:x$X1.d2]), x$VC$margins[1])$pr 
+p2s <- probm(X2s%*%t(bs[,(x$X1.d2+1):(x$X1.d2+x$X2.d2)]) , x$VC$margins[2])$pr
 
 #############  
 # thetas
@@ -628,8 +1030,18 @@ if(x$Model == "BSS") p2s <- probm( x$X2s%*%t(bs[,(x$X1.d2+1):(x$X1.d2+x$X2.d2)])
 if(x$Model != "BPO0"){
 
 if(is.null(x$X3))  epds <- bs[,length(x$coefficients)]
-if(!is.null(x$X3)) epds <- x$X3%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)])
-  	             
+
+
+if(!is.null(x$X3)){
+
+if(!missing(newdata)){ X3s <- predict.SemiParBIVProbit(x, eq = 3, newdata = newdata, type = "lpmatrix") }                  
+if( missing(newdata)){ if(x$Model == "BSS") X3s <- x$X3s else X3s <- x$X3 } 
+
+epds <- X3s%*%t(bs[,(x$X1.d2+x$X2.d2+1):(x$X1.d2+x$X2.d2+x$X3.d2)])
+
+                   }
+
+            
 est.RHOb <- teta.tr(x$VC, epds)$teta
 
 }
@@ -693,9 +1105,25 @@ if(y1 == 0 && y2 == 0){
 if(type == "independence"){
 
 
-p1 <- probm( x$X1%*%x$gam1$coefficients, x$VC$margins[1])$pr
-if(x$Model != "BSS") p2 <- probm( x$X2%*%x$gam2$coefficients, x$VC$margins[2])$pr
-if(x$Model == "BSS") p2 <- probm( x$X2s%*%x$gam2$coefficients, x$VC$margins[2])$pr
+
+if(!missing(newdata)){
+
+p1 <- probm( predict.SemiParBIVProbit(x, eq = 1, newdata = newdata, type = "lpmatrix")%*%x$gam1$coefficients, x$VC$margins[1])$pr
+p2 <- probm( predict.SemiParBIVProbit(x, eq = 2, newdata = newdata, type = "lpmatrix")%*%x$gam2$coefficients, x$VC$margins[2])$pr
+
+}
+
+
+
+if(missing(newdata)){
+
+p1 <- probm( predict.SemiParBIVProbit(x, eq = 1, type = "lpmatrix")%*%x$gam1$coefficients, x$VC$margins[1])$pr
+p2 <- probm( predict.SemiParBIVProbit(x, eq = 2, type = "lpmatrix")%*%x$gam2$coefficients, x$VC$margins[2])$pr
+
+
+}
+
+
 
 if(y1 == 1 && y2 == 1){ 
 
@@ -740,9 +1168,23 @@ if(intervals == TRUE){
 bs1 <- rMVN(n.sim, mean = x$gam1$coefficients, sigma=x$gam1$Vp)
 bs2 <- rMVN(n.sim, mean = x$gam2$coefficients, sigma=x$gam2$Vp)
 
-p1s   <- probm(  x$X1%*%t(bs1[,1:x$X1.d2]) , x$VC$margins[1])$pr 
-if(x$Model != "BSS") p2s   <- probm(  x$X2%*%t(bs2[,1:x$X2.d2]) , x$VC$margins[2])$pr 
-if(x$Model == "BSS") p2s   <- probm(  x$X2s%*%t(bs2[,1:x$X2.d2]) , x$VC$margins[2])$pr 
+
+if(!missing(newdata)){
+
+p1s <- probm( predict.SemiParBIVProbit(x, eq = 1, newdata = newdata, type = "lpmatrix")%*%t(bs1[,1:x$X1.d2]), x$VC$margins[1])$pr
+p2s <- probm( predict.SemiParBIVProbit(x, eq = 2, newdata = newdata, type = "lpmatrix")%*%t(bs2[,1:x$X2.d2]), x$VC$margins[2])$pr
+
+}
+
+
+
+if(missing(newdata)){
+
+p1s <- probm( predict.SemiParBIVProbit(x, eq = 1, type = "lpmatrix")%*%t(bs1[,1:x$X1.d2]), x$VC$margins[1])$pr
+p2s <- probm( predict.SemiParBIVProbit(x, eq = 2, type = "lpmatrix")%*%t(bs2[,1:x$X2.d2]), x$VC$margins[2])$pr
+
+
+}
 
 
 
@@ -819,8 +1261,12 @@ if(intervals == TRUE){
 
 CIp12 <- rowQuantiles(p12s, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE)
 
-res <- data.frame(p12, CIp12, p1, p2)
-names(res)[2:3] <- names(quantile(c(1,1), probs = c(prob.lev/2,1-prob.lev/2)))
+
+if(length(p12) > 1)  {res <- data.frame(p12, CIp12, p1, p2);       names(res)[2:3] <- names(quantile(c(1,1), probs = c(prob.lev/2,1-prob.lev/2)))}
+if(length(p12) == 1) {res <- data.frame(t(c(p12, CIp12, p1, p2))); names(res) <- c("p12",names(quantile(c(1,1), probs = c(prob.lev/2,1-prob.lev/2))),"p1","p2")}
+
+
+#names(res)[2:3] <- names(quantile(c(1,1), probs = c(prob.lev/2,1-prob.lev/2)))
 
 }else{
 
@@ -830,6 +1276,20 @@ res <- data.frame(p12, p1, p2)
 
 
 return(res)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
 

@@ -2,14 +2,14 @@ resp.check <- function(y, margin = "N",
                            main = "Histogram and Density of Response",
                            xlab = "Response", print.par = FALSE, plots = TRUE, loglik = FALSE, ...){
 
-m2 <- c("N","GU","rGU","LO","LN","WEI","iG","GA","BE")
+m2 <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK")
 m3 <- c("DAGUM","SM")
 nu <- NULL
 
-if(!(margin %in% c(m2,m3)) ) stop("Error in margin value. It can be: N, GU, rGU, LO, LN, WEI, iG, GA, DAGUM, SM, BE.") 
+if(!(margin %in% c(m2,m3)) ) stop("Error in margin value. It can be: N, GU, rGU, LO, LN, WEI, iG, GA, GAi, DAGUM, SM, BE, FISK.") 
 
-if(margin %in% c("LN","WEI","iG","GA","DAGUM","SM") && min(y, na.rm = TRUE) <= 0) stop("The response must be positive.")
-if(margin %in% c("BE") && min(y, na.rm = TRUE) <= 0 && max(y, na.rm = TRUE) >= 1 ) stop("The response must be in the interval (0,1).")
+if(margin %in% c("LN","WEI","iG","GA","GAi","DAGUM","SM","FISK") && min(y, na.rm = TRUE) <= 0) stop("The response must be positive.")
+if(margin %in% c("BE") && (min(y, na.rm = TRUE) <= 0 || max(y, na.rm = TRUE) >= 1) ) stop("The response must be in the interval (0,1).")
 
 y <- na.omit(y)
 
@@ -27,7 +27,7 @@ VC <- list(X1 = matrix(1, nrow = length(y), ncol = 1), X1.d2 = 1,
            l.sp1 = 0, l.sp2 = 0, l.sp3 = 0, l.sp4 = 0, l.sp5 = 0, l.sp6 = 0, l.sp7 = 0, 
            weights = 1, 
            margins = margins, fp = TRUE,
-           extra.regI = "t", Cont = "NO")
+           extra.regI = "t", Cont = "NO", ccss = "no", triv = FALSE)
 
 respvec <- list(y2 = y, univ = 0)
            
@@ -38,7 +38,9 @@ if( margin %in% c("GU") )         st.v <- c( mean(y) + 0.57722*sqrt(var(y)/1.644
 if( margin %in% c("rGU") )        st.v <- c( mean(y) - 0.57722*sqrt(var(y)/1.64493) ,  log(6*var(y)/pi^2) )   
 if( margin %in% c("WEI") )        st.v <- c( log( mean( exp(log(y) + 0.5772/(1.283/sqrt(var(log(y))))) )  ) , log( ( 1.283/sqrt(var(log(y))) )^2 ) ) 
 if( margin %in% c("GA") )         st.v <- c( log(mean((y + mean(y))/2)), log(var(y)/mean(y)^2)  ) # log( 1^2 )             
+if( margin %in% c("GAi") )        st.v <- c( mean((y + mean(y))/2), log(var(y)/mean(y)^2)  ) # log( 1^2 )             
 if( margin %in% c("DAGUM","SM") ) st.v <- c( log(mean((y + mean(y))/2)), log(sqrt(2)), log(1) )   # log(0.01) #  log(sqrt(2))       # 0.1    
+if( margin %in% c("FISK") )       st.v <- c( log(mean((y + mean(y))/2)), log(sqrt(2)))    
 if( margin %in% c("BE") )         st.v <- c( qlogis(mean((y + mean(y))/2)), qlogis( var(y)/( mean(y)*(1-mean(y)) )  )  )              
 
 
@@ -78,7 +80,7 @@ hist(y, freq = FALSE, ylim=c(0, max(d, hist(y, plot = FALSE)$density) ),
 lines(sort(y),d[order(y)],lwd=2)
 
 
-if(any(is.na(p)) == TRUE) stop("It is not possible to produce a QQ-plot. The chosen distribution is probably not a good fit.")
+if(any(is.na(p)) == TRUE) stop("It is not possible to produce a QQ-plot.\nThe chosen distribution (unconditional on covariates)\nis not probably a good fit.")
 
 qqnorm(qnorm(p))
 abline(0, 1, col = "red")

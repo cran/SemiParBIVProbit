@@ -6,6 +6,12 @@ AT <- function(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL
 
 if(x$Cont == "YES") stop("This function is not suitable for bivariate models with continuous margins.")
 
+if(x$triv == TRUE) stop("This function is not suitable for trivariate probit models.")
+
+
+if(x$Cont == "NO" && x$VC$ccss == "yes" ) stop("This function is not suitable for bivariate selection models with continuous margin.")
+
+
 
 delta <- FALSE
 
@@ -18,7 +24,7 @@ diffEf <- fy1.y2 <- est.ATso <- y2 <- CIF <- Pr <- Effects <- C.11 <- C.10 <- NU
 m2  <- x$VC$m2 
 m3  <- x$VC$m3 
 bin.link <- x$VC$bl  
-mat <- c("SM","DAGUM","GU","rGU","LO","LN","WEI","iG","GA","BE") # excludes "N"
+mat <- c("SM","DAGUM","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK") # excludes "N"
 
 
 end <- 0
@@ -27,11 +33,14 @@ max.p   <- 0.9999999
 est.ATb <- NA
 indD <- list()
 
-if(x$ig[[1]]$response %in% x$ig[[2]]$pred.names ) {end <- 1; eq <- 2} 
-if(x$ig[[2]]$response %in% x$ig[[1]]$pred.names ) {end <- 2; eq <- 1}    
+
+if(x$v1[1] %in% x$v2[-1]) {end <- 1; eq <- 2} 
+if(x$v2[1] %in% x$v1[-1]) {end <- 2; eq <- 1}
+
 
 if(x$margins[2] == "DAGUM" && eq == 2) { if( min(sqrt(x$sigma2)) <= 1) stop("sigma parameter has value(s) smaller than 1, hence the mean is indeterminate.")}
 if(x$margins[2] == "SM"    && eq == 2) { if( min(sqrt(x$sigma2)*x$nu) <= 1) stop("sigma*nu has value(s) smaller than 1, hence the mean is indeterminate.")}
+if(x$margins[2] == "FISK"  && eq == 2) { if( min(sqrt(x$sigma2)) <= 1) stop("sigma parameter has value(s) smaller than 1, hence the mean is indeterminate.")}
 
 
 if( !( type %in% c("naive","univariate","bivariate") ) ) stop("Error in parameter type value. It should be one of: naive, univariate or bivariate.")

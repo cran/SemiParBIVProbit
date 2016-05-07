@@ -1,6 +1,6 @@
 eta.tr <- function(vrb.st, margin){
 
-mupos <- c("LN","WEI","iG","GA","DAGUM","SM")
+mupos <- c("LN","WEI","iG","GA","DAGUM","SM","FISK")
 mub   <- c("BE")
 
 if(margin %in% mupos){

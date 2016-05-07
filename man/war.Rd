@@ -70,10 +70,13 @@ gov.eq <- onset ~ instab + oil + warl + ncontig + nwstate + s(gdpenl)
 bpo <- SemiParBIVProbit(list(reb.eq, gov.eq), data = war, Model = "BPO")
 conv.check(bpo)
 
+# perhaps model is to complex
+
 set.seed(1)
 sbpo <- summary(bpo)
 sbpo$theta; sbpo$CItheta
 
+# let's exclude the correlation parameter in fitting
 
 bpo0 <- SemiParBIVProbit(list(reb.eq, gov.eq), data = war, Model = "BPO0")
 conv.check(bpo0)

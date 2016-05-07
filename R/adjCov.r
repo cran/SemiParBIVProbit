@@ -1,5 +1,27 @@
 adjCov <- function(x, id){
 
+
+if(x$VC$triv == TRUE){
+
+
+if( !is.null(x$X3) ) {mul2 <- x$X4; mul3 <- x$X5; mul4 <- x$X6} 
+if(  is.null(x$X3) )  mul2 <- mul3 <- mul4 <- 1 
+                                       
+scores <- cbind( c(x$fit$dl.de1)*x$X1, 
+                 c(x$fit$dl.de2)*x$X2, 
+                 c(x$fit$dl.de3)*x$X3,
+                 c(x$fit$dl.dtheta12.st)*mul2,
+                 c(x$fit$dl.dtheta13.st)*mul3,
+                 c(x$fit$dl.dtheta23.st)*mul4  ) 
+
+}
+
+
+
+
+if(x$VC$triv == FALSE){
+
+
 cont2par <- x$VC$m2   
 cont3par <- x$VC$m3  
 bin.link <- x$VC$bl  
@@ -16,13 +38,13 @@ if(!is.null(x$X3) ) mul <- x$X3
 
 scores <- cbind( c(x$fit$dl.dbe1)*x$X1, c(x$fit$dl.dbe2)*x$X2, c(x$fit$dl.drho)*mul )
 
-}
+                                                    }
 
 if( x$Model == "BPO0" ){
 
 scores <- cbind( c(x$fit$dl.dbe1)*x$X1, c(x$fit$dl.dbe2)*x$X2 )
 
-}
+                       }
 
 
 
@@ -35,7 +57,7 @@ scores <- cbind( c(x$fit$dl.dbe1)*x$X1,
                  c(x$fit$dl.dbe2)*x$X2, 
                  c(x$fit$dl.dsigma.st)*mul1,
                  c(x$fit$dl.dteta.st)*mul2       )                                           
-}
+                                 }
 
 if( x$margins[2] %in% cont3par ){
 
@@ -46,8 +68,9 @@ scores <- cbind( c(x$fit$dl.dbe1)*x$X1,
                  c(x$fit$dl.dbe2)*x$X2, 
                  c(x$fit$dl.dsigma.st)*mul1,
                  c(x$fit$dl.dnu.st)*mul2,
-                 c(x$fit$dl.dteta.st)*mul3       )                                           
-}
+                 c(x$fit$dl.dteta.st)*mul3       )     
+                                       
+                                }
 
 
 
@@ -136,11 +159,17 @@ scores <- cbind( c(x$fit$dl.dbe1)*x$X1,
 
  
 
-
-
-
-
 }
+
+
+
+} # end TRIV
+
+
+
+
+
+
 
 
 

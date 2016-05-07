@@ -310,7 +310,7 @@ nu1 <- esp.tr(nu1.st, object$VC$margins[1])$vrb
 if(cm.plot == TRUE){
   
   c1   <- c("N","GU","rGU","LO")
-  c2   <- c("LN","WEI","iG","GA","DAGUM","SM","BE") 
+  c2   <- c("LN","WEI","iG","GA","GAi","DAGUM","SM","BE","FISK") 
    
   m2 <- s2 <- nu2 <- m1 <- s1 <- nu1 <- 0 
   par1 <- object$theta.a 

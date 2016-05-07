@@ -20,19 +20,21 @@ copulaReg <- function(formula, data = list(), weights = NULL, subset = NULL,
   sp7 <- gp7 <- gam7 <- X7 <- NULL    
   
   l.flist <- length(formula)
-    
+  
+  if(!is.list(formula)) stop("You must specify a list of equations.")
+
   opc  <- c("N","C0","C90","C180","C270","J0","J90","J180","J270","G0","G90","G180","G270","F","AMH","FGM")
   scc  <- c("C0", "C180", "J0", "J180", "G0", "G180")
   sccn <- c("C90", "C270", "J90", "J270", "G90", "G270")
-  m2   <- c("N","GU","rGU","LO","LN","WEI","iG","GA","BE")
+  m2   <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK")
   m3   <- c("DAGUM","SM")
   bl   <- c("probit", "logit", "cloglog", "cauchit") 
 
   if(!(BivD %in% opc)) stop("Error in parameter BivD value. It should be one of: N, C0, C90, C180, C270, J0, J90, J180, J270, G0, G90, G180, G270, F, AMH, FGM.")
   if(!(extra.regI %in% c("t","pC","sED"))) stop("Error in parameter extra.regI value. It should be one of: t, pC or sED.")
   
-  if(!(margins[1] %in% c(m2,m3)) ) stop("Error in first margin value. It can be: N, GU, rGU, LO, LN, WEI, iG, GA, DAGUM, SM, BE.")  
-  if(!(margins[2] %in% c(m2,m3)) ) stop("Error in second margin value. It can be: N, GU, rGU, LO, LN, WEI, iG, GA, DAGUM, SM, BE.")  
+  if(!(margins[1] %in% c(m2,m3)) ) stop("Error in first margin value. It can be: N, GU, rGU, LO, LN, WEI, iG, GA, GAi, DAGUM, SM, BE, FISK.")  
+  if(!(margins[2] %in% c(m2,m3)) ) stop("Error in second margin value. It can be: N, GU, rGU, LO, LN, WEI, iG, GA, GAi, DAGUM, SM, BE, FISK.")  
   
   if(l.flist > 2 && margins[1] %in% m2 && margins[2] %in% m2){ if(l.flist!=5) stop("You need to specify five equations.") } 
   if(l.flist > 2 && margins[1] %in% m2 && margins[2] %in% m3){ if(l.flist!=6) stop("You need to specify six equations.") } 
@@ -81,29 +83,91 @@ copulaReg <- function(formula, data = list(), weights = NULL, subset = NULL,
 
  #######################################################################################  
   
- 
-  ig <- interpret.gam(formula)
-  mf <- match.call(expand.dots = FALSE)
+    mf  <- match.call(expand.dots = FALSE)
+    or1 <- as.character(formula[[1]][2])
+    or2 <- as.character(formula[[2]][2])
 
-  if( l.flist == 2 ) pred.n <- union(ig[[1]]$pred.names,c(ig[[2]]$pred.names, ig[[2]]$response))
-  if( l.flist == 3 ) pred.n <- union(ig[[1]]$pred.names,c(ig[[2]]$pred.names, ig[[3]]$pred.names, ig[[2]]$response))
-  if( l.flist == 4 ) pred.n <- union(ig[[1]]$pred.names,c(ig[[2]]$pred.names, ig[[3]]$pred.names, ig[[4]]$pred.names, ig[[2]]$response))
-  if( l.flist == 5 ) pred.n <- union(ig[[1]]$pred.names,c(ig[[2]]$pred.names, ig[[3]]$pred.names, ig[[4]]$pred.names, ig[[5]]$pred.names, ig[[2]]$response))
-  if( l.flist == 6 ) pred.n <- union(ig[[1]]$pred.names,c(ig[[2]]$pred.names, ig[[3]]$pred.names, ig[[4]]$pred.names, ig[[5]]$pred.names, ig[[6]]$pred.names, ig[[2]]$response))
-  if( l.flist == 7 ) pred.n <- union(ig[[1]]$pred.names,c(ig[[2]]$pred.names, ig[[3]]$pred.names, ig[[4]]$pred.names, ig[[5]]$pred.names, ig[[6]]$pred.names, ig[[7]]$pred.names, ig[[2]]$response))
+ig <- interpret.gam(formula)
+
+  if( l.flist == 2 ){  
+    v1 <- all.vars(as.formula(formula[[1]]))[1]
+    v1 <- c(v1, ig[[1]]$pred.names)
+    v2 <- all.vars(as.formula(formula[[2]]))[1]
+    v2 <- c(v2, ig[[2]]$pred.names)
+    pred.n <- union(v1,c(v2,or1,or2))
+                    }
   
+  if( l.flist == 3 ){  
+    v1 <- all.vars(as.formula(formula[[1]]))[1]
+    v1 <- c(v1, ig[[1]]$pred.names)
+    v2 <- all.vars(as.formula(formula[[2]]))[1]
+    v2 <- c(v2, ig[[2]]$pred.names)
+    v3 <- ig[[3]]$pred.names 
+    
+    pred.n <- union(v1,c(v2,v3,or1,or2))
+                    } 
   
-  fake.formula <- paste(ig[[1]]$response, "~", paste(pred.n, collapse = " + ")) 
-  environment(fake.formula) <- environment(ig$fake.formula)
+  if( l.flist == 4 ){  
+    v1 <- all.vars(as.formula(formula[[1]]))[1]
+    v1 <- c(v1, ig[[1]]$pred.names)
+    v2 <- all.vars(as.formula(formula[[2]]))[1]
+    v2 <- c(v2, ig[[2]]$pred.names)
+    v3 <- ig[[3]]$pred.names  
+    v4 <- ig[[4]]$pred.names  
+    pred.n <- union(v1,c(v2,v3,v4,or1,or2))
+                    } 
+  
+  if( l.flist == 5 ){  
+    v1 <- all.vars(as.formula(formula[[1]]))[1]
+    v1 <- c(v1, ig[[1]]$pred.names)
+    v2 <- all.vars(as.formula(formula[[2]]))[1]
+    v2 <- c(v2, ig[[2]]$pred.names)
+    v3 <- ig[[3]]$pred.names 
+    v4 <- ig[[4]]$pred.names
+    v5 <- ig[[5]]$pred.names 
+    pred.n <- union(v1,c(v2,v3,v4,v5,or1,or2))
+                    }   
+  
+  if( l.flist == 6 ){  
+    v1 <- all.vars(as.formula(formula[[1]]))[1]
+    v1 <- c(v1, ig[[1]]$pred.names)
+    v2 <- all.vars(as.formula(formula[[2]]))[1]
+    v2 <- c(v2, ig[[2]]$pred.names)
+    v3 <- ig[[3]]$pred.names
+    v4 <- ig[[4]]$pred.names
+    v5 <- ig[[5]]$pred.names  
+    v6 <- ig[[6]]$pred.names
+    pred.n <- union(v1,c(v2,v3,v4,v5,v6,or1,or2))
+                    }  
+
+  if( l.flist == 7 ){  
+    v1 <- all.vars(as.formula(formula[[1]]))[1]
+    v1 <- c(v1, ig[[1]]$pred.names)
+    v2 <- all.vars(as.formula(formula[[2]]))[1]
+    v2 <- c(v2, ig[[2]]$pred.names)
+    v3 <- ig[[3]]$pred.names
+    v4 <- ig[[4]]$pred.names
+    v5 <- ig[[5]]$pred.names  
+    v6 <- ig[[6]]$pred.names
+    v7 <- ig[[7]]$pred.names
+    pred.n <- union(v1,c(v2,v3,v4,v5,v6,v7,or1,or2))
+                    }                 
+                
+                
+                
+  
+  fake.formula <- paste(v1[1], "~", paste(pred.n, collapse = " + ")) 
+  environment(fake.formula) <- environment(formula[[1]])
   mf$formula <- fake.formula 
   mf$BivD <- mf$margins <- mf$fp <- mf$infl.fac <- mf$rinit <- mf$rmax <- mf$iterlimsp <- mf$tolsp <- mf$gc.l <- mf$parscale <- mf$extra.regI <- mf$gamlssfit <- NULL                           
   mf$drop.unused.levels <- TRUE 
+  mf$na.action <- na.pass
   mf[[1]] <- as.name("model.frame")
   data <- eval(mf, parent.frame())
   
+  if(gc.l == TRUE) gc()  
+ 
   n <- dim(data)[1]
-  
-  if(gc.l == TRUE) gc()
         
   if(is.null(weights)) {weights <- rep(1,dim(data)[1]) 
                         data$weights <- weights
@@ -112,10 +176,6 @@ copulaReg <- function(formula, data = list(), weights = NULL, subset = NULL,
   formula.eq1 <- formula[[1]]
   formula.eq2 <- formula[[2]] 
   
- 
-  #if(ig[[1]]$response %in% ig[[2]]$pred.names ) end <- 1
-  #if(ig[[2]]$response %in% ig[[1]]$pred.names ) end <- 2
-
   ct  <- data.frame( c(opc),
                     c(1:14,55,56) 
                      )
@@ -125,31 +185,34 @@ copulaReg <- function(formula, data = list(), weights = NULL, subset = NULL,
   nC  <- ct[which(ct[,1]==BivD),2]
   nCa <- cta[which(cta[,1]==BivD),2]  
   
-  
  ##############################################################  
  # Equation 1
  ##############################################################  
    
     formula.eq1r <- formula.eq1   
+    y1 <- y1.test <- data[, v1[1]]
+       
+    if( v1[1] != as.character(formula.eq1r[2]) ) y1.test <- try(data[, as.character(formula.eq1r[2])], silent = TRUE)
+    if(class(y1.test) == "try-error") stop("Please check the syntax for the response of the first equation.") 
+
+          
+    if(margins[1] %in% c("LN","WEI","iG","GA","GAi","DAGUM","SM","FISK") && min(y1.test, na.rm = TRUE) <= 0) stop("The response of the first margin must be positive.")
+    if(margins[1] %in% c("BE") && (min(y1.test, na.rm = TRUE) <= 0 || max(y1.test, na.rm = TRUE) >= 1) ) stop("The response of the first margin must be in the interval (0,1).")
         
-    y1 <- data[ , as.character(formula.eq1[[2]])]
-    
-    if(margins[1] %in% c("LN","WEI","iG","GA","DAGUM","SM") && min(y1, na.rm = TRUE) <= 0)   stop("The response of the first margin must be positive.")
-    if(margins[1] %in% c("BE") && min(y1, na.rm = TRUE) <= 0 && max(y1, na.rm = TRUE) >= 1 ) stop("The response of the first margin must be in the interval (0,1).")
-    
-    
-    if( margins[1] %in% c("LN") ) y1 <- log(y1) 
-    
-    if( margins[1] %in% c("N","LO","GU","rGU") )        formula.eq1 <- update(formula.eq1, (. + mean(.))/2 ~ . )  
-    if( margins[1] %in% c("LN") )                       formula.eq1 <- update(formula.eq1, (log(.) + mean(log(.)))/2 ~ . )  
-    if( margins[1] %in% c("iG","GA","DAGUM","SM") )     formula.eq1 <- update(formula.eq1, log((. + mean(.))/2) ~ . )    
-    if( margins[1] %in% c("WEI") )                      formula.eq1 <- update(formula.eq1, log( exp(log(.) + 0.5772/(1.283/sqrt(var(log(.)))))  ) ~ . )     
-    if( margins[1] %in% c("BE") )                       formula.eq1 <- update(formula.eq1, qlogis((. + mean(.))/2) ~ . )    
+    if( margins[1] %in% c("N","LO","GU","rGU","GAi") )           formula.eq1 <- update(formula.eq1, (. + mean(.))/2 ~ . )  
+    if( margins[1] %in% c("LN") )                                formula.eq1 <- update(formula.eq1, (log(.) + mean(log(.)))/2 ~ . )  
+    if( margins[1] %in% c("iG","GA","DAGUM","SM","FISK") )       formula.eq1 <- update(formula.eq1, log((. + mean(.))/2) ~ . )    
+    if( margins[1] %in% c("WEI") )                               formula.eq1 <- update(formula.eq1, log( exp(log(.) + 0.5772/(1.283/sqrt(var(log(.)))))  ) ~ . )     
+    if( margins[1] %in% c("BE") )                                formula.eq1 <- update(formula.eq1, qlogis((. + mean(.))/2) ~ . )    
   
   
     gam1         <- eval(substitute(gam(formula.eq1, gamma=infl.fac, weights=weights, data=data),list(weights=weights)))
-    gam1$formula <- formula.eq1r   
+    gam1$formula <- formula.eq1r  
+    names(gam1$model)[1] <- as.character(formula.eq1r[2])
      
+    y1 <- y1.test # just in case the above condition was true
+    if( margins[1] %in% c("LN") ) y1 <- log(y1) 
+    
     X1 <- model.matrix(gam1)
     X1.d2 <- dim(X1)[2]
     l.sp1 <- length(gam1$sp)
@@ -161,25 +224,27 @@ copulaReg <- function(formula, data = list(), weights = NULL, subset = NULL,
  ##############################################################  
 
     formula.eq2r <- formula.eq2   
-        
-    y2 <- data[ , as.character(formula.eq2[[2]])]
+    y2 <- y2.test <- data[, v2[1]]
+       
+    if( v2[1] != as.character(formula.eq2r[2]) ) y2.test <- try(data[, as.character(formula.eq2r[2])], silent = TRUE)  
+    if(class(y2.test) == "try-error") stop("Please check the syntax for the response of the second equation.") 
+ 
+    if(margins[2] %in% c("LN","WEI","WEI2","iG","GA","GAi","DAGUM","SM","FISK") && min(y2.test, na.rm = TRUE) <= 0) stop("The response of the second margin must be positive.")    
+    if(margins[2] %in% c("BE") && (min(y2.test, na.rm = TRUE) <= 0 || max(y2.test, na.rm = TRUE) >= 1) ) stop("The response of the second margin must be in the interval (0,1).")
     
-    if(margins[2] %in% c("LN","WEI","WEI2","iG","GA","DAGUM","SM") && min(y2, na.rm = TRUE) <= 0) stop("The response of the second margin must be positive.")    
-    if(margins[2] %in% c("BE") && min(y2, na.rm = TRUE) <= 0 && max(y2, na.rm = TRUE) >= 1 ) stop("The response of the second margin must be in the interval (0,1).")
-    
-    
-    if( margins[2] %in% c("LN") ) y2 <- log(y2) 
-    
-    if( margins[2] %in% c("N","LO","GU","rGU") )        formula.eq2 <- update(formula.eq2, (. + mean(.))/2 ~ . )  
-    if( margins[2] %in% c("LN") )                       formula.eq2 <- update(formula.eq2, (log(.) + mean(log(.)))/2 ~ . )  
-    if( margins[2] %in% c("iG","GA","DAGUM","SM") )     formula.eq2 <- update(formula.eq2, log((. + mean(.))/2) ~ . )    
-    if( margins[2] %in% c("WEI") )                      formula.eq2 <- update(formula.eq2, log( exp(log(.) + 0.5772/(1.283/sqrt(var(log(.)))))  ) ~ . )     
-    if( margins[2] %in% c("BE") )                       formula.eq2 <- update(formula.eq2, qlogis((. + mean(.))/2) ~ . )    
+    if( margins[2] %in% c("N","LO","GU","rGU","GAi") )            formula.eq2 <- update(formula.eq2, (. + mean(.))/2 ~ . )  
+    if( margins[2] %in% c("LN") )                                 formula.eq2 <- update(formula.eq2, (log(.) + mean(log(.)))/2 ~ . )  
+    if( margins[2] %in% c("iG","GA","DAGUM","SM","FISK") )        formula.eq2 <- update(formula.eq2, log((. + mean(.))/2) ~ . )    
+    if( margins[2] %in% c("WEI") )                                formula.eq2 <- update(formula.eq2, log( exp(log(.) + 0.5772/(1.283/sqrt(var(log(.)))))  ) ~ . )     
+    if( margins[2] %in% c("BE") )                                 formula.eq2 <- update(formula.eq2, qlogis((. + mean(.))/2) ~ . )    
   
-  
-  
+ 
     gam2         <- eval(substitute(gam(formula.eq2, gamma=infl.fac, weights=weights, data=data),list(weights=weights)))
-    gam2$formula <- formula.eq2r   
+    gam2$formula <- formula.eq2r  
+    names(gam2$model)[1] <- as.character(formula.eq2r[2])    
+    
+    y2 <- y2.test 
+    if( margins[2] %in% c("LN") ) y2 <- log(y2) 
      
     X2 <- model.matrix(gam2)
     X2.d2 <- dim(X2)[2]
@@ -191,6 +256,10 @@ copulaReg <- function(formula, data = list(), weights = NULL, subset = NULL,
 ##############################################################
 # Starting values for dependence parameter
 ##############################################################
+
+# cor(u1, u2, method = "spearman") where u1 and u2 are on (0,1)
+# could possibly improve starting value for theta? Not sure ...
+
 
 res1 <- residuals(gam1)
 res2 <- residuals(gam2)
@@ -232,9 +301,9 @@ names(i.rho) <- "theta.star"
 		if( margins[1] %in% c("iG") )        log.sig2.1 <- log( var(y1)/mean(y1)^3 )      
 		if( margins[1] %in% c("GU","rGU") )  log.sig2.1 <- log(6*var(y1)/pi^2)   
 		if( margins[1] %in% c("WEI") )       log.sig2.1 <- log( (1.283/sqrt(var(log(y1))))^2 )              
-		if( margins[1] %in% c("GA") )        log.sig2.1 <- log(var(y1)/mean(y1)^2)           
-        	if( margins[1] %in% c("DAGUM","SM") )log.sig2.1 <- log(sqrt(2))  # log(0.01) #  log(sqrt(2))       # 0.1  
-        	if( margins[1] %in% c("BE"))         log.sig2.1 <- qlogis( var(y1)/( mean(y1)*(1-mean(y1)) )  )        
+		if( margins[1] %in% c("GA","GAi") )          log.sig2.1 <- log(var(y1)/mean(y1)^2)           
+        	if( margins[1] %in% c("DAGUM","SM","FISK") ) log.sig2.1 <- log(sqrt(2))  # log(0.01) #  log(sqrt(2))       # 0.1  
+        	if( margins[1] %in% c("BE"))                 log.sig2.1 <- qlogis( var(y1)/( mean(y1)*(1-mean(y1)) )  )        
         	
         
                                         } else log.sig2.1 <- par.est[2]
@@ -264,9 +333,9 @@ names(i.rho) <- "theta.star"
 		if( margins[2] %in% c("iG") )        log.sig2.2 <- log( var(y2)/mean(y2)^3 )      
 		if( margins[2] %in% c("GU","rGU") )  log.sig2.2 <- log(6*var(y2)/pi^2)   
 		if( margins[2] %in% c("WEI") )       log.sig2.2 <- log( (1.283/sqrt(var(log(y2))))^2 )              
-		if( margins[2] %in% c("GA") )        log.sig2.2 <- log(var(y2)/mean(y2)^2)           
-        	if( margins[2] %in% c("DAGUM","SM") )log.sig2.2 <- log(sqrt(2)) # log(0.01) #      # 0.1  
-        	if( margins[2] %in% c("BE"))         log.sig2.1 <- qlogis( var(y2)/( mean(y2)*(1-mean(y2)) )    )        
+		if( margins[2] %in% c("GA","GAi") )          log.sig2.2 <- log(var(y2)/mean(y2)^2)           
+        	if( margins[2] %in% c("DAGUM","SM","FISK") ) log.sig2.2 <- log(sqrt(2)) # log(0.01) #      # 0.1  
+        	if( margins[2] %in% c("BE"))                 log.sig2.1 <- qlogis( var(y2)/( mean(y2)*(1-mean(y2)) )    )        
         	
         
                                        } else log.sig2.2 <- par.est[2]
@@ -862,7 +931,7 @@ if(missing(parscale)) parscale <- 1
              BivD = BivD, nCa = nCa,
              nC = nC, gc.l = gc.l, n = n, extra.regI = extra.regI,
              parscale = parscale, margins = margins,
-             Cont = "YES", m2 = m2, m3 = m3, bl = bl) # original n only needed in SemiParBIVProbit.fit
+             Cont = "YES", ccss = "no", m2 = m2, m3 = m3, bl = bl, triv = FALSE) # original n only needed in SemiParBIVProbit.fit
              
   if(gc.l == TRUE) gc()           
              
@@ -1089,13 +1158,15 @@ sp <- c(sp1, sp2, sp3, sp4, sp5, sp6, sp7)
   # post estimation
   ##########################################################################################################################
 
-  SemiParFit.p <- copulaReg.fit.post(SemiParFit = SemiParFit, data = data, 
+  SemiParFit.p <- copulaReg.fit.post(SemiParFit = SemiParFit, 
                                             VC = VC, qu.mag = qu.mag, gam1 = gam1, gam2 = gam2, gam3 = gam3,
                                             gam4 = gam4, gam5 = gam5, gam6 = gam6, gam7 = gam7)                                     
  
  
   y1.m <- y1; if(margins[1] == "LN") y1.m <- exp(y1) 
   y2.m <- y2; if(margins[2] == "LN") y2.m <- exp(y2)
+
+  SemiParFit <- SemiParFit.p$SemiParFit  
 
   ##########################################################################################################################
 
@@ -1163,9 +1234,9 @@ L <- list(fit = SemiParFit$fit, dataset = NULL, n = n, gamlss1 = gamlss1, gamlss
           respvec = respvec, hess = TRUE,
           qu.mag = qu.mag, 
           gp1 = gp1, gp2 = gp2, gp3 = gp3, gp4 = gp4, gp5 = gp5, gp6 = gp6, gp7 = gp7, 
-          VC = VC,  ig = ig, magpp = SemiParFit$magpp,
+          VC = VC, magpp = SemiParFit$magpp,
           gamlssfit = gamlssfit, Cont = "YES",
-          tau = SemiParFit.p$tau, tau.a = SemiParFit.p$tau.a, l.flist = l.flist)
+          tau = SemiParFit.p$tau, tau.a = SemiParFit.p$tau.a, l.flist = l.flist, v1 = v1, v2 = v2, triv = FALSE)
 
 class(L) <- c("copulaReg","SemiParBIVProbit")
 

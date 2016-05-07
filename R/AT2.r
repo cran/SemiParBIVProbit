@@ -97,7 +97,7 @@ if(x1$BivD != "N") {
 
 
 if( x2$margins[2] %in% c("N","GU","rGU","LO") )                   { lil <- -Inf;    uil <- Inf}
-if( x2$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM")  )    { lil <- epsilon; uil <- Inf}
+if( x2$margins[2] %in% c("LN","WEI","iG","GA","GAi","DAGUM","SM")  )    { lil <- epsilon; uil <- Inf}
 if( x2$margins[2] %in% c("BE")  )                                 { lil <- epsilon; uil <- max.p}
 
 

@@ -107,8 +107,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Radice R., Marra G. and M. Wojtys (in press), Copula Regression Spline Models for Binary Outcomes. \emph{Statistics and Computing}.
-
+Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian Journal of Statistics}, 39(2), 259-279.
 
 }
 
@@ -121,8 +120,8 @@ Radice R., Marra G. and M. Wojtys (in press), Copula Regression Spline Models fo
 ## see examples for SemiParBIVProbit
 }
 
-\keyword{semiparametric bivariate probit modelling} 
-\keyword{bivariate probit model} 
+\keyword{semiparametric bivariate modelling} 
+\keyword{bivariate model} 
 \keyword{ATE} 
 \keyword{average treatment effect} 
 \keyword{bayesian posterior simulation}

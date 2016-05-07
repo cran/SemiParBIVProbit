@@ -1,47 +1,75 @@
-prev <- function(x, sw = NULL, type = "bivariate", ind = NULL, delta = FALSE, n.sim = 100, prob.lev = 0.05, 
+prev <- function(x, sw = NULL, type = "simultaneous", ind = NULL, delta = FALSE, n.sim = 100, prob.lev = 0.05, 
                       hd.plot = FALSE, main = "Histogram and Kernel Density of Simulated Prevalences", 
        xlab="Simulated Prevalences", ...){
 
 
 if(x$Cont == "YES") stop("This function is not suitable for bivariate models with continuous margins.")
+if(x$Cont == "NO" && x$VC$ccss == "yes" ) stop("This function is not suitable for bivariate selection models with continuous margin.")
 
 lb <- wm <- ub <- qz <- sv <- Vv <- G <- X2sg <- 1
 wms <- NA
 
-if(x$Model=="B" || x$Model=="BPO") stop("This function is suitable for sample selection models only.")
+if((x$Model=="B" || x$Model=="BPO") && x$triv == FALSE) stop("This function is suitable for sample selection models only.")
 
-if( !( type %in% c("naive","univariate","bivariate") ) ) stop("Error in parameter type value. It should be one of: naive, univariate or bivariate.")
-
-
-X2sg <- x$X2s
+if(x$triv == TRUE && x$Model != "TSS") stop("This function is suitable for sample selection models only.")
 
 
-if(type == "univariate")                    {eta2 <- X2sg%*%coef(x$gam2); Vv <- x$gam2$Vp}  
-if(type == "bivariate" || type == "naive")  {eta2 <- x$eta2;              Vv <- x$Vb}
+if( !( type %in% c("naive","univariate","simultaneous") ) ) stop("Error in parameter type value. It should be one of: naive, univariate or simultaneous.")
+
+
+if(x$Model == "BSS") Xsg <- x$X2s
+if(x$Model == "TSS") Xsg <- x$X3s
+
+
+if(type == "univariate"){
+
+if(x$Model == "BSS"){
+        etasg <- Xsg%*%coef(x$gam2)
+        Vv    <- x$gam2$Vp
+                    }
+
+if(x$Model == "TSS"){
+        etasg <- Xsg%*%coef(x$gam3)
+        Vv    <- x$gam3$Vp
+                    }
+
+}  
+
+
+
+if(type == "simultaneous" || type == "naive"){ # naive useful for sw below
+
+if(x$Model == "BSS") etasg <- x$eta2
+if(x$Model == "TSS") etasg <- x$eta3
+
+Vv <- x$Vb
+
+}
+
+
+
+
+if(!is.null(sw)) { if( length(sw)!=length(etasg) ) stop("sw must have the same length as the number of observations used in fitting.")  }
+if(is.null(sw)) sw <- rep(1,length(etasg)) 
+
 
 if( !is.null(ind) ){ 
 
     if(is.logical(ind) == FALSE) stop("ind must be a logical variable.")
     if(length(table(ind))!=2 ) stop("ind must be a logical binary variable.")
-    if( length(ind)!=length(eta2) ) stop("ind must have the same length as the number of observations used in fitting.")   
+    if( length(ind)!=length(etasg) ) stop("ind must have the same length as the number of observations used in fitting.")   
 
-    eta2 <- eta2[ind]
-    X2sg <- X2sg[ind,]
+    etasg <- etasg[ind]
+    Xsg <- Xsg[ind,]
     
-if(!is.null(sw)) sw <- sw[ind]     
+    sw <- sw[ind]     
 
 }
 
 
-if(is.null(sw)) sw <- rep(1,length(eta2)) 
-
-if( length(sw)!=length(eta2) ) stop("sw must have the same length as the number of observations used in fitting.") 
-
-
-
 #######
 
-wm <- weighted.mean(probm(eta2, x$margins[2])$pr, w=sw)
+wm <- weighted.mean(probm(etasg, x$margins[2])$pr, w=sw)
 
 #######
 
@@ -54,12 +82,27 @@ if(type != "naive"){
 
 if(delta == TRUE){
 
-core <- colWeightedMeans( c( probm(eta2, x$margins[2], only.pr = FALSE)$d.n )*X2sg, w = sw, na.rm = FALSE) 
+core <- colWeightedMeans( c( probm(etasg, x$margins[2], only.pr = FALSE)$d.n )*Xsg, w = sw, na.rm = FALSE) 
+
+
+if(x$Model == "BSS" && type == "simultaneous"){
 
 if( is.null(x$X3) ) zerod <- 0
 if(!is.null(x$X3) ) zerod <- rep(0, x$X3.d2)
 
-if(type == "bivariate")   G <- c( rep(0,x$X1.d2), core, zerod) 
+G <- c( rep(0,x$X1.d2), core, zerod) 
+
+}
+
+
+if(x$Model == "TSS" && type == "simultaneous"){
+
+zerod <- c(0,0,0)
+G <- c( rep(0, (x$X1.d2 + x$X2.d2)), core, zerod) 
+
+}
+
+
 if(type == "univariate")  G <- c( core )  
 
  
@@ -80,16 +123,34 @@ if(type == "univariate")  G <- c( core )
 
 if(delta == FALSE){
 
-  if(type == "bivariate")   coefm <- x$coefficients       
-  if(type == "univariate")  coefm <- x$gam2$coefficients    
+  if(type == "simultaneous") coefm <- x$coefficients    
+  
+  
+  if(type == "univariate"){ 
+  
+    if(x$Model == "BSS") coefm <- x$gam2$coefficients
+    if(x$Model == "TSS") coefm <- x$gam3$coefficients
+  
+  }
+  
   
    bs <- rMVN(n.sim, mean = coefm, sigma=Vv)
   
   
-  if(type == "bivariate") bs <- bs[, x$X1.d2 + (1 : x$X2.d2) ]
+  if(type == "simultaneous"){
+  
+    if(x$Model == "BSS") bs <- bs[, x$X1.d2 + (1 : x$X2.d2) ]
+    if(x$Model == "TSS") bs <- bs[, x$X1.d2 + x$X2.d2 + (1 : x$X3.d2) ]
+
+  }
+  
+  
+  
+  
+  
  
-  p2s <- probm( X2sg%*%t(bs) , x$margins[2])$pr 
-  wms <- colWeightedMeans( p2s, w = sw, na.rm = FALSE)
+  ps  <- probm( Xsg%*%t(bs) , x$margins[2])$pr 
+  wms <- colWeightedMeans( ps, w = sw, na.rm = FALSE)
   bb <- quantile(wms, probs = c(prob.lev/2,1-prob.lev/2), na.rm=TRUE )
 
   lb <- bb[1]
@@ -119,19 +180,22 @@ if(delta == FALSE){
 
 
 
-if( type == "naive"){
+if( type == "naive"){ 
 
-inde <- x$inde
-resp <- x$y2
+if(x$Model == "BSS") inde <- x$inde
+if(x$Model == "TSS") inde <- x$inde2
+sw <- sw[inde]
+if(x$Model == "BSS") resp <- x$y2
+if(x$Model == "TSS") resp <- x$y3[inde] # because it is done a bit inefficiently at the moment
 
 if( !is.null(ind) ){ 
 
-inde <- inde[ind]
+if( length(ind) != length(resp) ) stop("ind must have the same length as the number of selected observations for the outcome.")  
+
 resp <- resp[ind]
+sw   <- sw[ind]
                     }
 
-resp <- resp[inde]
-sw <- sw[inde]
 
 qz <- qnorm(prob.lev/2, lower.tail = FALSE)
 wm <- weighted.mean(resp, w = sw)
@@ -154,7 +218,7 @@ ub <- wm + qz*sv
   res <- c(lb, wm, ub)
   
 
-  rm(lb,wm,ub,qz,sv,Vv,G,X2sg)
+  rm(lb,wm,ub,qz,sv,Vv,G,Xsg)
 
   out <- list(res=res, prob.lev=prob.lev, sim.prev = wms)
  

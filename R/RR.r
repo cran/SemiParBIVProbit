@@ -4,6 +4,9 @@ RR <- function(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL
    xlab = "Simulated Risk Ratios", ...){
 
 if(x$Cont == "YES") stop("This function is not suitable for bivariate models with continuous margins.")
+if(x$Cont == "NO" && x$VC$ccss == "yes" ) stop("This function is not suitable for bivariate selection models with continuous margin.")
+
+
 
 CIs <- est.AT <- NULL
 
@@ -21,9 +24,8 @@ max.p   <- 0.9999999
 est.ATb <- NA
 indD <- list()
 
-
-if(x$ig[[1]]$response %in% x$ig[[2]]$pred.names ) {end <- 1; eq <- 2} 
-if(x$ig[[2]]$response %in% x$ig[[1]]$pred.names ) {end <- 2; eq <- 1} 
+if(x$v1[1] %in% x$v2[-1]) {end <- 1; eq <- 2} 
+if(x$v2[1] %in% x$v1[-1]) {end <- 2; eq <- 1}
 
 
 if( !( type %in% c("naive","univariate","bivariate") ) ) stop("Error in parameter type value. It should be one of: naive, univariate or bivariate.")

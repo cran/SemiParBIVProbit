@@ -73,7 +73,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 ## see example 5 for SemiParBIVProbit
 }
 
-\keyword{semiparametric bivariate probit modelling} 
+\keyword{semiparametric bivariate modelling} 
 \keyword{regression} 
 \keyword{Q-Q plot} 
 \keyword{density plot}

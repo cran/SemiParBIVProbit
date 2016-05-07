@@ -15,7 +15,7 @@ data(hiv.polys)
 
 
 
-\format{ \code{hiv} is a 5000 row data frame with the following columns 
+\format{ \code{hiv} is a 6416 row data frame with the following columns 
 
 
 
@@ -36,7 +36,7 @@ data(hiv.polys)
 \item{knowsdiedofaids}{equal to 1 if know someone who died of HIV.}
 \item{evertestedHIV}{equal to 1 if previously tested for HIV.}           
 \item{smoke}{smoker.}         
-\item{et}{bemba, lunda (luapula), lala, ushi, lamba, tonga, luvale,
+\item{ethnicity}{bemba, lunda (luapula), lala, ushi, lamba, tonga, luvale,
 lunda (northwestern), mbunda, kaonde, lozi, chewa, nsenga,
 ngoni, mambwe, namwanga, tumbuka, other.}              
 \item{language}{English, Bemba, Lozi, Nyanja, Tonga, other.}                     
@@ -59,7 +59,7 @@ region. \code{names(hiv.polys)} matches \code{hiv$region} (order unimportant).
 
 \source{
 
-The data have been produced using the procedure described in: 
+The data have been produced as described in: 
 
 McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}, 26(2), 229-237.
 
@@ -82,7 +82,7 @@ data("hiv.polys", package = "SemiParBIVProbit")
 #########################################################
 ## The stuff below is useful if the user wishes to employ  
 ## a Markov Random Field (MRF) smoother. It provides
-## the instruction to set up polygons automatically
+## the instructions to set up polygons automatically
 ## and the dataset variable needed to fit a model with 
 ## MRF.
 #########################################################
@@ -105,7 +105,7 @@ data("hiv.polys", package = "SemiParBIVProbit")
 #
 ## last step was to create a factor variable with range
 ## range(name[,1]) where the numerical values were linked   
-## to the regions in name[,2]. This is what was done in 
+## to the regions in name[, 2]. This is what was done in 
 ## the hiv dataset; see hiv$region. Specifically,
 ## the procedure used was
 ##
@@ -139,38 +139,46 @@ xt <- list(polys = hiv.polys)
 #########################################################
 # Bivariate brobit model with non-random sample selection
 #########################################################          
-            
-sel.eq <- hivconsent ~ s(age) + s(education) + 
-                       s(region, bs = "mrf", xt = xt) + marital + std + 
-                       highhiv + condom + aidscare + knowsdiedofaids + 
-                       evertestedHIV + smoke + et + language + 
-                       s(interviewerID, bs = "re") 
+     
+sel.eq <- hivconsent ~ s(age) + s(education) + s(wealth) + 
+                       s(region, bs = "mrf", xt = xt, k = 7) + 
+                       marital + std + age1sex_cat + highhiv + 
+                       partner + condom + aidscare + 
+                       knowsdiedofaids + evertestedHIV + 
+                       smoke + religion + ethnicity + 
+                       language + s(interviewerID, bs = "re")
  
-out.eq <- hiv ~ s(age) + s(education) + s(region, bs = "mrf", xt = xt) +  
-                marital + std + highhiv + condom + aidscare + 
-                knowsdiedofaids + evertestedHIV + smoke  + et +  
-                language     
-                       
-theta.eq <- ~ s(region, bs = "mrf", xt = xt)                        
-  
+out.eq <- hiv        ~ s(age) + s(education) + s(wealth) + 
+                       s(region, bs = "mrf", xt = xt, k = 7) + 
+                       marital + std + age1sex_cat + highhiv + 
+                       partner + condom + aidscare + 
+                       knowsdiedofaids + evertestedHIV + 
+                       smoke + religion + ethnicity + 
+                       language      
 
-bss <- SemiParBIVProbit(list(sel.eq, out.eq, theta.eq), 
-                        data = hiv, BivD = "J90", Model = "BSS")
+theta.eq <-          ~ s(region, bs = "mrf", xt = xt, k = 7)                       
+    
+fl <- list(sel.eq, out.eq, theta.eq)    
+     
+# the above model specification is fairly
+# complex and it serves to illustrate the 
+# flexibility of the modelling approach
+     
+bss <- SemiParBIVProbit(fl, data = hiv, BivD = "J90", 
+                        Model = "BSS")
 
 conv.check(bss)
 
 set.seed(1)
-summary(bss)
+sb <- summary(bss)
+sb
 
-par(mfrow = c(2, 3), mar=c(4, 4.7, 3.1, 2), 
-    cex.lab = 1.6, cex.axis = 1.6) 
-for (i in 1:3) plot(bss, eq = 1, seWithMean = TRUE, scheme = 1,   
-                    scale = 0, select = i, jit = TRUE)
-for (i in 1:3) plot(bss, eq = 2, seWithMean = TRUE, scheme = 1,
-                    scale = 0, select = i, jit = TRUE)
+plot(bss, eq = 1, seWithMean = TRUE, scheme = 1,   
+     scale = 0, pages = 1, jit = TRUE)
+                    
+plot(bss, eq = 2, seWithMean = TRUE, scheme = 1,
+     scale = 0, pages = 1, jit = TRUE)
 
-#dev.copy(postscript, "smoothHIV.eps", height=7)
-#dev.off()  
 
 prev(bss, sw = hiv$sw, type = "naive") 
 
@@ -195,21 +203,18 @@ thetaBYreg[i]  <- bss$theta[hiv$region==i][1]
 zlim <- range(prevBYreg)  # to establish a common prevalence range
 
 par(mfrow = c(1, 3), cex.axis = 1.3)
+
 polys.map(hiv.polys, prevBYreg[,1], zlim = zlim, lab = "",  
           cex.lab = 1.5, cex.main = 1.5, 
           main = "HIV - Imputation Model")
+          
 polys.map(hiv.polys, prevBYreg[,2], zlim = zlim, cex.main = 1.5, 
           main = "HIV - Selection Model")
+          
 polys.map(hiv.polys, thetaBYreg, rev.col = FALSE, cex.main = 1.7, 
           main = expression(paste("Copula parameter (",hat(theta),")")))
-
-#dev.copy(postscript, "PrevMaps.eps", height=3.5)
-#dev.off() 
-
-set.seed(1)
-CItheta <- summary(bss)$CItheta
-CItheta[1,]
-
+          
+sb$CItheta[1,]
 }
 
 #

@@ -5,6 +5,8 @@ pen <- function(params, qu.mag, sp, VC, univ = 0){
 # univ == 2 applies to margins cont and cont with interest in first margin
 # univ == 3 applies to margins cont and cont with interest in second margin
 
+qu.mag.a <- NULL
+
 l.sp1 <- VC$l.sp1 
 l.sp2 <- VC$l.sp2 
 l.sp3 <- VC$l.sp3 
@@ -12,6 +14,9 @@ l.sp4 <- VC$l.sp4
 l.sp5 <- VC$l.sp5 
 l.sp6 <- VC$l.sp6 
 l.sp7 <- VC$l.sp7 
+
+
+if(VC$triv == FALSE){ ### TRIV
 
 if(VC$Cont == "NO" && VC$margins[2] %in% VC$m2 && univ == 1) l.sp1 <- l.sp4 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
 if(VC$Cont == "NO" && VC$margins[2] %in% VC$m3 && univ == 1) l.sp1 <- l.sp5 <- l.sp6 <- l.sp7 <- 0  
@@ -25,7 +30,7 @@ if(VC$Cont == "YES" && VC$margins[1] %in% VC$m2 && VC$margins[2] %in% VC$m3 && u
 if(VC$Cont == "YES" && VC$margins[1] %in% VC$m3 && VC$margins[2] %in% VC$m2 && univ == 3) l.sp1 <- l.sp3 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
 if(VC$Cont == "YES" && VC$margins[1] %in% VC$m3 && VC$margins[2] %in% VC$m3 && univ == 3) l.sp1 <- l.sp3 <- l.sp5 <- l.sp7 <- 0
   
-
+} ### TRIV
 
 ##############################################################
     ma1 <- matrix(0,VC$gp1,VC$gp1)   
@@ -141,6 +146,18 @@ if(!is.null(VC$gp3)){
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+if(VC$triv == FALSE){    ### TRIV
+    
+    
+    
     if(univ == 0) S.h <- adiag(EQ1P, EQ2P, EQ3P, EQ4P, EQ5P, EQ6P, EQ7P)
     
     
@@ -173,12 +190,46 @@ if(!is.null(VC$gp3)){
     }    
     
         
+        
+        
+}    ### TRIV    
+        
+        
+        
+        
+        
+if(VC$triv == TRUE){ #### TRIV 
+
+S.h <- adiag(EQ1P, EQ2P, EQ3P)   
+
+if(VC$penCor %in% c("unpen")) S.h <- adiag(S.h, matrix(0, 3, 3))        
+               
+if(!(VC$penCor %in% c("unpen"))){
+
+  corrs <- params[(length(params)-2):length(params)]
+
+  if( VC$l.sp1==0 && VC$l.sp2==0 && VC$l.sp3==0) qu.mag$Ss[[1]]                   <- 10
+  if( VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0) qu.mag$Ss[[length(qu.mag$Ss)+1]] <- 10
+  
+  S.h <- adiag(S.h, sp[length(sp)]*qu.mag$Ss[[length(qu.mag$Ss)]]) 
+  
+  qu.mag.a <- qu.mag
+  
+                                 }              
+        
+} ### TRIV
+        
+        
+        
+        
+        
     S.h1 <- 0.5*crossprod(params,S.h)%*%params
     S.h2 <- S.h%*%params
     
-    list(S.h = S.h, S.h1 = S.h1, S.h2 = S.h2)
+    list(S.h = S.h, S.h1 = S.h1, S.h2 = S.h2, qu.mag.a = qu.mag.a)
     
    
+ 
          }
 
 

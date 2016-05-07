@@ -3,7 +3,7 @@
 
 \title{Fitted SemiParBIVProbit object}
 
-\description{A fitted semiparametric bivariate probit object returned by function \code{SemiParBIVProbit} and of class "SemiParBIVProbit".}
+\description{A fitted semiparametric bivariate object returned by function \code{SemiParBIVProbit} and of class "SemiParBIVProbit".}
 
 
 \value{ 
@@ -85,6 +85,9 @@
 \item{X2s}{Full design matrix of outcome equation for sample selection case.}
 
 \item{OR, GM}{Odds ratio and Gamma measure. See \code{\link{summary.SemiParBIVProbit}} for details.}
+
+\item{tau}{Kendall's tau.}
+
 
 }
 

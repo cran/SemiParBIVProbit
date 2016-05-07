@@ -13,7 +13,7 @@ der2p2.dereta2dernu.st      = 1
 der2p2.dersigma2.stdernu.st = 1
 
 
-cont2par <- c("WEI","iG","LO","rGU","GU","GA","BE") # "N" escluded for a reason
+cont2par <- c("WEI","iG","LO","rGU","GU","GA","GAi","BE","FISK") # "N" escluded for a reason
 cont3par <- c("DAGUM", "SM")
 
 # library(Deriv); library(numDeriv)
@@ -21,8 +21,11 @@ cont3par <- c("DAGUM", "SM")
 # Simplify( D(D(expr, "mu2"),"sigma2") )
 # func0 <- function(mu2){   }
 # grad(func0 , mu2)
-
-
+############################################################################
+# remember that eta2 will have to disappear if we change default link on mu2
+# this only applies to cases in which mu2 must be positive
+# otherwise things are fine
+############################################################################
 
 #######################################################################
 
@@ -95,28 +98,26 @@ dersigma2.dersigma2.st <- exp(sigma2.st)
 dernu.dernu.st <- exp(nu.st)
  
 
-pdf2 <- sqrt(sigma2)*nu/y2*( ((y2/mu2)^(sqrt(sigma2)*nu))/  ( (y2/mu2)^sqrt(sigma2) + 1 )^(nu+1) )            
+pdf2 <- sqrt(sigma2)*nu/y2*( ((y2/mu2)^(sqrt(sigma2)*nu))/( (y2/mu2)^sqrt(sigma2) + 1 )^(nu+1) )            
   
 derpdf2.dermu2 <-  -(nu * (nu * (y2/mu2)^(nu * sqrt(sigma2) - 1)/((y2/mu2)^sqrt(sigma2) + 
     1)^(1 + nu) - ((y2/mu2)^sqrt(sigma2) + 1)^(nu - 2 * (1 + 
     nu)) * (1 + nu) * (y2/mu2)^((1 + nu) * sqrt(sigma2) - 1)) * 
     sigma2^1/mu2^2)
     
+derpdf2.sigma2 <- nu * ((0.5 * (nu * (y2/mu2)^(nu * sqrt(sigma2))/((y2/mu2)^sqrt(sigma2) + 
+    1)^(1 + nu)) - 0.5 * (((y2/mu2)^sqrt(sigma2) + 1)^(nu - 2 * 
+    (1 + nu)) * (1 + nu) * (y2/mu2)^((1 + nu) * sqrt(sigma2)))) * 
+    (log(y2) - log(mu2)) + 0.5 * ((y2/mu2)^(nu * sqrt(sigma2))/(((y2/mu2)^sqrt(sigma2) + 
+    1)^(1 + nu) * sqrt(sigma2))))/y2    
     
-derpdf2.sigma2 <- -(nu * (y2^(nu * sqrt(sigma2)) * (log(y2) - eta2) * 
-    sqrt(sigma2) * (y2^sqrt(sigma2) * exp(eta2 * sqrt(sigma2)) - 
-    nu * exp(2 * (eta2 * sqrt(sigma2)))) - y2^(nu * sqrt(sigma2)) * 
-    (exp(2 * (eta2 * sqrt(sigma2))) + y2^sqrt(sigma2) * exp(eta2 * 
-        sqrt(sigma2))))/(y2 * (2 * exp(2 * (eta2 * sqrt(sigma2))) + 
-    2 * y2^(2 * sqrt(sigma2)) + 4 * (y2^sqrt(sigma2) * exp(eta2 * 
-    sqrt(sigma2)))) * (exp(eta2 * sqrt(sigma2)) + y2^sqrt(sigma2))^nu * 
-    sqrt(sigma2)))
 
-derpdf2.nu <-  -(((nu * y2^(nu * sqrt(sigma2)) * (log(exp(eta2 * 
-    sqrt(sigma2)) + y2^sqrt(sigma2)) - eta2 * sqrt(sigma2)) - 
-    y2^(nu * sqrt(sigma2))) * sqrt(sigma2) - nu * sigma2 * y2^(nu * 
-    sqrt(sigma2)) * (log(y2) - eta2)) * exp(eta2 * sqrt(sigma2))/(y2 * 
-    (exp(eta2 * sqrt(sigma2)) + y2^sqrt(sigma2))^(1 + nu)))
+
+derpdf2.nu <-  ((y2/mu2)^(nu * sqrt(sigma2))/((y2/mu2)^sqrt(sigma2) + 1)^(1 + 
+    nu) + nu * ((log(y2) - log(mu2)) * sqrt(sigma2) * (y2/mu2)^(nu * 
+    sqrt(sigma2))/((y2/mu2)^sqrt(sigma2) + 1)^(1 + nu) - ((y2/mu2)^sqrt(sigma2) + 
+    1)^(1 + nu - 2 * (1 + nu)) * log1p((y2/mu2)^sqrt(sigma2)) * 
+    (y2/mu2)^(nu * sqrt(sigma2)))) * sqrt(sigma2)/y2
 
 
 
@@ -136,49 +137,66 @@ der2pdf2.dermu2 <- nu * (nu * ((2 * (y2/mu2)^(nu * sqrt(sigma2) - 1) +
     nu) * sqrt(sigma2) - 2)/mu2)) * (1 + nu)) * sqrt(sigma2)/mu2^3
 
 
-der2pdf2.dersigma22 <-  -(nu * ((log(y2) - eta2) * (sigma2 * y2^(nu * sqrt(sigma2)) * 
-    (log(y2) - eta2) * (y2^sqrt(sigma2) * (1 + 3 * nu) * exp(2 * 
-    (eta2 * sqrt(sigma2))) - (nu^2 * exp(3 * (eta2 * sqrt(sigma2))) + 
-    y2^(2 * sqrt(sigma2)) * exp(eta2 * sqrt(sigma2)))) + y2^(nu * 
-    sqrt(sigma2)) * sqrt(sigma2) * (y2^(2 * sqrt(sigma2)) * exp(eta2 * 
-    sqrt(sigma2)) + y2^sqrt(sigma2) * (1 - nu) * exp(2 * (eta2 * 
-    sqrt(sigma2))) - nu * exp(3 * (eta2 * sqrt(sigma2))))) + 
-    y2^(nu * sqrt(sigma2)) * (2 * (y2^sqrt(sigma2) * exp(2 * 
-        (eta2 * sqrt(sigma2)))) + exp(3 * (eta2 * sqrt(sigma2))) + 
-        y2^(2 * sqrt(sigma2)) * exp(eta2 * sqrt(sigma2))))/(sigma2 * 
-    y2 * (12 * (y2^(2 * sqrt(sigma2)) * exp(eta2 * sqrt(sigma2))) + 
-    12 * (y2^sqrt(sigma2) * exp(2 * (eta2 * sqrt(sigma2)))) + 
-    4 * exp(3 * (eta2 * sqrt(sigma2))) + 4 * y2^(3 * sqrt(sigma2))) * 
-    (exp(eta2 * sqrt(sigma2)) + y2^sqrt(sigma2))^nu * sqrt(sigma2)))
+der2pdf2.dersigma22 <-  nu * (((nu * ((0.25 * (nu * (log(y2) - log(mu2)) * (y2/mu2)^(nu * 
+    sqrt(sigma2))) - 0.25 * ((y2/mu2)^(nu * sqrt(sigma2))/sqrt(sigma2)))/((y2/mu2)^sqrt(sigma2) + 
+    1)^(1 + nu) - 0.25 * (((y2/mu2)^sqrt(sigma2) + 1)^(nu - 2 * 
+    (1 + nu)) * (1 + nu) * (log(y2) - log(mu2)) * (y2/mu2)^((1 + 
+    nu) * sqrt(sigma2)))) - (((((y2/mu2)^sqrt(sigma2) + 1)^nu * 
+    (0.25 * ((log(y2) - log(mu2)) * (y2/mu2)^sqrt(sigma2)) - 
+        0.25 * ((y2/mu2)^sqrt(sigma2)/sqrt(sigma2))) + 0.25 * 
+    (nu * ((y2/mu2)^sqrt(sigma2) + 1)^(nu - 1) * (log(y2) - log(mu2)) * 
+        (y2/mu2)^(2 * sqrt(sigma2)))) * (y2/mu2)^(nu * sqrt(sigma2)) + 
+    0.25 * (nu * ((y2/mu2)^sqrt(sigma2) + 1)^nu * (log(y2) - 
+        log(mu2)) * (y2/mu2)^((1 + nu) * sqrt(sigma2))))/((y2/mu2)^sqrt(sigma2) + 
+    1)^(2 * (1 + nu)) - 0.5 * (((y2/mu2)^sqrt(sigma2) + 1)^(1 + 
+    3 * nu - 4 * (1 + nu)) * (1 + nu) * (log(y2) - log(mu2)) * 
+    (y2/mu2)^((2 + nu) * sqrt(sigma2)))) * (1 + nu)) * sqrt(sigma2) + 
+    0.5 * (nu * (y2/mu2)^(nu * sqrt(sigma2))/((y2/mu2)^sqrt(sigma2) + 
+        1)^(1 + nu)) - 0.5 * (((y2/mu2)^sqrt(sigma2) + 1)^(nu - 
+    2 * (1 + nu)) * (1 + nu) * (y2/mu2)^((1 + nu) * sqrt(sigma2)))) * 
+    (log(y2) - log(mu2)) - 0.25 * ((y2/mu2)^(nu * sqrt(sigma2))/(((y2/mu2)^sqrt(sigma2) + 
+    1)^(1 + nu) * sqrt(sigma2))))/(sigma2 * y2)
 
 
 
 
-    der2pdf2.dernu2 <- (((log(exp(eta2 * sqrt(sigma2)) + y2^sqrt(sigma2)) - 
-    eta2 * sqrt(sigma2)) * (nu * y2^(nu * sqrt(sigma2)) * (log(exp(eta2 * 
-    sqrt(sigma2)) + y2^sqrt(sigma2)) - eta2 * sqrt(sigma2)) - 
-    2 * y2^(nu * sqrt(sigma2))) + nu * sigma2 * y2^(nu * sqrt(sigma2)) * 
-    (log(y2) - eta2)^2) * sqrt(sigma2) + sigma2 * (2 * y2^(nu * 
-    sqrt(sigma2)) - 2 * (nu * y2^(nu * sqrt(sigma2)) * (log(exp(eta2 * 
-    sqrt(sigma2)) + y2^sqrt(sigma2)) - eta2 * sqrt(sigma2)))) * 
-    (log(y2) - eta2)) * exp(eta2 * sqrt(sigma2))/(y2 * (exp(eta2 * 
-    sqrt(sigma2)) + y2^sqrt(sigma2))^(1 + nu))
+    der2pdf2.dernu2 <- (2 * ((log(y2) - log(mu2)) * sqrt(sigma2) * (y2/mu2)^(nu * sqrt(sigma2))/((y2/mu2)^sqrt(sigma2) + 
+    1)^(1 + nu)) + nu * ((log(y2) - log(mu2)) * (sigma2 * (log(y2) - 
+    log(mu2)) * (y2/mu2)^(nu * sqrt(sigma2))/((y2/mu2)^sqrt(sigma2) + 
+    1)^(1 + nu) - ((y2/mu2)^sqrt(sigma2) + 1)^(1 + nu - 2 * (1 + 
+    nu)) * log1p((y2/mu2)^sqrt(sigma2)) * sqrt(sigma2) * (y2/mu2)^(nu * 
+    sqrt(sigma2))) - ((((y2/mu2)^sqrt(sigma2) + 1)^(1 + nu) * 
+    (log(y2) - log(mu2)) * sqrt(sigma2) * (y2/mu2)^(nu * sqrt(sigma2)) + 
+    ((y2/mu2)^sqrt(sigma2) + 1)^(1 + nu) * log1p((y2/mu2)^sqrt(sigma2)) * 
+        (y2/mu2)^(nu * sqrt(sigma2)))/((y2/mu2)^sqrt(sigma2) + 
+    1)^(2 * (1 + nu)) - 2 * (((y2/mu2)^sqrt(sigma2) + 1)^(1 + 
+    nu - 2 * (1 + nu)) * log1p((y2/mu2)^sqrt(sigma2)) * (y2/mu2)^(nu * 
+    sqrt(sigma2)))) * log1p((y2/mu2)^sqrt(sigma2))) - 2 * (((y2/mu2)^sqrt(sigma2) + 
+    1)^(1 + nu - 2 * (1 + nu)) * log1p((y2/mu2)^sqrt(sigma2)) * 
+    (y2/mu2)^(nu * sqrt(sigma2)))) * sqrt(sigma2)/y2
     
-        
-    der2pdf2.dersigma2dernu <-  (((nu * y2^(nu * sqrt(sigma2)) * (log(exp(eta2 * sqrt(sigma2)) + 
-    y2^sqrt(sigma2)) - eta2 * sqrt(sigma2)) * (y2^sqrt(sigma2) * 
-    exp(eta2 * sqrt(sigma2)) - nu * exp(2 * (eta2 * sqrt(sigma2)))) + 
-    y2^(nu * sqrt(sigma2)) * (3 * (nu * exp(2 * (eta2 * sqrt(sigma2)))) + 
-        y2^sqrt(sigma2) * exp(eta2 * sqrt(sigma2)) * (nu - 1))) * 
-    sqrt(sigma2) + nu * sigma2 * y2^(nu * sqrt(sigma2)) * (log(y2) - 
-    eta2) * (nu * exp(2 * (eta2 * sqrt(sigma2))) - y2^sqrt(sigma2) * 
-    exp(eta2 * sqrt(sigma2)))) * (log(y2) - eta2) + (exp(2 * 
-    (eta2 * sqrt(sigma2))) + y2^sqrt(sigma2) * exp(eta2 * sqrt(sigma2))) * 
-    (y2^(nu * sqrt(sigma2)) - nu * y2^(nu * sqrt(sigma2)) * (log(exp(eta2 * 
-        sqrt(sigma2)) + y2^sqrt(sigma2)) - eta2 * sqrt(sigma2))))/(y2 * 
-    (2 * exp(2 * (eta2 * sqrt(sigma2))) + 2 * y2^(2 * sqrt(sigma2)) + 
-        4 * (y2^sqrt(sigma2) * exp(eta2 * sqrt(sigma2)))) * (exp(eta2 * 
-    sqrt(sigma2)) + y2^sqrt(sigma2))^nu * sqrt(sigma2))
+    
+    der2pdf2.dersigma2dernu <-  ((0.5 * ((y2/mu2)^(nu * sqrt(sigma2))/((y2/mu2)^sqrt(sigma2) + 
+    1)^(1 + nu)) + 0.5 * (nu * ((log(y2) - log(mu2)) * sqrt(sigma2) * 
+    (y2/mu2)^(nu * sqrt(sigma2))/((y2/mu2)^sqrt(sigma2) + 1)^(1 + 
+    nu) - ((y2/mu2)^sqrt(sigma2) + 1)^(1 + nu - 2 * (1 + nu)) * 
+    log1p((y2/mu2)^sqrt(sigma2)) * (y2/mu2)^(nu * sqrt(sigma2)))))/sqrt(sigma2) + 
+    (log(y2) - log(mu2)) * (nu * (((((y2/mu2)^sqrt(sigma2) + 
+        1)^(nu - 2 * (1 + nu)) * (1 + nu) * (y2/mu2)^((1 + nu) * 
+        sqrt(sigma2)) - 0.5 * (nu * ((y2/mu2)^sqrt(sigma2) + 
+        1)^(1 + nu - 2 * (1 + nu)) * (y2/mu2)^(nu * sqrt(sigma2)))) * 
+        log1p((y2/mu2)^sqrt(sigma2))/sqrt(sigma2) + (0.5 * ((y2/mu2)^(nu * 
+        sqrt(sigma2))/sqrt(sigma2)) + 0.5 * (nu * (log(y2) - 
+        log(mu2)) * (y2/mu2)^(nu * sqrt(sigma2))))/((y2/mu2)^sqrt(sigma2) + 
+        1)^(1 + nu) - ((0.5 * (((y2/mu2)^sqrt(sigma2) + 1)^nu * 
+        (1 + nu) * log1p((y2/mu2)^sqrt(sigma2)) * (y2/mu2)^sqrt(sigma2)) + 
+        0.5 * (((y2/mu2)^sqrt(sigma2) + 1)^nu * (y2/mu2)^sqrt(sigma2))) * 
+        (y2/mu2)^(nu * sqrt(sigma2))/sqrt(sigma2) + 0.5 * (((y2/mu2)^sqrt(sigma2) + 
+        1)^nu * (1 + nu) * (log(y2) - log(mu2)) * (y2/mu2)^((1 + 
+        nu) * sqrt(sigma2))))/((y2/mu2)^sqrt(sigma2) + 1)^(2 * 
+        (1 + nu))) * sqrt(sigma2) + 0.5 * ((y2/mu2)^(nu * sqrt(sigma2))/((y2/mu2)^sqrt(sigma2) + 
+        1)^(1 + nu))) - 0.5 * (((y2/mu2)^sqrt(sigma2) + 1)^(nu - 
+        2 * (1 + nu)) * (1 + nu) * (y2/mu2)^((1 + nu) * sqrt(sigma2)))))/y2
  
  
  
@@ -231,13 +249,13 @@ if(naive == FALSE){
 
 derp2.dermu2 <-  -((1 + (y2/mu2)^-sqrt(sigma2))^-(nu + 1) * (nu * ((y2/mu2)^-(sqrt(sigma2) + 
     1) * (sqrt(sigma2) * (y2/mu2^2)))))
-             
-                          
-derp2.dersigma2 <- (1 + (y2/exp(eta2))^-sqrt(sigma2))^-(nu + 1) * (nu * ((y2/exp(eta2))^-sqrt(sigma2) * 
-    (log((y2/exp(eta2))) * (0.5 * sigma2^-0.5))))           
+               
+derp2.dersigma2 <- 0.5 * (nu * (log(y2) - log(mu2))/((1 + 1/(y2/mu2)^sqrt(sigma2))^(1 + 
+    nu) * sqrt(sigma2) * (y2/mu2)^sqrt(sigma2)))        
     
 
-derp2.dernu <- -((1 + (y2/exp(eta2))^-sqrt(sigma2))^-nu * log((1 + (y2/exp(eta2))^-sqrt(sigma2))))
+derp2.dernu <- -(log1p(1/(y2/mu2)^sqrt(sigma2))/(1 + 1/(y2/mu2)^sqrt(sigma2))^nu)
+
 
 
 der2p2.dermu22 <-  -(nu * y2 * (sqrt(sigma2) * (y2 * (1 + sqrt(sigma2))/(mu2 * 
@@ -248,27 +266,20 @@ der2p2.dermu22 <-  -(nu * y2 * (sqrt(sigma2) * (y2 * (1 + sqrt(sigma2))/(mu2 *
 
 
 
-der2p2.dersigma22 <-  -(nu * ((log(y2) - eta2) * sqrt(sigma2) * (y2^sqrt(sigma2) * 
-    exp(eta2 * sqrt(sigma2)) - nu * exp(2 * (eta2 * sqrt(sigma2)))) + 
-    exp(2 * (eta2 * sqrt(sigma2))) + y2^sqrt(sigma2) * exp(eta2 * 
-    sqrt(sigma2))) * (log(y2) - eta2)/(sigma2 * ((exp(eta2 * 
-    sqrt(sigma2)) + y2^sqrt(sigma2))/y2^sqrt(sigma2))^nu * (4 * 
-    exp(2 * (eta2 * sqrt(sigma2))) + 4 * y2^(2 * sqrt(sigma2)) + 
-    8 * (y2^sqrt(sigma2) * exp(eta2 * sqrt(sigma2)))) * sqrt(sigma2)))
+der2p2.dersigma22 <-  nu * (0.25 * ((1 + nu) * (log(y2) - log(mu2))/((1 + 1/(y2/mu2)^sqrt(sigma2))^(2 + 
+    nu) * (y2/mu2)^(2 * sqrt(sigma2)))) - (0.25 * ((log(y2) - 
+    log(mu2))/(y2/mu2)^sqrt(sigma2)) + 0.25/(sqrt(sigma2) * (y2/mu2)^sqrt(sigma2)))/(1 + 
+    1/(y2/mu2)^sqrt(sigma2))^(1 + nu)) * (log(y2) - log(mu2))/sigma2
    
    
    
-   
-der2p2.dernu2 <- (1 + (y2/exp(eta2))^-sqrt(sigma2))^-nu * log((1 + (y2/exp(eta2))^-sqrt(sigma2))) * 
-    log((1 + (y2/exp(eta2))^-sqrt(sigma2))) 
+der2p2.dernu2 <- log1p(1/(y2/mu2)^sqrt(sigma2))^2/(1 + 1/(y2/mu2)^sqrt(sigma2))^nu
     
     
         
-der2p2.dersigma2dernu <-  -(exp(eta2 * sqrt(sigma2)) * (log(y2) - eta2) * (nu * 
-    (log(exp(eta2 * sqrt(sigma2)) + y2^sqrt(sigma2)) - log(y2) * 
-        sqrt(sigma2)) - 1) * sqrt(sigma2)/(sigma2 * ((exp(eta2 * 
-    sqrt(sigma2)) + y2^sqrt(sigma2))/y2^sqrt(sigma2))^nu * (2 * 
-    exp(eta2 * sqrt(sigma2)) + 2 * y2^sqrt(sigma2))))
+der2p2.dersigma2dernu <- (0.5/((1 + 1/(y2/mu2)^sqrt(sigma2))^(1 + nu) * (y2/mu2)^sqrt(sigma2)) - 
+    0.5 * (nu * log1p(1/(y2/mu2)^sqrt(sigma2))/((1 + 1/(y2/mu2)^sqrt(sigma2))^(1 + 
+        nu) * (y2/mu2)^sqrt(sigma2)))) * (log(y2) - log(mu2))/sqrt(sigma2)
     
     
 
@@ -500,6 +511,148 @@ der2p2.derdermu2sigma2 <- -(nu * y2 * ((0.5 * ((log(y2) - log(mu2)) * (y2/mu2)^(
 
 
 
+###
+
+
+if(margin2 == "FISK"){
+
+
+mu2 <- dermu2.dereta2 <- der2mu2.dereta2eta2 <- exp(eta2) 
+dersigma2.dersigma2.st <- exp(sigma2.st)  
+
+pdf2 <- sqrt(sigma2)*y2^(sqrt(sigma2)-1) / (mu2^sqrt(sigma2)*(1+(y2/mu2)^sqrt(sigma2))^2)
+  
+derpdf2.dermu2 <- -(sigma2 * y2^(sqrt(sigma2) - 1) * ((y2/mu2)^sqrt(sigma2) + 1) * 
+    (mu2^(sqrt(sigma2) - 1) * ((y2/mu2)^sqrt(sigma2) + 1) - 2 * 
+        (mu2^(sqrt(sigma2) - 2) * y2 * (y2/mu2)^(sqrt(sigma2) - 
+            1)))/(mu2^sqrt(sigma2) * ((y2/mu2)^sqrt(sigma2) + 
+    1)^2)^2)
+
+                
+derpdf2.sigma2 <- (0.5 * (y2^(sqrt(sigma2) - 1) * log(y2)) + 0.5 * (y2^(sqrt(sigma2) - 
+    1)/sqrt(sigma2)))/(mu2^sqrt(sigma2) * ((y2/mu2)^sqrt(sigma2) + 
+    1)^2) - y2^(sqrt(sigma2) - 1) * ((y2/mu2)^sqrt(sigma2) + 
+    1) * (0.5 * (mu2^sqrt(sigma2) * ((y2/mu2)^sqrt(sigma2) + 
+    1) * log(mu2)) + mu2^sqrt(sigma2) * (log(y2) - log(mu2)) * 
+    (y2/mu2)^sqrt(sigma2))/(mu2^sqrt(sigma2) * ((y2/mu2)^sqrt(sigma2) + 
+    1)^2)^2
+
+
+der2pdf2.dermu2 <- -(sqrt(sigma2) * (y2^(sqrt(sigma2) - 1) * (((y2/mu2)^sqrt(sigma2) + 
+    1) * (mu2^(sqrt(sigma2) - 2) * ((y2/mu2)^sqrt(sigma2) + 1) * 
+    sqrt(sigma2) * (sqrt(sigma2) - 1) - 2 * (mu2^(sqrt(sigma2) - 
+    3) * sigma2 * y2 * (y2/mu2)^(sqrt(sigma2) - 1))) - y2 * (2 * 
+    (mu2^(sqrt(sigma2) - 3) * sigma2 * ((y2/mu2)^sqrt(sigma2) + 
+        1) * (y2/mu2)^(sqrt(sigma2) - 1)) - 2 * (mu2^(sqrt(sigma2) - 
+    3) * (((y2/mu2)^sqrt(sigma2) + 1) * (2 * (y2/mu2)^(sqrt(sigma2) - 
+    1) + y2 * (sqrt(sigma2) - 1) * (y2/mu2)^(sqrt(sigma2) - 2)/mu2) * 
+    sqrt(sigma2) + sigma2 * y2 * (y2/mu2)^(2 * (sqrt(sigma2) - 
+    1))/mu2)))) - 2 * (mu2^sqrt(sigma2) * sigma2 * y2^(sqrt(sigma2) - 
+    1) * ((y2/mu2)^sqrt(sigma2) + 1)^4 * (mu2^(sqrt(sigma2) - 
+    1) * ((y2/mu2)^sqrt(sigma2) + 1) - 2 * (mu2^(sqrt(sigma2) - 
+    2) * y2 * (y2/mu2)^(sqrt(sigma2) - 1)))^2/(mu2^sqrt(sigma2) * 
+    ((y2/mu2)^sqrt(sigma2) + 1)^2)^2))/(mu2^sqrt(sigma2) * ((y2/mu2)^sqrt(sigma2) + 
+    1)^2)^2)
+
+            
+der2pdf2.dersigma22 <- (((0.25 * (y2^(sqrt(sigma2) - 1) * log(y2)) - 0.25 * (y2^(sqrt(sigma2) - 
+    1)/sqrt(sigma2))) * sqrt(sigma2) + 0.25 * y2^(sqrt(sigma2) - 
+    1) + 0.25 * y2^(sqrt(sigma2) - 1)) * log(y2) - 0.25 * (y2^(sqrt(sigma2) - 
+    1)/sqrt(sigma2)))/(mu2^sqrt(sigma2) * sigma2 * ((y2/mu2)^sqrt(sigma2) + 
+    1)^2) - (((y2/mu2)^sqrt(sigma2) + 1) * (0.5 * (mu2^sqrt(sigma2) * 
+    ((y2/mu2)^sqrt(sigma2) + 1) * log(mu2)) + mu2^sqrt(sigma2) * 
+    (log(y2) - log(mu2)) * (y2/mu2)^sqrt(sigma2)) * (y2^(sqrt(sigma2) - 
+    1) * log(y2) + y2^(sqrt(sigma2) - 1)/sqrt(sigma2) - 2 * (mu2^sqrt(sigma2) * 
+    y2^(sqrt(sigma2) - 1) * ((y2/mu2)^sqrt(sigma2) + 1)^3 * (0.5 * 
+    (mu2^sqrt(sigma2) * ((y2/mu2)^sqrt(sigma2) + 1) * log(mu2)) + 
+    mu2^sqrt(sigma2) * (log(y2) - log(mu2)) * (y2/mu2)^sqrt(sigma2))/(mu2^sqrt(sigma2) * 
+    ((y2/mu2)^sqrt(sigma2) + 1)^2)^2))/sqrt(sigma2) + y2^(sqrt(sigma2) - 
+    1) * ((((y2/mu2)^sqrt(sigma2) + 1) * (0.25 * (mu2^sqrt(sigma2) * 
+    log(mu2)) - 0.25 * (mu2^sqrt(sigma2)/sqrt(sigma2))) + 0.5 * 
+    (mu2^sqrt(sigma2) * (log(y2) - log(mu2)) * (y2/mu2)^sqrt(sigma2))) * 
+    ((y2/mu2)^sqrt(sigma2) + 1) * log(mu2) + (0.5 * (mu2^sqrt(sigma2) * 
+    ((y2/mu2)^sqrt(sigma2) + 1) * log(mu2) * (y2/mu2)^sqrt(sigma2)) + 
+    2 * (mu2^sqrt(sigma2) * (((y2/mu2)^sqrt(sigma2) + 1) * (0.25 * 
+        ((log(y2) - log(mu2)) * (y2/mu2)^sqrt(sigma2)) - 0.25 * 
+        ((y2/mu2)^sqrt(sigma2)/sqrt(sigma2))) + 0.25 * ((log(y2) - 
+        log(mu2)) * (y2/mu2)^(2 * sqrt(sigma2)))))) * (log(y2) - 
+    log(mu2))) * sqrt(sigma2)/sigma2)/(mu2^sqrt(sigma2) * ((y2/mu2)^sqrt(sigma2) + 
+    1)^2)^2
+
+         
+der2pdf2.mu2dersigma2 <- -(((((y2/mu2)^sqrt(sigma2) + 1) * (0.5 * (y2^(sqrt(sigma2) - 
+    1) * log(y2)) + 0.5 * (y2^(sqrt(sigma2) - 1)/sqrt(sigma2))) * 
+    (mu2^(sqrt(sigma2) - 1) * ((y2/mu2)^sqrt(sigma2) + 1) - 2 * 
+        (mu2^(sqrt(sigma2) - 2) * y2 * (y2/mu2)^(sqrt(sigma2) - 
+            1))) + y2^(sqrt(sigma2) - 1) * ((((y2/mu2)^sqrt(sigma2) + 
+    1) * (0.5 * (mu2^(sqrt(sigma2) - 1) * log(mu2)) + 0.5 * (mu2^(sqrt(sigma2) - 
+    1)/sqrt(sigma2))) + mu2^(sqrt(sigma2) - 1) * (log(y2) - log(mu2)) * 
+    (y2/mu2)^sqrt(sigma2)) * ((y2/mu2)^sqrt(sigma2) + 1) - y2 * 
+    (2 * (mu2^(sqrt(sigma2) - 2) * (((y2/mu2)^sqrt(sigma2) + 
+        1) * (0.5 * ((log(y2) - log(mu2)) * (y2/mu2)^(sqrt(sigma2) - 
+        1)) + 0.5 * ((y2/mu2)^(sqrt(sigma2) - 1)/sqrt(sigma2))) + 
+        0.5 * ((log(y2) - log(mu2)) * (y2/mu2)^(2 * sqrt(sigma2) - 
+            1)))) + mu2^(sqrt(sigma2) - 2) * ((y2/mu2)^sqrt(sigma2) + 
+        1) * log(mu2) * (y2/mu2)^(sqrt(sigma2) - 1)))) * sqrt(sigma2) - 
+    2 * (mu2^sqrt(sigma2) * sigma2 * y2^(sqrt(sigma2) - 1) * 
+        ((y2/mu2)^sqrt(sigma2) + 1)^4 * (0.5 * (mu2^sqrt(sigma2) * 
+        ((y2/mu2)^sqrt(sigma2) + 1) * log(mu2)) + mu2^sqrt(sigma2) * 
+        (log(y2) - log(mu2)) * (y2/mu2)^sqrt(sigma2)) * (mu2^(sqrt(sigma2) - 
+        1) * ((y2/mu2)^sqrt(sigma2) + 1) - 2 * (mu2^(sqrt(sigma2) - 
+        2) * y2 * (y2/mu2)^(sqrt(sigma2) - 1)))/((mu2^sqrt(sigma2) * 
+        ((y2/mu2)^sqrt(sigma2) + 1)^2)^2 * sqrt(sigma2))))/(mu2^sqrt(sigma2) * 
+    ((y2/mu2)^sqrt(sigma2) + 1)^2)^2)
+
+
+ 
+  
+ 
+if(naive == FALSE){   
+ 
+    p2  <- 1/(1+(y2/mu2)^-sqrt(sigma2))
+    
+    derp2.dermu2 <- -(y2 * sqrt(sigma2)/(mu2^2 * (1 + 1/(y2/mu2)^sqrt(sigma2))^2 * 
+    (y2/mu2)^(1 + sqrt(sigma2))))
+
+
+                 
+derp2.dersigma2 <-  0.5 * ((log(y2) - log(mu2))/((1 + 1/(y2/mu2)^sqrt(sigma2))^2 * 
+    sqrt(sigma2) * (y2/mu2)^sqrt(sigma2)))
+             
+    
+
+der2p2.dermu22 <- -(y2 * (sqrt(sigma2) * (y2 * (1 + sqrt(sigma2))/(mu2 * (y2/mu2)^(2 + 
+    sqrt(sigma2))) - 2/(y2/mu2)^(1 + sqrt(sigma2))) - 2 * (sigma2 * 
+    y2/(mu2 * (1 + 1/(y2/mu2)^sqrt(sigma2)) * (y2/mu2)^(2 * (1 + 
+    sqrt(sigma2))))))/(mu2^3 * (1 + 1/(y2/mu2)^sqrt(sigma2))^2))
+
+
+der2p2.dersigma22 <- ((0.5/((1 + 1/(y2/mu2)^sqrt(sigma2)) * (y2/mu2)^(2 * sqrt(sigma2))) - 
+    0.25/(y2/mu2)^sqrt(sigma2)) * (log(y2) - log(mu2)) - 0.25/(sqrt(sigma2) * 
+    (y2/mu2)^sqrt(sigma2))) * (log(y2) - log(mu2))/(sigma2 * 
+    (1 + 1/(y2/mu2)^sqrt(sigma2))^2)
+
+
+
+der2p2.derdermu2sigma2 <- -(y2 * ((1/((1 + 1/(y2/mu2)^sqrt(sigma2)) * (y2/mu2)^(1 + 2 * 
+    sqrt(sigma2))) - 0.5/(y2/mu2)^(1 + sqrt(sigma2))) * (log(y2) - 
+    log(mu2)) + 0.5/(sqrt(sigma2) * (y2/mu2)^(1 + sqrt(sigma2))))/(mu2^2 * 
+    (1 + 1/(y2/mu2)^sqrt(sigma2))^2))
+
+   
+                                             
+                                             
+                                             
+                   }
+
+
+
+}
+
+
+
+
+
 ####
 
 
@@ -518,11 +671,9 @@ derpdf2.dermu2 <-   exp(-(y2/mu2)^sqrt(sigma2)) * (sigma2 * y2 * (y2/mu2)^(2 *
     sqrt(sigma2))/mu2^2
   
                   
-derpdf2.sigma2 <- -(((log(y2) - eta2) * sqrt(sigma2) * (y2^(2 * sqrt(sigma2)) - 
-    y2^sqrt(sigma2) * exp(eta2 * sqrt(sigma2))) - y2^sqrt(sigma2) * 
-    exp(eta2 * sqrt(sigma2))) * exp(-(2 * (eta2 * sqrt(sigma2)) + 
-    y2^sqrt(sigma2) * exp(-(eta2 * sqrt(sigma2)))))/(2 * (y2 * 
-    sqrt(sigma2))))
+derpdf2.sigma2 <- ((0.5 * (y2/mu2)^(sqrt(sigma2) - 1) - 0.5 * (y2/mu2)^(2 * sqrt(sigma2) - 
+    1)) * (log(y2) - log(mu2)) + 0.5 * ((y2/mu2)^(sqrt(sigma2) - 
+    1)/sqrt(sigma2))) * exp(-(y2/mu2)^sqrt(sigma2))/mu2
 
 
 der2pdf2.dermu2 <- ((2 * (y2/mu2)^(sqrt(sigma2) - 1) + y2 * (4 * (y2/mu2)^(sqrt(sigma2) - 
@@ -537,14 +688,17 @@ der2pdf2.dermu2 <- ((2 * (y2/mu2)^(sqrt(sigma2) - 1) + y2 * (4 * (y2/mu2)^(sqrt(
             
             
  
-der2pdf2.dersigma22 <- -(((log(y2) - eta2) * (sigma2 * (3 * (y2^(2 * sqrt(sigma2)) * 
-    exp(eta2 * sqrt(sigma2))) - (y2^(3 * sqrt(sigma2)) + y2^sqrt(sigma2) * 
-    exp(2 * (eta2 * sqrt(sigma2))))) * (log(y2) - eta2) + sqrt(sigma2) * 
-    (y2^(2 * sqrt(sigma2)) * exp(eta2 * sqrt(sigma2)) - y2^sqrt(sigma2) * 
-        exp(2 * (eta2 * sqrt(sigma2))))) + y2^sqrt(sigma2) * 
-    exp(2 * (eta2 * sqrt(sigma2)))) * exp(-(3 * (eta2 * sqrt(sigma2)) + 
-    y2^sqrt(sigma2) * exp(-(eta2 * sqrt(sigma2)))))/(4 * (sigma2^1.5 * 
-    y2))) 
+der2pdf2.dersigma22 <- ((((0.25 * ((log(y2) - log(mu2)) * (y2/mu2)^(sqrt(sigma2) - 1)) - 
+    0.25 * ((y2/mu2)^(sqrt(sigma2) - 1)/sqrt(sigma2))) * sqrt(sigma2) + 
+    0.25 * (y2/mu2)^(sqrt(sigma2) - 1) + 0.25 * (y2/mu2)^(sqrt(sigma2) - 
+    1)) * (log(y2) - log(mu2)) - 0.25 * ((y2/mu2)^(sqrt(sigma2) - 
+    1)/sqrt(sigma2)))/sigma2 - (((0.25 * (y2/mu2)^sqrt(sigma2) - 
+    0.25 * (y2/mu2)^(2 * sqrt(sigma2))) * (log(y2) - log(mu2)) - 
+    0.25 * ((y2/mu2)^sqrt(sigma2)/sqrt(sigma2))) * sqrt(sigma2) * 
+    (y2/mu2)^(sqrt(sigma2) - 1)/sigma2 + (0.5 * ((log(y2) - log(mu2)) * 
+    (y2/mu2)^(sqrt(sigma2) - 1)) + 0.5 * ((y2/mu2)^(sqrt(sigma2) - 
+    1)/sqrt(sigma2))) * (y2/mu2)^sqrt(sigma2)/sqrt(sigma2)) * 
+    (log(y2) - log(mu2))) * exp(-(y2/mu2)^sqrt(sigma2))/mu2
        
        
        
@@ -573,8 +727,7 @@ if(naive == FALSE){
     (sqrt(sigma2) * (y2/mu2^2))))
 
                  
-derp2.dersigma2 <-  exp(-(y2/exp(eta2))^sqrt(sigma2)) * ((y2/exp(eta2))^sqrt(sigma2) * 
-                   (log((y2/exp(eta2))) * (0.5 * sigma2^-0.5)))               
+derp2.dersigma2 <- 0.5 * (exp(-(y2/mu2)^sqrt(sigma2)) * (log(y2) - log(mu2)) * (y2/mu2)^sqrt(sigma2)/sqrt(sigma2))         
     
 
 der2p2.dermu22 <-  -(y2 * exp(-(y2/mu2)^sqrt(sigma2)) * (sigma2 * y2 * 
@@ -584,9 +737,9 @@ der2p2.dermu22 <-  -(y2 * exp(-(y2/mu2)^sqrt(sigma2)) * (sigma2 * y2 *
 
 
 
-der2p2.dersigma22 <-  ((0.25 - 0.25 * (y2 * exp(-eta2))^sqrt(sigma2)) * 
-    (log(y2) - eta2) * sqrt(sigma2) - 0.25) * exp(-(y2 * exp(-eta2))^sqrt(sigma2)) * 
-    (log(y2) - eta2) * (y2 * exp(-eta2))^sqrt(sigma2)/sigma2^1.5
+der2p2.dersigma22 <-  ((0.25 * (y2/mu2)^sqrt(sigma2) - 0.25 * (y2/mu2)^(2 * sqrt(sigma2))) * 
+    (log(y2) - log(mu2)) - 0.25 * ((y2/mu2)^sqrt(sigma2)/sqrt(sigma2))) * 
+    exp(-(y2/mu2)^sqrt(sigma2)) * (log(y2) - log(mu2))/sigma2
 
 
 
@@ -613,6 +766,9 @@ der2p2.derdermu2sigma2 <-   -(y2 * ((0.5 * (y2/mu2)^(sqrt(sigma2) - 1) - 0.5 *
 if(margin2 == "BE"){
 
 
+
+#########################
+
 mu2 <- plogis(eta2)
 
 dermu2.dereta2 <- (1 - exp(eta2)/(1 + exp(eta2))) * exp(eta2)/(1 + exp(eta2))
@@ -623,6 +779,11 @@ der2mu2.dereta2eta2 <-  (1 - (3 - 2 * (exp(eta2)/(1 + exp(eta2)))) * exp(eta2)/(
 sigma2 <- plogis(sigma2.st)  
 
 dersigma2.dersigma2.st <- (1 - exp(sigma2.st)/(1 + exp(sigma2.st))) * exp(sigma2.st)/(1 + exp(sigma2.st))
+
+#########################
+
+
+
 
 
 
@@ -837,14 +998,12 @@ derpdf2.dermu2 <- (1/(mu2^2 * sigma2 * y2) + 4 * (mu2 * sigma2 * y2 *
     (y2 - mu2)/(2 * (mu2^2 * sigma2 * y2))^2)) * exp(-((y2 - 
     mu2)^2/(2 * (mu2^2 * sigma2 * y2)) + (0.5 * (0.693147180559945 + 
     log(pi)) + 0.5 * log(sigma2) + 1.5 * log(y2)))) * (y2 - mu2)
-
+         
            
-           
-           
-   derpdf2.sigma2 <-  -((0.5/sigma2 - 2 * (y2 * exp(eta2)^2 * (y2 - exp(eta2))^2/(2 * 
-    (sigma2 * y2 * exp(eta2)^2))^2)) * exp(-((y2 - exp(eta2))^2/(2 * 
-    (sigma2 * y2 * exp(eta2)^2)) + (0.5 * (0.693147180559945 + 
-    log(pi)) + 0.5 * log(sigma2) + 1.5 * log(y2)))))
+   derpdf2.sigma2 <-  -((0.5/sigma2 - 2 * (mu2^2 * y2 * (y2 - mu2)^2/(2 * (mu2^2 * 
+    sigma2 * y2))^2)) * exp(-((y2 - mu2)^2/(2 * (mu2^2 * sigma2 * 
+    y2)) + (0.5 * (0.693147180559945 + log(pi)) + 0.5 * log(sigma2) + 
+    1.5 * log(y2)))))
 
 
 der2pdf2.dermu2 <-  (((1/(mu2^2 * sigma2 * y2) + 4 * (mu2 * sigma2 * y2 * 
@@ -857,14 +1016,11 @@ der2pdf2.dermu2 <-  (((1/(mu2^2 * sigma2 * y2) + 4 * (mu2 * sigma2 * y2 *
     log(y2))))
 
    
-der2pdf2.dersigma22 <- exp(-((0.693147180559945 + log(pi))/2 + (1/(2 * (sigma2 * 
-    y2)) + (3 * log(y2)/2 + y2 * exp(-(2 * eta2))/(2 * sigma2)) + 
-    log(sigma2)/2) + 4 * eta2)) * (exp(4 * eta2 + exp(-eta2)/sigma2) + 
-    y2 * exp(exp(-eta2)/sigma2) * (y2 * (6 * exp(2 * eta2) + 
-        sigma2 * (12 * exp(3 * eta2) + 3 * (sigma2 * exp(4 * 
-            eta2))) + y2 * (y2 - (4 * exp(eta2) + 6 * (sigma2 * 
-        exp(2 * eta2))))) - (4 * exp(3 * eta2) + 6 * (sigma2 * 
-        exp(4 * eta2)))))/(4 * (sigma2^4 * y2^2))
+der2pdf2.dersigma22 <- -((16 * (mu2^6 * sigma2 * y2^3 * (y2 - mu2)^2/(2 * (mu2^2 * sigma2 * 
+    y2))^4) - ((0.5/sigma2 - 2 * (mu2^2 * y2 * (y2 - mu2)^2/(2 * 
+    (mu2^2 * sigma2 * y2))^2))^2 + 0.5/(sigma2^1.5 * sqrt(sigma2)))) * 
+    exp(-((y2 - mu2)^2/(2 * (mu2^2 * sigma2 * y2)) + (0.5 * (0.693147180559945 + 
+        log(pi)) + 0.5 * log(sigma2) + 1.5 * log(y2)))))
  
 
 der2pdf2.mu2dersigma2 <-  exp(-((y2 - mu2)^2/(2 * (mu2^2 * sigma2 * y2)) + (0.5 * 
@@ -890,14 +1046,13 @@ derp2.dermu2 <- exp(2/(mu2 * sigma2)) * (y2 * dnorm(-((1 + y2/mu2)/(sqrt(sigma2)
     y2 * dnorm((y2/mu2 - 1)/(sqrt(sigma2) * sqrt(y2)))/(mu2^2 * 
         sqrt(sigma2) * sqrt(y2))
 
-                       
-derp2.dersigma2 <- (0.5 * ((1 + y2/exp(eta2)) * dnorm(-((1 + y2/exp(eta2))/(sqrt(sigma2) * 
-    sqrt(y2)))) * sqrt(y2)/(sqrt(sigma2) * (sqrt(sigma2) * sqrt(y2))^2)) - 
-    2 * (exp(eta2) * pnorm(-((1 + y2/exp(eta2))/(sqrt(sigma2) * 
-        sqrt(y2))))/(sigma2 * exp(eta2))^2)) * exp(2/(sigma2 * 
-    exp(eta2))) - 0.5 * (dnorm((y2/exp(eta2) - 1)/(sqrt(sigma2) * 
-    sqrt(y2))) * sqrt(y2) * (y2/exp(eta2) - 1)/(sqrt(sigma2) * 
-    (sqrt(sigma2) * sqrt(y2))^2))            
+      
+derp2.dersigma2 <- (0.5 * ((1 + y2/mu2) * dnorm(-((1 + y2/mu2)/(sqrt(sigma2) * sqrt(y2)))) * 
+    sqrt(y2)/(sqrt(sigma2) * (sqrt(sigma2) * sqrt(y2))^2)) - 
+    2 * (mu2 * pnorm(-((1 + y2/mu2)/(sqrt(sigma2) * sqrt(y2))))/(mu2 * 
+        sigma2)^2)) * exp(2/(mu2 * sigma2)) - 0.5 * (dnorm((y2/mu2 - 
+    1)/(sqrt(sigma2) * sqrt(y2))) * sqrt(y2) * (y2/mu2 - 1)/(sqrt(sigma2) * 
+    (sqrt(sigma2) * sqrt(y2))^2))          
     
 
 der2p2.dermu22 <-   -(exp(2/(mu2 * sigma2)) * (sigma2 * (2 * (y2 * dnorm(-((1 + 
@@ -911,18 +1066,18 @@ der2p2.dermu22 <-   -(exp(2/(mu2 * sigma2)) * (sigma2 * (2 * (y2 * dnorm(-((1 +
     sqrt(y2)))/(mu2^3 * sqrt(sigma2) * sqrt(y2)))
 
   
-der2p2.dersigma22 <-  exp(-(3 * eta2)) * (sigma2 * (dnorm(-(exp(-eta2) * 
-    (exp(eta2) + y2)/(sqrt(sigma2) * sqrt(y2)))) * (exp(2 * (exp(-eta2)/sigma2) + 
-    3 * eta2) + y2 * exp(2 * (exp(-eta2)/sigma2)) * (y2 * (y2 - 
-    (3 * (sigma2 * exp(2 * eta2)) + 5 * exp(eta2))) - (3 * (sigma2 * 
-    exp(3 * eta2)) + 5 * exp(2 * eta2)))) + dnorm(exp(-eta2) * 
-    (y2 - exp(eta2))/(sqrt(sigma2) * sqrt(y2))) * (exp(3 * eta2) + 
-    y2 * (y2 * (3 * (sigma2 * exp(2 * eta2)) + 3 * exp(eta2) - 
-        y2) - (3 * (sigma2 * exp(3 * eta2)) + 3 * exp(2 * eta2))))) + 
-    y2^1.5 * (16 * (sigma2 * exp(2 * eta2)) + 16 * exp(eta2)) * 
-        exp(2 * (exp(-eta2)/sigma2)) * pnorm(-(exp(-eta2) * (exp(eta2) + 
-        y2)/(sqrt(sigma2) * sqrt(y2)))) * sqrt(sigma2))/(4 * 
-    (sigma2^4.5 * y2^1.5))
+der2p2.dersigma22 <-  (((0.25 * ((1 + y2/mu2)^2/(sqrt(sigma2) * sqrt(y2))^2) - 0.25)/sigma2 - 
+    (0.5 * (y2/(sqrt(sigma2) * sqrt(y2))^2) + mu2/(mu2 * sigma2)^2)) * 
+    (1 + y2/mu2) * dnorm(-((1 + y2/mu2)/(sqrt(sigma2) * sqrt(y2)))) * 
+    sqrt(y2)/(sqrt(sigma2) * (sqrt(sigma2) * sqrt(y2))^2) - mu2 * 
+    ((1 + y2/mu2) * dnorm(-((1 + y2/mu2)/(sqrt(sigma2) * sqrt(y2)))) * 
+        sqrt(y2)/(sqrt(sigma2) * (sqrt(sigma2) * sqrt(y2))^2) - 
+        mu2 * (4 + 4 * (mu2 * sigma2)) * pnorm(-((1 + y2/mu2)/(sqrt(sigma2) * 
+            sqrt(y2))))/(mu2 * sigma2)^2)/(mu2 * sigma2)^2) * 
+    exp(2/(mu2 * sigma2)) - ((0.25 * ((y2/mu2 - 1)^2/(sqrt(sigma2) * 
+    sqrt(y2))^2) - 0.25)/sigma2 - 0.5 * (y2/(sqrt(sigma2) * sqrt(y2))^2)) * 
+    dnorm((y2/mu2 - 1)/(sqrt(sigma2) * sqrt(y2))) * sqrt(y2) * 
+    (y2/mu2 - 1)/(sqrt(sigma2) * (sqrt(sigma2) * sqrt(y2))^2)
 
 
 
@@ -1194,7 +1349,7 @@ der2p2.derdermu2sigma2 <-  -(exp(-exp((y2 - eta2)/sqrt(sigma2))) * (exp((y2 - et
 
 
 
-if(margin2 %in% c("GA")){
+if(margin2 %in% c("GA","GAi")){
 
 #
 sigma2    <- ifelse(sigma2 < 0.006, 0.006, sigma2) # related to gamma function
@@ -1202,48 +1357,65 @@ sigma2.st <- log(sigma2)
 #
 
 
-mu2 <- dermu2.dereta2 <- der2mu2.dereta2eta2 <- exp(eta2) 
+if(margin2 == "GAi"){eta2 <- ifelse(eta2 < 0.0000001, 0.0000001, eta2); mu2 <- eta2; dermu2.dereta2 <- 1; der2mu2.dereta2eta2 <- 0}
+if(margin2 == "GA") { mu2 <- dermu2.dereta2 <- der2mu2.dereta2eta2 <- exp(eta2) }
+
+
 dersigma2.dersigma2.st <- exp(sigma2.st)   
 
-pdf2  <-  dgamma(y2, shape = 1/sigma2, scale = mu2 * sigma2)      
+pdf2 <- dgamma(y2, shape = 1/sigma2, scale = mu2 * sigma2)
+
+#expr <- expression(1/(sigma2*mu2)^(1/sigma2)*( y2^(1/sigma2-1)*exp(-y2/(sigma2*mu2)) )  /gamma(1/sigma2))
+#Simplify( D(expr, "sigma2") )
+#Simplify( D(D(expr, "sigma2"),"sigma2") )
+
 
 derpdf2.dermu2 <-  -(sigma2 * exp((log(y2) - (log(mu2) + log(sigma2) + 
     y2/mu2))/sigma2 - (lgamma(1/sigma2) + log(y2))) * (mu2 - 
     y2)/(mu2 * sigma2)^2)
     
-
-derpdf2.sigma2 <-  (exp(-(y2 * exp(-eta2)/sigma2)) * (y2^(1/sigma2 - 
-    1) * (eta2 + log(sigma2) - 1)/(sigma2 * exp(eta2))^(1/sigma2) + 
-    y2^(1/sigma2 - 1) * psigamma(1/sigma2, 0)/(sigma2 * exp(eta2))^(1/sigma2) - 
-    y2^(1/sigma2 - 1) * log(y2)/(sigma2 * exp(eta2))^(1/sigma2)) + 
-    y2^(1/sigma2) * exp(-(eta2 + y2 * exp(-eta2)/sigma2))/(sigma2 * 
-        exp(eta2))^(1/sigma2))/(sigma2^2 * gamma(1/sigma2))
  
-
+derpdf2.sigma2 <-  ((mu2 * y2^(1/sigma2)/(mu2 * sigma2)^2 - y2^(1/sigma2 - 1) * 
+    log(y2)/sigma2^2)/(mu2 * sigma2)^(1/sigma2) + (y2^(1/sigma2 - 
+    1) * digamma(1/sigma2)/(sigma2 * (mu2 * sigma2)^(1/sigma2)) - 
+    y2^(1/sigma2 - 1) * (mu2 * (mu2 * sigma2)^(1/sigma2 - 1) - 
+        (log(mu2) + log(sigma2)) * (mu2 * sigma2)^(1/sigma2)/sigma2)/(mu2 * 
+        sigma2)^(2/sigma2))/sigma2) * exp(-(y2/(mu2 * sigma2)))/gamma(1/sigma2) 
+ 
  der2pdf2.dermu2 <-  sigma2 * exp((log(y2) - (log(mu2) + log(sigma2) + 
     y2/mu2))/sigma2 - (lgamma(1/sigma2) + log(y2))) * (sigma2 * 
     ((mu2 - y2)^2 + mu2 * sigma2 * (2 * mu2 - 2 * y2)) - y2^2/(y2/(mu2 * 
     sigma2))^2)/(mu2 * sigma2)^4
             
-der2pdf2.dersigma22 <-  (((((y2^(1/sigma2 - 1) * log(y2) - 2 * (y2^(1/sigma2 - 
-    1) * psigamma(1/sigma2, 0)))/sigma2 + 2 * y2^(1/sigma2 - 
-    1)) * log(y2) + y2^(1/sigma2 - 1) * (psigamma(1/sigma2, 0) * 
-    (psigamma(1/sigma2, 0)/sigma2 - 2) - psigamma(1/sigma2, 1)/sigma2)) * 
-    exp(-(y2 * exp(-eta2)/sigma2))/(sigma2 * exp(eta2))^(1/sigma2) + 
-    2 * (((eta2 + log(sigma2) - 1) * exp(-(y2 * exp(-eta2)/sigma2))/(sigma2 * 
-        exp(eta2))^(1/sigma2) + y2 * exp(-(eta2 + y2 * exp(-eta2)/sigma2))/(sigma2 * 
-        exp(eta2))^(1/sigma2)) * (y2^(1/sigma2 - 1) * psigamma(1/sigma2, 
-        0) - y2^(1/sigma2 - 1) * log(y2))/sigma2))/sigma2^3 + 
-    y2^(1/sigma2 - 1) * ((((eta2 + log(sigma2) - 1)/sigma2^2)^2/(sigma2 * 
-        exp(eta2))^(1/sigma2) + (3 - 2 * (eta2 + log(sigma2)))/(sigma2^3 * 
-        (sigma2 * exp(eta2))^(1/sigma2))) * exp(-(y2 * exp(-eta2)/sigma2)) + 
-        y2 * ((y2 * exp(-(2 * eta2 + y2 * exp(-eta2)/sigma2))/sigma2 - 
-            2 * exp(-(eta2 + y2 * exp(-eta2)/sigma2)))/(sigma2 * 
-            exp(eta2))^(1/sigma2) + 2 * ((eta2 + log(sigma2) - 
-            1) * exp(-(eta2 + y2 * exp(-eta2)/sigma2))/(sigma2 * 
-            (sigma2 * exp(eta2))^(1/sigma2))))/sigma2^3))/gamma(1/sigma2)        
-           
-                             
+      
+der2pdf2.dersigma22 <-  (((((2 * (y2^(1/sigma2 - 1) * digamma(1/sigma2)/(sigma2 * (mu2 * 
+    sigma2)^(1/sigma2))) - 2 * (y2^(1/sigma2 - 1) * (mu2 * (mu2 * 
+    sigma2)^(1/sigma2 - 1) - (log(mu2) + log(sigma2)) * (mu2 * 
+    sigma2)^(1/sigma2)/sigma2)/(mu2 * sigma2)^(2/sigma2)))/sigma2 + 
+    2 * ((mu2 * y2^(1/sigma2)/(mu2 * sigma2)^2 - y2^(1/sigma2 - 
+        1) * log(y2)/sigma2^2)/(mu2 * sigma2)^(1/sigma2))) * 
+    digamma(1/sigma2) - y2^(1/sigma2 - 1) * ((digamma(1/sigma2)^2 + 
+    trigamma(1/sigma2))/sigma2 + 2 * digamma(1/sigma2))/(sigma2 * 
+    (mu2 * sigma2)^(1/sigma2)))/sigma2 - (2 * ((mu2 * (mu2 * 
+    sigma2)^(1/sigma2 - 1) - (log(mu2) + log(sigma2)) * (mu2 * 
+    sigma2)^(1/sigma2)/sigma2) * (mu2 * y2^(1/sigma2)/(mu2 * 
+    sigma2)^2 - y2^(1/sigma2 - 1) * log(y2)/sigma2^2)/(mu2 * 
+    sigma2)^(2/sigma2)) + y2^(1/sigma2 - 1) * ((mu2 * (mu2 * 
+    (1/sigma2 - 1) * (mu2 * sigma2)^(1/sigma2 - 2) - ((log(mu2) + 
+    log(sigma2)) * (mu2 * sigma2)^(1/sigma2 - 1)/sigma2 + (mu2 * 
+    sigma2)^(1/sigma2 - 1))/sigma2) - ((1 - 2 * (log(mu2) + log(sigma2))) * 
+    (mu2 * sigma2)^(1/sigma2) + (log(mu2) + log(sigma2)) * (mu2 * 
+    (mu2 * sigma2)^(1/sigma2 - 1) - (log(mu2) + log(sigma2)) * 
+    (mu2 * sigma2)^(1/sigma2)/sigma2))/sigma2^2)/(mu2 * sigma2)^(2/sigma2) - 
+    2 * ((mu2 * (mu2 * sigma2)^(1/sigma2 - 1) - (log(mu2) + log(sigma2)) * 
+        (mu2 * sigma2)^(1/sigma2)/sigma2)^2/(sigma2 * (mu2 * 
+        sigma2)^(3/sigma2))))))/sigma2 + (mu2 * (mu2 * y2^(1/sigma2) * 
+    (y2 - 2 * (mu2 * sigma2))/(mu2 * sigma2)^2 - y2^(1/sigma2) * 
+    log(y2)/sigma2^2)/(mu2 * sigma2)^2 - log(y2) * (mu2 * y2^(1/sigma2)/(mu2 * 
+    sigma2)^2 - (2 * y2^(1/sigma2 - 1) + y2^(1/sigma2 - 1) * 
+    log(y2)/sigma2)/sigma2)/sigma2^2)/(mu2 * sigma2)^(1/sigma2)) * 
+    exp(-(y2/(mu2 * sigma2)))/gamma(1/sigma2)
+                    
  der2pdf2.mu2dersigma2 <- -(exp((1/sigma2) * log(y2/(mu2 * sigma2)) - y2/(mu2 * sigma2) - 
     log(y2) - lgamma(1/sigma2)) * ((1/sigma2) * ((y2/(mu2 * sigma2)^2 - 
     y2 * sigma2 * (2 * (mu2 * (mu2 * sigma2)))/((mu2 * sigma2)^2)^2)/(y2/(mu2 * 
@@ -1259,10 +1431,8 @@ der2pdf2.dersigma22 <-  (((((y2^(1/sigma2 - 1) * log(y2) - 2 * (y2^(1/sigma2 -
             sigma2))) - y2 * sigma2/(mu2 * sigma2)^2))
 
     
-    
 if(naive == FALSE){      
-    
-           
+              
     p2  <-  pgamma(y2, shape = 1/sigma2, scale = mu2 * sigma2)
                                   
 
@@ -1290,23 +1460,11 @@ nde <- numgh(funcD, sigma2)
 derp2.dersigma2   <- nde$fi
 der2p2.dersigma22 <- nde$se
 
-
-   
                               }
 
 
 
 }
-
-
-
-
-
-
-
-
-
-
 
 
 ##########################################################

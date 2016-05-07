@@ -44,7 +44,9 @@ copulaReg(formula, data = list(), weights = NULL, subset = NULL,
 
 \item{margins}{It indicates the distributions used for the two margins. Possible choices are: normal ("N"), log-normal ("LN"), 
 Gumbel ("GU"), reverse Gumbel ("rGU"), 
-               logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"), Dagum ("DAGUM"), Singh-Maddala ("SM"), beta ("BE").}
+               logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"), 
+               gamma with identity link for the location parameter ("GAi"), Dagum ("DAGUM"), 
+               Singh-Maddala ("SM"), beta ("BE"), Fisk ("FISK", also known as log-logistic distribution).}
                
 \item{gamlssfit}{If \code{gamlssfit = TRUE} then gamlss models are fitted. This is useful for obtaining 
                  starting values, for instance.}               
@@ -108,7 +110,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Marra G. and Radice R. (submitted), Flexible Bivariate Copula-Based Regression Models.
+Marra G. and Radice R. (submitted), A Bivariate Copula Additive Model for Location, Scale and Shape.
 
 }
 
@@ -124,13 +126,14 @@ the score and information matrix associated with the fitted model. The former sh
 In such a situation, the user may use some extra regularisation (see \code{extra.regI}) and/or
 rescaling (see \code{parscale}). Using \code{gamlssfit = TRUE} is typically more effective than the first two options as
 this will provide better calibrated starting values as compared to those obtained from the default starting value procedure.
-The default option is, however, \code{gamlssfit = FALSE} only because it is computationally cheaper and because the 
+The default option is, however, \code{gamlssfit = FALSE} only because it tends to be computationally cheaper and because the 
 default starting value procedure has typically been found to do a satisfactory job in most cases. 
 (The results obtained when using 
 \code{gamlssfit = FALSE} and \code{gamlssfit = TRUE} could also be compared to check if starting values make any difference.)
 
 The above suggestions may help, especially the latter option. However, the user should also consider
-re-specifying the model, and/or using a diferrent dependence structure and/or checking that the chosen marginal distributions fit the responses.
+re-specifying the model, and/or using a diferrent dependence structure and/or checking that the chosen marginal 
+distributions fit the responses.
 In our experience, we found that convergence failure typically occurs 
 when the model has been misspecified and/or the sample size is low compared to the complexity of the model. Examples
 of misspecification include using a Clayton copula rotated by 90 degrees when a positive
@@ -158,8 +161,6 @@ fitting all competing models and, provided convergence is achieved, comparing th
 
 library(SemiParBIVProbit)
 
-############
-## EXAMPLE 1
 ############
 ## Generate data
 ## Correlation between the two equations 0.5 - Sample size 400 
@@ -206,8 +207,7 @@ jc.probs(out, 1.4, 2.3, intervals = TRUE)[1:4,]
 
 }
 
-\keyword{semiparametric bivariate probit modelling} 
-\keyword{bivariate model} 
+\keyword{semiparametric bivariate modelling} 
 \keyword{smooth} 
 \keyword{regression spline}
 \keyword{shrinkage smoother}

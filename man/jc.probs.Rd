@@ -1,7 +1,7 @@
 \name{jc.probs}
 \alias{jc.probs}
 
-\title{Joint or conditional probabilities from fitted bivariate model}
+\title{Joint or conditional probabilities from a fitted bivariate model}
 
 \description{ 
 \code{jc.probs} can be used to calculate the joint or conditional probabilities from a fitted bivariate model with intervals obtained 
@@ -11,18 +11,23 @@ using posterior simulation.}
 
 \usage{
 
-jc.probs(x, y1, y2, type = "bivariate", cond = 0,
+jc.probs(x, y1, y2, newdata, type = "bivariate", cond = 0,
          intervals = FALSE, n.sim = 100, prob.lev = 0.05)
 
 }
 
 \arguments{ 
 
-\item{x}{A fitted \code{SemiParBIVProbit} or \code{copulaReg} object as produced by \code{SemiParBIVProbit()} or \code{copulaReg()}.}
+\item{x}{A fitted \code{SemiParBIVProbit} or \code{copulaReg} or \code{copulaSampleSel} object as 
+         produced by \code{SemiParBIVProbit()} or \code{copulaReg()} or \code{copulaSampleSel()}.}
 
 \item{y1}{Value of response for first margin.}
 
 \item{y2}{Value of response for second margin.}
+
+\item{newdata}{A data frame or list containing the values of the model covariates at which predictions are required. 
+               If not provided then predictions corresponding to the original data are returned.
+               When newdata is provided, it should contain all the variables needed for prediction.}
 
 \item{type}{This argument can take two: \code{"bivariate"} (the probabilities are calculated from the fitted 
             bivariate model) and \code{"independence"} (the calculation is done from univariate fits).}
@@ -68,25 +73,17 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 }
 
 
-\references{
-
-Marra G. and Radice R. (submitted), Flexible Bivariate Copula-Based Regression Models.
-
-
-}
-
 
 \seealso{
-\code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{copulaReg}}  
+\code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{copulaReg}}, \code{\link{copulaSampleSel}}  
 }
 
 \examples{
-## see examples for SemiParBIVProbit and copulaReg
+## see examples for SemiParBIVProbit, copulaReg and copulaSampleSel
 }
 
-\keyword{semiparametric bivariate probit modelling} 
+\keyword{semiparametric bivariate modelling} 
 \keyword{copula}
-\keyword{bivariate probit model} 
 \keyword{bayesian posterior simulation}
 
 

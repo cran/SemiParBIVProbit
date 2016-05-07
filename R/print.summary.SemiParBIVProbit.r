@@ -27,6 +27,7 @@ bin.link <- x$bin.link
   
    main.t <- "\nCOPULA:  "     
   cp <- "  theta = "; as.p <- x$theta.a
+  ct <- "  tau = "; kt.p <- x$tau.a  
 
 
 
@@ -41,8 +42,8 @@ bin.link <- x$bin.link
     if(x$margins[2]=="cauchit")                                 m2l <- "cauchit" 
 
 
-  if(x$margins[2] %in% c("N","GU","rGU","LO") )  m2l <- "identity"
-  if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM") ) m2l <- "log"   
+  if(x$margins[2] %in% c("N","GU","rGU","LO","GAi") )  m2l <- "identity"
+  if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK") ) m2l <- "log"   
   if(x$margins[2] %in% c("BE") )                              m2l <- "qlogis"   
   
   
@@ -59,10 +60,12 @@ bin.link <- x$bin.link
     if(x$margins[2]=="LN")     cat("\nMARGIN 2: log-normal") 
     if(x$margins[2]=="WEI")    cat("\nMARGIN 2: Weibull") 
     if(x$margins[2]=="iG")     cat("\nMARGIN 2: inverse Gaussian") 
-    if(x$margins[2]=="GA")     cat("\nMARGIN 2: gamma")   
+    if(x$margins[2]%in%c("GA","GAi"))     cat("\nMARGIN 2: gamma")   
     if(x$margins[2]=="BE")     cat("\nMARGIN 2: beta")    
     if(x$margins[2]=="DAGUM")  cat("\nMARGIN 2: Dagum")
     if(x$margins[2]=="SM")     cat("\nMARGIN 2: Singh-Maddala") 
+    if(x$margins[2]=="FISK")     cat("\nMARGIN 2: Fisk") 
+    
   
   
   cat("\n\nEQUATION 1")  
@@ -202,7 +205,7 @@ if(!is.null(x$tableP3) && !is.null(x$tableP4) && !is.null(x$tableP5)  ){
 
 
 
-  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","BE")  
+  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK")  
   cont3par <- c("DAGUM","SM")  
   
 
@@ -210,22 +213,27 @@ if(!is.null(x$tableP3) && !is.null(x$tableP4) && !is.null(x$tableP5)  ){
   CIrs <- colMeans(x$CItheta, na.rm = TRUE)
   if(x$margins[2] %in% cont2par)  CIsig2 <- colMeans(x$CIsig2, na.rm = TRUE)
   if(x$margins[2] %in% cont3par) {CIsig2 <- colMeans(x$CIsig2, na.rm = TRUE) ; CInu <- colMeans(x$CInu, na.rm = TRUE)}
+  CIkt    <- colMeans(x$CIkt, na.rm = TRUE)
 
 
 
 
   nodi <- 3
   
-  if( (x$Model=="B" || x$Model=="BPO") && x$margins[2] %in% bin.link) cat("\nn = ",x$n,cp,format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")","  total edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
+  
+  
+  
+  
+  if( (x$Model=="B" || x$Model=="BPO") && x$margins[2] %in% bin.link) cat("\nn = ",x$n,cp,format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")",ct,format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")","\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
 
   if( x$Model == "BPO0" ) cat("\nn = ",x$n,"  total edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
     
     
-  if(x$Model=="BSS") cat("\nn = ",x$n,"  n.sel = ",x$n.sel,cp,format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")","\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="") 
+  if(x$Model=="BSS") cat("\nn = ",x$n,"  n.sel = ",x$n.sel,cp,format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")","\ntau = ",format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")","  total edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="") 
      
-  if(x$Model=="B" && x$margins[2] %in% cont2par ) cat("\nn = ",x$n,cp,format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")","  sigma2 = ",format(x$sigma2.a,digits=nodi),"(",format(CIsig2[1],digits=nodi),",",format(CIsig2[2],digits=nodi),")","\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
+  if(x$Model=="B" && x$margins[2] %in% cont2par ) cat("\nn = ",x$n,"  sigma2 = ",format(x$sigma2.a,digits=nodi),"(",format(CIsig2[1],digits=nodi),",",format(CIsig2[2],digits=nodi),")","\ntheta = ",format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")",ct,format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")","\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
        
-  if(x$Model=="B" && x$margins[2] %in% cont3par ) cat("\nn = ",x$n,cp,format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")","  sigma2 = ",format(x$sigma2.a,digits=nodi),"(",format(CIsig2[1],digits=nodi),",",format(CIsig2[2],digits=nodi),")","\nnu = ",format(x$nu.a,digits = nodi),"(",format(CInu[1],digits=nodi),",",format(CInu[2],digits=nodi),")","  total edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
+  if(x$Model=="B" && x$margins[2] %in% cont3par ) cat("\nn = ",x$n,"  sigma2 = ",format(x$sigma2.a,digits=nodi),"(",format(CIsig2[1],digits=nodi),",",format(CIsig2[2],digits=nodi),")","  nu = ",format(x$nu.a,digits = nodi),"(",format(CInu[1],digits=nodi),",",format(CInu[2],digits=nodi),")","\ntheta = ",format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")",ct,format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")","\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
        
        
 invisible(x)

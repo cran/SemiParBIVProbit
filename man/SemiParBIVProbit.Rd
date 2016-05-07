@@ -65,7 +65,9 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
                to the link function of the first equation whose response is always assumed to be binary. The response 
                for the second equation can be binary ("probit"), normal ("N"), 
                log-normal ("LN"), Gumbel ("GU"), reverse Gumbel ("rGU"), 
-               logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"), Dagum ("DAGUM"), Singh-Maddala ("SM"), beta ("BE").}
+               logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"), 
+               gamma with identity link for the location parameter ("GAi"), Dagum ("DAGUM"), 
+               Singh-Maddala ("SM"), beta ("BE"), Fisk ("FISK", also known as log-logistic distribution).}
                
 \item{gamlssfit}{In the case of continuous margin for the outcome equation, if \code{gamlssfit = TRUE} then 
                  a gamlss if fitted for the outcome equation. This is useful to calculate, for instance, the average
@@ -77,10 +79,8 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
             "G0", "G90", "G180", "G270", "F", "AMH", "FGM" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
              Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Ali-Mikhail-Haq and 
-             Farlie-Gumbel-Morgenstern. Note that 
-             for empirical applications, options N, one of Clayton, Joe or Gumbel (with all respective rotated versions), and F may suffice.
-             This is because the Clayton, Joe and Gumbel copulas are very similar; for instance, C90, J270 and G270 are very close.
-             Nevertheless, there might be situations in which the use of a specific copula may result in more stable computation.}            
+             Farlie-Gumbel-Morgenstern. Note that Clayton, Joe and Gumbel are somewhat similar. Also, 
+             there might be situations in which the use of a specific copula may result in more stable computations.}            
 
 \item{fp}{If \code{TRUE} then a fully parametric model with unpenalised regression splines if fitted. See the example below.}              
 
@@ -122,7 +122,7 @@ The bivariate models considered in this package consist of two model equations w
 whose association between the responses is modelled through parameter \eqn{\theta}{\theta} of a standardised bivariate normal 
 distribution or that of a bivariate copula distribution. The linear predictors of the two equations are flexibly specified using 
 parametric components and smooth functions of covariates. The same can be done for the dependence parameter if it makes sense.
-Estiamtion is achieved within a  penalized likelihood framework with integrated automatic multiple smoothing parameter selection. The use of 
+Estimation is achieved within a  penalized likelihood framework with integrated automatic multiple smoothing parameter selection. The use of 
 penalty matrices allows for the suppression of that part of smooth term complexity which has no support 
 from the data. The trade-off between smoothness 
 and fitness is controlled by smoothing parameters associated with the penalty matrices. Smoothing parameters are chosen to 
@@ -130,6 +130,23 @@ minimise an approximate AIC.
 
 Details of the underlying fitting methods are given in Radice, Marra and Wojtys (in press). Releases previous to 3.2-7
 were based on the algorithms detailed in Marra and Radice (2011, 2013). 
+
+
+For sample selection models, if there are factors in the model, before fitting, the user has to ensure 
+that the numbers of factor variables' levels in the selected sample 
+are the same as those in the complete dataset. Even if a model could be fitted in such a situation,
+the model may produce fits which are 
+not coherent with the nature of the correction sought. As an example consider the 
+situation in which the complete dataset contains a factor variable with five levels and that only three of them   
+appear in the selected sample. For the outcome equation (which is the one of interest) only three levels of such variable 
+exist in the population, but their effects will be corrected for non-random selection using a selection equation 
+in which five levels exist instead.
+Having differing numbers of factors' levels between complete and selected samples will also  
+make prediction not feasible (an aspect which may be particularly important for selection models);
+clearly it is not possible to predict the response of interest for the missing entries using a 
+dataset that contains all levels of a factor variable but using an outcome model 
+estimated using a subset of these levels. 
+
 
 }
 
@@ -149,8 +166,6 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Marra G. (2013), On P-values for Semiparametric Bivariate Probit Models. \emph{Statistical Methodology}, 10(1), 23-28.
-
 Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian 
 Journal of Statistics}, 39(2), 259-279.
 
@@ -159,6 +174,8 @@ Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Sem
 Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}, 29(3-4), 715-741.
 
 Marra G., Radice R. and Filippou P. (in press), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity. \emph{Communications in Statistics - Simulation and Computation}.
+
+Marra G., Radice R., Barnighausen T., Wood S.N. and McGovern M.E. (submitted). A Simultaneous Equation Approach to Estimating HIV Prevalence with Non-Ignorable Missing Responses.
 
 McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}, 26(2), 229-237.
 
@@ -183,19 +200,20 @@ the score and information matrix associated with the fitted model. The former sh
 \code{SemiParBIVProbit()} will produce some warnings if there is a convergence issue.
 
 In such a situation, the user may use some extra regularisation (see \code{extra.regI}) and/or
-rescaling (see \code{parscale}). Using \code{gamlssfit = TRUE} is typically more effective than the first two options as
+rescaling (see \code{parscale}). Using \code{gamlssfit = TRUE} (this is relevant
+when one outcome is not binary) is typically more effective than the first two options as
 this will provide better calibrated starting values as compared to those obtained from the default starting value procedure.
-The default option is, however, \code{gamlssfit = FALSE} only because it is computationally cheaper and because the 
+The default option is, however, \code{gamlssfit = FALSE} only because it tends to be computationally cheaper and because the 
 default starting value procedure has typically been found to do a satisfactory job in most cases. 
 (The results obtained when using 
 \code{gamlssfit = FALSE} and \code{gamlssfit = TRUE} could also be compared to check if starting values make any difference.)
 
 The above suggestions may help, especially the latter option. However, the user should also consider
 re-specifying the model and/or using a diferrent dependence structure and/or checking that the chosen marginal 
-distribution fit the responses well (this is a bit more relevant when
-modeling jointly binary and continuous responses).
+distribution fit the responses well.
 In our experience, we found that convergence failure typically occurs 
-when the model has been misspecified and/or the sample size is low compared to the complexity of the model. Examples
+when the model has been misspecified and/or the sample size (and/or number of selected observations in selection models) is low 
+compared to the complexity of the model. Examples
 of misspecification include using a Clayton copula rotated by 90 degrees when a positive
 association between the margins is present instead, using marginal distributions that do not fit
 the responses (again, this is a bit more relevant when one of the two responses is continuous), and 
@@ -212,7 +230,7 @@ iterations is required to reach convergence). As a practical check, this may be 
 fitting all competing models and, provided convergence is achieved, comparing their respective AIC and BICs, for instance.
 
 In the contexts of endogeneity and non-random sample selection, extra attention is required when specifying
-the dependence parameter as a function of covariates. This is because in these situations the dependence paramter mainly models the 
+the dependence parameter as a function of covariates. This is because in these situations the dependence parameter mainly models the 
 association between the unobserved confounders in the two equations. Therefore, this option would make sense when it 
 is believed that the  
 strength of the association between the unobservables in the two equations varies based on some grouping factor or across geographical 
@@ -221,7 +239,7 @@ areas, for instance.
 } 
 
 \seealso{
-\code{\link{copulaReg}}, \code{\link{AT}}, \code{\link{OR}}, \code{\link{RR}}, \code{\link{adjCov}}, \code{\link{prev}}, \code{\link{gt.bpm}}, \code{\link{LM.bpm}}, \code{\link{VuongClarke}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{conv.check}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
+\code{\link{copulaReg}}, \code{\link{copulaSampleSel}}, \code{\link{AT}}, \code{\link{OR}}, \code{\link{RR}}, \code{\link{adjCov}}, \code{\link{prev}}, \code{\link{gt.bpm}}, \code{\link{LM.bpm}}, \code{\link{VuongClarke}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{conv.check}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
 }
 
 \examples{
@@ -644,6 +662,7 @@ out <- SemiParBIVProbit(fl, data = dataSim,
                         margins = c("probit","N"), gamlssfit = TRUE)
 conv.check(out)                        
 summary(out)
+post.check(out)
 jc.probs(out, 1, 1.5, intervals = TRUE)[1:4,]
 AT(out, nm.end = "y1")
 AT(out, nm.end = "y1", type = "univariate")
@@ -688,6 +707,7 @@ out <- SemiParBIVProbit(fl, data = dataSim,
                         margins = c("probit","N"))
 conv.check(out)                        
 summary(out)
+post.check(out)
 AT(out, nm.end = "y1")
 AT(out, nm.end = "y1", type = "univariate")
 RR(out, nm.end = "y1", rr.plot = TRUE)
@@ -700,8 +720,7 @@ OR(out, nm.end = "y1", type = "univariate")
 
 
 \keyword{non-random sample selection}
-\keyword{semiparametric bivariate probit modelling} 
-\keyword{bivariate probit model} 
+\keyword{semiparametric bivariate modelling} 
 \keyword{partial observability} 
 \keyword{endogeneity} 
 \keyword{smooth} 

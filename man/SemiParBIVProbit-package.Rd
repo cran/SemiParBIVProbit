@@ -5,61 +5,61 @@
 \title{Semiparametric Copula Bivariate Regression Models}
 
 \description{
-\code{\link{SemiParBIVProbit}} provides a function for fitting bivariate binary models with semiparametric 
-predictors, including linear and nonlinear effects. Several bivariate copula distributions are supported. The dependence parameter of 
-the bivariate distribution employed can be specified as a function of a semiparametric predictor as well. Smoothness selection is
-achieved automatically and interval calculations are based on a Bayesian approach.
 
-\code{SemiParBIVProbit} has been originally designed to deal with binary responses only. However, the use of 
-bivariate equation systems in which one response is binary and the other is continuous is allowed for. 
+This package provides functions for fitting copula bivariate regression models with various types of covariate effects for several situations.  
+Many bivariate copula and marginal distributions are supported. The copula dependence parameter can 
+also be specified as a flexible function of covariates.
 
-Function \code{copulaReg} allows the user to model two continuous margins. 
+This package, and in particular its main function \code{SemiParBIVProbit()}, has been originally designed 
+to deal with binary responses and, in fact, the first model
+that has been introduced was the semiparametric bivariate probit model (hence the name of the package). However, 
+since then we have introduced more models and options, and as a consequence fitting functions (to make the 
+different models more manageable for development).
 
-Other models will be incorporated from time to time on a case-study basis.
+The fitting functions are listed below.
+
+\code{SemiParBIVProbit()} allows the user to fit bivariate regression models with binary responses (where the link functions
+are not restricted to be just probit). This is useful to fit bivariate binary models in the presence of 
+non-random sample selection or correlated/associated responses or endogeneity or partial observability. In fact, this function includes
+an argument which allows the user to employ the desired model. This function also permits to fit models in which one response
+is binary and the other is continuous; this is useful to deal with correlated/associated responses or endogeneity, for instance.
+
+\code{copulaReg()} allows the user to fit bivariate models with continuous margins in the presence of correlated/associated responses. 
+
+\code{copulaSampleSel()} allows the user to fit bivariate sample selection models with continuous response, instead of binary as it would be the case
+when using SemiParBIVProbit().  
+
+\code{SemiParTRIVProbit()} allows the user to fit trivariate probit models (with and without double sample selection).  
+
+Other models/options will be incorporated from time to time.
 
 
 }
 
 \details{
-\code{SemiParBIVProbit} provides a function for fitting flexible bivariate binary models, in the presence of 
+\code{SemiParBIVProbit} provides functions for fitting flexible copula regression models, in the presence of 
 associated error equations, endogeneity, non-random sample selection or partial observability. The underlying representation and 
-estimation of the model is based on a penalized likelihood-based regression spline approach, with automatic smoothness selection. Several
-bivariate copula distributions are available. The 
-numerical routine carries out function minimization using a trust region algorithm from the package \code{trust} in combination with
-an adaptation of a low level smoothness estimation fitting procedure from the package \code{mgcv}. 
+estimation of the model is based on a penalized likelihood-based regression spline approach, with automatic 
+smoothness selection. Several
+marginal and bivariate copula distributions are available. The 
+numerical routine carries out function minimization using a trust region algorithm in combination with
+an adaptation of a smoothness estimation fitting procedure for GAMs (see \code{mgcv} for more details on the this last point). 
  
-\code{SemiParBIVProbit} supports the use of many smoothers as extracted from \code{mgcv}. Estimation is by penalized 
+Many smoothers are supported and are extracted from \code{mgcv}. Estimation is by penalized 
 maximum likelihood with automatic smoothness estimation achieved 
 by using an approximate AIC. 
 
 Confidence intervals for smooth components and nonlinear functions of the model
 parameters are derived using a Bayesian approach. Approximate p-values for testing 
 individual smooth terms for equality to the zero function are also provided and based on the approach
-implemented in \code{mgcv}. Functions \code{\link{plot.SemiParBIVProbit}} and 
-\code{\link{summary.SemiParBIVProbit}} extract such information from a fitted \code{\link{SemiParBIVProbit}} object. Model/variable 
-selection is also possible via the use of shrinakge smoothers or information criteria. 
-
-Tools for testing the hypothesis of uncorrelated error equations/absence of unobserved 
-confounding/absence of endogeneity/absence of non-random sample selection are available (see \code{\link{gt.bpm}}
-and \code{\link{LM.bpm}}). 
-
-For recursive bivariate and sample selection models \code{\link{AT}} and \code{\link{prev}} calculate 
-the average effect of an endogenous covariate and prevalence, respectively. \code{\link{mb}} provides the
-nonparametric (worst-case) Manski's bound which is useful to check whether the average effect from a recursive model or prevalence from
-a sample selection model is included within the possibilites of the bound.
-
-If it makes sense then the dependence parameter of the copula distribution can be specified as a function of covariates or a grouping factor.
-
-\code{SemiParBIVProbit} has been originally designed to deal with bivariate binary responses in the contexts of associated 
-error equations, endogeneity, non-random sample selection and partial observability. However, the use of 
-bivariate equation systems in which one response is binary and the other is continuous is allowed for. This case
-is relevant for estimating, for instance, the effect that a binary endogenous variable has on a continuous response or viceversa. 
-There are many continuous distributions which can be employed within this context and we plan to include several 
-options on a case-study basis. Other bivariate models will be implemented from time to time, depending on the study at hand. 
-
-Function \code{copulaReg} allows the user to employ two continuous margins.
+implemented in \code{mgcv}. The usual plotting and summary finctions are also available. Model/variable 
+selection is also possible via the use of shrinakge smoothers and/or information criteria. 
 
 
+If it makes sense then the dependence parameter of the copula distribution can be specified as a function of covariates or a grouping factor, for instance.
+
+The models implemented also allow the user to specify all marginal distribution and copula parameters as functions of
+covariates, as it would be typical in a GAMLSS approach.
 
 
 }
@@ -73,21 +73,23 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 Thanks to Bear Braumoeller (Department of Political Science, The Ohio State University) for suggesting the implementation of bivariate models with partial observability.
 
+Thanks to Panagiota Filippou for the work done on \code{SemiParTRIVProbit()}.
+
 }
 
 \references{
-
-Marra G. (2013), On P-values for Semiparametric Bivariate Probit Models. \emph{Statistical Methodology}, 10(1), 23-28.
 
 Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian Journal of Statistics}, 39(2), 259-279.
 
 Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, 7, 1432-1455.
 
-Marra G. and Radice R. (submitted), Flexible Bivariate Copula-Based Regression Models.
+Marra G. and Radice R. (submitted), A Bivariate Copula Additive Model for Location, Scale and Shape.
 
 Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}, 29(3-4), 715-741.
 
 Marra G., Radice R. and Filippou P. (in press), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity. \emph{Communications in Statistics - Simulation and Computation}.
+
+Marra G., Radice R., Barnighausen T., Wood S.N. and McGovern M.E. (submitted). A Simultaneous Equation Approach to Estimating HIV Prevalence with Non-Ignorable Missing Responses.
 
 McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}, 26(2), 229-237.
 
@@ -97,14 +99,15 @@ Radice R., Marra G. and M. Wojtys (in press), Copula Regression Spline Models fo
 }
 
 
-\seealso{  \code{\link{SemiParBIVProbit}}, \code{\link{copulaReg}}  }
+\seealso{\code{\link{SemiParBIVProbit}}, \code{\link{copulaReg}}, \code{\link{copulaSampleSel}}, \code{\link{SemiParTRIVProbit}}}
 
 
 \keyword{endogeneity} 
 \keyword{package}
 \keyword{non-random sample selection} 
 \keyword{partial observability} 
-\keyword{semiparametric bivariate probit modelling} 
+\keyword{semiparametric bivariate modelling} 
+\keyword{semiparametric trivariate modelling} 
 \keyword{smooth} 
 \keyword{regression}
 \keyword{variable selection}

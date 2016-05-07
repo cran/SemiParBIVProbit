@@ -1,7 +1,7 @@
 print.copulaReg <- function(x, ...){
 
 
-  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","BE")  
+  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK")  
   cont3par <- c("DAGUM","SM") 
 
   if(x$BivD=="FGM")  {cop <- "FGM"                ;lind <- "atanh"} 
@@ -30,27 +30,30 @@ print.copulaReg <- function(x, ...){
   n2 <- "nu.2 = "; n2.p <- x$nu2.a   
   
 
-  if(x$margins[1] %in% c("N","GU","rGU","LO") )  m1l <- "identity"
-  if(x$margins[2] %in% c("N","GU","rGU","LO") )  m2l <- "identity"
-  if(x$margins[1] %in% c("LN","WEI","iG","GA","DAGUM","SM") ) m1l <- "log" 
-  if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM") ) m2l <- "log" 
+  if(x$margins[1] %in% c("N","GU","rGU","LO","GAi") )  m1l <- "identity"
+  if(x$margins[2] %in% c("N","GU","rGU","LO","GAi") )  m2l <- "identity"
+  if(x$margins[1] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK") ) m1l <- "log" 
+  if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK") ) m2l <- "log" 
   if(x$margins[1] %in% c("BE") )                              m1l <- "qlogis" 
   if(x$margins[2] %in% c("BE") )                              m2l <- "qlogis"   
   
 
 
   cat("\nCOPULA:  ",cop)
-  if(x$margins[1]=="N")      cat("\nMARGIN 1: Gaussian")  
-  if(x$margins[1]=="GU")     cat("\nMARGIN 1: Gumbel")    
-  if(x$margins[1]=="rGU")    cat("\nMARGIN 1: reverse Gumbel")  
-  if(x$margins[1]=="LO")     cat("\nMARGIN 1: logistic")   
-  if(x$margins[1]=="LN")     cat("\nMARGIN 1: log-normal") 
-  if(x$margins[1]=="WEI")    cat("\nMARGIN 1: Weibull") 
-  if(x$margins[1]=="iG")     cat("\nMARGIN 1: inverse Gaussian") 
-  if(x$margins[1]=="GA")     cat("\nMARGIN 1: gamma")  
+  if(x$margins[1]=="N")             cat("\nMARGIN 1: Gaussian")  
+  if(x$margins[1]=="GU")            cat("\nMARGIN 1: Gumbel")    
+  if(x$margins[1]=="rGU")           cat("\nMARGIN 1: reverse Gumbel")  
+  if(x$margins[1]=="LO")            cat("\nMARGIN 1: logistic")   
+  if(x$margins[1]=="LN")            cat("\nMARGIN 1: log-normal") 
+  if(x$margins[1]=="WEI")           cat("\nMARGIN 1: Weibull") 
+  if(x$margins[1]=="iG")            cat("\nMARGIN 1: inverse Gaussian") 
+  if(x$margins[1]%in%c("GA","GAi")) cat("\nMARGIN 1: gamma")  
+  if(x$margins[1]=="FISK")   cat("\nMARGIN 1: Fisk") 
   if(x$margins[1]=="BE")     cat("\nMARGIN 1: beta")    
   if(x$margins[1]=="DAGUM")  cat("\nMARGIN 1: Dagum")  
   if(x$margins[1]=="SM")     cat("\nMARGIN 1: Singh-Maddala") 
+
+
 
   if(x$margins[2]=="N")      cat("\nMARGIN 2: Gaussian")  
   if(x$margins[2]=="GU")     cat("\nMARGIN 2: Gumbel")    
@@ -59,11 +62,11 @@ print.copulaReg <- function(x, ...){
   if(x$margins[2]=="LN")     cat("\nMARGIN 2: log-normal") 
   if(x$margins[2]=="WEI")    cat("\nMARGIN 2: Weibull") 
   if(x$margins[2]=="iG")     cat("\nMARGIN 2: inverse Gaussian") 
-  if(x$margins[2]=="GA")     cat("\nMARGIN 2: gamma")   
+  if(x$margins[2]%in%c("GA","GAi"))     cat("\nMARGIN 2: gamma")   
   if(x$margins[2]=="BE")     cat("\nMARGIN 2: beta")    
   if(x$margins[2]=="DAGUM")  cat("\nMARGIN 2: Dagum")
   if(x$margins[2]=="SM")     cat("\nMARGIN 2: Singh-Maddala") 
-
+  if(x$margins[2]=="FISK")   cat("\nMARGIN 2: Fisk") 
 
 
 
@@ -188,28 +191,24 @@ if( x$margins[1] %in% cont3par && x$margins[2] %in% cont3par ){
   
   cat("\n")
             
-  if(x$margins[1] %in% cont2par && x$margins[2] %in% cont2par ) cat("n = ",x$n,
-                                                                     "\n",s1, format(s1.p, digits=3), "  ",s2, format(s2.p, digits=3),
+  if(x$margins[1] %in% cont2par && x$margins[2] %in% cont2par ) cat( s1, format(s1.p, digits=3), "  ",s2, format(s2.p, digits=3),
                                                                      "\n",cp, format(as.p, digits=3),
-                                                                     "\ntotal edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
+                                                                     "\nn = ",x$n,"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
                                                                      
-  if(x$margins[1] %in% cont3par && x$margins[2] %in% cont3par ) cat("n = ",x$n,
-                                                                     "\n",s1, format(s1.p, digits=3), "  ",s2, format(s2.p, digits=3),
+  if(x$margins[1] %in% cont3par && x$margins[2] %in% cont3par ) cat( s1, format(s1.p, digits=3), "  ",s2, format(s2.p, digits=3),
                                                                      "\n",n1, format(n1.p, digits=3), "  ",n2, format(n2.p, digits=3),
                                                                      "\n",cp, format(as.p, digits=3),
-                                                                     "\ntotal edf = ",format(x$t.edf, digits=3),"\n\n", sep="")                                                                     
+                                                                     "\nn = ",x$n,"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")                                                                     
 
-  if(x$margins[1] %in% cont2par && x$margins[2] %in% cont3par ) cat("n = ",x$n,
-                                                                     "\n",s1, format(s1.p, digits=3), "  ",s2, format(s2.p, digits=3),
+  if(x$margins[1] %in% cont2par && x$margins[2] %in% cont3par ) cat( s1, format(s1.p, digits=3), "  ",s2, format(s2.p, digits=3),
                                                                      "\n",n2, format(n2.p, digits=3),
                                                                      "\n",cp, format(as.p, digits=3),
-                                                                     "\ntotal edf = ",format(x$t.edf, digits=3),"\n\n", sep="")   
+                                                                     "\nn = ",x$n,"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")   
 
-  if(x$margins[1] %in% cont3par && x$margins[2] %in% cont2par ) cat("n = ",x$n,
-                                                                     "\n",s1, format(s1.p, digits=3), "  ",s2, format(s2.p, digits=3),
+  if(x$margins[1] %in% cont3par && x$margins[2] %in% cont2par ) cat( s1, format(s1.p, digits=3), "  ",s2, format(s2.p, digits=3),
                                                                      "\n",n1, format(n1.p, digits=3), 
                                                                      "\n",cp, format(as.p, digits=3),
-                                                                     "\ntotal edf = ",format(x$t.edf, digits=3),"\n\n", sep="")   
+                                                                     "\nn = ",x$n,"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")   
 
 invisible(x)
 
