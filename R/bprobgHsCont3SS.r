@@ -1,4 +1,4 @@
-bprobgHsCont3SS <- function(params, respvec, VC, sp = NULL, qu.mag = NULL, AT = FALSE){
+bprobgHsCont3SS <- function(params, respvec, VC, ps, AT = FALSE){
 
   eta1 <- VC$X1%*%params[1:VC$X1.d2]
   eta2 <- VC$X2%*%params[(VC$X1.d2+1):(VC$X1.d2+VC$X2.d2)]
@@ -300,15 +300,23 @@ if( !is.null(VC$X3) ){
 
 
 
-if( ( VC$l.sp1==0 && VC$l.sp2==0 && VC$l.sp3==0 && VC$l.sp4==0 && VC$l.sp5==0 ) || VC$fp==TRUE) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0) else ps <- pen(params, qu.mag, sp, VC)
 
  
 if(VC$extra.regI == "pC") H <- regH(H, type = 1)
   
-         S.res <- res
-         res   <- S.res + ps$S.h1
-         G     <- G + ps$S.h2
-         H     <- H + ps$S.h  
+  S.h  <- ps$S.h  
+  
+  if( length(S.h) != 1){
+  
+  S.h1 <- 0.5*crossprod(params,S.h)%*%params
+  S.h2 <- S.h%*%params
+  
+  } else S.h <- S.h1 <- S.h2 <- 0   
+  
+  S.res <- res
+  res   <- S.res + S.h1
+  G     <- G + S.h2
+  H     <- H + S.h  
         
 if(VC$extra.regI == "sED") H <- regH(H, type = 2)   
   
@@ -334,7 +342,7 @@ dl.dsigma.stt[VC$inde] <- dl.dsigma.st 	;dl.dsigma.st <- dl.dsigma.stt
 dl.dnu.stt[VC$inde]    <- dl.dnu.st	;dl.dnu.st    <- dl.dnu.stt   
 dl.dteta.stt[VC$inde]  <- dl.dteta.st	;dl.dteta.st  <- dl.dteta.stt
 
-         list(value=res, gradient=G, hessian=H, S.h=ps$S.h, l=S.res, l.par=l.par, ps = ps, etas = etas,
+         list(value=res, gradient=G, hessian=H, S.h=S.h, S.h1=S.h1, S.h2=S.h2, l=S.res, l.par=l.par, ps = ps, etas = etas,
               eta1 = eta1, eta2 = eta2, etad = etad, etan = etan,
               dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.dsigma.st = dl.dsigma.st, 
               dl.dnu.st = dl.dnu.st, dl.dteta.st = dl.dteta.st,

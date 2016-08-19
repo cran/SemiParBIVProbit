@@ -1,4 +1,4 @@
-bprobgHs <- function(params, respvec, VC, sp = NULL, qu.mag = NULL, AT = FALSE){
+bprobgHs <- function(params, respvec, VC, ps, AT = FALSE){
 
  
   epsilon <- 0.0000001 
@@ -294,16 +294,24 @@ if( !is.null(VC$X3) ){
 
 
 
-if( ( VC$l.sp1==0 && VC$l.sp2==0 && VC$l.sp3==0 ) || VC$fp==TRUE) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0) else ps <- pen(params, qu.mag, sp, VC)
 
 
 
 if(VC$extra.regI == "pC" && VC$hess==FALSE) H <- regH(H, type = 1)
   
-         S.res <- res
-         res   <- S.res + ps$S.h1
-         G     <- G + ps$S.h2
-         H     <- H + ps$S.h  
+  S.h  <- ps$S.h
+  
+  if( length(S.h) != 1){
+  
+  S.h1 <- 0.5*crossprod(params,S.h)%*%params
+  S.h2 <- S.h%*%params
+  
+  } else S.h <- S.h1 <- S.h2 <- 0   
+  
+  S.res <- res
+  res   <- S.res + S.h1
+  G     <- G + S.h2
+  H     <- H + S.h 
         
 if(VC$extra.regI == "sED") H <- regH(H, type = 2) 
   
@@ -311,7 +319,7 @@ if(VC$extra.regI == "sED") H <- regH(H, type = 2)
 
   
 
-         list(value=res, gradient=G, hessian=H, S.h=ps$S.h, l=S.res, l.par=l.par, ps = ps, 
+         list(value=res, gradient=G, hessian=H, S.h=S.h, S.h1=S.h1, S.h2=S.h2, l=S.res, l.par=l.par, ps = ps, 
               p11=p11, p10=p10, p01=p01, p00=p00, eta1=eta1, eta2=eta2, etad=etad, 
               dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.drho=dl.drho,
               #d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 

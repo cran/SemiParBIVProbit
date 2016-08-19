@@ -1,8 +1,8 @@
 print.copulaReg <- function(x, ...){
 
-
-  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK")  
-  cont3par <- c("DAGUM","SM") 
+   cont1par <- c("PO","ZTP")  
+   cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK","NBI", "NBII","NBIa", "NBIIa","PIG")  
+   cont3par <- c("DAGUM","SM","DEL","SICHEL")   
 
   if(x$BivD=="FGM")  {cop <- "FGM"                ;lind <- "atanh"} 
   if(x$BivD=="AMH")  {cop <- "AMH"                ;lind <- "atanh"} 
@@ -32,10 +32,10 @@ print.copulaReg <- function(x, ...){
 
   if(x$margins[1] %in% c("N","GU","rGU","LO","GAi") )  m1l <- "identity"
   if(x$margins[2] %in% c("N","GU","rGU","LO","GAi") )  m2l <- "identity"
-  if(x$margins[1] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK") ) m1l <- "log" 
-  if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK") ) m2l <- "log" 
-  if(x$margins[1] %in% c("BE") )                              m1l <- "qlogis" 
-  if(x$margins[2] %in% c("BE") )                              m2l <- "qlogis"   
+  if(x$margins[1] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK","NBI","NBII","NBIa","NBIIa","PIG","PO","ZTP") ) m1l <- "log" 
+  if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK","NBI","NBII","NBIa","NBIIa","PIG","PO","ZTP") ) m2l <- "log" 
+  if(x$margins[1] %in% c("BE") )                       m1l <- "qlogis" 
+  if(x$margins[2] %in% c("BE") )                       m2l <- "qlogis"   
   
 
 
@@ -48,12 +48,17 @@ print.copulaReg <- function(x, ...){
   if(x$margins[1]=="WEI")           cat("\nMARGIN 1: Weibull") 
   if(x$margins[1]=="iG")            cat("\nMARGIN 1: inverse Gaussian") 
   if(x$margins[1]%in%c("GA","GAi")) cat("\nMARGIN 1: gamma")  
-  if(x$margins[1]=="FISK")   cat("\nMARGIN 1: Fisk") 
-  if(x$margins[1]=="BE")     cat("\nMARGIN 1: beta")    
-  if(x$margins[1]=="DAGUM")  cat("\nMARGIN 1: Dagum")  
-  if(x$margins[1]=="SM")     cat("\nMARGIN 1: Singh-Maddala") 
-
-
+  if(x$margins[1]=="FISK")          cat("\nMARGIN 1: Fisk") 
+  if(x$margins[1]=="BE")            cat("\nMARGIN 1: beta")    
+  if(x$margins[1]=="DAGUM")         cat("\nMARGIN 1: Dagum")  
+  if(x$margins[1]=="SM")            cat("\nMARGIN 1: Singh-Maddala") 
+  if(x$margins[1]%in%c("NBI","NBIa"))           cat("\nMARGIN 1: Negative Binomial - Type I") 
+  if(x$margins[1]%in%c("NBII","NBIIa"))          cat("\nMARGIN 1: Negative Binomial - Type II")
+  if(x$margins[1]=="PIG")           cat("\nMARGIN 1: Poisson inverse Gaussian") 
+  if(x$margins[1]=="PO")            cat("\nMARGIN 1: Poisson")   
+  if(x$margins[1]=="ZTP")           cat("\nMARGIN 1: Zero Truncated Poisson")    
+  
+  
 
   if(x$margins[2]=="N")      cat("\nMARGIN 2: Gaussian")  
   if(x$margins[2]=="GU")     cat("\nMARGIN 2: Gumbel")    
@@ -62,11 +67,17 @@ print.copulaReg <- function(x, ...){
   if(x$margins[2]=="LN")     cat("\nMARGIN 2: log-normal") 
   if(x$margins[2]=="WEI")    cat("\nMARGIN 2: Weibull") 
   if(x$margins[2]=="iG")     cat("\nMARGIN 2: inverse Gaussian") 
-  if(x$margins[2]%in%c("GA","GAi"))     cat("\nMARGIN 2: gamma")   
+  if(x$margins[2]%in%c("GA","GAi"))  cat("\nMARGIN 2: gamma")   
   if(x$margins[2]=="BE")     cat("\nMARGIN 2: beta")    
   if(x$margins[2]=="DAGUM")  cat("\nMARGIN 2: Dagum")
   if(x$margins[2]=="SM")     cat("\nMARGIN 2: Singh-Maddala") 
   if(x$margins[2]=="FISK")   cat("\nMARGIN 2: Fisk") 
+  if(x$margins[2]%in%c("NBI","NBIa"))    cat("\nMARGIN 2: Negative Binomial - Type I") 
+  if(x$margins[2]%in%c("NBII","NBIIa"))   cat("\nMARGIN 2: Negative Binomial - Type II")
+  if(x$margins[2]=="PIG")    cat("\nMARGIN 2: Poisson inverse Gaussian") 
+  if(x$margins[2]=="PO")     cat("\nMARGIN 2: Poisson")   
+  if(x$margins[2]=="ZTP")    cat("\nMARGIN 2: Zero Truncated Poisson")      
+  
 
 
 
@@ -81,7 +92,48 @@ print.copulaReg <- function(x, ...){
   
   if( !is.null(x$X3) ){
   
+ 
+ 
+  if( x$margins[1] %in% cont1par && x$margins[2] %in% cont2par ){
   
+  
+  cat("\nEQUATION 3")
+  if(x$margins[2] !="BE") cat("\nLink function for sigma2.2:","log","\n") else cat("\nLink function for sigma2.2:","qlogis","\n") 
+  cat("Formula: "); print(x$formula[[3]])  
+  
+ 
+  cat("\nEQUATION 4")
+  cat("\nLink function for theta:",lind,"\n") 
+  cat("Formula: "); print(x$formula[[4]]) 
+     
+     } 
+     
+     
+     
+     
+
+    
+ if( x$margins[1] %in% cont1par && x$margins[2] %in% cont3par ){
+       
+
+    cat("\nEQUATION 3")
+    cat("\nLink function for sigma2.2:","log","\n") 
+    cat("Formula: "); print(x$formula[[3]]) # print(x$gam4$formula)  
+       
+    cat("\nEQUATION 4")
+    cat("\nLink function for nu.2:","log","\n") 
+    cat("Formula: "); print(x$formula[[4]]) #print(x$gam5$formula)     
+    
+    cat("\nEQUATION 5")
+    cat("\nLink function for theta:",lind,"\n") 
+    cat("Formula: "); print(x$formula[[5]]) #print(x$gam6$formula)
+       
+       }
+         
+ 
+ 
+ 
+ 
   
   if( x$margins[1] %in% cont2par && x$margins[2] %in% cont2par ){
   
@@ -198,7 +250,18 @@ if( x$margins[1] %in% cont3par && x$margins[2] %in% cont3par ){
   if(x$margins[1] %in% cont3par && x$margins[2] %in% cont3par ) cat( s1, format(s1.p, digits=3), "  ",s2, format(s2.p, digits=3),
                                                                      "\n",n1, format(n1.p, digits=3), "  ",n2, format(n2.p, digits=3),
                                                                      "\n",cp, format(as.p, digits=3),
-                                                                     "\nn = ",x$n,"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")                                                                     
+                                                                     "\nn = ",x$n,"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")   
+                                                                     
+                                                                  
+  if(x$margins[1] %in% cont1par && x$margins[2] %in% cont2par ) cat( s2, format(s2.p, digits=3),
+                                                                     "\n",cp, format(as.p, digits=3),
+                                                                     "\nn = ",x$n,"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
+                                                                     
+  if(x$margins[1] %in% cont1par && x$margins[2] %in% cont3par ) cat( s2, format(s2.p, digits=3),
+                                                                     "\n",n2, format(n2.p, digits=3),
+                                                                     "\n",cp, format(as.p, digits=3),
+                                                                     "\nn = ",x$n,"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")  
+                                                                     
 
   if(x$margins[1] %in% cont2par && x$margins[2] %in% cont3par ) cat( s1, format(s1.p, digits=3), "  ",s2, format(s2.p, digits=3),
                                                                      "\n",n2, format(n2.p, digits=3),

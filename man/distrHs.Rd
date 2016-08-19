@@ -1,9 +1,13 @@
 \name{distrHs}
 \alias{distrHs}
+\alias{distrHsAT}
+\alias{distrHsATDiscr}
+\alias{distrHsDiscr}
 
 \title{Internal Function}
 
-\description{It evaluates some of the derivatives needed in the likelihood function for the binary and continuous margin's case.}
+\description{This and other similar internal functions evaluate the margins' derivatives needed in the likelihood function for the 
+binary, discrete and continuous cases.}
 
 
 \author{

@@ -1,10 +1,10 @@
 \name{logLik.SemiParBIVProbit}
 \alias{logLik.SemiParBIVProbit}
 
-\title{Extract the log likelihood for a fitted SemiParBIVProbit or copulaReg}
+\title{Extract the log likelihood for a fitted copula model}
 
 
-\description{It extracts the log-likelihood for a fitted \code{SemiParBIVProbit} or \code{copulaReg} model.
+\description{It extracts the log-likelihood for a fitted \code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel}/\code{SemiParTRIV} model.
 
 }
 
@@ -15,7 +15,7 @@
 
 \arguments{ 
   
-\item{object}{A fitted \code{SemiParBIVProbit} object as produced by \code{SemiParBIVProbit()}.}
+\item{object}{A fitted \code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel}/\code{SemiParTRIV} object.}
 
 \item{...}{Un-used for this function.}
 
@@ -25,8 +25,8 @@
 
 \details{
 
-Modification of the classic \code{logLik} which accounts for the estimated degrees of freedom used in \code{SemiParBIVProbit} objects.
-This function is provided so that information criteria work correctly with \code{SemiParBIVProbit} objects by using the correct number of degrees 
+Modification of the classic \code{logLik} which accounts for the estimated degrees of freedom used in \code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel}/\code{SemiParTRIV} objects.
+This function is provided so that information criteria work correctly by using the correct number of degrees 
 of freedom. 
 
 }

@@ -47,6 +47,20 @@ The data have been obtained from http://www.meps.ahrq.gov/.
 
 }
 
+
+
+
+\references{
+
+Radice R., Marra G. and Wojtys M. (2016), Copula Regression Spline Models for Binary Outcomes. \emph{Statistics and Computing}, 26(5), 981-995. 
+
+
+
+}
+
+
+
+
 \examples{
 
 \dontrun{ 

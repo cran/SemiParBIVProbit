@@ -1,11 +1,11 @@
 \name{predict.SemiParBIVProbit}
 \alias{predict.SemiParBIVProbit}
 
-\title{Prediction from a fitted SemiParBIVProbit model}
+\title{Prediction function}
 
 \description{
 
-It takes a fitted \code{SemiParBIVProbit},\code{copulaReg},\code{copulaSampleSel},\code{SemiParTRIVProbit} object produced by \code{SemiParBIVProbit()},\code{copulaReg()},\code{copulaSampleSel()},\code{SemiParTRIVProbit()} and, 
+It takes a fitted \code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel}/\code{SemiParTRIV} object and, 
 for each equation, produces predictions 
 for a new set of values of the model covariates or the original values used for the model fit. 
 Standard errors of predictions can be produced and are based on the posterior distribution of the model coefficients. This function is a 
@@ -22,8 +22,7 @@ wrapper for \code{predict.gam()} in \code{mgcv}. Please see the documentation of
 
 \arguments{ 
 
-\item{object}{A fitted code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel} object as 
-              produced by \code{SemiParBIVProbit()}/\code{copulaReg()}/\code{copulaSampleSel()}.}
+\item{object}{A fitted code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel}/\code{SemiParTRIV} object.}
 
 \item{eq}{The equation to be considered for prediction.}
 
@@ -56,7 +55,7 @@ through functions of them.
 
 
 \seealso{
-\code{\link{SemiParBIVProbit}}, \code{\link{copulaReg}}, \code{\link{copulaSampleSel}}, \code{\link{plot.SemiParBIVProbit}}
+\code{\link{SemiParBIVProbit}}, \code{\link{copulaReg}}, \code{\link{copulaSampleSel}}, \code{\link{SemiParTRIV}}, \code{\link{plot.SemiParBIVProbit}}
 }
 
 

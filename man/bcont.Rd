@@ -1,10 +1,13 @@
 \name{bcont}
 \alias{bcont}
+\alias{bcont3}
+\alias{bcont23}
+\alias{bcont32}
 
 \title{Internal Function}
 
-\description{It provides the log-likelihood, gradient and observed information matrix for 
-penalized or unpenalized maximum likelihood optimization, when continuous margins are employed.
+\description{This and other similar internal functions provide the log-likelihood, gradient and observed information matrix for 
+penalized/unpenalized maximum likelihood optimization when copula models with continuous margins are employed.
 
 }
 

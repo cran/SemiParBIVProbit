@@ -20,12 +20,8 @@ print.summary.SemiParBIVProbit <- function(x, digits = max(3, getOption("digits"
   if(x$BivD=="G270") {cop <- "270\u00B0 Gumbel"   ;lind <- "log(- \u00B7 - 1)"}   
   
   
-bin.link <- x$bin.link  
-  
-  
-  
-  
-   main.t <- "\nCOPULA:  "     
+  bin.link <- x$bin.link  
+  main.t <- "\nCOPULA:  "     
   cp <- "  theta = "; as.p <- x$theta.a
   ct <- "  tau = "; kt.p <- x$tau.a  
 
@@ -40,11 +36,20 @@ bin.link <- x$bin.link
     if(x$margins[2]=="logit")                                   m2l <- "logit"
     if(x$margins[2]=="cloglog")                                 m2l <- "cloglog"
     if(x$margins[2]=="cauchit")                                 m2l <- "cauchit" 
-
-
-  if(x$margins[2] %in% c("N","GU","rGU","LO","GAi") )  m2l <- "identity"
-  if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK") ) m2l <- "log"   
-  if(x$margins[2] %in% c("BE") )                              m2l <- "qlogis"   
+    if(x$margins[2] %in% c("N","GU","rGU","LO","GAi") )         m2l <- "identity"
+    if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK","NBI","NBII","NBIa","NBIIa","PIG","PO","ZTP") ) m2l <- "log"   
+    if(x$margins[2] %in% c("BE") )                              m2l <- "qlogis"    
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
@@ -64,7 +69,12 @@ bin.link <- x$bin.link
     if(x$margins[2]=="BE")     cat("\nMARGIN 2: beta")    
     if(x$margins[2]=="DAGUM")  cat("\nMARGIN 2: Dagum")
     if(x$margins[2]=="SM")     cat("\nMARGIN 2: Singh-Maddala") 
-    if(x$margins[2]=="FISK")     cat("\nMARGIN 2: Fisk") 
+    if(x$margins[2]=="FISK")   cat("\nMARGIN 2: Fisk") 
+    if(x$margins[2] %in% c("NBI","NBIa"))    cat("\nMARGIN 2: Negative Binomial - Type I") 
+    if(x$margins[2] %in% c("NBII","NBIIa"))   cat("\nMARGIN 2: Negative Binomial - Type II")
+    if(x$margins[2]=="PIG")    cat("\nMARGIN 2: Poisson inverse Gaussian") 
+    if(x$margins[2]=="PO")     cat("\nMARGIN 2: Poisson")   
+    if(x$margins[2]=="ZTP")    cat("\nMARGIN 2: Zero Truncated Poisson")      
     
   
   
@@ -204,9 +214,9 @@ if(!is.null(x$tableP3) && !is.null(x$tableP4) && !is.null(x$tableP5)  ){
 
 
 
-
-  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK")  
-  cont3par <- c("DAGUM","SM")  
+   cont1par <- c("PO","ZTP")  
+   cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK","NBI", "NBII","NBIa","NBIIa","PIG")  
+   cont3par <- c("DAGUM","SM") 
   
 
 
@@ -230,6 +240,9 @@ if(!is.null(x$tableP3) && !is.null(x$tableP4) && !is.null(x$tableP5)  ){
     
     
   if(x$Model=="BSS") cat("\nn = ",x$n,"  n.sel = ",x$n.sel,cp,format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")","\ntau = ",format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")","  total edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="") 
+     
+
+  if(x$Model=="B" && x$margins[2] %in% cont1par ) cat("\nn = ",x$n,"\ntheta = ",format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")",ct,format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")","\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
      
   if(x$Model=="B" && x$margins[2] %in% cont2par ) cat("\nn = ",x$n,"  sigma2 = ",format(x$sigma2.a,digits=nodi),"(",format(CIsig2[1],digits=nodi),",",format(CIsig2[2],digits=nodi),")","\ntheta = ",format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")",ct,format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")","\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
        

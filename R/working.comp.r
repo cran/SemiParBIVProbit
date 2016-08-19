@@ -1,7 +1,7 @@
 working.comp <- function(fit){
    
-  G <- -(fit$gradient - fit$ps$S.h2)
-  H <- fit$hessian - fit$ps$S.h
+  G <- -(fit$gradient - fit$S.h2)
+  H <- fit$hessian - fit$S.h
   
   W.eig <- eigen(H, symmetric=TRUE)
   

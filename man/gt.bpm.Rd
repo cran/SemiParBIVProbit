@@ -77,11 +77,10 @@ Terrell G. (2002), The Gradient Statistic. \emph{Computing Science and Statistic
 }
 
 \keyword{semiparametric bivariate probit modelling} 
-\keyword{bivariate probit model} 
 \keyword{gradient test} 
 \keyword{endogeneity}
 \keyword{non-random sample selection}
-\keyword{correlated model equations/errors}
+
 
 
 

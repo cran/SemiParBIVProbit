@@ -31,7 +31,7 @@ print.copulaSampleSel <- function(x, ...){
 
  
     if(x$margins[2] %in% c("N","GU","rGU","LO","GAi") )               m2l <- "identity"
-    if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK") ) m2l <- "log"   
+    if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK","NBI","NBII","NBIa","NBIIa","PIG","PO","ZTP") ) m2l <- "log"   
     if(x$margins[2] %in% c("BE") )                              m2l <- "qlogis"   
     
       cat(main.t,cop) 
@@ -50,6 +50,11 @@ print.copulaSampleSel <- function(x, ...){
       if(x$margins[2]=="DAGUM")  cat("\nMARGIN 2: Dagum")
       if(x$margins[2]=="SM")     cat("\nMARGIN 2: Singh-Maddala") 
       if(x$margins[2]=="FISK")     cat("\nMARGIN 2: Fisk") 
+      if(x$margins[2] %in% c("NBI","NBIa"))    	cat("\nMARGIN 2: Negative Binomial - Type I") 
+      if(x$margins[2]%in% c("NBII","NBIIa"))   	cat("\nMARGIN 2: Negative Binomial - Type II")
+      if(x$margins[2]=="PIG")    	cat("\nMARGIN 2: Poisson inverse Gaussian") 
+      if(x$margins[2]=="PO")     	cat("\nMARGIN 2: Poisson")   
+      if(x$margins[2]=="ZTP")    	cat("\nMARGIN 2: Zero Truncated Poisson")         
       
     
     
@@ -122,12 +127,15 @@ print.copulaSampleSel <- function(x, ...){
   
   
   
-  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK")  
+  
+  cont1par <- c("PO","ZTP")  
+  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK","NBI", "NBII","NBIa", "NBIIa","PIG")   
   cont3par <- c("DAGUM","SM")  
   
   
   cat("\n")
-            
+  
+  if(x$margins[2] %in% cont1par ) cat("n = ",x$n,"  n.sel = ", x$n.sel,"\ntheta = ", format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
   if(x$margins[2] %in% cont2par ) cat("n = ",x$n,"  n.sel = ", x$n.sel,"\nsigma2 = ",x$sigma2.a, "\ntheta = ", format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
   if(x$margins[2] %in% cont3par ) cat("n = ",x$n,"  n.sel = ", x$n.sel,"\nsigma2 = ",x$sigma2.a, "  nu = ",x$nu.a, "\ntheta = ", format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
 

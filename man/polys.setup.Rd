@@ -50,7 +50,3 @@ Thanks to Guy Harling for suggesting the implementation of this function.
 }
 
 
-
-\keyword{models} 
-\keyword{smooth} 
-

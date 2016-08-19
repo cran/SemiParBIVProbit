@@ -1,6 +1,17 @@
 jc.probs <- function(x, y1, y2, newdata, type = "bivariate", cond = 0, intervals = FALSE, n.sim = 100, prob.lev = 0.05){
 
-if(x$triv == TRUE ) stop("This function is currently not suitable for trivariate probit models.")
+
+
+cont1par  <- x$VC$m1d   
+cont2par  <- c(x$VC$m2,x$VC$m2d) 
+cont3par  <- x$VC$m3 
+
+
+if(x$triv == TRUE ) stop("This function is currently not suitable for trivariate binary models.")
+
+
+if(x$VC$Cont == "YES" && x$margins[1] %in% c(x$VC$m1d, x$VC$m2d)) stop("This function is currently not suitable for models involving a discrete margin.")
+if(x$VC$Cont == "NO"  && x$margins[2] %in% c(x$VC$m1d, x$VC$m2d)) stop("This function is currently not suitable for models involving a discrete margin.")
 
 
 if(missing(y1)) stop("You must provide a value for y1.")
@@ -8,9 +19,6 @@ if(missing(y2)) stop("You must provide a value for y2.")
 
 epsilon <- 0.0000001 
   
-cont2par  <- x$VC$m2 
-cont3par  <- x$VC$m3 
-
 nu1 <- nu2 <- nu <- 1
 CIp12 <- NULL
 bin.link <- x$VC$bl  
@@ -1257,12 +1265,12 @@ if(y1 == 0 && y2 == 0){
 
 
 
-if(intervals == TRUE){
+if(intervals == TRUE){ # p12s introduced to calculate stuff
 
 CIp12 <- rowQuantiles(p12s, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE)
 
-
 if(length(p12) > 1)  {res <- data.frame(p12, CIp12, p1, p2);       names(res)[2:3] <- names(quantile(c(1,1), probs = c(prob.lev/2,1-prob.lev/2)))}
+#if(length(p12) > 1)  {res <- data.frame(p12, CIp12, p1, p2, p12s);       names(res)[2:3] <- names(quantile(c(1,1), probs = c(prob.lev/2,1-prob.lev/2)))}
 if(length(p12) == 1) {res <- data.frame(t(c(p12, CIp12, p1, p2))); names(res) <- c("p12",names(quantile(c(1,1), probs = c(prob.lev/2,1-prob.lev/2))),"p1","p2")}
 
 

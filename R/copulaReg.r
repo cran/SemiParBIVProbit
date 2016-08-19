@@ -8,9 +8,24 @@ copulaReg <- function(formula, data = list(), weights = NULL, subset = NULL,
   # model set up and starting values
   ##########################################################################################################################
   
+  bl   <- c("probit", "logit", "cloglog", "cauchit")  
+  
+  if(margins[1] %in% bl){
+                          
+  L <- eval(substitute(SemiParBIVProbit(formula, data, weights, subset,
+                               Model = "B", BivD, margins, gamlssfit,
+                               fp, hess = TRUE, infl.fac, 
+                               rinit, rmax, iterlimsp, tolsp,
+                               gc.l, parscale, extra.regI, intf = TRUE, theta.fx = NULL),list(weights=weights)))                               
+  
+  }
+  
+  if(!(margins[1] %in% bl)){
+  
+  
   i.rho <- sp <- qu.mag <- qu.mag1 <- qu.mag2 <- y1.y2 <- y1.cy2 <- cy1.y2 <- cy1.cy2 <- cy <- cy1 <- gamlss1 <- gamlss2 <- inde <- spgamlss1 <- spgamlss2 <- NULL  
   end <- X3.d2 <- X4.d2 <- X5.d2 <- X6.d2 <- X7.d2 <- l.sp3 <- l.sp4 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
-  gam1 <- gam2 <- gam3 <- gam4 <- gam5 <- gam6 <- gam7 <- NULL
+  gam1 <- gam2 <- gam3 <- gam4 <- gam5 <- gam6 <- gam7 <- y1m <- y2m <- NULL
   ngc <- 2
   sp1 <- sp2 <- NULL
   sp3 <- gp3 <- gam3 <- X3 <- NULL  
@@ -28,18 +43,30 @@ copulaReg <- function(formula, data = list(), weights = NULL, subset = NULL,
   sccn <- c("C90", "C270", "J90", "J270", "G90", "G270")
   m2   <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK")
   m3   <- c("DAGUM","SM")
-  bl   <- c("probit", "logit", "cloglog", "cauchit") 
+  m1d  <- c("PO", "ZTP")
+  m2d  <- c("NBI", "NBII","NBIa", "NBIIa","PIG")
+  m3d  <- c("DEL","SICHEL")
 
-  if(!(BivD %in% opc)) stop("Error in parameter BivD value. It should be one of: N, C0, C90, C180, C270, J0, J90, J180, J270, G0, G90, G180, G270, F, AMH, FGM.")
-  if(!(extra.regI %in% c("t","pC","sED"))) stop("Error in parameter extra.regI value. It should be one of: t, pC or sED.")
+  if( margins[1] %in% c(m2d) && margins[2] %in% c(m1d) ) stop("Please swap the two equations (and hence margins' specification).\nThe second instead of the first margin has to be a two-parameter discrete distribution.")
+  if( margins[1] %in% c(m2,m3) && margins[2] %in% c(m1d,m2d) ) stop("Please swap the two equations (and hence margins' specification).\nThe first instead of the second margin has to be discrete.")
+
+  if(!(BivD %in% opc)) stop("Error in parameter BivD value. It should be one of:\nN, C0, C90, C180, C270, J0, J90, J180, J270, G0, G90, G180, G270, F, AMH, FGM.")
+  if(!(extra.regI %in% c("t","pC","sED"))) stop("Error in parameter extra.regI value. It should be one of:\nt, pC or sED.")
   
-  if(!(margins[1] %in% c(m2,m3)) ) stop("Error in first margin value. It can be: N, GU, rGU, LO, LN, WEI, iG, GA, GAi, DAGUM, SM, BE, FISK.")  
-  if(!(margins[2] %in% c(m2,m3)) ) stop("Error in second margin value. It can be: N, GU, rGU, LO, LN, WEI, iG, GA, GAi, DAGUM, SM, BE, FISK.")  
+  if(!(margins[1] %in% c(m2,m3,m1d,m2d)) )  stop("Error in first margin value. It should be one of:\nN, GU, rGU, LO, LN, WEI, iG, GA, GAi, DAGUM, SM, BE, FISK, NBI, NBII, PIG, PO, ZTP.")  
+  if(!(margins[2] %in% c(m2,m3,m1d,m2d)) ) stop("Error in second margin value. It should be one of:\nN, GU, rGU, LO, LN, WEI, iG, GA, GAi, DAGUM, SM, BE, FISK, NBI, NBII, PIG, PO, ZTP.")  
   
-  if(l.flist > 2 && margins[1] %in% m2 && margins[2] %in% m2){ if(l.flist!=5) stop("You need to specify five equations.") } 
-  if(l.flist > 2 && margins[1] %in% m2 && margins[2] %in% m3){ if(l.flist!=6) stop("You need to specify six equations.") } 
-  if(l.flist > 2 && margins[1] %in% m3 && margins[2] %in% m2){ if(l.flist!=6) stop("You need to specify six equations.") } 
-  if(l.flist > 2 && margins[1] %in% m3 && margins[2] %in% m3){ if(l.flist!=7) stop("You need to specify seven equations.") } 
+  if(l.flist > 2 && margins[1] %in% c(m1d)    && margins[2] %in% c(m1d))   { if(l.flist!=3) stop("You need to specify three equations.") } 
+  if(l.flist > 2 && margins[1] %in% c(m2d)    && margins[2] %in% c(m1d))   { if(l.flist!=4) stop("You need to specify four equations.") } 
+  if(l.flist > 2 && margins[1] %in% c(m1d)    && margins[2] %in% c(m2,m2d)){ if(l.flist!=4) stop("You need to specify four equations.") } 
+  if(l.flist > 2 && margins[1] %in% c(m1d)    && margins[2] %in% c(m3,m3d)){ if(l.flist!=5) stop("You need to specify five equations.") } 
+  if(l.flist > 2 && margins[1] %in% c(m2,m2d) && margins[2] %in% c(m2,m2d)){ if(l.flist!=5) stop("You need to specify five equations.") } 
+  if(l.flist > 2 && margins[1] %in% c(m2,m2d) && margins[2] %in% c(m3,m3d)){ if(l.flist!=6) stop("You need to specify six equations.") } 
+  if(l.flist > 2 && margins[1] %in% c(m3,m3d) && margins[2] %in% c(m2,m2d)){ if(l.flist!=6) stop("You need to specify six equations.") } 
+  if(l.flist > 2 && margins[1] %in% c(m3,m3d) && margins[2] %in% c(m3,m3d)){ if(l.flist!=7) stop("You need to specify seven equations.") } 
+  
+  
+  if(margins[1] %in% c(m1d,m2d) && margins[2] %in% c(m1d,m2d,m2,m3) ) stop("Check the next release for the final tested version of this model\nor get in touch to check progress.")
   
   
  #######################################################################################  
@@ -195,15 +222,44 @@ ig <- interpret.gam(formula)
     if( v1[1] != as.character(formula.eq1r[2]) ) y1.test <- try(data[, as.character(formula.eq1r[2])], silent = TRUE)
     if(class(y1.test) == "try-error") stop("Please check the syntax for the response of the first equation.") 
 
-          
+
+
+    if(margins[1] %in% c(m1d,m2d) && min(y1.test, na.rm = TRUE) < 0) stop("The response of the first margin must be positive.")
+    if(margins[1] %in% c(m1d,m2d)){
+    
+    is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+    if(sum(as.numeric(is.wholenumber(y1.test))) != length(y1.test)) stop("The response of the first margin must be discrete.")     
+    }
+    if(margins[1] %in% c("ZTP") && min(y1.test, na.rm = TRUE) < 1) stop("The response of the first margin must be greater than 0.") 
+    
     if(margins[1] %in% c("LN","WEI","iG","GA","GAi","DAGUM","SM","FISK") && min(y1.test, na.rm = TRUE) <= 0) stop("The response of the first margin must be positive.")
     if(margins[1] %in% c("BE") && (min(y1.test, na.rm = TRUE) <= 0 || max(y1.test, na.rm = TRUE) >= 1) ) stop("The response of the first margin must be in the interval (0,1).")
-        
-    if( margins[1] %in% c("N","LO","GU","rGU","GAi") )           formula.eq1 <- update(formula.eq1, (. + mean(.))/2 ~ . )  
-    if( margins[1] %in% c("LN") )                                formula.eq1 <- update(formula.eq1, (log(.) + mean(log(.)))/2 ~ . )  
-    if( margins[1] %in% c("iG","GA","DAGUM","SM","FISK") )       formula.eq1 <- update(formula.eq1, log((. + mean(.))/2) ~ . )    
-    if( margins[1] %in% c("WEI") )                               formula.eq1 <- update(formula.eq1, log( exp(log(.) + 0.5772/(1.283/sqrt(var(log(.)))))  ) ~ . )     
-    if( margins[1] %in% c("BE") )                                formula.eq1 <- update(formula.eq1, qlogis((. + mean(.))/2) ~ . )    
+     
+     
+    # matrix useful for fitting
+    
+    if(margins[1] %in% c("NBIa","NBIIa","NBI","PO","ZTP")){ # no PIG, NBI, NBII as these are numerical
+     
+    ly1 <- length(y1)
+    y1m <- list()
+    my1 <- max(y1)
+    for(i in 1:ly1){ y1m[[i]] <- seq(0, y1[i]); length(y1m[[i]]) <- my1+1} 
+    y1m <- do.call(rbind, y1m)   
+    
+  
+    if(max(y1) > 170 && margins[1] %in% c("PO","ZTP") ) y1m <- mpfr( y1m, pmax(53, getPrec(y1))) 
+    
+    }
+     
+     
+     
+    if( margins[1] %in% c("N","LO","GU","rGU","GAi") )  formula.eq1 <- update(formula.eq1, (. + mean(.))/2 ~ . ) 
+    if( margins[1] %in% c(m1d, m2d) )              formula.eq1 <- update(formula.eq1, log((. + mean(.))/2) ~ . )  
+
+    if( margins[1] %in% c("LN") )                                     formula.eq1 <- update(formula.eq1, (log(.) + mean(log(.)))/2 ~ . )  
+    if( margins[1] %in% c("iG","GA","DAGUM","SM","FISK") )            formula.eq1 <- update(formula.eq1, log((. + mean(.))/2) ~ . )    
+    if( margins[1] %in% c("WEI") )                                    formula.eq1 <- update(formula.eq1, log( exp(log(.) + 0.5772/(1.283/sqrt(var(log(.)))))  ) ~ . )     
+    if( margins[1] %in% c("BE") )                                     formula.eq1 <- update(formula.eq1, qlogis((. + mean(.))/2) ~ . )    
   
   
     gam1         <- eval(substitute(gam(formula.eq1, gamma=infl.fac, weights=weights, data=data),list(weights=weights)))
@@ -229,14 +285,43 @@ ig <- interpret.gam(formula)
     if( v2[1] != as.character(formula.eq2r[2]) ) y2.test <- try(data[, as.character(formula.eq2r[2])], silent = TRUE)  
     if(class(y2.test) == "try-error") stop("Please check the syntax for the response of the second equation.") 
  
+
+    if(margins[2] %in% c(m1d,m2d) && min(y2.test, na.rm = TRUE) < 0) stop("The response of the second margin must be positive.")
+    if(margins[2] %in% c(m1d,m2d)){
+    
+    is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+    if(sum(as.numeric(is.wholenumber(y2.test))) != length(y2.test)) stop("The response of the second margin must be discrete.")     
+    } 
+    
+    if(margins[2] %in% c("ZTP") && min(y2.test, na.rm = TRUE) < 1) stop("The response of the second margin must be greater than 0.") 
+
+    if(margins[2] %in% c("NBIa","NBIIa","NBI","PO","ZTP")){
+     
+    ly2 <- length(y2)
+    y2m <- list()
+    my2 <- max(y2)
+    for(i in 1:ly2){ y2m[[i]] <- seq(0, y2[i]); length(y2m[[i]]) <- my2+1} 
+    y2m <- do.call(rbind, y2m)  
+    
+    if(max(y2) > 170 && margins[2] %in% c("PO","ZTP") ) y2m <- mpfr( y2m, pmax(53, getPrec(y2))) 
+
+     
+    }
+    
+    
+ 
     if(margins[2] %in% c("LN","WEI","WEI2","iG","GA","GAi","DAGUM","SM","FISK") && min(y2.test, na.rm = TRUE) <= 0) stop("The response of the second margin must be positive.")    
     if(margins[2] %in% c("BE") && (min(y2.test, na.rm = TRUE) <= 0 || max(y2.test, na.rm = TRUE) >= 1) ) stop("The response of the second margin must be in the interval (0,1).")
     
-    if( margins[2] %in% c("N","LO","GU","rGU","GAi") )            formula.eq2 <- update(formula.eq2, (. + mean(.))/2 ~ . )  
-    if( margins[2] %in% c("LN") )                                 formula.eq2 <- update(formula.eq2, (log(.) + mean(log(.)))/2 ~ . )  
-    if( margins[2] %in% c("iG","GA","DAGUM","SM","FISK") )        formula.eq2 <- update(formula.eq2, log((. + mean(.))/2) ~ . )    
-    if( margins[2] %in% c("WEI") )                                formula.eq2 <- update(formula.eq2, log( exp(log(.) + 0.5772/(1.283/sqrt(var(log(.)))))  ) ~ . )     
-    if( margins[2] %in% c("BE") )                                 formula.eq2 <- update(formula.eq2, qlogis((. + mean(.))/2) ~ . )    
+ 
+
+    if( margins[2] %in% c("N","LO","GU","rGU","GAi") ) formula.eq2 <- update(formula.eq2, (. + mean(.))/2 ~ . )  
+    if( margins[2] %in% c(m1d, m2d) )             formula.eq2 <- update(formula.eq2, log((. + mean(.))/2) ~ . )  
+    
+    if( margins[2] %in% c("LN") )                                  formula.eq2 <- update(formula.eq2, (log(.) + mean(log(.)))/2 ~ . )  
+    if( margins[2] %in% c("iG","GA","DAGUM","SM","FISK") )         formula.eq2 <- update(formula.eq2, log((. + mean(.))/2) ~ . )    
+    if( margins[2] %in% c("WEI") )                                 formula.eq2 <- update(formula.eq2, log( exp(log(.) + 0.5772/(1.283/sqrt(var(log(.)))))  ) ~ . )     
+    if( margins[2] %in% c("BE") )                                  formula.eq2 <- update(formula.eq2, qlogis((. + mean(.))/2) ~ . )    
   
  
     gam2         <- eval(substitute(gam(formula.eq2, gamma=infl.fac, weights=weights, data=data),list(weights=weights)))
@@ -291,11 +376,15 @@ names(i.rho) <- "theta.star"
 ############         
 ## first eq.         
 ############
-        
-        par.est <- try( resp.check(y1, margin = margins[1], plots = FALSE, print.par = TRUE), silent = TRUE)
+           
+        if( !(margins[1] %in% c(m1d)) ){###
+           
+        par.est <- try( resp.check(y1, margin = margins[1], plots = FALSE, print.par = TRUE, i.f = TRUE), silent = TRUE)
         
         if(class(par.est)=="try-error") {
         
+ 		if( margins[1] %in% c("NBI","NBIa","PIG") ) log.sig2.1 <- log( max( (var(y1) - mean(y1))/mean(y1)^2, 0.1) )
+ 		if( margins[1] %in% c("NBII","NBIIa") )      log.sig2.1 <- log( max( (var(y1)/mean(y1)) - 1, 0.1) ) 		
  		if( margins[1] %in% c("N","LN") )    log.sig2.1 <- log(var(y1))  
 		if( margins[1] %in% c("LO") )        log.sig2.1 <- log( 3*var(y1)/pi^2 )   
 		if( margins[1] %in% c("iG") )        log.sig2.1 <- log( var(y1)/mean(y1)^3 )      
@@ -305,29 +394,37 @@ names(i.rho) <- "theta.star"
         	if( margins[1] %in% c("DAGUM","SM","FISK") ) log.sig2.1 <- log(sqrt(2))  # log(0.01) #  log(sqrt(2))       # 0.1  
         	if( margins[1] %in% c("BE"))                 log.sig2.1 <- qlogis( var(y1)/( mean(y1)*(1-mean(y1)) )  )        
         	
-        
                                         } else log.sig2.1 <- par.est[2]
         
         names(log.sig2.1) <- "sigma2.1.star"
         
-        if( margins[1] %in% m3 ){
+        if( margins[1] %in% c(m3) ){
         
               if( margins[1] %in% c("DAGUM","SM") ){
         	if(class(par.est)=="try-error") log.nu.1 <- log(1) else log.nu.1 <- par.est[3]
                                          }
+                                                                                    
               
         	names(log.nu.1) <- "nu.1.star"
         }
         
+        
+        
+        } ####
+        
 
 #############         
 ## second eq.         
-#############            
+#############  
+
+        if( !(margins[2] %in% c(m1d)) ){###
    
-        par.est <- try( resp.check(y2, margin = margins[2], plots = FALSE, print.par = TRUE), silent = TRUE)
+        par.est <- try( resp.check(y2, margin = margins[2], plots = FALSE, print.par = TRUE, i.f = TRUE), silent = TRUE)
         
         if(class(par.est)=="try-error") {
-        
+
+ 		if( margins[2] %in% c("NBI","NBIa","PIG") ) log.sig2.2 <- log( max( (var(y2) - mean(y2))/mean(y2)^2, 0.1) )
+ 		if( margins[2] %in% c("NBII","NBIIa") )      log.sig2.2 <- log( max( (var(y2)/mean(y2)) - 1, 0.1) )         
  		if( margins[2] %in% c("N","LN") )    log.sig2.2 <- log(var(y2))  
 		if( margins[2] %in% c("LO") )        log.sig2.2 <- log( 3*var(y2)/pi^2 )   
 		if( margins[2] %in% c("iG") )        log.sig2.2 <- log( var(y2)/mean(y2)^3 )      
@@ -347,17 +444,48 @@ names(i.rho) <- "theta.star"
               if( margins[2] %in% c("DAGUM","SM") ){
         	if(class(par.est)=="try-error") log.nu.2 <- log(1) else log.nu.2 <- par.est[3]
                                          }
+                                         
 
         	names(log.nu.2) <- "nu.2.star"
         }
         
+        
+         } ####
+        
 
 #############         
 ## start val.         
-#############  
+############# 
+
+       		if(margins[1] %in% c(m1d) && margins[2] %in% c(m1d)){
+       
+       			             start.v <- c(coef(gam1), coef(gam2),             i.rho) 
+       		                    start.v1 <- c(coef(gam1)                               ) 
+                                    start.v2 <- c(            coef(gam2)                   ) 
+                           
+       		} 
+       		
+
+       		if(margins[1] %in% c(m1d) && margins[2] %in% c(m2,m2d)){
+       
+       			             start.v <- c(coef(gam1), coef(gam2), log.sig2.2, i.rho) 
+       		                    start.v1 <- c(coef(gam1)                               ) 
+                                    start.v2 <- c(            coef(gam2), log.sig2.2       ) 
+                           
+       		} 
+       		
+       		if(margins[1] %in% c(m1d) && margins[2] %in% c(m3,m3d)){
+       
+       		                     start.v <- c(coef(gam1), coef(gam2), log.sig2.2, log.nu.2, i.rho) 
+       		                    start.v1 <- c(coef(gam1)                                         ) 
+       		                    start.v2 <- c(            coef(gam2), log.sig2.2, log.nu.2       ) 
+                           
+       					}         		
+
+
 
        
-       		if(margins[1] %in% m2 && margins[2] %in% m2){
+       		if(margins[1] %in% c(m2,m2d) && margins[2] %in% c(m2,m2d)){
        
        			             start.v <- c(coef(gam1), coef(gam2), log.sig2.1, log.sig2.2, i.rho) 
        		                    start.v1 <- c(coef(gam1),             log.sig2.1                   ) 
@@ -366,7 +494,7 @@ names(i.rho) <- "theta.star"
        		} 
        		                      
        		                     
-       		if(margins[1] %in% m3 && margins[2] %in% m3){
+       		if(margins[1] %in% c(m3,m3d) && margins[2] %in% c(m3,m3d)){
        
        		                       start.v <- c(coef(gam1), coef(gam2), log.sig2.1, log.sig2.2, log.nu.1, log.nu.2, i.rho) 
        		                      start.v1 <- c(coef(gam1),             log.sig2.1,             log.nu.1                 ) 
@@ -375,7 +503,7 @@ names(i.rho) <- "theta.star"
        					}
        					
        					
-       		if(margins[1] %in% m2 && margins[2] %in% m3){
+       		if(margins[1] %in% c(m2,m2d) && margins[2] %in% c(m3,m3d)){
        
        		                     start.v <- c(coef(gam1), coef(gam2), log.sig2.1, log.sig2.2, log.nu.2, i.rho) 
        		                    start.v1 <- c(coef(gam1),             log.sig2.1                             ) 
@@ -384,7 +512,7 @@ names(i.rho) <- "theta.star"
        					}  
        					
        					
-       		if(margins[1] %in% m3 && margins[2] %in% m2){
+       		if(margins[1] %in% c(m3,m3d) && margins[2] %in% c(m2,m2d)){
        
        		                     start.v <- c(coef(gam1), coef(gam2), log.sig2.1, log.sig2.2, log.nu.1, i.rho) 
        		                    start.v1 <- c(coef(gam1),             log.sig2.1,             log.nu.1       ) 
@@ -396,11 +524,182 @@ names(i.rho) <- "theta.star"
 ##############################################################  
 ##############################################################  
   
-#if(l.flist > 2) seqq <- seq(-0.005, 0.005, length.out = n) 
+    if(l.flist > 2 && margins[1] %in% c(m1d) && margins[2] %in% c(m1d)){
+    
+    formula.eq3 <- formula[[3]] 
+    
+    nad3   <- "theta"     
+    
+    formula.eq3 <- as.formula( paste(  nad3,"~",formula.eq4[2],sep="") )   
+    
+    set.seed(1)
+    theta    <- rnorm(n, i.rho, 0.001)      
+    rm(list=".Random.seed", envir=globalenv()) 
+    
+    gam3 <- gam(formula.eq3, data = data, gamma = ngc) 
+    l.sp3 <- length(gam3$sp)   
+    
+    if(l.sp3 != 0){
+    ngc <- 2
+    while( any(round(summary(gam3)$edf, 1) > 1) ) {gam3 <- gam(formula.eq3, data = data, gamma = ngc + 1); ngc <- ngc + 1; if(ngc > 5) break}  
+                   } 
+                             
+    X3 <- model.matrix(gam3)
+    X3.d2 <- dim(X3)[2]
+ 
+    if(l.sp3 != 0) sp3 <- gam3$sp 
+    environment(gam3$formula) <- environment(gam2$formula)
+    gp3 <- gam3$nsdf 
+       
+          
+    start.v  <- c(coef(gam1), coef(gam2), coef(gam3) )
+    start.v1 <- c(coef(gam1)                         )  
+    start.v2 <- c(            coef(gam2)             )     
+    
+  }   
+  
   
   
 
-    if(l.flist > 2 && margins[1] %in% m2 && margins[2] %in% m2){
+  
+  
+    if(l.flist > 2 && margins[1] %in% c(m1d) && margins[2] %in% c(m2,m2d)){
+    
+    formula.eq3 <- formula[[3]] 
+    formula.eq4 <- formula[[4]]  
+    
+    nad2.2 <- "sigma2.2" 
+    nad3   <- "theta"     
+    
+    formula.eq3 <- as.formula( paste(nad2.2,"~",formula.eq3[2],sep="") ) 
+    formula.eq4 <- as.formula( paste(  nad3,"~",formula.eq4[2],sep="") )   
+    
+    set.seed(1)
+    sigma2.2 <- rnorm(n, log.sig2.2, 0.001) 
+    theta    <- rnorm(n, i.rho, 0.001)      
+    rm(list=".Random.seed", envir=globalenv()) 
+    
+    gam3 <- gam(formula.eq3, data = data, gamma = ngc) 
+    gam4 <- gam(formula.eq4, data = data, gamma = ngc)   
+    l.sp3 <- length(gam3$sp)   
+    l.sp4 <- length(gam4$sp)    
+    
+    
+    if(l.sp3 != 0){
+    ngc <- 2
+    while( any(round(summary(gam3)$edf, 1) > 1) ) {gam3 <- gam(formula.eq3, data = data, gamma = ngc + 1); ngc <- ngc + 1; if(ngc > 5) break}  
+                   } 
+                   
+    if(l.sp4 != 0){
+    ngc <- 2
+    while( any(round(summary(gam4)$edf, 1) > 1) ) {gam4 <- gam(formula.eq4, data = data, gamma = ngc + 1); ngc <- ngc + 1; if(ngc > 5) break}  
+                   }                    
+
+                  
+    X3 <- model.matrix(gam3)
+    X3.d2 <- dim(X3)[2]
+    X4 <- model.matrix(gam4)
+    X4.d2 <- dim(X4)[2]  
+    
+    if(l.sp3 != 0) sp3 <- gam3$sp 
+    environment(gam3$formula) <- environment(gam2$formula)
+    gp3 <- gam3$nsdf 
+    
+    if(l.sp4 != 0) sp4 <- gam4$sp 
+    environment(gam4$formula) <- environment(gam2$formula)
+    gp4 <- gam4$nsdf     
+          
+    start.v  <- c(coef(gam1), coef(gam2), coef(gam3), coef(gam4) )
+    start.v1 <- c(coef(gam1)                                     )  
+    start.v2 <- c(            coef(gam2), coef(gam3)             )     
+    
+  }  
+  
+  
+  
+  
+  
+  
+  
+   if(l.flist > 2 && margins[1] %in% c(m1d) && margins[2] %in% c(m3,m3d)){
+      
+      formula.eq3 <- formula[[3]] 
+      formula.eq4 <- formula[[4]] 
+      formula.eq5 <- formula[[5]]   
+      nad2.2 <- "sigma2.2" 
+      nad.2 <- "nu.2"     
+      nad3 <- "theta"     
+      
+      formula.eq3 <- as.formula( paste(nad2.2,"~",formula.eq3[2],sep="") ) 
+      formula.eq4 <- as.formula( paste(nad.2,"~", formula.eq4[2],sep="") )     
+      formula.eq5 <- as.formula( paste(  nad3,"~",formula.eq5[2],sep="") ) 
+      
+      set.seed(1)
+      sigma2.2 <- rnorm(n, log.sig2.2, 0.001) 
+      nu.2     <- rnorm(n, log.nu.2, 0.001)       
+      theta    <- rnorm(n, i.rho, 0.001)         
+      rm(list=".Random.seed", envir=globalenv()) 
+      
+      gam3 <- gam(formula.eq3, data = data, gamma = ngc) 
+      gam4 <- gam(formula.eq4, data = data, gamma = ngc)   
+      gam5 <- gam(formula.eq5, data = data, gamma = ngc)     
+      l.sp3 <- length(gam3$sp)    
+      l.sp4 <- length(gam4$sp)    
+      l.sp5 <- length(gam5$sp)    
+      
+      if(l.sp3 != 0){
+      ngc <- 2
+      while( any(round(summary(gam3)$edf, 1) > 1) ) {gam3 <- gam(formula.eq3, data = data, gamma = ngc + 1); ngc <- ngc + 1; if(ngc > 5) break}  
+                     } 
+                     
+      if(l.sp4 != 0){
+      ngc <- 2
+      while( any(round(summary(gam4)$edf, 1) > 1) ) {gam4 <- gam(formula.eq4, data = data, gamma = ngc + 1); ngc <- ngc + 1; if(ngc > 5) break}  
+                     }                    
+  
+      if(l.sp5 != 0){
+      ngc <- 2
+      while( any(round(summary(gam5)$edf, 1) > 1) ) {gam5 <- gam(formula.eq5, data = data, gamma = ngc + 1); ngc <- ngc + 1; if(ngc > 5) break}  
+                     }                    
+   
+ 
+  
+       
+      X3 <- model.matrix(gam3)
+      X3.d2 <- dim(X3)[2]
+      X4 <- model.matrix(gam4)
+      X4.d2 <- dim(X4)[2]  
+      X5 <- model.matrix(gam5)
+      X5.d2 <- dim(X5)[2]  
+    
+  
+  
+      if(l.sp3 != 0) sp3 <- gam3$sp 
+      environment(gam3$formula) <- environment(gam2$formula)
+      gp3 <- gam3$nsdf 
+      
+  
+      if(l.sp4 != 0) sp4 <- gam4$sp 
+      environment(gam4$formula) <- environment(gam2$formula)
+      gp4 <- gam4$nsdf     
+      
+  
+      if(l.sp5 != 0) sp5 <- gam5$sp 
+      environment(gam5$formula) <- environment(gam2$formula)
+      gp5 <- gam5$nsdf    
+      
+  
+           
+      start.v  <- c(coef(gam1), coef(gam2), coef(gam3), coef(gam4), coef(gam5) )
+      start.v1 <- c(coef(gam1)                                                 )  
+      start.v2 <- c(            coef(gam2), coef(gam3), coef(gam4)             )     
+      
+    }    
+    
+    
+
+
+    if(l.flist > 2 && margins[1] %in% c(m2,m2d) && margins[2] %in% c(m2,m2d)){
     
     formula.eq3 <- formula[[3]] 
     formula.eq4 <- formula[[4]] 
@@ -472,7 +771,7 @@ names(i.rho) <- "theta.star"
   }   
   
   
-    if(l.flist > 2 && margins[1] %in% m3 && margins[2] %in% m3){
+    if(l.flist > 2 && margins[1] %in% c(m3,m3d) && margins[2] %in% c(m3,m3d)){
     
     formula.eq3 <- formula[[3]] 
     formula.eq4 <- formula[[4]] 
@@ -588,7 +887,7 @@ names(i.rho) <- "theta.star"
   }    
   
   
-    if(l.flist > 2 && margins[1] %in% m2 && margins[2] %in% m3){
+    if(l.flist > 2 && margins[1] %in% c(m2,m2d) && margins[2] %in% c(m3,m3d)){
     
     formula.eq3 <- formula[[3]] 
     formula.eq4 <- formula[[4]] 
@@ -678,7 +977,7 @@ names(i.rho) <- "theta.star"
     
   
 
-    if(l.flist > 2 && margins[1] %in% m3 && margins[2] %in% m2){
+    if(l.flist > 2 && margins[1] %in% c(m3,m3d) && margins[2] %in% c(m2,m2d)){
     
     formula.eq3 <- formula[[3]] 
     formula.eq4 <- formula[[4]] 
@@ -730,10 +1029,7 @@ names(i.rho) <- "theta.star"
     ngc <- 2
     while( any(round(summary(gam6)$edf, 1) > 1) ) {gam6 <- gam(formula.eq6, data = data, gamma = ngc + 1); ngc <- ngc + 1; if(ngc > 5) break}  
                    }   
-
-     
-        
-         
+  
     X3 <- model.matrix(gam3)
     X3.d2 <- dim(X3)[2]
     X4 <- model.matrix(gam4)
@@ -798,7 +1094,68 @@ l.gam7 <- length(coef(gam7))
 if(gamlssfit == TRUE){
 
 
-  if( margins[1] %in% m2 && margins[2] %in% m2){   
+
+  if( margins[1] %in% c(m1d) && margins[2] %in% c(m1d)){   
+ 
+             if(l.sp1!=0) {
+               	spgamlss1 <- c(sp1)
+               	qu.mag1 <- S.m(gam1, gam2, gam3, gam4, gam5, gam6, gam7, 
+               	               l.sp1, 0, 0, 0, 0, 0, 0, 
+               	               l.gam1, 0, 0, 0, 0, 0, 0)  
+                                      }   
+             
+             if(l.sp2!=0 ) {
+               	spgamlss2 <- c(sp2)
+               	qu.mag2 <- S.m(gam1, gam2, gam3, gam4, gam5, gam6, gam7, 
+               	               0, l.sp2, 0, 0, 0, 0, 0,
+               	               0, l.gam2, 0, 0, 0, 0, 0)    
+                                      }     
+                                      
+          }
+
+
+  if( margins[1] %in% c(m1d) && margins[2] %in% c(m2,m2d)){   
+ 
+             if(l.sp1!=0) {
+               	spgamlss1 <- c(sp1)
+               	qu.mag1 <- S.m(gam1, gam2, gam3, gam4, gam5, gam6, gam7, 
+               	               l.sp1, 0, 0, 0, 0, 0, 0, 
+               	               l.gam1, 0, 0, 0, 0, 0, 0)  
+                                      }   
+             
+             if(l.sp2!=0 || l.sp3!=0) {
+               	spgamlss2 <- c(sp2, sp3)
+               	qu.mag2 <- S.m(gam1, gam2, gam3, gam4, gam5, gam6, gam7, 
+               	               0, l.sp2, l.sp3, 0, 0, 0, 0,
+               	               0, l.gam2, l.gam3, 0, 0, 0, 0)    
+                                      }     
+                                      
+                                               }
+                                               
+                                               
+                                               
+                                               
+  if( margins[1] %in% c(m1d) && margins[2] %in% c(m3,m3d)){   
+ 
+             if(l.sp1!=0) {
+               	spgamlss1 <- c(sp1)
+               	qu.mag1 <- S.m(gam1, gam2, gam3, gam4, gam5, gam6, gam7, 
+               	               l.sp1, 0, 0, 0, 0, 0, 0,
+               	               l.gam1, 0, 0, 0, 0, 0, 0)  
+                                      }   
+             
+             if(l.sp2!=0 || l.sp3!=0 || l.sp4!=0) {
+               	spgamlss2 <- c(sp2, sp3, sp4)
+               	qu.mag2 <- S.m(gam1, gam2, gam3, gam4, gam5, gam6, gam7, 
+               	               0, l.sp2, l.sp3, l.sp4, 0, 0, 0,
+               	               0, l.gam2, l.gam3, l.gam4, 0, 0, 0)    
+                                      }     
+                                      
+                                               }                                                 
+                                               
+                                               
+
+  if( margins[1] %in% c(m2,m2d) && margins[2] %in% c(m2,m2d)){   
  
              if(l.sp1!=0 || l.sp3!=0) {
                	spgamlss1 <- c(sp1, sp3)
@@ -817,7 +1174,7 @@ if(gamlssfit == TRUE){
                                                }
 
 
-  if( margins[1] %in% m3 && margins[2] %in% m3){   
+  if( margins[1] %in% c(m3,m3d) && margins[2] %in% c(m3,m3d)){   
  
              if(l.sp1!=0 || l.sp3!=0 || l.sp5!=0) {
                	spgamlss1 <- c(sp1, sp3, sp5)
@@ -835,7 +1192,7 @@ if(gamlssfit == TRUE){
                                       
                                                }
                                                
-  if( margins[1] %in% m2 && margins[2] %in% m3){   
+  if( margins[1] %in% c(m2,m2d) && margins[2] %in% c(m3,m3d)){   
  
              if(l.sp1!=0 || l.sp3!=0) {
                	spgamlss1 <- c(sp1, sp3)
@@ -853,7 +1210,7 @@ if(gamlssfit == TRUE){
                                       
                                                }                                               
 
-  if( margins[1] %in% m3 && margins[2] %in% m2){   
+  if( margins[1] %in% c(m3,m3d) && margins[2] %in% c(m2,m2d)){   
  
              if(l.sp1!=0 || l.sp3!=0 || l.sp5!=0) {
                	spgamlss1 <- c(sp1, sp3, sp5)
@@ -931,7 +1288,8 @@ if(missing(parscale)) parscale <- 1
              BivD = BivD, nCa = nCa,
              nC = nC, gc.l = gc.l, n = n, extra.regI = extra.regI,
              parscale = parscale, margins = margins,
-             Cont = "YES", ccss = "no", m2 = m2, m3 = m3, bl = bl, triv = FALSE) # original n only needed in SemiParBIVProbit.fit
+             Cont = "YES", ccss = "no", m2 = m2, m3 = m3, m1d = m1d, m2d = m2d, m3d = m3d, bl = bl, triv = FALSE,
+             y1m = y1m, y2m = y2m) # original n only needed in SemiParBIVProbit.fit
              
   if(gc.l == TRUE) gc()           
              
@@ -939,10 +1297,23 @@ if(missing(parscale)) parscale <- 1
   # model fitting
   ##########################################################################################################################
 
+  if(margins[1] %in% m1d && margins[2] %in% m2){func.opt  <- bdiscrcont12; func.opt1 <- func.opt2 <- bprobgHsContUniv }
+  if(margins[1] %in% m1d && margins[2] %in% m3){func.opt  <- bdiscrcont13; func.opt1 <- bprobgHsContUniv;  func.opt2 <- bprobgHsContUniv3 }
+
+
+  if(margins[1] %in% m2d && margins[2] %in% m2){func.opt  <- bdiscrcont;   func.opt1 <- func.opt2 <- bprobgHsContUniv }
+  if(margins[1] %in% m2d && margins[2] %in% m3){func.opt  <- bdiscrcont23; func.opt1 <- bprobgHsContUniv;  func.opt2 <- bprobgHsContUniv3 }
+  
+  if(margins[1] %in% m1d && margins[2] %in% m1d){func.opt  <- bdiscrdiscr11;   func.opt1 <- func.opt2 <- bprobgHsContUniv }  
+  if(margins[1] %in% m1d && margins[2] %in% m2d){func.opt  <- bdiscrdiscr12;   func.opt1 <- func.opt2 <- bprobgHsContUniv }
+  if(margins[1] %in% m2d && margins[2] %in% m2d){func.opt  <- bdiscrdiscr;   func.opt1 <- func.opt2 <- bprobgHsContUniv }
+  
+  
   if(margins[1] %in% m2 && margins[2] %in% m2) {func.opt  <- bcont  ; func.opt1 <- func.opt2 <- bprobgHsContUniv }  
   if(margins[1] %in% m3 && margins[2] %in% m3) {func.opt  <- bcont3 ; func.opt1 <- func.opt2 <- bprobgHsContUniv3 } 
   if(margins[1] %in% m2 && margins[2] %in% m3) {func.opt  <- bcont23; func.opt1 <- bprobgHsContUniv;  func.opt2 <- bprobgHsContUniv3 }
   if(margins[1] %in% m3 && margins[2] %in% m2) {func.opt  <- bcont32; func.opt1 <- bprobgHsContUniv3; func.opt2 <- bprobgHsContUniv  } 
+  
   
   ##########################################################################################################################
   ##########################################################################################################################
@@ -988,9 +1359,95 @@ if(gamlssfit == TRUE){
   #########################   
   # updated starting values 
   #########################
+
+  if(margins[1] %in% m1d && margins[2] %in% c(m1d)){
+  
+  b1 <- gamlss1$fit$argument[1:X1.d2]
+  b2 <- gamlss2$fit$argument[1:X2.d2]
+ 
+  start.v  <- c(b1, b2, i.rho) 
+  
+  if( l.sp1 != 0 ) sp1 <- gamlss1$sp
+  if( l.sp2 != 0 ) sp2 <- gamlss2$sp
+  
+  } 
   
   
-  if(margins[1] %in% m2 && margins[2] %in% m2 && l.flist == 2){
+  if(margins[1] %in% m1d && margins[2] %in% c(m2,m2d) && l.flist == 2){
+  
+  b1 <- gamlss1$fit$argument[1:X1.d2]
+  b2 <- gamlss2$fit$argument[1:X2.d2]
+  s2 <- gamlss2$fit$argument[X2.d2+1]  
+ 
+  start.v  <- c(b1, b2, s2, i.rho) 
+  
+  if( l.sp1 != 0 ) sp1 <- gamlss1$sp
+  if( l.sp2 != 0 ) sp2 <- gamlss2$sp
+  
+  } 
+  
+  if(margins[1] %in% m1d && margins[2] %in% c(m2,m2d) && l.flist > 2){
+  
+  b1 <- gamlss1$fit$argument[1:X1.d2]
+  b2 <- gamlss2$fit$argument[1:X2.d2]
+  s2 <- gamlss2$fit$argument[(X2.d2+1):(X2.d2+X3.d2)]  
+ 
+  start.v  <- c(b1, b2, s2, coef(gam4)) 
+  
+  if( l.sp1 != 0 ) sp1 <- gamlss1$sp[1:l.sp1]
+  
+  if( l.sp2 != 0 ) sp2 <- gamlss2$sp[1:l.sp2]
+  if( l.sp3 != 0 ) sp3 <- gamlss2$sp[(l.sp2 + 1):(l.sp2 + l.sp3)]  
+
+  }  
+  
+  #
+  # 
+  
+  
+  
+  
+  if(margins[1] %in% c(m1d) && margins[2] %in% m3 && l.flist == 2){
+    
+    b1 <- gamlss1$fit$argument[1:X1.d2]
+    b2 <- gamlss2$fit$argument[1:X2.d2]
+    s2 <- gamlss2$fit$argument[X2.d2+1] 
+    n2 <- gamlss2$fit$argument[X2.d2+2]    
+   
+    start.v  <- c(b1, b2, s2, n2, i.rho) 
+    
+    if( l.sp1 != 0 ) sp1 <- gamlss1$sp
+    if( l.sp2 != 0 ) sp2 <- gamlss2$sp
+    
+    }  
+    
+    if(margins[1] %in% c(m1d) && margins[2] %in% m3 && l.flist > 2){
+    
+    b1 <- gamlss1$fit$argument[1:X1.d2]
+    b2 <- gamlss2$fit$argument[1:X2.d2]
+    s2 <- gamlss2$fit$argument[(X2.d2+1):(X2.d2+X3.d2)]
+    n2 <- gamlss2$fit$argument[(X2.d2+X3.d2+1):(X2.d2+X3.d2+X4.d2)]  
+   
+    start.v  <- c(b1, b2, s2, n2, coef(gam5)) 
+    
+    
+    if( l.sp1 != 0 ) sp1 <- gamlss1$sp[1:l.sp1]
+      
+    if( l.sp2 != 0 ) sp2 <- gamlss2$sp[1:l.sp2]
+    if( l.sp3 != 0 ) sp3 <- gamlss2$sp[(l.sp2 + 1):(l.sp2 + l.sp3)]  
+    if( l.sp4 != 0 ) sp4 <- gamlss2$sp[(l.sp2 + l.sp3 + 1):(l.sp2 + l.sp3 + l.sp4)]  
+    
+    }     
+    
+  #
+  #  
+  
+  
+  
+  
+
+  
+  if(margins[1] %in% c(m2,m2d) && margins[2] %in% c(m2,m2d) && l.flist == 2){
   
   b1 <- gamlss1$fit$argument[1:X1.d2]
   s1 <- gamlss1$fit$argument[X1.d2+1]
@@ -1004,7 +1461,7 @@ if(gamlssfit == TRUE){
   
   }
   
-  if(margins[1] %in% m2 && margins[2] %in% m2 && l.flist > 2){
+  if(margins[1] %in% c(m2,m2d) && margins[2] %in% c(m2,m2d) && l.flist > 2){
   
   b1 <- gamlss1$fit$argument[1:X1.d2]
   s1 <- gamlss1$fit$argument[(X1.d2+1):(X1.d2+X3.d2)]
@@ -1065,7 +1522,7 @@ if(gamlssfit == TRUE){
   #
   #
   
-  if(margins[1] %in% m2 && margins[2] %in% m3 && l.flist == 2){
+  if(margins[1] %in% c(m2,m2d) && margins[2] %in% m3 && l.flist == 2){
   
   b1 <- gamlss1$fit$argument[1:X1.d2]
   s1 <- gamlss1$fit$argument[X1.d2+1]
@@ -1080,7 +1537,7 @@ if(gamlssfit == TRUE){
   
   }  
   
-  if(margins[1] %in% m2 && margins[2] %in% m3 && l.flist > 2){
+  if(margins[1] %in% c(m2,m2d) && margins[2] %in% m3 && l.flist > 2){
   
   b1 <- gamlss1$fit$argument[1:X1.d2]
   s1 <- gamlss1$fit$argument[(X1.d2+1):(X1.d2+X3.d2)] 
@@ -1103,7 +1560,7 @@ if(gamlssfit == TRUE){
   #
   #  
   
-  if(margins[1] %in% m3 && margins[2] %in% m2 && l.flist == 2){
+  if(margins[1] %in% m3 && margins[2] %in% c(m2,m2d) && l.flist == 2){
     
     b1 <- gamlss1$fit$argument[1:X1.d2]
     s1 <- gamlss1$fit$argument[X1.d2+1]
@@ -1118,7 +1575,7 @@ if(gamlssfit == TRUE){
     
     }  
     
-  if(margins[1] %in% m3 && margins[2] %in% m2 && l.flist > 2){
+  if(margins[1] %in% m3 && margins[2] %in% c(m2,m2d) && l.flist > 2){
     
     b1 <- gamlss1$fit$argument[1:X1.d2]
     s1 <- gamlss1$fit$argument[(X1.d2+1):(X1.d2+X3.d2)]
@@ -1187,9 +1644,9 @@ me3 <- "Read the WARNINGS section in ?copulaReg."
 #if(gradi > 0.1) warning(me1, call. = FALSE)
 #if(e.v <= 0)    warning(me2, call. = FALSE)
 
-if(gradi > 0.1 && e.v <= 0){ warning(me1, call. = FALSE); warning(paste(me2,"\n",me3), call. = FALSE)} 
-if(gradi > 0.1 && e.v > 0)   warning(paste(me1,"\n",me3), call. = FALSE)
-if(gradi < 0.1 && e.v <= 0)  warning(paste(me2,"\n",me3), call. = FALSE)
+if(gradi > 10 && e.v <= 0){ warning(me1, call. = FALSE); warning(paste(me2,"\n",me3), call. = FALSE)} 
+if(gradi > 10 && e.v > 0)   warning(paste(me1,"\n",me3), call. = FALSE)
+if(gradi < 10 && e.v <= 0)  warning(paste(me2,"\n",me3), call. = FALSE)
 
 
   ##########################################################################################################################
@@ -1240,7 +1697,12 @@ L <- list(fit = SemiParFit$fit, dataset = NULL, n = n, gamlss1 = gamlss1, gamlss
 
 class(L) <- c("copulaReg","SemiParBIVProbit")
 
+#L
+
+}
+
 L
+
 
 }
 

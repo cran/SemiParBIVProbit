@@ -1,13 +1,13 @@
 \name{copgHs}
 \alias{copgHs}
+\alias{copgHs2}
+\alias{copgHsAT}
+\alias{copgHsCont}
 
 \title{Internal Function}
 
-\description{This function evaluates the first and second derivatives with respect to the margins and association 
-parameter of the bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton, rotated Clayton (270 degrees), Joe, 
-rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees), Gumbel, rotated Gumbel (90 degrees), survival Gumbel, 
-rotated Gumbel (270 degrees), and Frank.
-
+\description{This and other similar internal functions evaluate the first and second derivatives with respect to the margins and association 
+parameter of several copulae.
 
 }
 

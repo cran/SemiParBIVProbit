@@ -1,9 +1,10 @@
 \name{BCDF}
 \alias{BCDF}
+\alias{BiCDF}
 
 \title{Internal Function}
 
-\description{It evaluates the cdf of several copula functions.}
+\description{It evaluates the cdf of several copulae.}
 
 
 \author{

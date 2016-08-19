@@ -45,7 +45,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 \code{\link{prev}}
 }
 
-\keyword{semiparametric bivariate modelling} 
+\keyword{flexible copula regression modelling} 
 
 
 

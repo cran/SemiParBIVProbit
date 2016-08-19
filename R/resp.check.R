@@ -1,17 +1,35 @@
 resp.check <- function(y, margin = "N", 
                            main = "Histogram and Density of Response",
-                           xlab = "Response", print.par = FALSE, plots = TRUE, loglik = FALSE, ...){
+                           xlab = "Response", print.par = FALSE, plots = TRUE, loglik = FALSE, 
+                           os = FALSE, test = FALSE, i.f = FALSE, ...){
 
 m2 <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK")
 m3 <- c("DAGUM","SM")
 nu <- NULL
+m1d  <- c("PO","ZTP")
+m2d  <- c("NBI", "NBII","NBIa", "NBIIa","PIG")
+m3d  <- c("DEL","SICHEL")
 
-if(!(margin %in% c(m2,m3)) ) stop("Error in margin value. It can be: N, GU, rGU, LO, LN, WEI, iG, GA, GAi, DAGUM, SM, BE, FISK.") 
+y2m <- NA
+y <- na.omit(y)
+
+if(!(margin %in% c(m2,m3,m1d,m2d)) ) stop("Error in margin value. It should be one of:\nN, GU, rGU, LO, LN, WEI, iG, GA, GAi, DAGUM, SM, BE, FISK, NBI, NBII, PIG, PO, ZTP.") 
 
 if(margin %in% c("LN","WEI","iG","GA","GAi","DAGUM","SM","FISK") && min(y, na.rm = TRUE) <= 0) stop("The response must be positive.")
 if(margin %in% c("BE") && (min(y, na.rm = TRUE) <= 0 || max(y, na.rm = TRUE) >= 1) ) stop("The response must be in the interval (0,1).")
+   
+    if(margin %in% c(m1d,m2d,m3d) && min(y, na.rm = TRUE) < 0) stop("The response must be positive.")
+    if(margin %in% c(m1d,m2d,m3d)){
+    
+    is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+    if(sum(as.numeric(is.wholenumber(y))) != length(y)) stop("The response must be discrete.")     
+    }
+    if(margin %in% c("ZTP") && min(y, na.rm = TRUE) < 1) stop("The response must be greater than 0.") 
+    
 
-y <- na.omit(y)
+
+
+
 
 if(margin == "LN") y <- log(y)
 
@@ -25,12 +43,20 @@ VC <- list(X1 = matrix(1, nrow = length(y), ncol = 1), X1.d2 = 1,
            X6 = matrix(1, nrow = length(y), ncol = 1), X6.d2 = 1,
            X7 = matrix(1, nrow = length(y), ncol = 1), X7.d2 = 1,
            l.sp1 = 0, l.sp2 = 0, l.sp3 = 0, l.sp4 = 0, l.sp5 = 0, l.sp6 = 0, l.sp7 = 0, 
-           weights = 1, 
+           weights = 1, m2 = m2, m3 = m3, m1d = m1d, m2d = m2d, m3d = m3d, 
            margins = margins, fp = TRUE,
            extra.regI = "t", Cont = "NO", ccss = "no", triv = FALSE)
 
+ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0)
+
 respvec <- list(y2 = y, univ = 0)
            
+if( margin %in% c("PO","ZTP") )   st.v <- c( log( mean((y + mean(y))/2) ) )           
+if( margin %in% c("NBI","NBIa","PIG") )  st.v <- c( log(mean((y + mean(y))/2)), log( max( (var(y) - mean(y))/mean(y)^2, 0.1) ) )
+if( margin %in% c("NBII","NBIIa") )       st.v <- c( log(mean((y + mean(y))/2)), log( max( (var(y)/mean(y)) - 1, 0.1) ) )    
+if( margin %in% c("DEL") )        st.v <- c( log(mean((y + mean(y))/2)), log( max( (var(y) - mean(y))/mean(y)^2, 0.1) ), qlogis(0.5) )  
+if( margin %in% c("SICHEL") )     st.v <- c( log(mean((y + mean(y))/2)), log( max( (var(y) - mean(y))/mean(y)^2, 0.1) ), -0.5 )    
+
 if( margin %in% c("N","LN") )     st.v <- c( mean((y + mean(y))/2) ,           log( var(y) ) )  
 if( margin %in% c("LO") )         st.v <- c( mean((y + mean(y))/2) ,           log(  3*var(y)/pi^2 ) )  
 if( margin %in% c("iG") )         st.v <- c( log( mean((y + mean(y))/2) ) , log( var(y)/mean(y)^3)  )    
@@ -44,33 +70,63 @@ if( margin %in% c("FISK") )       st.v <- c( log(mean((y + mean(y))/2)), log(sqr
 if( margin %in% c("BE") )         st.v <- c( qlogis(mean((y + mean(y))/2)), qlogis( var(y)/( mean(y)*(1-mean(y)) )  )  )              
 
 
-
-if( margin %in% m2 ) names(st.v) <- c("mu.star", "sigma2.star")
-if( margin %in% m3 ) names(st.v) <- c("mu.star", "sigma2.star", "nu.star")
-
-#if( margin %in% m2 ) names(st.v) <- c("mu", "sigma")
-#if( margin %in% m3 ) names(st.v) <- c("mu", "sigma", "nu")
+if( margin %in% c(m1d) )    names(st.v) <- c("mu.star")
+if( margin %in% c(m2,m2d) ) names(st.v) <- c("mu.star", "sigma2.star")
+if( margin %in% c(m3,m3d) ) names(st.v) <- c("mu.star", "sigma2.star", "nu.star")
 
 
-if(margin %in% m2) univfit <-  try(trust(bprobgHsContUniv, st.v, rinit = 1, rmax = 100, respvec = respvec, 
-                                            VC = VC, sp = NULL, qu.mag = NULL, blather = TRUE), silent = TRUE)
+if(print.par == TRUE && os == TRUE){ 
+
+if( margin %in% c(m1d) )    names(st.v) <- c("mu")
+if( margin %in% c(m2,m2d) ) names(st.v) <- c("mu", "sigma2")
+if( margin %in% c(m3,m3d) ) names(st.v) <- c("mu", "sigma2", "nu")
+
+}
+
+
+
+if(margin %in% c(m1d,m2,m2d)) univfit <-  try(trust(bprobgHsContUniv, st.v, rinit = 1, rmax = 100, respvec = respvec, 
+                                            VC = VC, ps = ps, blather = TRUE), silent = TRUE)
                                             
-if(margin %in% m3) univfit <-  try(trust(bprobgHsContUniv3, st.v, rinit = 1, rmax = 100, respvec = respvec, 
-                                            VC = VC, sp = NULL, qu.mag = NULL, blather = TRUE), silent = TRUE)                                            
+if(margin %in% c(m3,m3d)) univfit <-  try(trust(bprobgHsContUniv3, st.v, rinit = 1, rmax = 100, respvec = respvec, 
+                                            VC = VC, ps = ps, blather = TRUE), silent = TRUE)                                            
                  
 if(class(univfit) == "try-error") stop("The parameters of the chosen distribution could not be estimated. Try a different distribution.")                  
-    
+ 
+ 
     
 if(plots == TRUE){ ##       
              
 
 if(margin == "LN") y <- exp(y)
 
-if(margin %in% m2)  pp <- distrHsAT(y, univfit$argument[1], esp.tr(univfit$argument[2], margin)$vrb, 1, margin)
-if(margin %in% m3)  pp <- distrHsAT(y, univfit$argument[1], esp.tr(univfit$argument[2], margin)$vrb, exp(univfit$argument[3]), margin)
+
+    if(margin %in% c("ZTP")){
+     
+    ly1 <- length(y)
+    y1m <- list()
+    my1 <- max(y)
+    for(i in 1:ly1){ y1m[[i]] <- seq(0, y[i]); length(y1m[[i]]) <- my1+1} 
+    y1m <- do.call(rbind, y1m)  
+    
+    if(max(y) > 170) y1m <- mpfr( y1m, pmax(53, getPrec(y))) 
+
+     
+    }
+
+
+
+if(margin %in% m2)   pp <-      distrHsAT(y, univfit$argument[1], esp.tr(univfit$argument[2], margin)$vrb, 1, margin)
+if(margin %in% m3)   pp <-      distrHsAT(y, univfit$argument[1], esp.tr(univfit$argument[2], margin)$vrb, exp(univfit$argument[3]), margin)
+if(margin %in% m1d)  pp <- distrHsATDiscr(y, univfit$argument[1], 1, 1, margin, y2m = y1m)
+if(margin %in% m2d)  pp <- distrHsATDiscr(y, univfit$argument[1], esp.tr(univfit$argument[2], margin)$vrb, 1, margin, y2m = y1m)
+
 
 p <- pp$p2
 d <- pp$pdf2
+
+if(margin %in% c(m1d,m2d)) p <- runif(y, p - d, p)
+
 
 par(mfrow = c(1, 2))
 hist(y, freq = FALSE, ylim=c(0, max(d, hist(y, plot = FALSE)$density) ),
@@ -86,38 +142,96 @@ qqnorm(qnorm(p))
 abline(0, 1, col = "red")
 
 
-if(print.par == TRUE) print( univfit$argument )  
+#if(print.par == TRUE) print( univfit$argument )  
 
 
                  } ##
                  
                  
-         
-#if(print.par == TRUE){         
-#         
-#mu    <- eta.tr(univfit$argument[1], margin)
-#mupos <- c("LN","WEI","iG","GA","DAGUM","SM")
-#mub   <- c("BE")
-#if(margin %in% mupos) mu <- exp(mu)
-#if(margin %in% mub)   mu <- plogis(mu)
-#
-#sigma <- esp.tr(univfit$argument[2], margin)$vrb
-#
-#if(margin %in% m3) nu <- esp.tr(univfit$argument[3], margin)$vrb                 
-#                 
-#}
-
-
                  
-#if(print.par == TRUE && plots == TRUE) print( c(mu,sigma,nu) )                
+                 
+if(print.par == TRUE && os == FALSE && i.f == FALSE) print( univfit$argument )                  
+         
+         
+if(print.par == TRUE && os == TRUE && i.f == FALSE){         
+         
+mu    <- eta.tr(univfit$argument[1], margin)
+mupos <- c("LN","WEI","iG","GA","DAGUM","SM","FISK",m1d,m2d,m3d)
+mub   <- c("BE")
+if(margin %in% mupos) mu <- exp(mu)
+if(margin %in% mub)   mu <- plogis(mu)
 
-if(plots == FALSE && print.par == TRUE && loglik == FALSE) return( univfit$argument )  
+if(!(margin %in% m1d)) sigma <- NULL else sigma <- esp.tr(univfit$argument[2], margin)$vrb
+
+if(margin %in% m3)  nu <- esp.tr(univfit$argument[3], margin)$vrb   
+if(margin %in% m3d) nu <- enu.tr(univfit$argument[3], margin)$vrb   
+
+
+if(!(margin %in% m1d)) print( c(mu) ) else print( c(mu,sigma,nu) )
+                 
+}
+
+
+if(test == TRUE){
+
+if(margin == "LN") y <- exp(y)
+
+    if(margin %in% c("ZTP")){
+     
+    ly1 <- length(y)
+    y1m <- list()
+    my1 <- max(y)
+    for(i in 1:ly1){ y1m[[i]] <- seq(0, y[i]); length(y1m[[i]]) <- my1+1} 
+    y1m <- do.call(rbind, y1m)     
+    
+        if(max(y) > 170) y1m <- mpfr( y1m, pmax(53, getPrec(y))) 
+
+     
+    }
+
+if(margin %in% m2)  pp <-      distrHsAT(y, univfit$argument[1], esp.tr(univfit$argument[2], margin)$vrb, 1, margin)
+if(margin %in% m3)  pp <-      distrHsAT(y, univfit$argument[1], esp.tr(univfit$argument[2], margin)$vrb, exp(univfit$argument[3]), margin)
+if(margin %in% m1d) pp <- distrHsATDiscr(y, univfit$argument[1], 1, 1, margin, y2m = y1m)
+if(margin %in% m2d) pp <- distrHsATDiscr(y, univfit$argument[1], esp.tr(univfit$argument[2], margin)$vrb, 1, margin, y2m = y1m)
+
+
+pp <- pp$p2
+
+if(margin %in% c(m1d,m2d)) pp <- runif(y, pp - pp$pdf2, pp)
+
+
+qr <- qnorm(pp$p2)
+
+#print(ks.test(qr, "pnorm"))
+print(shapiro.test(qr))
+
+}
+
+
+
+#####################################################################################
+# this is need for estimation in internal routines 
+##
+
+if(plots == FALSE && print.par == TRUE && loglik == FALSE && test == FALSE && os == FALSE && i.f == TRUE) return( univfit$argument )  
+
+##
+#####################################################################################
+
 
 
 
 if(loglik == TRUE){ ##
 
-if(margin == "LN") lk <- sum(log(d))
+if(margin == "LN"){ 
+
+if(plots == FALSE) d <- distrHsAT(exp(y), univfit$argument[1], esp.tr(univfit$argument[2], margin)$vrb, 1, margin)$pdf2
+lk <- sum(log(d))
+
+                  }
+
+
+
 if(margin != "LN") lk <- -univfit$l
 
 attr(lk, "nobs") <- length(y)
@@ -126,6 +240,9 @@ class(lk) <- "logLik"
 lk
 
                   } ##
+                  
+                  
+
 
 
 }

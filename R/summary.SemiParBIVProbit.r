@@ -9,8 +9,9 @@ summary.SemiParBIVProbit <- function(object, n.sim = 100, prob.lev = 0.05,
   filled.contour <- getFromNamespace("filled.contour", "graphics")      
 
   bs <- SE <- Vb <- epds <- sigma2.st <- sigma2 <- nu.st <- nu <- est.RHOb <- et1s <- et2s <- p1s <- p2s <- p11s <- p10s <- p00s <- p01s <- ORs <- GMs <- XX <- Xt <- V <- 1
-  
-cont2par  <- object$VC$m2 
+
+cont1par  <- c(object$VC$m1d)  
+cont2par  <- c(object$VC$m2,object$VC$m2d) 
 cont3par  <- object$VC$m3  
 bin.link  <- object$VC$bl  
 
@@ -34,12 +35,25 @@ bin.link  <- object$VC$bl
   SE <- sqrt(diag(Vb)) 
 
   
-  if(object$VC$Model != "BPO0") bs <- rMVN(n.sim, mean = object$coefficients, sigma=Vb)  
-  if(object$VC$Model == "BPO0") epds <- rep(0, 10 )
+  if(object$VC$Model != "BPO0" && is.null(object$VC$theta.fx)) bs <- rMVN(n.sim, mean = object$coefficients, sigma=Vb)  
+  if(object$VC$Model == "BPO0") epds <- rep(0, 10)
+  if(object$VC$Model == "B" && !is.null(object$VC$theta.fx)) epds <- rep(object$VC$theta.fx, 10)
   
   
 
-  if(object$VC$margins[2] %in% bin.link && object$VC$Model != "BPO0"){
+
+
+
+if( is.null(object$VC$theta.fx) ){############
+
+
+
+
+
+
+
+
+  if(object$VC$margins[2] %in% c(bin.link,cont1par) && object$VC$Model != "BPO0"){
   
   if(object$VC$Model == "BSS")  X3x <- object$X3s else X3x <- object$X3 
   
@@ -119,10 +133,34 @@ bin.link  <- object$VC$bl
    CIrs <- rowQuantiles(est.RHOb, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE)
    if( is.null(object$X3) ) CIrs <- t(CIrs) 
 
+
+
+
      
+}  ############   
+     
+     
+     
+if( !is.null(object$VC$theta.fx) ){
+
+   est.RHOb <- epds 
+   est.RHOb <- t(as.matrix(est.RHOb))
+   
+   CIrs <- rowQuantiles(est.RHOb, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE)
+   CIrs <- t(CIrs) 
+
+}
+     
+       
 ######################
 # Association measure
 ######################
+
+if(object$VC$BivD %in% c("J0","J180"))  est.RHOb <- ifelse(est.RHOb > 50, 50, est.RHOb)
+if(object$VC$BivD %in% c("J90","J270")) est.RHOb <- - ifelse(abs(est.RHOb) > 50, 50, abs(est.RHOb)) 
+
+if(object$VC$BivD %in% c("C0","C180","G0","G180"))  est.RHOb <- ifelse(est.RHOb > 100, 100, est.RHOb)
+if(object$VC$BivD %in% c("C90","C270","G90","G270")) est.RHOb <- - ifelse(abs(est.RHOb) > 100, 100, abs(est.RHOb))  
 
 if(!(object$VC$BivD %in% c("AMH","FGM"))) tau <- BiCopPar2Tau(family = object$VC$nCa, par = est.RHOb) 
 if(object$VC$BivD == "AMH")               tau <- 1 - (2/3)/est.RHOb^2*(est.RHOb + (1-est.RHOb)^2*log(1-est.RHOb))
@@ -142,7 +180,7 @@ if( is.null(object$X3) ) CIkt <- t(CIkt)
    
    
    
-if (gm == TRUE){   
+if (gm == TRUE && is.null(object$VC$theta.fx)){   
 
 
    ####
@@ -327,6 +365,8 @@ if(object$VC$gc.l == TRUE) gc()
  
  c1   <- c("N","GU","rGU","LO")
  c2   <- c("LN","WEI","iG","GA","GAi","DAGUM","SM","BE","FISK") 
+ c2d  <- c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP")
+
   
  m2 <- s2 <- nu2 <- 0 
  par1 <- object$theta.a 
@@ -342,6 +382,12 @@ if(object$VC$gc.l == TRUE) gc()
  s2 <- object$sigma2.a
  nu2 <- object$nu.a
                                      } 
+                                     
+  if(object$margins[2] %in% cont1par ){ 
+  m2 <- mean(object$eta2) 
+  s2 <- 0
+  nu2 <- 0
+                                      }                                      
 
 
  if(object$BivD=="AMH")  {cop <- bquote(paste("AMH (",hat(theta)," = ",.(round(par1,2)),")",sep=""))}
@@ -369,56 +415,135 @@ if(object$VC$gc.l == TRUE) gc()
   Cplot <- function (BivD, par1, mar2, m2, s2, nu2, resp, margins, ...){   
   
     size <- 100
-          
-                             x1 <- seq(from = xlim[1], to = xlim[2], length.out = size)         
-                             
-          if(mar2 %in% bin.link) x2 <- seq(from = ylim[1], to = ylim[2], length.out = size)                            
-        if(!(mar2 %in% bin.link)) x2 <- seq(from = min(resp), to = max(resp), length.out = size)                        
-          
-          x11 <- rep(x1, each = size)
-          x22 <- rep(x2, times = size)
-          
+    
+    
+    
+if(mar2 %in% bin.link)                                                      x2 <- seq(from = ylim[1], to = ylim[2], length.out = size)                            
+if(!(mar2 %in% bin.link) && !(mar2 %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP"))) x2 <- seq(from = min(resp), to = max(resp), length.out = size)                        
+if(mar2 %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP") ){                           x2 <- c( min(resp):max(resp) ); size <- length(x2)  }
+
+
+
+          x1   <- seq(from = xlim[1], to = xlim[2], length.out = size)     
+          x11  <- rep(x1, each = size)
           px11 <- probm(x11, margins[1], only.pr = FALSE)
-          
           d.x1 <- px11$d.n 
           p1   <- px11$pr
           
-          resf <- distrHsAT(x22, m2, s2, nu2, mar2)
+          
+          x22 <- rep(x2, times = size)
+          
+          
+          if(!(mar2 %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP"))) resf <- distrHsAT(x22, m2, s2, nu2, mar2)
+        
+          if(mar2 %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP")){
+           
+           y2m <- NULL
+           
+               if(mar2 %in% c("ZTP")){
+	        
+	       ly2 <- length(x22)
+	       y2m <- list()
+	       my2 <- max(x22)
+	       for(i in 1:ly2){ y2m[[i]] <- seq(0, x22[i]); length(y2m[[i]]) <- my2+1} 
+	       y2m <- do.call(rbind, y2m)     
+	        
+               }
+           
+           resf <- distrHsATDiscr(x22, m2, s2, nu2, mar2, y2m = y2m)
+           
+           }        
+        
           d.x2 <- resf$pdf2
           p2   <- resf$p2
           
           
-          md <- copgHsAT(p1, p2, par1, BivD, Ln = TRUE)$c.copula2.be1be2*d.x1*d.x2    
-          z  <- matrix(data = md, nrow = size, byrow = TRUE)
+          
+          
+          
+          
+           if(mar2 %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP")){
+           
+	     h1  <- copgHsAT(p1, p2,          par1, BivD, Ln = FALSE)$c.copula.be2  
+	     h2  <- copgHsAT(p1, mm(p2-d.x2), par1, BivD, Ln = FALSE)$c.copula.be2   
+	     
+	     md  <- d.x1*(h2 - h1) # swap here
+	     
+           }          
+          
+          if(!(mar2 %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP"))) md <- copgHsAT(p1, p2, par1, BivD, Ln = TRUE)$c.copula2.be1be2*d.x1*d.x2   
+          
+          
+          z <- matrix(data = md, nrow = size, byrow = TRUE)
       
           filled.contour(x1, x2, z, color = topo.colors, nlevels = 16, ...) 
                
  }
  
+ 
+ 
+ 
+ 
+ if(!(object$margins[2] %in% bin.link)){ 
+ 
+ 
+ if(object$margins[2] %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP") ){ 
+    
+    test.resp <- c( min(object$y2):max(object$y2) )
+    
+            y2m <- NULL
+            
+                if(object$margins[2] %in% c("ZTP")){
+ 	        
+ 	       ly2 <- length(test.resp)
+ 	       y2m <- list()
+ 	       my2 <- max(test.resp)
+ 	       for(i in 1:ly2){ y2m[[i]] <- seq(0, test.resp[i]); length(y2m[[i]]) <- my2+1} 
+ 	       y2m <- do.call(rbind, y2m)     
+ 	        
+                }
+            
+            
+      test.dens <- round( distrHsATDiscr(test.resp, m2, s2, nu2, object$VC$margins[2], y2m = y2m)$pdf2, n.dig)
+  
+   }
+ 
+ 
+ 
+ 
 
 
-  if(object$margins[2] %in% c(c1,c2)){
+  if( !(object$margins[2] %in% c("NBI","NBII", "NBIa","NBIIa","PIG","PO","ZTP")) ){
   
   if(object$margins[2] %in% c1) test.resp <- seq(from = min(object$y2), to = max(object$y2), length.out = n.grid)
   if(object$margins[2] %in% c2) test.resp <- seq(from = 0.0001, to = max(object$y2), length.out = n.grid)
 
   
   test.dens <- round( distrHsAT(test.resp, m2, s2, nu2, object$VC$margins[2])$pdf2, n.dig)
+  
+  }
+  
+  
+  
   resp <- test.resp[which(test.dens != 0)]
   
   if( length(resp) < 2 ) stop("Increase/decrease n.dig and/or n.grid values.")
   
- 
-  } else resp <- object$y2
+  
+ } 
   
   
   
- 
+  
+  
+  
+  
+
 Cplot(BivD = object$BivD, par1 = par1, mar2 = object$margins[2], 
       m2 = m2, s2 = s2, nu2 = nu2, resp = resp, main = cop, ylab = ylab, xlab = xlab, object$margins, ...)  
       
-      
-      
+     
+
  }
  
  

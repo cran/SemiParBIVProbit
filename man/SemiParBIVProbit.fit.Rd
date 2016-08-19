@@ -3,7 +3,7 @@
 
 \title{Internal Function}
 
-\description{Internal fitting function.}
+\description{Wrapper of core algorithm.}
 
 
 \author{

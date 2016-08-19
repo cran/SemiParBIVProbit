@@ -1,6 +1,24 @@
 numch <- function(funcD, para1, para2){
 
-eps <- 1e-06
+#fd.prec  <- 10^(-7)
+#fd.prec2 <- 10^-3
+#
+#
+#para11 <- para1 + fd.prec
+#para22 <- para2 + fd.prec2
+#
+#f00 <- funcD(para1, para2)
+#
+#
+#
+#F2.fd.dsigma.plus <- pPIG(i2, mu = (mu+fd.prec), sigma = sigma.plus)
+#      dF2.dsigma.plus <- (F2.fd.dsigma.plus - F2.sigma.plus) / (fd.prec)
+#      dF2.dsigma.plus <- as.vector(dF2.dsigma.plus)*as.vector(mu) 
+#      d2F2ddelta2dsigma <- (dF2.dsigma.plus - dF2) / fd.prec2
+#      d2F22ddelta2dsigma <- d2F2ddelta2dsigma - d2f2delta2sigma   
+#
+
+eps <- 1e-06 
 eps2 <- eps*eps 
 
 f00 <- funcD(para1, para2)  

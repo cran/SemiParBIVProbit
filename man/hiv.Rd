@@ -66,6 +66,16 @@ McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption
 
 }
 
+
+\references{
+
+Marra G., Radice R., Barnighausen T., Wood S.N. and McGovern M.E. (in press), A Simultaneous Equation Approach to Estimating HIV Prevalence with Non-Ignorable Missing Responses. \emph{Journal of the American Statistical Association}.
+
+
+}
+
+
+
 \examples{
 
 \dontrun{ 

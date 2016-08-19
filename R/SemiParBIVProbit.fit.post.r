@@ -3,7 +3,8 @@ SemiParBIVProbit.fit.post <- function(SemiParFit, Model, VC, qu.mag=NULL,
 
 Ve <- R <- X2s <- lambda1s <- X3s <- lambda2s <- eta1S <- eta2S <- theta <- edf <- edf1 <- theta.a <- sigma2 <- sigma2.a <- OR <- GM <- p1n <- p2n <- nu <- nu.a <- NULL
 
-cont2par  <- VC$m2 
+cont1par  <- VC$m1d
+cont2par  <- c(VC$m2,VC$m2d) 
 cont3par  <- VC$m3 
 bin.link  <- VC$bl  
 
@@ -86,7 +87,10 @@ if( is.null(VC$X4) && is.null(VC$X5) ) {names(sigma2) <- "sigma2"; names(nu) <- 
 ############################################################################################
 
 
-if(VC$Model == "BPO0" ) dep <- theta <- 0
+if(is.null(VC$theta.fx)){
+
+
+if(VC$Model == "BPO0" ) dep <- theta <- theta.a <- 0
 
 if(!(VC$Model %in% c("BPO0","BSS")) ){
 
@@ -97,7 +101,14 @@ theta <- teta.tr(VC, dep)$teta
         
 theta.a  <- mean(theta)   
 
+                                     }
+
+
 }
+
+
+
+if(!is.null(VC$theta.fx)) dep <- theta <- theta.a <- VC$theta.fx 
 
 
 ############################################################################################
@@ -117,7 +128,7 @@ SemiParFit$fit$etad <- VC$X3s%*%SemiParFit$fit$argument[(VC$X1.d2+VC$X2.d2+1):(V
 
 theta <- teta.tr(VC, SemiParFit$fit$etad)$teta 
 
-}
+                    }
 
 
 if(is.null(VC$X3)){
@@ -157,6 +168,12 @@ if(Model=="BSS" || Model=="BPO" || Model=="BPO0"){
 ######################
 # Association measures
 ######################
+
+if(VC$BivD %in% c("J0","J180","J90","J270"))  theta <- ifelse(abs(theta) > 50, 50, abs(theta))
+if(VC$BivD %in% c("J90","J270"))              theta <- -theta 
+
+if(VC$BivD %in% c("C0","C180","G0","G180","C90","C270","G90","G270")) theta <- ifelse(abs(theta) > 100, 100, abs(theta))
+if(VC$BivD %in% c("C90","C270","G90","G270"))                         theta <- -theta
 
 if(!(VC$BivD %in% c("AMH","FGM"))) tau <- BiCopPar2Tau(family = VC$nCa, par = theta)
 if(VC$BivD == "AMH")               tau <- 1 - (2/3)/theta^2*(theta + (1-theta)^2*log(1-theta))

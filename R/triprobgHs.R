@@ -1,4 +1,4 @@
-triprobgHs <- function (params, respvec, VC, sp = NULL, qu.mag = NULL, AT = FALSE){
+triprobgHs <- function (params, respvec, VC, ps, AT = FALSE){
 
   eta1 <- VC$X1%*%params[1:VC$X1.d2]
   eta2 <- VC$X2%*%params[(VC$X1.d2 + 1):(VC$X1.d2 + VC$X2.d2)]
@@ -13,13 +13,13 @@ triprobgHs <- function (params, respvec, VC, sp = NULL, qu.mag = NULL, AT = FALS
   theta23.st <- params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2+3)]    
   theta23    <- tanh(theta23.st)
   
-  p1 <- 10
-  p2 <- 10
-  p3 <- 10
+  p1 <- probm(eta1, "probit")$pr
+  p2 <- probm(eta2, "probit")$pr
+  p3 <- probm(eta3, "probit")$pr 
   
-  p11 <- 10
-  p13 <- 10
-  p23 <- 10
+  p11 <- mm( pbinorm( eta1, eta2, cov12 = theta12) )
+  p13 <- mm( pbinorm( eta1, eta3, cov12 = theta13) )
+  p23 <- mm( pbinorm( eta2, eta3, cov12 = theta23) )
   
   Sigma <-  matrix( c( 1,        theta12, theta13,
                        theta12,        1, theta23,
@@ -50,7 +50,8 @@ triprobgHs <- function (params, respvec, VC, sp = NULL, qu.mag = NULL, AT = FALS
   } else Sigma <- Sigma 
   
 
-  for(i in 1:VC$n) p111[i] <- 10
+  if(VC$approx == FALSE){ for(i in 1:VC$n) p111[i] <- mm( pmnorm(x = c(eta1[i], eta2[i], eta3[i]), varcov = Sigma)[1] )   }
+  if(VC$approx == TRUE) p111 <- mm( TRIapprox(eta1, eta2, eta3, Sigma) )
   
   p011 <- mm(p23 - p111)
   p101 <- mm(p13 - p111)
@@ -108,24 +109,50 @@ triprobgHs <- function (params, respvec, VC, sp = NULL, qu.mag = NULL, AT = FALS
 ##########################################################################################
 ##########################################################################################
 
-# && VC$l.sp4==0 && VC$l.sp5==0 && VC$l.sp6==0
-# at the moment the setup below excludes the case of varying corrs
-# and most probably we will not do it
+S.h  <- ps$S.h
 
-if( (VC$l.sp1==0 && VC$l.sp2==0 && VC$l.sp3==0 && VC$l.sp4==0 ) || VC$fp==TRUE) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0) else ps <- pen(params, qu.mag, sp, VC)
+
+if( VC$penCor %in% c("lasso", "alasso") ){
+
+	if(VC$penCor %in% c("lasso")) A <- diag(1/(sqrt(params[(length(params)-2):length(params)]^2 + 1e-08)))  
+
+	if(VC$penCor %in% c("alasso")){
+
+  		wc <- 1/abs(VC$wc)^VC$gamma
+  		A  <- diag(wc * 1/(sqrt(params[(length(params)-2):length(params)]^2 + 1e-08)))
+
+		                      }
+
+if( VC$l.sp1==0 && VC$l.sp2==0 && VC$l.sp3==0) VC$qu.mag$Ss[[1]]                      <- A 
+if( VC$l.sp1!=0 || VC$l.sp2!=0 || VC$l.sp3!=0) VC$qu.mag$Ss[[length(VC$qu.mag$Ss)+1]] <- A
+
+S.h <- adiag( S.h, VC$sp[length(VC$sp)]*VC$qu.mag$Ss[[length(VC$qu.mag$Ss)]])
+
+}
+
+
 
 if (VC$extra.regI == "pC") H <- regH(H, type = 1)
-
+  
+  
+  if( length(S.h) != 1){
+  
+  S.h1 <- 0.5*crossprod(params,S.h)%*%params
+  S.h2 <- S.h%*%params
+  
+  } else S.h <- S.h1 <- S.h2 <- 0   
+  
+  
   S.res <- res
-  res   <- S.res + ps$S.h1
-  G     <- G + ps$S.h2
-  H     <- H + ps$S.h
+  res   <- S.res + S.h1
+  G     <- G + S.h2
+  H     <- H + S.h  
   
   
 if (VC$extra.regI == "sED") H <- regH(H, type = 2)
 
 
-  list(value = res, gradient = G, hessian = H, S.h = ps$S.h, qu.mag = qu.mag, qu.mag.a = ps$qu.mag.a,
+  list(value = res, gradient = G, hessian = H, S.h=S.h, S.h1=S.h1, S.h2=S.h2, qu.mag = VC$qu.mag,
        l = S.res, l.par = l.par, ps = ps, 
        eta1 = eta1, eta2 = eta2, eta3 = eta3, 
        p111 = p111,

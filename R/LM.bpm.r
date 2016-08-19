@@ -82,8 +82,6 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, Model,
   gam2 <- eval(substitute(gam(formula.eq2, binomial(link="probit"), weights=weights, 
                               data=data, subset=inde),list(weights=weights,inde=inde)))                              
   X2.d2 <- length(coef(gam2))
-  #X2 <- matrix(0,length(inde),X2.d2,dimnames = list(c(1:length(inde)),c(names(coef(gam2)))) )
-  #X2[inde, ] <- model.matrix(gam2) 
   X2 <- model.matrix(gam2) 
   y2 <- gam2$y # rep(0,length(inde)); y2[inde] <- gam2$y
   l.sp2 <- length(gam2$sp)
@@ -135,7 +133,16 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, Model,
 
 params <- c(coef(gam1),coef(gam2),0)
 
-resf <- func.opt(params, respvec, VC, sp, qu.mag)
+
+l.splist <- list( l.sp1 = l.sp1, l.sp2 = l.sp2, l.sp3 = 0, 
+                  l.sp4 = 0, l.sp5 = 0, l.sp6 = 0, 
+                  l.sp7 = 0 )
+
+
+if( l.sp1==0 && l.sp2==0 ) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0) else ps <- pen(qu.mag, sp, VC, univ = 0, l.splist)
+
+
+resf <- func.opt(params, respvec, VC, ps)
 
 G   <- resf$gradient
 var <- resf$hessian

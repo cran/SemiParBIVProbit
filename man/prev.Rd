@@ -4,7 +4,8 @@
 \title{Estimated overall prevalence from sample selection model}
 
 \description{ 
-\code{prev} can be used to calculate the overall estimated prevalence from a sample selection model, with corresponding interval
+\code{prev} can be used to calculate the overall estimated prevalence from a sample selection model 
+with binay outcome, with corresponding interval
 obtained using the delta method or posterior simulation.}
 
 
@@ -20,7 +21,7 @@ prev(x, sw = NULL, type = "simultaneous", ind = NULL, delta = FALSE,
 
 \arguments{ 
 
-\item{x}{A fitted \code{SemiParBIVProbit} object as produced by \code{SemiParBIVProbit()}.}
+\item{x}{A fitted \code{SemiParBIVProbit}/\code{SemiParTRIV} object.}
 
 \item{sw}{Survey weights.}  
 
@@ -89,6 +90,8 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}, 26(2), 229-237.
 
+Marra G., Radice R., Barnighausen T., Wood S.N. and McGovern M.E. (in press), A Simultaneous Equation Approach to Estimating HIV Prevalence with Non-Ignorable Missing Responses. \emph{Journal of the American Statistical Association}.
+
 
 
 }
@@ -97,18 +100,19 @@ McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption
 
 
 \seealso{
-\code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}  
+\code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{SemiParTRIV}}  
 }
 
 \examples{
-## see examples for SemiParBIVProbit
+## see examples for SemiParBIVProbit and SemiParTRIV
 }
 
-\keyword{semiparametric bivariate modelling} 
-\keyword{semiparametric trivariate probit modelling} 
+
 \keyword{prevalence} 
-\keyword{delta method}
 \keyword{non-random sample selection} 
+\keyword{flexible copula regression modelling} 
+\keyword{bayesian posterior simulation}
+
 
 
 

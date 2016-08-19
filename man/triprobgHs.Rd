@@ -1,9 +1,10 @@
 \name{triprobgHs}
 \alias{triprobgHs}
+\alias{triprobgHsSS}
 
 \title{Internal Function}
 
-\description{It provides score and Hessian for a trivariate probit model.
+\description{It provides score and Hessian for trivariate binary models.
 }
 
 

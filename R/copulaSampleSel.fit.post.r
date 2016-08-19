@@ -3,7 +3,8 @@ copulaSampleSel.fit.post <- function(SemiParFit, VC, qu.mag=NULL,
 
 Ve <- R <- X2s <- lambda1s <- lambda2s <- eta1S <- eta2S <- theta <- edf <- edf1 <- theta.a <- sigma2 <- sigma2.a <- OR <- GM <- p1n <- p2n <- nu <- nu.a <- NULL
 
-cont2par  <- VC$m2 
+cont1par  <- VC$m1d
+cont2par  <- c(VC$m2,VC$m2d) 
 cont3par  <- VC$m3 
 bin.link  <- VC$bl  
 
@@ -58,6 +59,9 @@ dimnames(SemiParFit$fit$hessian)[[1]] <- dimnames(SemiParFit$fit$hessian)[[2]] <
 if(is.null(VC$X3)){ # START
 
 
+if(!(VC$margins[2] %in% cont1par)){ ##
+
+
 sigma2        <- esp.tr(SemiParFit$fit$etas, VC$margins[2])$vrb 
 names(sigma2) <- "sigma2"   
 sigma2.a      <- sigma2 
@@ -72,7 +76,9 @@ if(VC$margins[2] %in% cont3par ){
                                               }  
 nu.a     <- nu
  
-}
+                                }
+
+} ##
 
 
 dep        <- SemiParFit$fit$etad
@@ -89,6 +95,9 @@ theta.a <- theta
   
 if(!is.null(VC$X3)){ # START  
   
+  
+if(!(VC$margins[2] %in% cont1par)){##  
+  
   SemiParFit$fit$etas <- VC$X3s%*%SemiParFit$fit$argument[(VC$X1.d2+VC$X2.d2+1):(VC$X1.d2+VC$X2.d2+VC$X3.d2)]  
   
   sigma2 <- esp.tr(SemiParFit$fit$etas, VC$margins[2])$vrb 
@@ -104,14 +113,22 @@ theta <- teta.tr(VC, SemiParFit$fit$etad)$teta
 
 if(VC$margins[2] %in% cont3par){
 
-SemiParFit$fit$etad <- VC$X5s%*%SemiParFit$fit$argument[(VC$X1.d2+VC$X2.d2+VC$X3.d2+VC$X4.d2+1):(VC$X1.d2+VC$X2.d2+VC$X3.d2+VC$X4.d2+VC$X5.d2)]
 SemiParFit$fit$etan <- VC$X4s%*%SemiParFit$fit$argument[(VC$X1.d2+VC$X2.d2+VC$X3.d2+1):(VC$X1.d2+VC$X2.d2+VC$X3.d2+VC$X4.d2)]
+SemiParFit$fit$etad <- VC$X5s%*%SemiParFit$fit$argument[(VC$X1.d2+VC$X2.d2+VC$X3.d2+VC$X4.d2+1):(VC$X1.d2+VC$X2.d2+VC$X3.d2+VC$X4.d2+VC$X5.d2)]
  
   nu    <- esp.tr(SemiParFit$fit$etan, VC$margins[2])$vrb   
   theta <- teta.tr(VC, SemiParFit$fit$etad)$teta  
- 
   nu.a <- mean(nu) 
  
+}
+
+}##
+
+if(VC$margins[2] %in% cont1par){
+
+SemiParFit$fit$etad <- VC$X3s%*%SemiParFit$fit$argument[(VC$X1.d2+VC$X2.d2+1):(VC$X1.d2+VC$X2.d2+VC$X3.d2)]
+theta <- teta.tr(VC, SemiParFit$fit$etad)$teta  
+
 }
 
 
@@ -123,6 +140,13 @@ theta.a <- mean(theta)
 ######################
 # Association measures
 ######################
+
+if(VC$BivD %in% c("J0","J180","J90","J270"))  theta <- ifelse(abs(theta) > 50, 50, abs(theta))
+if(VC$BivD %in% c("J90","J270"))             theta <- -theta 
+
+if(VC$BivD %in% c("C0","C180","G0","G180","C90","C270","G90","G270")) theta <- ifelse(abs(theta) > 100, 100, abs(theta))
+if(VC$BivD %in% c("C90","C270","G90","G270"))                         theta <- -theta 
+
 
 if(!(VC$BivD %in% c("AMH","FGM"))) tau <- BiCopPar2Tau(family = VC$nCa, par = theta)
 if(VC$BivD == "AMH")               tau <- 1 - (2/3)/theta^2*(theta + (1-theta)^2*log(1-theta))

@@ -557,32 +557,34 @@ bit1.th2 <- bit1.th2ATE*derteta.derteta.st^2 + c.copula.thet*der2teta.derteta.st
 
 if(BivD %in% c("C90","J90","G90") ) {
 
-#c.copula.be1     <- c.copula.be1
+
 c.copula.be2     <- 1 - c.copula.be2
 c.copula.theta   <- - c.copula.theta
+c.copula.thet    <- - c.copula.thet
 c.copula2.be1    <- - c.copula2.be1
 c.copula2.be2    <- - c.copula2.be2
-#c.copula2.be1be2 <- c.copula2.be1be2
-#c.copula2.be1th  <- c.copula2.be1th 
+
 c.copula2.be2th  <- - c.copula2.be2th
+c.copula2.be2t   <- - c.copula2.be2t
+
 bit1.th2ATE      <- - bit1.th2ATE  
 bit1.th2         <- - bit1.th2 
 
-}  
+} 
+
+
 
 if(BivD %in% c("C180","J180","G180") ) {
 
 c.copula.be1     <- 1 - c.copula.be1 
 c.copula.be2     <- 1 - c.copula.be2
-#c.copula.theta   <- c.copula.theta
-#c.copula2.be1    <- c.copula2.be1 
-#c.copula2.be2    <- c.copula2.be2
-#c.copula2.be1be2 <- c.copula2.be1be2
+
 c.copula2.be1th  <- - c.copula2.be1th
 c.copula2.be2th  <- - c.copula2.be2th
-#bit1.th2ATE      <- bit1.th2ATE
-#bit1.th2         <- bit1.th2  
 
+c.copula2.be1t  <- - c.copula2.be1t
+c.copula2.be2t  <- - c.copula2.be2t
+ 
 
 }  
 
@@ -590,13 +592,15 @@ c.copula2.be2th  <- - c.copula2.be2th
 if(BivD %in% c("C270","J270","G270") ) {
 
 c.copula.be1     <- 1 - c.copula.be1
-#c.copula.be2     <- c.copula.be2
+
 c.copula.theta   <- - c.copula.theta
+c.copula.thet    <- - c.copula.thet
 c.copula2.be1    <- - c.copula2.be1
 c.copula2.be2    <- - c.copula2.be2
-#c.copula2.be1be2 <- c.copula2.be1be2
+
 c.copula2.be1th  <- - c.copula2.be1th
-#c.copula2.be2th  <-   c.copula2.be2th
+c.copula2.be1t   <- - c.copula2.be1t
+
 bit1.th2ATE      <- - bit1.th2ATE
 bit1.th2         <- - bit1.th2
 
@@ -610,10 +614,8 @@ max.p   <- 0.9999999
 
 # the bits below are probs
   
-c.copula.be2 <- ifelse(c.copula.be2 > max.p, max.p, c.copula.be2) 
-c.copula.be2 <- ifelse(c.copula.be2 < epsilon,     epsilon, c.copula.be2)
-c.copula.be1 <- ifelse(c.copula.be1 > max.p, max.p, c.copula.be1) 
-c.copula.be1 <- ifelse(c.copula.be1 < epsilon,     epsilon, c.copula.be1)
+c.copula.be2 <- mm(c.copula.be2)
+c.copula.be1 <- mm(c.copula.be1)
 c.copula2.be1be2 <- ifelse(c.copula2.be1be2 < epsilon, epsilon, c.copula2.be1be2)
 
 
@@ -634,13 +636,18 @@ dv
 c.copula.be1     <- ifef(c.copula.be1    )  
 c.copula.be2     <- ifef(c.copula.be2    ) 
 c.copula.theta   <- ifef(c.copula.theta  ) 
+c.copula.thet    <- ifef(c.copula.thet   ) 
 c.copula2.be1    <- ifef(c.copula2.be1   ) 
 c.copula2.be2    <- ifef(c.copula2.be2   ) 
 c.copula2.be1be2 <- ifef(c.copula2.be1be2) 
 c.copula2.be1th  <- ifef(c.copula2.be1th ) 
 c.copula2.be2th  <- ifef(c.copula2.be2th ) 
+c.copula2.be1t  <- ifef(c.copula2.be1t ) 
+c.copula2.be2t  <- ifef(c.copula2.be2t ) 
 bit1.th2ATE      <- ifef(bit1.th2ATE     ) 
 bit1.th2         <- ifef(bit1.th2        ) 
+derteta.derteta.st         <- ifef(derteta.derteta.st        )
+der2teta.derteta.stteta.st <- ifef(der2teta.derteta.stteta.st)
 
 
 
@@ -648,13 +655,18 @@ list(
 c.copula.be1     = c.copula.be1,    
 c.copula.be2     = c.copula.be2,    
 c.copula.theta   = c.copula.theta,  
+c.copula.thet    = c.copula.thet,  
 c.copula2.be1    = c.copula2.be1,  
 c.copula2.be2    = c.copula2.be2,   
 c.copula2.be1be2 = c.copula2.be1be2,
 c.copula2.be1th  = c.copula2.be1th, 
 c.copula2.be2th  = c.copula2.be2th, 
+c.copula2.be1t  = c.copula2.be1t, 
+c.copula2.be2t  = c.copula2.be2t, 
 bit1.th2ATE      = bit1.th2ATE,     
-bit1.th2         = bit1.th2 )     
+bit1.th2         = bit1.th2, 
+derteta.derteta.st = derteta.derteta.st,
+der2teta.derteta.stteta.st = der2teta.derteta.stteta.st )     
 
 
 }

@@ -1,11 +1,11 @@
 \name{adjCov}
 \alias{adjCov}
 
-\title{Adjustment for the covariance matrix from a fitted SemiParBIVProbit model}
+\title{Adjustment for the covariance matrix from a fitted SemiParBIVProbit/copulaReg/copulaSampleSel/SemiParTRIV model}
 
 \description{ 
 
-\code{adjCov} can be used to adjust the covariance matrix of a fitted \code{SemiParBIVProbit} object.}
+\code{adjCov} can be used to adjust the covariance matrix of a fitted \code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel}/\code{SemiParTRIV} object.}
 
 
 \usage{
@@ -16,7 +16,7 @@ adjCov(x, id)
 
 \arguments{ 
 
-\item{x}{A fitted \code{SemiParBIVProbit} object as produced by \code{SemiParBIVProbit()}.}
+\item{x}{A fitted \code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel}/\code{SemiParTRIV} object as produced by the respective fitting function.}
  
 \item{id}{Cluster identifier.} 
 
@@ -41,7 +41,7 @@ as described in Liang and Zeger (1986, Section 2).
 
 \value{
 
-This function returns a fitted \code{SemiParBIVProbit} object which is identical to that supplied in \code{adjCov} but with adjusted covariance matrix.
+This function returns a fitted object which is identical to that supplied in \code{adjCov} but with adjusted covariance matrix.
 
 
 }
@@ -50,7 +50,7 @@ This function returns a fitted \code{SemiParBIVProbit} object which is identical
 
 \section{WARNINGS}{
 
-This correction may not be appropriate for models that require the use of penalties in fitting.
+This correction may not be appropriate for models fitted using penalties.
 
 } 
 
@@ -74,7 +74,10 @@ Liang K.-Y. and Zeger S. (1986), Longitudinal Data Analysis Using Generalized Li
 
 
 \seealso{
-\code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}  
+\code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}},
+\code{\link{SemiParTRIV}}, \code{\link{summary.SemiParTRIV}},
+\code{\link{copulaReg}}, \code{\link{summary.copulaReg}},
+\code{\link{copulaSampleSel}}, \code{\link{summary.copulaSampleSel}}
 }
 
 

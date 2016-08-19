@@ -97,7 +97,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 
 \seealso{
-\code{\link{copulaRegObject}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
+\code{\link{plot.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
 }
 
 \examples{
@@ -108,8 +108,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 \keyword{information criteria}
 \keyword{smooth}
 \keyword{regression}
-\keyword{shrinkage smoother}
-\keyword{variable selection}
+
 
 
 

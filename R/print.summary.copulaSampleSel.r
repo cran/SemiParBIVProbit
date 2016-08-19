@@ -34,8 +34,8 @@ bin.link <- x$bin.link
     if(x$margins[1]=="cloglog")                                 m1l <- "cloglog"
     if(x$margins[1]=="cauchit")                                 m1l <- "cauchit"  
 
-    if(x$margins[2] %in% c("N","GU","rGU","LO","GAi") )  m2l <- "identity"
-    if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK") ) m2l <- "log"   
+    if(x$margins[2] %in% c("N","GU","rGU","LO","GAi") )               m2l <- "identity"
+    if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK","NBI","NBII","NBIa","NBIIa","PIG","PO","ZTP") ) m2l <- "log"   
     if(x$margins[2] %in% c("BE") )                              m2l <- "qlogis"   
   
   
@@ -56,6 +56,11 @@ bin.link <- x$bin.link
     if(x$margins[2]=="DAGUM")  cat("\nMARGIN 2: Dagum")
     if(x$margins[2]=="SM")     cat("\nMARGIN 2: Singh-Maddala") 
     if(x$margins[2]=="FISK")     cat("\nMARGIN 2: Fisk") 
+      if(x$margins[2] %in% c("NBI","NBIa"))    	cat("\nMARGIN 2: Negative Binomial - Type I") 
+      if(x$margins[2]%in% c("NBII","NBIIa"))   	cat("\nMARGIN 2: Negative Binomial - Type II")
+      if(x$margins[2]=="PIG")    	cat("\nMARGIN 2: Poisson inverse Gaussian") 
+      if(x$margins[2]=="PO")     	cat("\nMARGIN 2: Poisson")   
+      if(x$margins[2]=="ZTP")    	cat("\nMARGIN 2: Zero Truncated Poisson")    
 
   
   
@@ -195,23 +200,24 @@ if(!is.null(x$tableP3) && !is.null(x$tableP4) && !is.null(x$tableP5)  ){
 
 
 
-
-  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK")  
+  cont1par <- c("PO","ZTP")  
+  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK","NBI", "NBII","NBIa", "NBIIa","PIG")  
   cont3par <- c("DAGUM","SM")  
   
 
   kt.p <- x$tau.a 
   CIkt    <- colMeans(x$CIkt, na.rm = TRUE)
   CIrs <- colMeans(x$CItheta, na.rm = TRUE)
-  CIsig2 <- colMeans(x$CIsig2, na.rm = TRUE)
-  if(x$margins[2] %in% cont3par) CInu <- colMeans(x$CInu, na.rm = TRUE)
+  if(x$margins[2] %in% cont2par) CIsig2 <- colMeans(x$CIsig2, na.rm = TRUE)
+  if(x$margins[2] %in% cont3par){ CIsig2 <- colMeans(x$CIsig2, na.rm = TRUE); CInu <- colMeans(x$CInu, na.rm = TRUE)}
 
 
 
 
   nodi <- 3
   
-     
+  if(x$margins[2] %in% cont1par ) cat("\nn = ",x$n,"  n.sel = ", x$n.sel,"\ntheta = ",format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")","  tau = ",format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")","\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
+  
   if(x$margins[2] %in% cont2par ) cat("\nn = ",x$n,"  n.sel = ", x$n.sel,"\nsigma2 = ",format(x$sigma2.a,digits=nodi),"(",format(CIsig2[1],digits=nodi),",",format(CIsig2[2],digits=nodi),")","\ntheta = ",format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")","  tau = ",format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")","\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  
        
   if(x$margins[2] %in% cont3par ) cat("\nn = ",x$n,"  n.sel = ", x$n.sel,"\nsigma2 = ",format(x$sigma2.a,digits=nodi),"(",format(CIsig2[1],digits=nodi),",",format(CIsig2[2],digits=nodi),")","  nu = ",format(x$nu.a,digits = nodi),"(",format(CInu[1],digits=nodi),",",format(CInu[2],digits=nodi),")","\ntheta = ",format(as.p,digits=nodi),"(",format(CIrs[1],digits=nodi),",",format(CIrs[2],digits=nodi),")","  tau = ",format(kt.p,digits=nodi),"(",format(CIkt[1],digits=nodi),",",format(CIkt[2],digits=nodi),")","\ntotal edf = ",format(x$t.edf,digits=nodi),"\n\n", sep="")  

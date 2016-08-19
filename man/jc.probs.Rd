@@ -18,8 +18,8 @@ jc.probs(x, y1, y2, newdata, type = "bivariate", cond = 0,
 
 \arguments{ 
 
-\item{x}{A fitted \code{SemiParBIVProbit} or \code{copulaReg} or \code{copulaSampleSel} object as 
-         produced by \code{SemiParBIVProbit()} or \code{copulaReg()} or \code{copulaSampleSel()}.}
+\item{x}{A fitted \code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel} object as 
+         produced by the respective fitting function.}
 
 \item{y1}{Value of response for first margin.}
 
@@ -82,11 +82,10 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 ## see examples for SemiParBIVProbit, copulaReg and copulaSampleSel
 }
 
-\keyword{semiparametric bivariate modelling} 
+\keyword{flexible copula regression modelling} 
 \keyword{copula}
+\keyword{marginal distribution}
 \keyword{bayesian posterior simulation}
-
-
 
 
 

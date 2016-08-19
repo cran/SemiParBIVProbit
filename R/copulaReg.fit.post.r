@@ -4,8 +4,9 @@ copulaReg.fit.post <- function(SemiParFit, VC, qu.mag=NULL,
 Ve <- R <- theta <- edf <- edf1 <- NULL
 theta.a <- sigma21 <- sigma22 <- sigma2.1.a <- sigma2.2.a <- nu1 <- nu2 <- nu1.a <- nu2.a <- NULL
 
-cont2par  <- VC$m2 
-cont3par  <- VC$m3 
+cont1par  <- c(VC$m1d) 
+cont2par  <- c(VC$m2,VC$m2d) 
+cont3par  <- c(VC$m3,VC$m3d)
 
 
 He <- SemiParFit$fit$hessian
@@ -116,6 +117,12 @@ if( length(theta)==1 ) theta.a <- theta
 ######################
 # Association measures
 ######################
+
+if(VC$BivD %in% c("J0","J180","J90","J270"))  theta <- ifelse(abs(theta) > 50, 50, abs(theta))
+if(VC$BivD %in% c("J90","J270"))             theta <- -theta 
+
+if(VC$BivD %in% c("C0","C180","G0","G180","C90","C270","G90","G270")) theta <- ifelse(abs(theta) > 100, 100, abs(theta))
+if(VC$BivD %in% c("C90","C270","G90","G270"))                         theta <- -theta
 
 if(!(VC$BivD %in% c("AMH","FGM"))) tau <- BiCopPar2Tau(family = VC$nCa, par = theta)
 if(VC$BivD == "AMH")               tau <- 1 - (2/3)/theta^2*(theta + (1-theta)^2*log(1-theta))

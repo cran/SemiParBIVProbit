@@ -43,7 +43,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 \code{\link{mb}}
 }
 
-\keyword{semiparametric bivariate probit modelling} 
+\keyword{Manski's bounds} 
 
 
 

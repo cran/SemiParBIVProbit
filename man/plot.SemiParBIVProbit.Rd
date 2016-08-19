@@ -1,10 +1,11 @@
 \name{plot.SemiParBIVProbit}
 \alias{plot.SemiParBIVProbit}
 
-\title{SemiParBIVProbit plotting}
+\title{Plotting function}
 
 
-\description{It takes a fitted \code{SemiParBIVProbit},\code{copulaReg},\code{copulaSampleSel},\code{SemiParTRIVProbit} object produced by \code{SemiParBIVProbit()},\code{copulaReg()},\code{copulaSampleSel()},\code{SemiParTRIVProbit()} and 
+\description{It takes a fitted \code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel}/\code{SemiParTRIV} object produced 
+by \code{SemiParBIVProbit()}, \code{copulaReg()}, \code{copulaSampleSel()}, \code{SemiParTRIV()} and 
 plots the 
 estimated smooth functions on the scale of the linear predictors. This function is a 
 wrapper for \code{plot.gam()} in \code{mgcv}. Please see 
@@ -19,8 +20,7 @@ the documentation of \code{plot.gam()} for full details.
 
 \arguments{ 
   
-\item{x}{A fitted \code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel} object 
-         produced by \code{SemiParBIVProbit()}/\code{copulaReg()}/\code{copulaSampleSel()}.}
+\item{x}{A fitted \code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel}/\code{SemiParTRIV()} object.}
 
 \item{eq}{The equation from which smooth terms should be considered for printing.}
 
@@ -78,7 +78,7 @@ The function can not deal with smooths of more than 2 variables.
 
 
 \seealso{
-\code{\link{SemiParBIVProbit}}, \code{\link{copulaReg}}, \code{\link{copulaSampleSel}}, \code{\link{predict.SemiParBIVProbit}}
+\code{\link{SemiParBIVProbit}}, \code{\link{copulaReg}}, \code{\link{copulaSampleSel}}, \code{\link{SemiParTRIV}}, \code{\link{predict.SemiParBIVProbit}}
 }
 
 

@@ -900,30 +900,6 @@ der2pdf2.mu2dersigma2 <- ((1 - y2)^(-1 + ((-1 + mu2) *(-1 + sigma2))/sigma2)*
 if(naive == FALSE){   
 
 
-#set.seed(1)
-#
-#mu2 <- runif(2)
-#sigma2 <- runif(2)
-#y2 <- runif(2)
-#
-#mu2    <- mu2[2]
-#sigma2 <- sigma2[2] 
-#y2     <- y2[2]
-#
-#
-#
-#  func0 <- function(mu2){  pbeta(y2, shape1 = mu2 * (1 - sigma2)/sigma2, shape2 = (1-mu2)*(1 - sigma2)/sigma2) }
-#  grad(func0 , mu2)
-#  numDeriv::hessian(func0 , mu2)
-#  #numericNHessian(func0, mu2)
-#
-#
-#  func0 <- function(sigma2){  pbeta(y2, shape1 = mu2 * (1 - sigma2)/sigma2, shape2 = (1-mu2)*(1 - sigma2)/sigma2) }
-#  grad(func0 , sigma2)
-#  numDeriv::hessian(func0 , sigma2)
-#  #numericNHessian(func0, sigma2)
-
-
 p2  <-  pbeta(y2, shape1 = mu2 * (1 - sigma2)/sigma2, shape2 = (1-mu2)*(1 - sigma2)/sigma2)
 
 funcD <- function(para) pbeta(y2, shape1 = para * (1 - sigma2)/sigma2, shape2 = (1-para)*(1 - sigma2)/sigma2)
@@ -946,8 +922,7 @@ funcD1 <- function(pms1, pms2) pbeta(y2, shape1 = pms1 * (1 - pms2)/pms2, shape2
 der2p2.derdermu2sigma2 <- numch(funcD1, mu2, sigma2)
 
 
-#funcD1 <- function(pms) pbeta(y2, shape1 = pms[1] * (1 - pms[2])/pms[2], shape2 = (1-pms[1])*(1 - pms[2])/pms[2])
-#numericNHessian(funcD1, c(mu2,sigma2))
+
 
 
 
@@ -1365,9 +1340,7 @@ dersigma2.dersigma2.st <- exp(sigma2.st)
 
 pdf2 <- dgamma(y2, shape = 1/sigma2, scale = mu2 * sigma2)
 
-#expr <- expression(1/(sigma2*mu2)^(1/sigma2)*( y2^(1/sigma2-1)*exp(-y2/(sigma2*mu2)) )  /gamma(1/sigma2))
-#Simplify( D(expr, "sigma2") )
-#Simplify( D(D(expr, "sigma2"),"sigma2") )
+
 
 
 derpdf2.dermu2 <-  -(sigma2 * exp((log(y2) - (log(mu2) + log(sigma2) + 

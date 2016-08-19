@@ -1,10 +1,11 @@
 \name{bprobgHsContUniv}
 \alias{bprobgHsContUniv}
+\alias{bprobgHsContUniv3}
 
 \title{Internal Function}
 
 \description{It provides the log-likelihood, gradient and observed information matrix for 
-penalized or unpenalized maximum likelihood optimization, when fitting univariate models with continuous response.}
+penalized/unpenalized maximum likelihood optimization when fitting univariate models with discrete/continuous response.}
 
 
 

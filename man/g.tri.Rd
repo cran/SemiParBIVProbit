@@ -1,11 +1,10 @@
 \name{g.tri}
 \alias{g.tri}
+\alias{g.triSS}
 
 \title{Internal Function}
 
-\description{It calculates the score for a trivariate probit model.
-
-}
+\description{This and other similar internal functions calculate the score for trivariate binary models.}
 
 
 

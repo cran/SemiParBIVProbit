@@ -35,27 +35,33 @@ print.SemiParBIVProbit <- function(x, ...){
     if(x$margins[2]=="cloglog")                                 m2l <- "cloglog"
     if(x$margins[2]=="cauchit")                                 m2l <- "cauchit"   
     if(x$margins[2] %in% c("N","GU","rGU","LO","GAi") )               m2l <- "identity"
-    if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK") ) m2l <- "log"   
+    if(x$margins[2] %in% c("LN","WEI","iG","GA","DAGUM","SM","FISK","NBI","NBII","NBIa","NBIIa","PIG","PO","ZTP") ) m2l <- "log"   
     if(x$margins[2] %in% c("BE") )                              m2l <- "qlogis"   
+    
     
       cat(main.t,cop) 
     
       if(x$margins[1] %in% bin.link) cat("\nMARGIN 1: Bernoulli")  
       if(x$margins[2] %in% bin.link) cat("\nMARGIN 2: Bernoulli") 
       
-      if(x$margins[2]=="N")      cat("\nMARGIN 2: Gaussian")  
-      if(x$margins[2]=="GU")     cat("\nMARGIN 2: Gumbel")    
-      if(x$margins[2]=="rGU")    cat("\nMARGIN 2: reverse Gumbel")  
-      if(x$margins[2]=="LO")     cat("\nMARGIN 2: logistic")   
-      if(x$margins[2]=="LN")     cat("\nMARGIN 2: log-normal") 
-      if(x$margins[2]=="WEI")    cat("\nMARGIN 2: Weibull") 
-      if(x$margins[2]=="iG")     cat("\nMARGIN 2: inverse Gaussian") 
-      if(x$margins[2]%in%c("GA","GAi"))     cat("\nMARGIN 2: gamma")   
-      if(x$margins[2]=="BE")     cat("\nMARGIN 2: beta")    
-      if(x$margins[2]=="DAGUM")  cat("\nMARGIN 2: Dagum")
-      if(x$margins[2]=="SM")     cat("\nMARGIN 2: Singh-Maddala") 
-      if(x$margins[2]=="FISK")     cat("\nMARGIN 2: Fisk") 
-      
+      if(x$margins[2]=="N")             cat("\nMARGIN 2: Gaussian")  
+      if(x$margins[2]=="GU")            cat("\nMARGIN 2: Gumbel")    
+      if(x$margins[2]=="rGU")           cat("\nMARGIN 2: reverse Gumbel")  
+      if(x$margins[2]=="LO")            cat("\nMARGIN 2: logistic")   
+      if(x$margins[2]=="LN")            cat("\nMARGIN 2: log-normal") 
+      if(x$margins[2]=="WEI")           cat("\nMARGIN 2: Weibull") 
+      if(x$margins[2]=="iG")            cat("\nMARGIN 2: inverse Gaussian") 
+      if(x$margins[2]%in%c("GA","GAi")) cat("\nMARGIN 2: gamma")   
+      if(x$margins[2]=="BE")            cat("\nMARGIN 2: beta")    
+      if(x$margins[2]=="DAGUM")         cat("\nMARGIN 2: Dagum")
+      if(x$margins[2]=="SM")            cat("\nMARGIN 2: Singh-Maddala") 
+      if(x$margins[2]=="FISK")          cat("\nMARGIN 2: Fisk") 
+      if(x$margins[2]%in%c("NBI","NBIa"))    	cat("\nMARGIN 2: Negative Binomial - Type I") 
+      if(x$margins[2]%in%c("NBII","NBIIa"))   	cat("\nMARGIN 2: Negative Binomial - Type II")
+      if(x$margins[2]=="PIG")    	cat("\nMARGIN 2: Poisson inverse Gaussian") 
+      if(x$margins[2]=="PO")     	cat("\nMARGIN 2: Poisson")   
+      if(x$margins[2]=="ZTP")    	cat("\nMARGIN 2: Zero Truncated Poisson")    
+   
     
     
     
@@ -127,16 +133,20 @@ print.SemiParBIVProbit <- function(x, ...){
   
   
   
-  cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK")  
-  cont3par <- c("DAGUM","SM")  
+   cont1par <- c("PO","ZTP")  
+   cont2par <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK","NBI", "NBII","NBIa", "NBIIa","PIG")  
+   cont3par <- c("DAGUM","SM")    
   
-  
+
   cat("\n")
             
   if(x$Model %in% c("B","BPO") && x$margins[2] %in% bin.link) cat("n = ",x$n,cp,format(as.p, digits=3),"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
   if(x$Model == "BPO0")                                   cat("n = ",x$n,"  total edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
 
   if(x$Model=="BSS")                                      cat("n = ",x$n,"  n.sel = ",x$n.sel,cp,format(as.p, digits=3),"\ntotal edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
+  
+
+  if(x$Model=="B" && x$margins[2] %in% cont1par ) cat("n = ",x$n, cp, format(as.p, digits=3),"\ntotal edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
   
   if(x$Model=="B" && x$margins[2] %in% cont2par ) cat("n = ",x$n,"  sigma2 = ",x$sigma2.a, cp, format(as.p, digits=3),"\ntotal edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
 

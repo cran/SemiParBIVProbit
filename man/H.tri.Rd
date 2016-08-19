@@ -1,9 +1,10 @@
 \name{H.tri}
 \alias{H.tri}
+\alias{H.triSS}
 
 \title{Internal Function}
 
-\description{It calculates the Hessian for a trivariate probit model.
+\description{This and other similar internal functions calculate the Hessian for trivariate binary models.
 
 }
 

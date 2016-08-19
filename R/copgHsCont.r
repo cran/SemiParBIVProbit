@@ -2120,21 +2120,6 @@ der2c.derp2.derrho <- t19*t33*t35*t39+t9*(-t21*t16*t17+t8*t52*t17-t31/t55*t16)*t
 
 
 
-
-if( VC$BivD %in% c("C270","J270","G270") ) {
-
-der2h.derp1p2   <- -der2h.derp1p2
-der2h.derp1teta <- -der2h.derp1teta
-
-der2c.derp1.derp2	= -der2c.derp1.derp2
-der2c.derp1.derrho	= -der2c.derp1.derrho
-
-
-
-
-}
-
-
 if( VC$BivD %in% c("C90","J90","G90") ) {
 
 der2h.derp1p1         <- -der2h.derp1p1
@@ -2152,8 +2137,10 @@ if( VC$BivD %in% c("C180","J180","G180") ) {
 
 der2h.derp2p2              = -der2h.derp2p2
 der2h.derteta.teta.st      = -der2h.derteta.teta.st
+
 derteta.derteta.st         = -derteta.derteta.st
 der2teta.derteta.stteta.st = -der2teta.derteta.stteta.st 
+
 der2h.derp1p2              = -der2h.derp1p2 
 der2h.derp1teta            = -der2h.derp1teta                                   
 der2h.derp2teta            = -der2h.derp2teta 
@@ -2161,6 +2148,21 @@ der2h.derp1p1              = -der2h.derp1p1
 
 
 }
+
+
+
+
+if( VC$BivD %in% c("C270","J270","G270") ) {
+
+der2h.derp1p2   <- -der2h.derp1p2
+der2h.derp1teta <- -der2h.derp1teta
+
+der2c.derp1.derp2	= -der2c.derp1.derp2
+der2c.derp1.derrho	= -der2c.derp1.derrho
+
+
+}
+
 
 
 

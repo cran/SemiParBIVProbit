@@ -1,10 +1,10 @@
 \name{AT}
 \alias{AT}
 
-\title{Average treatment effect of a binary or continuous endogenous variable}
+\title{Average treatment effect of a binary/continuous/discrete endogenous variable}
 
 \description{ 
-\code{AT} can be used to calculate the treatment effect of a binary or continuous endogenous predictor/treatment, with 
+\code{AT} can be used to calculate the treatment effect of a binary/continuous/discrete endogenous predictor/treatment, with 
 corresponding interval obtained using posterior simulation.}
 
 
@@ -21,7 +21,7 @@ AT(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL,
 
 \arguments{ 
 
-\item{x}{A fitted \code{SemiParBIVProbit} object as produced by \code{SemiParBIVProbit()}.}
+\item{x}{A fitted \code{SemiParBIVProbit}/\code{copulaReg}/ object as produced by the respective fitting function.}
 
 \item{nm.end}{Name of the endogenous variable.} 
 
@@ -34,11 +34,12 @@ the control group. This only makes sense if \code{E = FALSE}.}
 \item{type}{This argument can take three values: \code{"naive"} (the effect is calculated ignoring the presence of observed and unobserved 
             confounders), \code{"univariate"} (the effect is obtained from the univariate model 
             which neglects the presence of unobserved confounders) and \code{"bivariate"} (the effect is obtained from 
-            the bivariate model which accounts for observed and unobserved confounders).}
+            the simultaneous model which accounts for observed and unobserved confounders).}
 
 
 
-\item{ind}{Binary logical variable. It can be used to calculate the AT for a subset of the data. Note that it does not make sense to use \code{ind} 
+\item{ind}{Binary logical variable. It can be used to calculate the AT for a subset of the data. Note that it does not make sense to 
+           use \code{ind} 
            when some observations are excluded from the AT calculation (e.g., when using \code{E = FALSE}).}  
 
 \item{n.sim}{Number of simulated coefficient vectors from the posterior distribution of the estimated model parameters. This is used 
@@ -46,7 +47,7 @@ the control group. This only makes sense if \code{E = FALSE}.}
 
 \item{prob.lev}{Overall probability of the left and right tails of the AT distribution used for interval calculations.} 
 
-\item{length.out}{Ddesired length of the sequence to be used when calculating the effect that a continuous
+\item{length.out}{Ddesired length of the sequence to be used when calculating the effect that a continuous/discrete
                   treatment has on a binary outcome.}
 
 
@@ -54,7 +55,7 @@ the control group. This only makes sense if \code{E = FALSE}.}
 \item{hd.plot}{If \code{TRUE} then a plot of the histogram and kernel density estimate of the simulated average effects is produced. This can 
                only be produced when when binary responses are used.}
 
-\item{te.plot}{For the case of continuous endogenous variable and binary outcome, if \code{TRUE} then a plot  
+\item{te.plot}{For the case of continuous/discrete endogenous variable and binary outcome, if \code{TRUE} then a plot  
                  showing the treatment effects that the binary outcome is equal to 1 for each incremental value of the endogenous variable 
                  and respective intervals is produced.}
 
@@ -75,7 +76,8 @@ treatment (the binary predictor or treatment assumes value 1) and under
 control (the binary treatment assumes value 0). Posterior simulation 
 is used to obtain a confidence/credible interval. See the references below for details. 
 
-AT can also calculate the effect that a continuous endogenous variable has on a binary outcome. In this case the effect will depend on the 
+AT can also calculate the effect that a continuous/discrete endogenous variable has on a binary outcome. In 
+this case the effect will depend on the 
 unit increment chosen (as shown by the plot produced). 
 
 }
@@ -88,7 +90,7 @@ unit increment chosen (as shown by the plot produced).
 \item{prob.lev}{Probability level used.}
 \item{sim.AT}{It returns a vector containing simulated values of the average treatment effect. This 
                is used to calculate intervals.}
-\item{Effects}{For the case of continuous endogenous variable and binary outcome, it returns a matrix made up of 
+\item{Effects}{For the case of continuous/discrete endogenous variable and binary outcome, it returns a matrix made up of 
                three columns containing the effects for each incremental value in the endogenous variable and respective intervals.}            
            
                
@@ -113,14 +115,14 @@ Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariat
 
 
 \seealso{
-\code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}  
+\code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{copulaReg}} 
 }
 
 \examples{
-## see examples for SemiParBIVProbit
+## see examples for SemiParBIVProbit and copulaReg
 }
 
-\keyword{semiparametric bivariate modelling} 
+\keyword{flexible copula regression modelling} 
 \keyword{bivariate model} 
 \keyword{ATE} 
 \keyword{average treatment effect} 

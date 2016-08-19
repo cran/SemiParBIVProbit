@@ -98,7 +98,10 @@ Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence o
 \keyword{score test} 
 \keyword{endogeneity}
 \keyword{non-random sample selection}
-\keyword{correlated model equations/errors}
+\keyword{correlated equations/errors}
+
+
+
 
 
 

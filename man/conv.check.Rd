@@ -3,7 +3,7 @@
 
 \title{Some convergence diagnostics}
 
-\description{It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVProbit()} and produces some 
+\description{It takes a fitted model object and produces some 
 diagnostic information about the fitting procedure.
 
 }
@@ -19,7 +19,7 @@ conv.check(x)
 \arguments{ 
 
 
-\item{x}{\code{SemiParBIVProbit} object produced by \code{SemiParBIVProbit()}.}
+\item{x}{\code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel}/\code{SemiParTRIV} object.}
 
 
 }
@@ -36,12 +36,11 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 
 \seealso{
-\code{\link{SemiParBIVProbit}}
+\code{\link{SemiParBIVProbit}}, \code{\link{SemiParBIVProbit}}, \code{\link{copulaReg}}, \code{\link{copulaSampleSel}}, \code{\link{SemiParTRIV}}
 }
 
 
-\keyword{semiparametric bivariate modelling} 
-\keyword{semiparametric trivariate probit modelling} 
+\keyword{flexible copula regression modelling} 
 \keyword{diagnostics} 
 
 

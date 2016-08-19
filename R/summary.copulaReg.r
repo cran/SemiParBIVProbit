@@ -10,8 +10,9 @@ summary.copulaReg <- function(object, n.sim = 100, prob.lev = 0.05,
 
   bs <- SE <- Vb <- epds <- sigma2.st <- sigma2 <- nu.st <- nu <- est.RHOb <- XX <- Xt <- V <- 1
   
-cont2par  <- object$VC$m2 
-cont3par  <- object$VC$m3 
+cont1par  <- c(object$VC$m1d)   
+cont2par  <- c(object$VC$m2,object$VC$m2d) 
+cont3par  <- c(object$VC$m3,object$VC$m3d) 
   
   n <- object$n
   
@@ -35,6 +36,8 @@ cont3par  <- object$VC$m3
   if(  is.null(object$X3) ) epds <- bs[,lf]
   
   	if( !is.null(object$X3) ){ 
+  if(object$VC$margins[1] %in% cont1par && object$VC$margins[2] %in% cont2par) epds <- object$X4%*%t(bs[,(object$X1.d2+object$X2.d2+object$X3.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2)])
+  if(object$VC$margins[1] %in% cont1par && object$VC$margins[2] %in% cont3par) epds <- object$X5%*%t(bs[,(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2+object$X5.d2)])  	
   if(object$VC$margins[1] %in% cont2par && object$VC$margins[2] %in% cont2par) epds <- object$X5%*%t(bs[,(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2+object$X5.d2)])
  if((object$VC$margins[1] %in% cont3par && object$VC$margins[2] %in% cont2par) || (object$VC$margins[1] %in% cont2par && object$VC$margins[2] %in% cont3par) ) epds <- object$X6%*%t(bs[,(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2+object$X5.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2+object$X5.d2+object$X6.d2)])
   if(object$VC$margins[1] %in% cont3par && object$VC$margins[2] %in% cont3par) epds <- object$X7%*%t(bs[,(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2+object$X5.d2+object$X6.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2+object$X5.d2+object$X6.d2+object$X7.d2)])
@@ -56,6 +59,12 @@ est.RHOb <- teta.tr(object$VC, epds)$teta
 # Association measures
 ######################
 
+if(object$VC$BivD %in% c("J0","J180"))  est.RHOb <- ifelse(est.RHOb > 50, 50, est.RHOb)
+if(object$VC$BivD %in% c("J90","J270")) est.RHOb <- - ifelse(abs(est.RHOb) > 50, 50, abs(est.RHOb)) 
+
+if(object$VC$BivD %in% c("C0","C180","G0","G180"))  est.RHOb <- ifelse(est.RHOb > 100, 100, est.RHOb)
+if(object$VC$BivD %in% c("C90","C270","G90","G270")) est.RHOb <- - ifelse(abs(est.RHOb) > 100, 100, abs(est.RHOb))  
+
 if(!(object$VC$BivD %in% c("AMH","FGM"))) tau <- BiCopPar2Tau(family = object$VC$nCa, par = est.RHOb) 
 if(object$VC$BivD == "AMH")               tau <- 1 - (2/3)/est.RHOb^2*(est.RHOb + (1-est.RHOb)^2*log(1-est.RHOb))
 if(object$VC$BivD == "FGM")               tau <- 2/9*est.RHOb 
@@ -73,6 +82,8 @@ if( is.null(object$X3) ) CIkt <- t(CIkt)
 
       if( is.null(object$X3) ) {
       
+if(object$VC$margins[1] %in% cont1par && object$VC$margins[2] %in% cont2par ){ ps1 <- lf - 1; ps2 <- lf - 1 }
+if(object$VC$margins[1] %in% cont1par && object$VC$margins[2] %in% cont3par ){ ps1 <- lf - 2; ps2 <- lf - 2 }
 if(object$VC$margins[1] %in% cont2par && object$VC$margins[2] %in% cont2par ){ ps1 <- lf - 2; ps2 <- lf - 1 }
 if(object$VC$margins[1] %in% cont3par && object$VC$margins[2] %in% cont3par ){ ps1 <- lf - 4; ps2 <- lf - 3 }
 if((object$VC$margins[1] %in% cont2par && object$VC$margins[2] %in% cont3par) || (object$VC$margins[1] %in% cont3par && object$VC$margins[2] %in% cont2par) ){ ps1 <- lf - 3; ps2 <- lf - 2 }
@@ -86,15 +97,22 @@ if((object$VC$margins[1] %in% cont2par && object$VC$margins[2] %in% cont3par) ||
   
       if( !is.null(object$X3) ) {
 
+if(!(object$VC$margins[1] %in% cont1par)){
        sigma2.1.star <- object$X3%*%t(bs[,(object$X1.d2+object$X2.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2)]) 
        sigma2.2.star <- object$X4%*%t(bs[,(object$X1.d2+object$X2.d2+object$X3.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2)]) 
+                                          }
+
+if(object$VC$margins[1] %in% cont1par){
+       sigma2.1.star <- c(0, 0)
+       sigma2.2.star <- object$X3%*%t(bs[,(object$X1.d2+object$X2.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2)]) 
+                                      }
 
                                 }  
 
     sigma21 <- esp.tr(sigma2.1.star, object$VC$margins[1])$vrb  
     sigma22 <- esp.tr(sigma2.2.star, object$VC$margins[2])$vrb  
 
-   CIsig21 <- rowQuantiles(sigma21, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE)
+   if(!(object$VC$margins[1] %in% cont1par)) CIsig21 <- rowQuantiles(sigma21, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE) else CIsig21 <- c(0,0)
    CIsig22 <- rowQuantiles(sigma22, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE)
    if( is.null(object$X3) ){ CIsig21 <- t(CIsig21); CIsig22 <- t(CIsig22) }
   
@@ -151,6 +169,39 @@ nu2 <- esp.tr(nu2.st, object$VC$margins[2])$vrb
 
    
 } 
+
+
+
+
+
+
+if(object$VC$margins[1] %in% cont1par && object$VC$margins[2] %in% cont3par ){  
+  
+
+  if( is.null(object$X3) )  {  pn2 <- lf - 1; nu2.st <- t(as.matrix(bs[, pn2]))  } 
+  
+  if( !is.null(object$X3) ) {  
+ 
+       nu2.st <- object$X4%*%t(bs[,(object$X1.d2 + object$X2.d2 + object$X3.d2 + 1):(object$X1.d2 + object$X2.d2 + object$X3.d2 + object$X4.d2)]) 
+  
+                }   
+  
+nu2 <- esp.tr(nu2.st, object$VC$margins[2])$vrb   
+ 
+   
+   CInu2 <- rowQuantiles(nu2, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE)
+   if( is.null(object$X3) ) CInu2 <- t(CInu2) 
+
+   
+} 
+
+
+
+
+
+
+
+
   
   
   
@@ -310,7 +361,8 @@ nu1 <- esp.tr(nu1.st, object$VC$margins[1])$vrb
 if(cm.plot == TRUE){
   
   c1   <- c("N","GU","rGU","LO")
-  c2   <- c("LN","WEI","iG","GA","GAi","DAGUM","SM","BE","FISK") 
+  c2   <- c("LN","WEI","iG","GA","GAi","DAGUM","SM","BE","FISK")
+  c2d  <- c("NBI","NBII","NBIa","NBIIa","PIG","PO","ZTP")
    
   m2 <- s2 <- nu2 <- m1 <- s1 <- nu1 <- 0 
   par1 <- object$theta.a 
@@ -326,7 +378,15 @@ if(cm.plot == TRUE){
   s2 <- object$sigma22.a
   nu2 <- object$nu2.a
                                       } 
-                                      
+    
+    
+    
+  if(object$margins[1] %in% cont1par ){ 
+  m1 <- mean(object$eta1) 
+  s1 <- 0
+  nu1 <- 0
+                                      }     
+    
   if(object$margins[1] %in% cont2par ){ 
   m1 <- mean(object$eta1) 
   s1 <- object$sigma21.a
@@ -367,23 +427,68 @@ if(cm.plot == TRUE){
    
      size <- 100
                                          
-           x1 <- seq(from = min(resp1), to = max(resp1), length.out = size)                                                      
+           if(!(mar1 %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP"))) x1 <- seq(from = min(resp1), to = max(resp1), length.out = size)   
+           
+           if(  mar1 %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP") ){ x1 <- c( min(resp1):max(resp1) ); size <- length(x1)  }
+           
+           
+           
            x2 <- seq(from = min(resp2), to = max(resp2), length.out = size)                        
             
            x11 <- rep(x1, each = size)
            x22 <- rep(x2, times = size)
  
-           resf1 <- distrHsAT(x11, m1, s1, nu1, mar1)
+ 
+           if(!(mar1 %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP"))) resf1 <- distrHsAT(x11, m1, s1, nu1, mar1)
+           
+           if(mar1 %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP")){
+           
+           y1m <- NULL
+           
+               if(mar1 %in% c("ZTP")){
+	        
+	       ly1 <- length(x11)
+	       y1m <- list()
+	       my1 <- max(x11)
+	       for(i in 1:ly1){ y1m[[i]] <- seq(0, x11[i]); length(y1m[[i]]) <- my1+1} 
+	       y1m <- do.call(rbind, y1m)     
+	        
+               }
+           
+           resf1 <- distrHsATDiscr(x11, m1, s1, nu1, mar1, y2m = y1m)
+           
+           }
+           
+           resf2 <- distrHsAT(x22, m2, s2, nu2, mar2)
+           
+           
+           
+           
            d.x1  <- resf1$pdf2
            p1    <- resf1$p2
            
-           
-           resf2 <- distrHsAT(x22, m2, s2, nu2, mar2)
            d.x2  <- resf2$pdf2
            p2    <- resf2$p2
            
            
-           md <- copgHsAT(p1, p2, par1, BivD, Ln = TRUE)$c.copula2.be1be2*d.x1*d.x2    
+           
+           
+           if(mar1 %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP")){
+           
+	     h1  <- copgHsAT(         p1, p2, par1, BivD, Ln = FALSE)$c.copula.be2  
+	     h2  <- copgHsAT(mm(p1-d.x1), p2, par1, BivD, Ln = FALSE)$c.copula.be2   
+	     
+	     md  <- d.x2*(h1 - h2) 
+	     
+           }
+           
+           
+           
+           
+           
+           if(!(mar1 %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP"))) md <- copgHsAT(p1, p2, par1, BivD, Ln = TRUE)$c.copula2.be1be2*d.x1*d.x2 
+           
+          
            z  <- matrix(data = md, nrow = size, byrow = TRUE)
        
            filled.contour(x1, x2, z, color = topo.colors, nlevels = 16, ...) 
@@ -392,15 +497,48 @@ if(cm.plot == TRUE){
   
  
  
+ 
+ 
+ 
+   if(object$margins[1] %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP") ){ 
+   
+   test.resp <- c( min(object$y1):max(object$y1) )
+   
+           y1m <- NULL
+           
+               if(object$margins[1] %in% c("ZTP")){
+	        
+	       ly1 <- length(test.resp)
+	       y1m <- list()
+	       my1 <- max(test.resp)
+	       for(i in 1:ly1){ y1m[[i]] <- seq(0, test.resp[i]); length(y1m[[i]]) <- my1+1} 
+	       y1m <- do.call(rbind, y1m)     
+	        
+               }
+           
+           
+     test.dens <- round( distrHsATDiscr(test.resp, m1, s1, nu1, object$VC$margins[1], y2m = y1m)$pdf2, n.dig)
+ 
+   }
+ 
+ 
+ 
+   if(!(object$margins[1] %in% c("NBI","NBII","NBIa","NBIIa", "PIG","PO","ZTP")) ){
    
    if(object$margins[1] %in% c1) test.resp <- seq(from = min(object$y1), to = max(object$y1), length.out = n.grid)
    if(object$margins[1] %in% c2) test.resp <- seq(from = 0.0001, to = max(object$y1), length.out = n.grid)
  
-   
    test.dens <- round( distrHsAT(test.resp, m1, s1, nu1, object$VC$margins[1])$pdf2, n.dig)
+   
+   }
+   
+   
    resp1 <- test.resp[which(test.dens != 0)]
    
    if( length(resp1) < 2 ) stop("Increase/decrease n.dig and/or n.grid values.")
+   
+   
+
    
    
    if(object$margins[2] %in% c1) test.resp <- seq(from = min(object$y2), to = max(object$y2), length.out = n.grid)
@@ -412,6 +550,10 @@ if(cm.plot == TRUE){
    
    if( length(resp2) < 2 ) stop("Increase/decrease n.dig and/or n.grid values.")
    
+
+   
+ 
+ 
   
  Cplot(BivD = object$BivD, par1 = par1, mar1 = object$margins[1], mar2 = object$margins[2], 
        m1 = m1, m2 = m2, s1 = s1, s2 = s2, nu1 = nu1, nu2 = nu2, resp1 = resp1, resp2 = resp2, main = cop, ylab = ylab, xlab = xlab, ...)  

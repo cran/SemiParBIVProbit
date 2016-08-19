@@ -1,0 +1,293 @@
+bdiscrdiscr11 <- function(params, respvec, VC, ps, AT = FALSE){
+
+    eta1 <- VC$X1%*%params[1:VC$X1.d2]
+    eta2 <- VC$X2%*%params[(VC$X1.d2 + 1):(VC$X1.d2 + VC$X2.d2)]
+    etad <- etas1 <- etas2 <- l.ln <- NULL 
+  
+    epsilon <- 0.0000001 
+    max.p   <- 0.9999999
+    
+    
+  if(is.null(VC$X3)){  
+    sigma21.st <- etas1 <- 0
+    sigma22.st <- etas2 <- 0
+    teta.st    <- etad  <- params[(VC$X1.d2 + VC$X2.d2 + 1)]
+  } 
+  
+  
+  if(!is.null(VC$X3)){  
+    sigma21.st <- etas1 <- 0
+    sigma22.st <- etas2 <- 0
+    teta.st    <- etad  <- VC$X3%*%params[(VC$X1.d2 + VC$X2.d2 + 1):(VC$X1.d2 + VC$X2.d2 + VC$X3.d2)]
+  }  
+  
+  
+##################
+## Transformations
+##################
+  
+    sstr1 <- 0
+    sstr2 <- 0
+  
+    sigma21.st <- 0
+    sigma22.st <- 0
+    
+    sigma21    <- 0
+    sigma22    <- 0
+    
+    eta1 <- eta.tr(eta1, VC$margins[1])
+    eta2 <- eta.tr(eta2, VC$margins[2])
+    
+resT    <- teta.tr(VC, teta.st)
+teta.st <- resT$teta.st
+teta    <- resT$teta
+    
+##################
+##################
+
+  dHs1 <- distrHsDiscr(respvec$y1, eta1, sigma21, sigma21.st, nu = 1, nu.st = 1, margin2=VC$margins[1], naive = FALSE, y2m = VC$y1m)
+  dHs2 <- distrHsDiscr(respvec$y2, eta2, sigma22, sigma22.st, nu = 1, nu.st = 1, margin2=VC$margins[2], naive = FALSE, y2m = VC$y2m)
+
+  pdf1 <- dHs1$pdf2
+  pdf2 <- dHs2$pdf2
+
+  p1 <- dHs1$p2
+  p2 <- dHs2$p2
+  
+  C11 <- BiCDF(p1, p2, VC$nC, teta)
+  C01 <- BiCDF(mm(p1-pdf1), p2, VC$nC, teta)
+  C10 <- BiCDF(p1, mm(p2-pdf2), VC$nC, teta)
+  C00 <- BiCDF(mm(p1-pdf1), mm(p2-pdf2), VC$nC, teta)
+
+  E <- C11 - C01 - C10 + C00 
+  E <- ifelse(E < epsilon, epsilon, E)  
+
+
+  l.par <- VC$weights*log(E)
+  
+  
+##################
+
+  dHC11 <- copgHs(p1, p2,                   eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD)
+  dHC01 <- copgHs(mm(p1-pdf1), p2,          eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD)
+  dHC10 <- copgHs(p1, mm(p2-pdf2),          eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD)
+  dHC00 <- copgHs(mm(p1-pdf1), mm(p2-pdf2), eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD)
+ 
+  derC11.derp1 <- dHC11$c.copula.be1  
+  derC01.derp1 <- dHC01$c.copula.be1  
+  derC10.derp1 <- dHC10$c.copula.be1  
+  derC00.derp1 <- dHC00$c.copula.be1 
+  
+  derC11.derp2 <- dHC11$c.copula.be2  
+  derC01.derp2 <- dHC01$c.copula.be2  
+  derC10.derp2 <- dHC10$c.copula.be2  
+  derC00.derp2 <- dHC00$c.copula.be2   
+  
+  derC11.derthet <- dHC11$c.copula.thet 
+  derC01.derthet <- dHC01$c.copula.thet  
+  derC10.derthet <- dHC10$c.copula.thet  
+  derC00.derthet <- dHC00$c.copula.thet  
+  
+  derteta.derteta.st <- dHC11$derteta.derteta.st
+  
+  derpdf1.dereta1    <- dHs1$derpdf2.dereta2 
+  derp1.dereta1      <- dHs1$derp2.dereta2
+  derp1m1.dereta1    <- derp1.dereta1 - derpdf1.dereta1
+    
+  derpdf2.dereta2    <- dHs2$derpdf2.dereta2 
+  derp2.dereta2      <- dHs2$derp2.dereta2
+  derp2m1.dereta2    <- derp2.dereta2 - derpdf2.dereta2
+  
+  fE1  <- (derC11.derp1 - derC10.derp1)*derp1.dereta1 - (derC01.derp1 - derC00.derp1)*derp1m1.dereta1    
+  fE2  <- (derC11.derp2 - derC01.derp2)*derp2.dereta2 - (derC10.derp2 - derC00.derp2)*derp2m1.dereta2   
+  fEt  <- (derC11.derthet - derC01.derthet - derC10.derthet + derC00.derthet)*derteta.derteta.st   
+
+  dl.dbe1        <- VC$weights*fE1/E   
+  dl.dbe2        <- VC$weights*fE2/E
+  dl.dteta.st    <- VC$weights*fEt/E
+
+##################
+
+  der2C11.derp1p1 <- dHC11$c.copula2.be1
+  der2C01.derp1p1 <- dHC01$c.copula2.be1  
+  der2C10.derp1p1 <- dHC10$c.copula2.be1  
+  der2C00.derp1p1 <- dHC00$c.copula2.be1 
+  
+  der2C11.derp2p2 <- dHC11$c.copula2.be2
+  der2C01.derp2p2 <- dHC01$c.copula2.be2  
+  der2C10.derp2p2 <- dHC10$c.copula2.be2  
+  der2C00.derp2p2 <- dHC00$c.copula2.be2  
+  
+  der2C11.derp1p2 <- dHC11$c.copula2.be1be2
+  der2C01.derp1p2 <- dHC01$c.copula2.be1be2 
+  der2C10.derp1p2 <- dHC10$c.copula2.be1be2  
+  der2C00.derp1p2 <- dHC00$c.copula2.be1be2
+ 
+  der2C11.derp1t  <- dHC11$c.copula2.be1t
+  der2C01.derp1t  <- dHC01$c.copula2.be1t 
+  der2C10.derp1t  <- dHC10$c.copula2.be1t  
+  der2C00.derp1t  <- dHC00$c.copula2.be1t 
+  
+  der2C11.derp2t  <- dHC11$c.copula2.be2t
+  der2C01.derp2t  <- dHC01$c.copula2.be2t 
+  der2C10.derp2t  <- dHC10$c.copula2.be2t  
+  der2C00.derp2t  <- dHC00$c.copula2.be2t   
+  
+  der2C11.derthet2 <- dHC11$bit1.th2ATE
+  der2C01.derthet2 <- dHC01$bit1.th2ATE  
+  der2C10.derthet2 <- dHC10$bit1.th2ATE  
+  der2C00.derthet2 <- dHC00$bit1.th2ATE   
+
+  der2teta.derteta.stteta.st <- dHC11$der2teta.derteta.stteta.st 
+
+  der2pdf1.dereta1     <- dHs1$der2pdf2.dereta2 
+  der2p1.dereta1eta1   <- dHs1$der2p2.dereta2eta2
+  der2p1m1.dereta1eta1 <- der2p1.dereta1eta1 - der2pdf1.dereta1
+
+  der2pdf2.dereta2     <- dHs2$der2pdf2.dereta2
+  der2p2.dereta2eta2   <- dHs2$der2p2.dereta2eta2
+  der2p2m1.dereta2eta2 <- der2p2.dereta2eta2 - der2pdf2.dereta2 
+  
+
+
+d2l.be1.be1 <- -VC$weights*( (E*(der2C11.derp1p1*derp1.dereta1^2 + derC11.derp1*der2p1.dereta1eta1 - 
+(der2C01.derp1p1*derp1m1.dereta1^2 + derC01.derp1*der2p1m1.dereta1eta1) - 
+(der2C10.derp1p1*derp1.dereta1^2 + derC10.derp1*der2p1.dereta1eta1) + 
+(der2C00.derp1p1*derp1m1.dereta1^2 + derC00.derp1*der2p1m1.dereta1eta1)) - fE1^2)/E^2  )
+
+d2l.be2.be2 <- -VC$weights*((E*(der2C11.derp2p2*derp2.dereta2^2 + derC11.derp2*der2p2.dereta2eta2 - 
+(der2C01.derp2p2*derp2.dereta2^2 + derC01.derp2*der2p2.dereta2eta2) - 
+(der2C10.derp2p2*derp2m1.dereta2^2 + derC10.derp2*der2p2m1.dereta2eta2) + 
+(der2C00.derp2p2*derp2m1.dereta2^2 + derC00.derp2*der2p2m1.dereta2eta2)) - fE2^2)/E^2  )
+
+
+
+d2l.rho.rho <- -VC$weights*((E*(der2C11.derthet2*derteta.derteta.st^2 + derC11.derthet*der2teta.derteta.stteta.st - 
+(der2C01.derthet2*derteta.derteta.st^2 + derC01.derthet*der2teta.derteta.stteta.st) - 
+(der2C10.derthet2*derteta.derteta.st^2 + derC10.derthet*der2teta.derteta.stteta.st) + 
+(der2C00.derthet2*derteta.derteta.st^2 + derC00.derthet*der2teta.derteta.stteta.st)) - fEt^2)/E^2  )                                   
+
+d2l.be1.be2 <- -VC$weights*( (E*(der2C11.derp1p2*derp1.dereta1*derp2.dereta2  - 
+der2C01.derp1p2*derp1m1.dereta1*derp2.dereta2 - 
+der2C10.derp1p2*derp1.dereta1*derp2m1.dereta2 + 
+der2C00.derp1p2*derp1m1.dereta1*derp2m1.dereta2) - fE1*fE2)/E^2  )
+
+
+d2l.be1.rho <- -VC$weights*((E*(der2C11.derp1t*derp1.dereta1*derteta.derteta.st  - 
+der2C01.derp1t*derp1m1.dereta1*derteta.derteta.st - 
+der2C10.derp1t*derp1.dereta1*derteta.derteta.st + 
+der2C00.derp1t*derp1m1.dereta1*derteta.derteta.st) - fE1*fEt)/E^2  )
+
+
+
+d2l.be2.rho <- -VC$weights*((E*(der2C11.derp2t*derp2.dereta2*derteta.derteta.st  - 
+der2C01.derp2t*derp2.dereta2*derteta.derteta.st - 
+der2C10.derp2t*derp2m1.dereta2*derteta.derteta.st + 
+der2C00.derp2t*derp2m1.dereta2*derteta.derteta.st) - fE2*fEt)/E^2  )
+
+
+
+
+
+
+    
+
+
+if( is.null(VC$X3) ){
+
+
+
+  G   <- -c(colSums( c(dl.dbe1)*VC$X1 ),
+              colSums( c(dl.dbe2)*VC$X2 ),
+              sum( dl.dteta.st )            )
+  
+  
+  
+    be1.be1 <- crossprod(VC$X1*c(d2l.be1.be1),VC$X1)
+    be2.be2 <- crossprod(VC$X2*c(d2l.be2.be2),VC$X2)
+    be1.be2 <- crossprod(VC$X1*c(d2l.be1.be2),VC$X2)
+    be1.rho <-   t(t(rowSums(t(VC$X1*c(d2l.be1.rho)))))
+    be2.rho <-   t(t(rowSums(t(VC$X2*c(d2l.be2.rho)))))
+  
+    H <- rbind( cbind( be1.be1    ,   be1.be2    ,             be1.rho  ), 
+                cbind( t(be1.be2) ,   be2.be2    ,             be2.rho  ), 
+                cbind( t(be1.rho) ,   t(be2.rho) ,     sum(d2l.rho.rho) ) 
+                
+              ) 
+
+}
+
+
+
+if( !is.null(VC$X3) ){
+
+
+
+G   <- -c( colSums(       c(dl.dbe1)*VC$X1 ) ,
+           colSums(       c(dl.dbe2)*VC$X2 ) ,
+           colSums(   c(dl.dteta.st)*VC$X3 )  )  
+
+                 
+    be1.be1         <- crossprod(VC$X1*c(d2l.be1.be1),VC$X1)
+    be2.be2         <- crossprod(VC$X2*c(d2l.be2.be2),VC$X2)
+    be1.be2         <- crossprod(VC$X1*c(d2l.be1.be2),VC$X2)
+    be1.rho         <- crossprod(VC$X1*c(d2l.be1.rho),VC$X3)    
+    be2.rho         <- crossprod(VC$X2*c(d2l.be2.rho),VC$X3)   
+    rho.rho         <- crossprod(VC$X3*c(d2l.rho.rho),VC$X3)    
+    
+    
+    H <- rbind( cbind( be1.be1        ,   be1.be2      ,    be1.rho    ), 
+                cbind( t(be1.be2)     ,   be2.be2      ,    be2.rho    ), 
+                cbind( t(be1.rho)     ,   t(be2.rho)   ,    rho.rho    ) ) 
+                
+                 
+                 
+
+}
+
+
+
+res <- -sum(l.par)
+
+
+
+ 
+if(VC$extra.regI == "pC") H <- regH(H, type = 1)
+  
+  S.h  <- ps$S.h  
+  
+  if( length(S.h) != 1){
+  
+  S.h1 <- 0.5*crossprod(params,S.h)%*%params
+  S.h2 <- S.h%*%params
+  
+  } else S.h <- S.h1 <- S.h2 <- 0   
+  
+  S.res <- res
+  res   <- S.res + S.h1
+  G     <- G + S.h2
+  H     <- H + S.h   
+        
+if(VC$extra.regI == "sED") H <- regH(H, type = 2)   
+  
+  
+  
+
+  
+  
+  
+  
+
+         list(value=res, gradient=G, hessian=H, S.h=S.h, S.h1=S.h1, S.h2=S.h2, l=S.res, l.ln = l.ln, l.par=l.par, ps = ps, 
+              eta1=eta1, eta2=eta2, etad=etad, etas1 = etas1, etas2 = etas2, 
+              BivD=VC$BivD, p1 = p1, p2 = p2,
+              dl.dbe1          =dl.dbe1,       
+              dl.dbe2          =dl.dbe2,       
+              dl.dteta.st      =dl.dteta.st) 
+              
+              
+
+  }
+  
+
+  

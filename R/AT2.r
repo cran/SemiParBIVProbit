@@ -6,6 +6,7 @@ AT2 <- function(x1, x2, index1, index2, n.sim = 100, prob.lev = 0.05,
 
 # to re-check averaging etc ...
 
+stop("not ready yet to use")
 
 etap.noi <- X.int <- X.noi <- eti1 <- eti0 <- etno <- indS <- bs <- ind.excl <- p.int1 <- p.int0 <- d.int1 <- d.int0 <- p.etn <- d.etn <- ass.p <- ass.pst <- C.11 <- C.10 <- sig2 <- peti1s <- peti0s <- sigma2.st <- sigma2s <- eti1s <- eti0s <- d0 <- d1 <- p.etns <- etnos <- etds <- ass.ps <- 1
 diffEf <- fy1.y2 <- est.ATso <- y2 <- CIF <- Pr <- Effects <- C.11 <- C.10 <- C.11s <- C.10s <- v0s <- v1s <- ATs <- NULL

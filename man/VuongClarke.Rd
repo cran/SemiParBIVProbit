@@ -73,17 +73,10 @@ Vuong Q.H. (1989), Likelihood Ratio Tests for Model Selection and Non-Nested Hyp
 
 
 
-
-\seealso{
-\code{\link{SemiParBIVProbit}}
-}
-
 \examples{
 ## see examples for SemiParBIVProbit
 }
 
-\keyword{semiparametric bivariate modelling} 
-\keyword{semiparametric trivariate probit modelling} 
 \keyword{Vuong test} 
 \keyword{Clarke test} 
 \keyword{likelihood ratio test} 

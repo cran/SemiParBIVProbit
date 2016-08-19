@@ -43,7 +43,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 \code{\link{AT2}}
 }
 
-\keyword{semiparametric bivariate modelling} 
+\keyword{flexible copula regression modelling} 
 
 
 

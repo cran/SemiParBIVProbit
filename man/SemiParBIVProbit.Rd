@@ -1,36 +1,24 @@
 \name{SemiParBIVProbit}
 \alias{SemiParBIVProbit}
 
-\title{Semiparametric Copula Bivariate Regression Models}
+\title{Semiparametric Copula Bivariate Binary Models}
 
 \description{ 
-\code{SemiParBIVProbit} can be used to fit bivariate binary models where the linear predictors of the two main equations can 
-be flexibly specified using 
-parametric and regression spline components. Several bivariate copula distributions are supported. During the model fitting process, the 
-possible presence of associated error equations, endogeneity, non-random sample selection or partial observability is accounted for. Regression 
-spline bases are extracted from the package \code{mgcv}. Multi-dimensional smooths are available 
-via the use of penalized thin plate regression splines. Note that, if it makes sense, the dependence parameter of the employed bivariate 
-distribution can be specified as a function of covariates.
-
-\code{SemiParBIVProbit} can also be used to fit bivariate models in which one response is binary and the other is continuous. This case
-is relevant for estimating, for instance, the effect that a binary endogenous variable has on a continuous response or viceversa
-or when interest is in modelling jointly binary and continuous responses. 
-
-There are many continuous distributions and copula functions that can be employed when using \code{SemiParBIVProbit} and we plan to include more 
-options. Other bivariate models can/will be implemented.
+\code{SemiParBIVProbit} fits flexible copula bivariate binary models with several types of covariate 
+effects, copula distributions and link functions. During the model fitting process, the 
+possible presence of associated error equations, endogeneity, non-random sample selection or partial observability is accounted for.
 
 }
-
 
 
 \usage{
 SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,  
                  Model = "B", BivD = "N", 
                  margins = c("probit","probit"), gamlssfit = FALSE,
-                 fp = FALSE, hess = TRUE, infl.fac = 1, 
+                 fp = FALSE, hess = TRUE, infl.fac = 1, theta.fx = NULL, 
                  rinit = 1, rmax = 100, 
                  iterlimsp = 50, tolsp = 1e-07,
-                 gc.l = FALSE, parscale, extra.regI = "t")
+                 gc.l = FALSE, parscale, extra.regI = "t", intf = FALSE)
 }
 
 
@@ -43,12 +31,7 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
                   selection purposes and more. See the examples below and the documentation of \code{mgcv} for further 
                   details on formula specifications. Note that 
                   if \code{Model = "BSS"} then the first formula MUST refer to the selection equation. Furthermore,
-                  if it makes sense, a third equation for the dependence parameter can be specified (see Example 1 below).
-                  When one outcome is binary and the other continuous then the first equation must refer to the binary outcome whereas 
-                  the second to the continuous one. For binary-continuous bivariate models, a maximum of three more equations can be 
-                  specified, one modelling 
-                  the scale parameter, the other the shape parameter (this would be the case
-                  for "DAGUM" and "SM") and the last for the dependence parameter. The order matters. Examples are provided below.} 
+                  if it makes sense, a third equation for the dependence parameter can be specified (see Example 1 below).} 
 
 \item{data}{An optional data frame, list or environment containing the variables in the model.  If not found in \code{data}, the
             variables are taken from \code{environment(formula)}, typically the environment from which \code{SemiParBIVProbit} is called.} 
@@ -61,19 +44,9 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
              "BSS" (bivariate model with non-random sample selection), "BPO" (bivariate model with partial observability)
              and "BPO0" (bivariate model with partial observability and zero correlation).}
 
-\item{margins}{It indicates the distributions used for the two margins. The first is one of "probit", "logit", "cloglog" which refer 
-               to the link function of the first equation whose response is always assumed to be binary. The response 
-               for the second equation can be binary ("probit"), normal ("N"), 
-               log-normal ("LN"), Gumbel ("GU"), reverse Gumbel ("rGU"), 
-               logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"), 
-               gamma with identity link for the location parameter ("GAi"), Dagum ("DAGUM"), 
-               Singh-Maddala ("SM"), beta ("BE"), Fisk ("FISK", also known as log-logistic distribution).}
+\item{margins}{It indicates the link functions used for the two margins. Possible choiced are "probit", "logit" and "cloglog".}
                
-\item{gamlssfit}{In the case of continuous margin for the outcome equation, if \code{gamlssfit = TRUE} then 
-                 a gamlss if fitted for the outcome equation. This is useful to calculate, for instance, the average
-                 treatment effect from the model which does not account for endogeneity/associated equation errors.
-                 This may also be used for obtaining better calibrated starting values, for instance.
-               }               
+\item{gamlssfit}{This is for internal purposes only.}               
 
 \item{BivD}{Type of bivariate error distribution employed. Possible choices are "N", "C0", "C90", "C180", "C270", "J0", "J90", "J180", "J270", 
             "G0", "G90", "G180", "G270", "F", "AMH", "FGM" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
@@ -89,6 +62,8 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
 
 \item{infl.fac}{Inflation factor for the model degrees of freedom in the approximate AIC. Smoother models can be obtained setting 
              this parameter to a value greater than 1.}
+
+\item{theta.fx}{If \code{Model = "B"} and \code{BivD = "N"} then the theta parameter can be fixed in estimation.}
 
 \item{rinit}{Starting trust region radius. The trust region radius is adjusted as the algorithm proceeds. See the documentation
              of \code{trust} for further details.}
@@ -112,7 +87,8 @@ documentation of \code{trust} for more details.}
                   If different from "t" then extra regularization is applied via the options "pC" (pivoted Choleski - this
                   will only work when the information matrix is semi-positive or positive definite) and "sED" (symmetric eigen-decomposition).}  
      
-                      
+\item{intf}{This is for internal use.} 
+
 }
 
 
@@ -122,15 +98,14 @@ The bivariate models considered in this package consist of two model equations w
 whose association between the responses is modelled through parameter \eqn{\theta}{\theta} of a standardised bivariate normal 
 distribution or that of a bivariate copula distribution. The linear predictors of the two equations are flexibly specified using 
 parametric components and smooth functions of covariates. The same can be done for the dependence parameter if it makes sense.
-Estimation is achieved within a  penalized likelihood framework with integrated automatic multiple smoothing parameter selection. The use of 
+Estimation is achieved within a penalized likelihood framework with integrated automatic multiple smoothing parameter selection. The use of 
 penalty matrices allows for the suppression of that part of smooth term complexity which has no support 
 from the data. The trade-off between smoothness 
 and fitness is controlled by smoothing parameters associated with the penalty matrices. Smoothing parameters are chosen to 
 minimise an approximate AIC.
 
-Details of the underlying fitting methods are given in Radice, Marra and Wojtys (in press). Releases previous to 3.2-7
+Details of the underlying fitting methods are given in Radice, Marra and Wojtys (2016) and Marra et al. (in press). Releases previous to 3.2-7
 were based on the algorithms detailed in Marra and Radice (2011, 2013). 
-
 
 For sample selection models, if there are factors in the model, before fitting, the user has to ensure 
 that the numbers of factor variables' levels in the selected sample 
@@ -171,63 +146,38 @@ Journal of Statistics}, 39(2), 259-279.
 
 Marra G. and Radice R. (2013), A Penalized Likelihood Estimation Approach to Semiparametric Sample Selection Binary Response Modeling. \emph{Electronic Journal of Statistics}, 7, 1432-1455.
 
-Marra G., Radice R. and Missiroli S. (2014), Testing the Hypothesis of Absence of Unobserved Confounding in Semiparametric Bivariate Probit Models. \emph{Computational Statistics}, 29(3-4), 715-741.
-
-Marra G., Radice R. and Filippou P. (in press), Regression Spline Bivariate Probit Models: A Practical Approach to Testing for Exogeneity. \emph{Communications in Statistics - Simulation and Computation}.
-
-Marra G., Radice R., Barnighausen T., Wood S.N. and McGovern M.E. (submitted). A Simultaneous Equation Approach to Estimating HIV Prevalence with Non-Ignorable Missing Responses.
+Marra G., Radice R., Barnighausen T., Wood S.N. and McGovern M.E. (in press), A Simultaneous Equation Approach to Estimating HIV Prevalence with Non-Ignorable Missing Responses. \emph{Journal of the American Statistical Association}.
 
 McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption of Joint Normality in Selection Models: A Copula Approach Applied to Estimating HIV Prevalence. \emph{Epidemiology}, 26(2), 229-237.
 
-Radice R., Marra G. and M. Wojtys (in press), Copula Regression Spline Models for Binary Outcomes. \emph{Statistics and Computing}.
-
-Marra G. and Wood S.N. (2011), Practical Variable Selection for Generalized Additive Models. \emph{Computational Statistics and Data Analysis}, 55(7), 2372-2387.
-
-Marra G. and Wood S.N. (2012), Coverage Properties of Confidence Intervals for Generalized Additive Model Components. \emph{Scandinavian Journal of Statistics}, 39(1), 53-74.
+Radice R., Marra G. and Wojtys M. (2016), Copula Regression Spline Models for Binary Outcomes. \emph{Statistics and Computing}, 26(5), 981-995. 
 
 Poirier D.J. (1980), Partial Observability in Bivariate Probit Models. \emph{Journal of Econometrics}, 12, 209-217.
 
-Wood S.N. (2004), Stable and efficient multiple smoothing parameter estimation for generalized additive models. \emph{Journal of the American Statistical Association}, 99(467), 673-686.
 
 }
+
 
 
 \section{WARNINGS}{
 
 Convergence failure may sometimes occur. Convergence can be checked using \code{\link{conv.check}} which provides some 
 information about 
-the score and information matrix associated with the fitted model. The former should be 0 and the latter positive definite.
-\code{SemiParBIVProbit()} will produce some warnings if there is a convergence issue.
+the score and information matrix associated with the fitted model. The former should be close to 0 and the latter positive definite.
+\code{SemiParBIVProbit()} will produce some warnings when there is a convergence issue.
 
 In such a situation, the user may use some extra regularisation (see \code{extra.regI}) and/or
-rescaling (see \code{parscale}). Using \code{gamlssfit = TRUE} (this is relevant
-when one outcome is not binary) is typically more effective than the first two options as
-this will provide better calibrated starting values as compared to those obtained from the default starting value procedure.
-The default option is, however, \code{gamlssfit = FALSE} only because it tends to be computationally cheaper and because the 
-default starting value procedure has typically been found to do a satisfactory job in most cases. 
-(The results obtained when using 
-\code{gamlssfit = FALSE} and \code{gamlssfit = TRUE} could also be compared to check if starting values make any difference.)
-
-The above suggestions may help, especially the latter option. However, the user should also consider
-re-specifying the model and/or using a diferrent dependence structure and/or checking that the chosen marginal 
-distribution fit the responses well.
+rescaling (see \code{parscale}). These suggestions may help, especially the latter option. However, the user should also consider
+re-specifying the model and/or using a diferrent dependence structure and/or using different links.
 In our experience, we found that convergence failure typically occurs 
 when the model has been misspecified and/or the sample size (and/or number of selected observations in selection models) is low 
 compared to the complexity of the model. Examples
 of misspecification include using a Clayton copula rotated by 90 degrees when a positive
-association between the margins is present instead, using marginal distributions that do not fit
-the responses (again, this is a bit more relevant when one of the two responses is continuous), and 
+association between the margins is present instead, using marginal distributions that are not adequate, and 
 employing a copula which does not accommodate the type and/or strength of
 the dependence between the margins (e.g., using AMH when the association between the margins is strong).
-It is also worth bearing in mind that the use of a three parameter marginal distribution requires the data
-to be more informative than a situation in which a two parameter distribution is used instead.
 
-When comparing competing models (for instance, by keeping the linear predictor specifications
-fixed and changing the copula), if the computing time for a set of alternatives
-is considerably higher than that of another set then it may mean that 
-the more computationally demanding models are not able to fit the data very well (as a higher number of 
-iterations is required to reach convergence). As a practical check, this may be verified by
-fitting all competing models and, provided convergence is achieved, comparing their respective AIC and BICs, for instance.
+
 
 In the contexts of endogeneity and non-random sample selection, extra attention is required when specifying
 the dependence parameter as a function of covariates. This is because in these situations the dependence parameter mainly models the 
@@ -239,7 +189,7 @@ areas, for instance.
 } 
 
 \seealso{
-\code{\link{copulaReg}}, \code{\link{copulaSampleSel}}, \code{\link{AT}}, \code{\link{OR}}, \code{\link{RR}}, \code{\link{adjCov}}, \code{\link{prev}}, \code{\link{gt.bpm}}, \code{\link{LM.bpm}}, \code{\link{VuongClarke}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{conv.check}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
+\code{\link{copulaReg}}, \code{\link{copulaSampleSel}}, \code{\link{SemiParTRIV}}, \code{\link{AT}}, \code{\link{OR}}, \code{\link{RR}}, \code{\link{adjCov}}, \code{\link{prev}}, \code{\link{gt.bpm}}, \code{\link{LM.bpm}}, \code{\link{VuongClarke}}, \code{\link{plot.SemiParBIVProbit}}, \code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbitObject}}, \code{\link{conv.check}}, \code{\link{summary.SemiParBIVProbit}}, \code{\link{predict.SemiParBIVProbit}}
 }
 
 \examples{
@@ -611,122 +561,17 @@ plot(out, eq = 1, scale = 0); lines(x2, f1.x2, col = "red")
 ## See also ?war
 ################
 
-############
-## EXAMPLE 5
-############
-## Generate data with one endogenous binary variable 
-## and continuous outcome
-
-set.seed(0)
-
-n <- 1000
-
-Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
-u     <- rMVN(n, rep(0,2), Sigma)
-
-cov   <- rMVN(n, rep(0,2), Sigma)
-cov   <- pnorm(cov)
-x1 <- round(cov[,1]); x2 <- cov[,2]
-
-f1   <- function(x) cos(pi*2*x) + sin(pi*x)
-f2   <- function(x) x+exp(-30*(x-0.5)^2)   
-
-y1 <- ifelse(-1.55 + 2*x1    + f1(x2) + u[,1] > 0, 1, 0)
-y2 <-        -0.25 - 1.25*y1 + f2(x2) + u[,2] 
-
-dataSim <- data.frame(y1, y2, x1, x2)
-
-
-## RECURSIVE Model
-
-rc <- resp.check(y2, margin = "N", print.par = TRUE, loglik = TRUE)
-AIC(rc); BIC(rc)
-
-out <- SemiParBIVProbit(list(y1 ~ x1 + x2, 
-                             y2 ~ y1 + x2), 
-                        data = dataSim, margins = c("probit","N"))
-conv.check(out)                        
-summary(out)
-post.check(out)
-
-## SEMIPARAMETRIC RECURSIVE Model
-
-eq.mu.1   <- y1 ~ x1 + s(x2) 
-eq.mu.2   <- y2 ~ y1 + s(x2)
-eq.sigma2 <-    ~ 1
-eq.theta  <-    ~ 1
-
-fl <- list(eq.mu.1, eq.mu.2, eq.sigma2, eq.theta)
-
-out <- SemiParBIVProbit(fl, data = dataSim, 
-                        margins = c("probit","N"), gamlssfit = TRUE)
-conv.check(out)                        
-summary(out)
-post.check(out)
-jc.probs(out, 1, 1.5, intervals = TRUE)[1:4,]
-AT(out, nm.end = "y1")
-AT(out, nm.end = "y1", type = "univariate")
-
-
-#
-#
-
-############
-## EXAMPLE 6
-############
-## Generate data with one endogenous continuous exposure 
-## and binary outcome
-
-set.seed(0)
-
-n <- 1000
-
-Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
-u     <- rMVN(n, rep(0,2), Sigma)
-
-cov   <- rMVN(n, rep(0,2), Sigma)
-cov   <- pnorm(cov)
-x1 <- round(cov[,1]); x2 <- cov[,2]
-
-f1   <- function(x) cos(pi*2*x) + sin(pi*x)
-f2   <- function(x) x+exp(-30*(x-0.5)^2) 
-
-y1 <-        -0.25 - 2*x1    + f2(x2) + u[,2] 
-y2 <- ifelse(-0.25 - 0.25*y1 + f1(x2) + u[,1] > 0, 1, 0)
-
-dataSim <- data.frame(y1, y2, x1, x2)
-
-eq.mu.1   <- y2 ~ y1 + s(x2) 
-eq.mu.2   <- y1 ~ x1 + s(x2)
-eq.sigma2 <-    ~ 1
-eq.theta  <-    ~ 1
-
-fl <- list(eq.mu.1, eq.mu.2, eq.sigma2, eq.theta)
-
-out <- SemiParBIVProbit(fl, data = dataSim, 
-                        margins = c("probit","N"))
-conv.check(out)                        
-summary(out)
-post.check(out)
-AT(out, nm.end = "y1")
-AT(out, nm.end = "y1", type = "univariate")
-RR(out, nm.end = "y1", rr.plot = TRUE)
-RR(out, nm.end = "y1", type = "univariate")
-OR(out, nm.end = "y1", or.plot = TRUE)
-OR(out, nm.end = "y1", type = "univariate")
-
 }
 }
 
 
 \keyword{non-random sample selection}
-\keyword{semiparametric bivariate modelling} 
+\keyword{flexible copula regression modelling} 
 \keyword{partial observability} 
 \keyword{endogeneity} 
 \keyword{smooth} 
 \keyword{regression spline}
-\keyword{shrinkage smoother}
-\keyword{variable selection}
+
 
 
 

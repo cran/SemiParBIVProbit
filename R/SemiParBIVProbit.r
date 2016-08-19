@@ -1,14 +1,14 @@
 SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NULL,
                              Model = "B", BivD = "N", margins = c("probit","probit"), gamlssfit = FALSE,
-                             fp = FALSE, hess = TRUE, infl.fac = 1, 
+                             fp = FALSE, hess = TRUE, infl.fac = 1, theta.fx = NULL, 
                              rinit = 1, rmax = 100, iterlimsp = 50, tolsp = 1e-07,
-                             gc.l = FALSE, parscale, extra.regI = "t"){
+                             gc.l = FALSE, parscale, extra.regI = "t", intf = FALSE){
   
   ##########################################################################################################################
   # model set up and starting values
   ##########################################################################################################################
   
-  i.rho <- sp <- qu.mag <- qu.mag1 <- qu.mag2 <- n.sel <- y1.y2 <- y1.cy2 <- cy1.y2 <- cy1.cy2 <- cy <- cy1 <- gamlss <- inde <- spgamlss <- NULL  
+  i.rho <- sp <- qu.mag <- qu.mag1 <- qu.mag2 <- n.sel <- y1.y2 <- y1.cy2 <- cy1.y2 <- cy1.cy2 <- cy <- cy1 <- gamlss <- inde <- spgamlss <- y2m <- NULL  
   end <- X3.d2 <- X4.d2 <- X5.d2 <- X6.d2 <- X7.d2 <- l.sp3 <- l.sp4 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
   ngc <- 2
   gam1 <- gam2 <- gam3 <- gam4 <- gam5 <- gam6 <- gam7 <- NULL
@@ -19,7 +19,8 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   sp6 <- gp6 <- gam6 <- X6 <- NULL  
   sp7 <- gp7 <- gam7 <- X7 <- NULL   
   X2s <- X3s <- NULL
-  
+  #theta <- NULL
+  i.rho <- 0
     
   opc  <- c("N","C0","C90","C180","C270","J0","J90","J180","J270","G0","G90","G180","G270","F","AMH","FGM")
   scc  <- c("C0", "C180", "J0", "J180", "G0", "G180")
@@ -27,33 +28,47 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   mb   <- c("B", "BSS", "BPO", "BPO0")
   m2   <- c("N","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK")
   m3   <- c("DAGUM","SM")
+  m1d  <- c("PO", "ZTP") 
+  m2d  <- c("NBI", "NBII","NBIa", "NBIIa", "PIG") 
+  
+  if(intf == FALSE && margins[2] %in% c(m1d,m2d,m2,m3)) stop("Please use copulaReg() for models involving binary and continuous margins.")
   
   bl   <- c("probit", "logit", "cloglog") # , "cauchit") 
 
   l.flist <- length(formula)
   if(!is.list(formula)) stop("You must specify a list of equations.")
-
-  #if(margins[2]%in% c(m2,m3)) stop("Check next release for final tested version of this model.")
   
+  
+  if(!is.null(theta.fx) && BivD != "N") stop("This approach is not currently implemented for non-Gaussian bivariate distributions.")
+  if(!is.null(theta.fx)) { if(Model != "B" && !(margins[2] %in% bl)) stop("Only bivariate binary models with fixed theta are currenlty allowed for.")}
+  
+  if(!is.null(theta.fx) ) { if( abs(theta.fx) > 0.999 ) stop("The theta value must be in the interval [-0.999,0.999].") }
+
   if(Model == "BPO" && BivD != "N") stop("This model is not defined for copulae.")
   if(Model == "BPO" && margins[1] != "probit" && margins[2] != "probit") stop("This model is not defined for the chosen margins.")
 
-  if(!(Model %in% mb)) stop("Error in parameter Model value. It should be one of: B, BSS, BPO, BPO0.")
-  if(!(BivD %in% opc)) stop("Error in parameter BivD value. It should be one of: N, C0, C90, C180, C270, J0, J90, J180, J270, G0, G90, G180, G270, F, AMH, FGM.")
-  if(!(extra.regI %in% c("t","pC","sED"))) stop("Error in parameter extra.regI value. It should be one of: t, pC or sED.")
+  if(!(Model %in% mb)) stop("Error in parameter Model value. It should be one of:\nB, BSS, BPO, BPO0.")
+  if(!(BivD %in% opc)) stop("Error in parameter BivD value. It should be one of:\nN, C0, C90, C180, C270, J0, J90, J180, J270, G0, G90, G180, G270, F, AMH, FGM.")
+  if(!(extra.regI %in% c("t","pC","sED"))) stop("Error in parameter extra.regI value. It should be one of:\nt, pC or sED.")
   
-  if(!(margins[1] %in% bl) ) stop("Error in first margin value. It can be: probit, logit, cloglog.")
-  if(!(margins[2] %in% c(bl,m2,m3)) ) stop("Error in second margin value. It can be: probit, logit, cloglog, N, GU, rGU, LO, LN, WEI, iG, GA, GAi, DAGUM, SM, BE, FISK.")  
-  if(margins[2] %in% m2 && (Model == "BPO" || Model == "BSS" || Model == "BPO0") ) stop("For continuous responses, selection or partial observability models are not allowed for.")   
+  if(!(margins[1] %in% bl) ) stop("Error in first margin value. It should be one of:\nprobit, logit, cloglog.")
+  if(!(margins[2] %in% c(bl,m2,m3)) && intf == FALSE ) stop("Error in second margin value. It should be one of:\nprobit, logit, cloglog.")  
+  if(!(margins[2] %in% c(bl,m2,m3,m1d,m2d)) && intf == TRUE ) stop("Error in second margin value. It should be one of:\nN, GU, rGU, LO, LN, WEI, iG, GA, GAi, DAGUM, SM, BE, FISK, PO, ZTP, NBI, NBII, PIG.")  
+
+  if(margins[2] %in% m2 && (Model == "BPO" || Model == "BSS" || Model == "BPO0") ) stop("For continuous responses, selection or partial observability models\nare not allowed for using this function.")   
   
-  if(l.flist > 2 && margins[2] %in% m2){ if(l.flist!=4) stop("You need to specify four equations.") } 
-  if(l.flist > 2 && margins[2] %in% m3){ if(l.flist!=5) stop("You need to specify five equations.") }  
+  if(l.flist > 2 && margins[2] %in% c(bl,m1d)){ if(l.flist!=3) stop("You need to specify three equations.") } 
+  if(l.flist > 2 && margins[2] %in% c(m2,m2d)){ if(l.flist!=4) stop("You need to specify four equations.") } 
+  if(l.flist > 2 && margins[2] %in% m3       ){ if(l.flist!=5) stop("You need to specify five equations.") }  
 
-  if( l.flist == 3 && Model == "BPO0")       stop("The chosen model does not have a correlation parameter.")
-  if( l.flist > 3 && margins[2] %in% bl)     stop("The chosen model can not have more than three equations.")
-  if( l.flist > 4 && margins[2] %in% m2)     stop("The chosen model can not have more than four equations.")
-  if( l.flist > 5 && margins[2] %in% m3)     stop("The chosen model can not have more than five equations.")
+  if( l.flist > 2  && Model == "BPO0")                 stop("You need to specify two equations.\nThe chosen model does not have a correlation parameter.")
+  if( l.flist > 2  && Model == "B" && !is.null(theta.fx)) stop("You need to specify two equations.\nThe chosen model is not allowed to estimate the theta parameter.")
+  
 
+  if(margins[2] %in% c(m1d,m2d)) stop("Check the next release for the final tested version of this model\nor get in touch to check progress.")
+
+
+  
  #######################################################################################  
  # formula check  
  #######################################################################################  
@@ -144,7 +159,7 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   fake.formula <- paste(v1[1], "~", paste(pred.n, collapse = " + ")) 
   environment(fake.formula) <- environment(formula[[1]])
   mf$formula <- fake.formula 
-  mf$Model <- mf$BivD <- mf$margins <- mf$fp <- mf$hess <- mf$infl.fac <- mf$rinit <- mf$rmax <- mf$iterlimsp <- mf$tolsp <- mf$gc.l <- mf$parscale <- mf$extra.regI <- mf$gamlssfit <- NULL                           
+  mf$intf <- mf$theta.fx <- mf$Model <- mf$BivD <- mf$margins <- mf$fp <- mf$hess <- mf$infl.fac <- mf$rinit <- mf$rmax <- mf$iterlimsp <- mf$tolsp <- mf$gc.l <- mf$parscale <- mf$extra.regI <- mf$gamlssfit <- NULL                           
   mf$drop.unused.levels <- TRUE 
   
   if(Model=="BSS") mf$na.action <- na.pass
@@ -156,10 +171,11 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
 
    if(Model=="BSS"){     
    
+     data[is.na(data[, v1[1]]), v1[1]] <- 0
      indS <- data[, v1[1]]    
      indS[is.na(indS)] <- 0   
      indS <- as.logical(indS)  
-     data[indS == FALSE, v2[1]] <- 0.01  
+     data[indS == FALSE, v2[1]] <- 0  
      data <- na.omit(data)   
    
                    }
@@ -234,7 +250,7 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
   } 
   
  ##############################################################
- # Equation 2 for B and continuous response 
+ # Equation 2 for B and continuous/discrete response 
  ##############################################################  
 
   if(Model=="B" && !(margins[2] %in% bl) ){
@@ -246,10 +262,36 @@ SemiParBIVProbit <- function(formula, data = list(), weights = NULL, subset = NU
     if( v2[1] != as.character(formula.eq2r[2]) ) y2.test <- try(data[, as.character(formula.eq2r[2])], silent = TRUE)  
     if(class(y2.test) == "try-error") stop("Please check the syntax for the response of the second equation.")     
   
+
+    if(margins[2] %in% c(m1d,m2d) && min(y2.test, na.rm = TRUE) < 0) stop("The response of the second margin must be positive.")
+    if(margins[2] %in% c(m1d,m2d)){
+    
+    is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+    if(sum(as.numeric(is.wholenumber(y2.test))) != length(y2.test)) stop("The response of the second margin must be discrete.")     
+    } 
+    
+    if(margins[2] %in% c("ZTP") && min(y2.test, na.rm = TRUE) < 1) stop("The response of the second margin must be greater than 0.") 
+
+    if(margins[2] %in% c("NBI","NBIa","NBIIa","PO","ZTP")){
+     
+    ly2 <- length(y2)
+    y2m <- list()
+    my2 <- max(y2)
+    for(i in 1:ly2){ y2m[[i]] <- seq(0, y2[i]); length(y2m[[i]]) <- my2+1} 
+    y2m <- do.call(rbind, y2m)  
+    
+    if(max(y2) > 170 && margins[2] %in% c("PO","ZTP") ) y2m <- mpfr( y2m, pmax(53, getPrec(y2))) 
+
+     
+    }
+  
+
     if(margins[2] %in% c("LN","WEI","iG","GA","GAi","DAGUM","SM","FISK") && min(y2.test, na.rm = TRUE) <= 0) stop("The response of the second margin must be positive.")    
     if(margins[2] %in% c("BE") && (min(y2.test, na.rm = TRUE) <= 0 || max(y2.test, na.rm = TRUE) >= 1) ) stop("The response of the second margin must be in the interval (0,1).")
         
     if( margins[2] %in% c("N","LO","GU","rGU","GAi") )            formula.eq2 <- update(formula.eq2, (. + mean(.))/2 ~ . )  
+    if( margins[2] %in% c(m1d, m2d) )             formula.eq2 <- update(formula.eq2, log((. + mean(.))/2) ~ . )  
+    
     if( margins[2] %in% c("LN") )                                 formula.eq2 <- update(formula.eq2, (log(.) + mean(log(.)))/2 ~ . )  
     if( margins[2] %in% c("iG","GA","DAGUM","SM","FISK") )        formula.eq2 <- update(formula.eq2, log((. + mean(.))/2) ~ . )    
     if( margins[2] %in% c("WEI") )                                formula.eq2 <- update(formula.eq2, log( exp(log(.) + 0.5772/(1.283/sqrt(var(log(.)))))  ) ~ . )     
@@ -301,7 +343,28 @@ if(class(X2s)=="try-error") stop("Check that the numbers of factor variables' le
   cy1 <- (1-y1)
   y1.y2 <- y1[inde]*y2
   y1.cy2 <- y1[inde]*(1-y2)
-
+  
+  
+  ######################
+  
+  form.eq2imr <- update.formula(formula.eq2, ~. + imrGUANN) 
+  p.g1 <- predict.gam(gam1)
+  imrGUANN <- data$imrGUANN <- dnorm(p.g1)/pnorm(p.g1)
+    
+  gam2.1 <- eval(substitute(gam(form.eq2imr, gamma=infl.fac, binomial(link = margins[2]), weights=weights, data=data, subset=inde),list(weights = weights, inde = inde)))
+  pimr   <- which(names(coef(gam2.1))=="imrGUANN")
+  
+  c.gam2 <- coef(gam2.1)[-pimr]
+  
+  sia <- sqrt(mean(residuals(gam2.1, type = "deviance")^2)+mean(imrGUANN[inde]*(imrGUANN[inde]+p.g1[inde]))*gam2.1$coef["imrGUANN"]^2)[[1]]
+  co  <- (gam2.1$coef["imrGUANN"]/sia)[[1]] 
+  
+  ass.s <- co 
+  ss <- sign(ass.s)
+  ass.s <- ss*ifelse(abs(ass.s) > 0.9, 0.9, abs(ass.s))
+  
+  if(l.sp2 != 0) sp2 <- gam2.1$sp
+  
   }
   
 ##############################################################  
@@ -314,22 +377,28 @@ if(class(X2s)=="try-error") stop("Check that the numbers of factor variables' le
 # Starting values for dependence parameter
 ##############################################################
 
-    
-if( !(Model %in% c("BPO","BPO0")) ){    
-    
-if(Model=="B")    res1 <- residuals(gam1)
-                  res2 <- residuals(gam2)
-                  
-if(Model=="B") ass.s <- cor(res1, res2, method = "kendall") else ass.s <- 0.01 
+   
+if(is.null(theta.fx)){
 
+ 
+if( !(Model %in% c("BPO0")) ){    
+    
+if(Model=="B"){ 
+
+  res1 <- residuals(gam1)
+  res2 <- residuals(gam2)
+  ass.s <- cor(res1, res2, method = "kendall")
+  
+              }  
+
+if(Model=="BPO") ass.s <- 0.01
+# this not need as it is already up if(Model=="BSS") ass.s <- ass.s
+                  
 if(BivD %in% scc)  ass.s <-  abs(ass.s)   
 if(BivD %in% sccn) ass.s <- -abs(ass.s) 
 
-
-
 if(!(BivD %in% c("AMH","FGM"))) i.rho <- BiCopTau2Par(family = nCa, tau = ass.s)
 if(  BivD %in% c("AMH","FGM") ) i.rho <- BiCopTau2Par(family = 1, tau = ass.s)
-
 
 if(BivD %in% c("N","AMH","FGM")) i.rho <- atanh( i.rho )
 if(BivD == "F") i.rho <- ifelse( abs(i.rho) < 0.0000001, 0.0000001, i.rho ) 
@@ -341,28 +410,17 @@ if(BivD %in% c("J0","J180","G0","G180","J90","J270","G90","G270"))   i.rho <-  l
 }
 
 
-if(Model=="BPO"){ 
+if(Model=="BPO0")  i.rho <- 0
 
-ass.s <- 0.01
-
-if(BivD %in% scc)  ass.s <-  abs(ass.s)   
-if(BivD %in% sccn) ass.s <- -abs(ass.s) 
-
-if(!(BivD %in% c("AMH","FGM"))) i.rho <- BiCopTau2Par(family = nCa, tau = ass.s)
-if(  BivD %in% c("AMH","FGM") ) i.rho <- BiCopTau2Par(family = 1, tau = ass.s)
-
-if(BivD == "N") i.rho <- atanh( i.rho ) 
-if(BivD == "F") i.rho <- i.rho
-if(!(BivD %in% c("N","F"))) i.rho <- abs(i.rho)
-
-if(BivD %in% c("C0","C180","C90","C270"))                            i.rho <-  log(i.rho)   
-if(BivD %in% c("J0","J180","G0","G180","J90","J270","G90","G270"))   i.rho <-  log(i.rho - 1)   
 
 }
 
-if(Model=="BPO0")  i.rho <- 0
 
 names(i.rho) <- "theta.star"   
+
+
+
+
 
 
 
@@ -371,20 +429,31 @@ names(i.rho) <- "theta.star"
 # Starting values for whole parameter vector
 ##############################################################
                       
-    if(l.flist == 2 && margins[1] %in% bl && margins[2] %in% bl && Model != "BPO0" ){
+if(l.flist == 2 && margins[1] %in% bl && margins[2] %in% c(bl,m1d) && Model %in% c("B","BPO") && is.null(theta.fx)) start.v <- c(coef(gam1), coef(gam2), i.rho) 
+
+if(Model == "BSS")  start.v <- c(coef(gam1), c.gam2, i.rho) 
+if(Model == "BPO0") start.v <- c(coef(gam1), coef(gam2))      
+
+
+if(!is.null(theta.fx) && Model == "B" && margins[2] %in% bl ) start.v <- c(coef(gam1), coef(gam2)) 
+
+
+if(l.flist == 2 && margins[1] %in% bl && margins[2] %in% c(m1d) ) start.v1 <- c(coef(gam2)) 
+
+
+
     
-              start.v <- c(coef(gam1), coef(gam2), i.rho) 
-       
-    } 
-    
-    
-    if(margins[1] %in% bl && !(margins[2] %in% bl) ){
+    if(margins[1] %in% bl && margins[2] %in% c(m2,m3,m2d) ){
         
         
-        par.est <- try( resp.check(y2, margin = margins[2], plots = FALSE, print.par = TRUE), silent = TRUE)
+        par.est <- try( resp.check(y2, margin = margins[2], plots = FALSE, print.par = TRUE, i.f = TRUE), silent = TRUE)
         
         if(class(par.est)=="try-error") {
         
+        
+ 		if( margins[2] %in% c("NBI","NBIa","PIG") ) log.sig2.2 <- log( max( (var(y2) - mean(y2))/mean(y2)^2, 0.1) )
+ 		if( margins[2] %in% c("NBII","NBIIa") )      log.sig2.2 <- log( max( (var(y2)/mean(y2)) - 1, 0.1) ) 
+ 		
  		if( margins[2] %in% c("N","LN") )    log.sig2 <- log(var(y2))  
 		if( margins[2] %in% c("LO") )        log.sig2 <- log( 3*var(y2)/pi^2 )   
 		if( margins[2] %in% c("iG") )        log.sig2 <- log( var(y2)/mean(y2)^3 )      
@@ -414,7 +483,7 @@ names(i.rho) <- "theta.star"
        
        
        
-       		if(margins[2] %in% m2){
+       		if(margins[2] %in% c(m2,m2d)){
        
        		                     start.v <- c(coef(gam1), coef(gam2), log.sig2, i.rho) 
                                     start.v1 <- c(            coef(gam2), log.sig2       ) 
@@ -433,14 +502,9 @@ names(i.rho) <- "theta.star"
     
     
     
-    if(Model == "BPO0") start.v <- c(coef(gam1), coef(gam2))      
     
     
 ##############################################################  
-  
-#if(l.flist > 2) seqq <- seq(-0.005, 0.005, length.out = n) 
-
-
   
     if(l.flist == 3){
     
@@ -484,8 +548,12 @@ names(i.rho) <- "theta.star"
     environment(gam3$formula) <- environment(gam2$formula)
     gp3 <- gam3$nsdf 
   
-    start.v <- c( coef(gam1), coef(gam2), coef(gam3) )
+  
+ 
     
+if(Model == "BSS") {start.v  <- c( coef(gam1), c.gam2, coef(gam3) ); start.v1  <- c(c.gam2)   }              
+if(Model != "BSS") {start.v  <- c( coef(gam1), coef(gam2), coef(gam3) ); start.v1  <- c(gam2) }
+
   }
   
   
@@ -498,8 +566,6 @@ names(i.rho) <- "theta.star"
     formula.eq3 <- as.formula( paste(nad1,"~",formula.eq3[2],sep="") ) 
     formula.eq4 <- as.formula( paste(nad2,"~",formula.eq4[2],sep="") )        
   
-    #sigma2 <- rep(log.sig2,n) #+ seqq
-    #theta  <- rep(i.rho, n)   #+ seqq
     
     set.seed(1)
     sigma2 <- rnorm(n, log.sig2, 0.001) 
@@ -560,10 +626,6 @@ names(i.rho) <- "theta.star"
     formula.eq3 <- as.formula( paste(nad1,"~",formula.eq3[2],sep="") ) 
     formula.eq4 <- as.formula( paste(nad2,"~",formula.eq4[2],sep="") ) 
     formula.eq5 <- as.formula( paste(nad3,"~",formula.eq5[2],sep="") )  
-    
-    #sigma2 <- rep(log.sig2,n) #+ seqq
-    #nu     <- rep(log.nu,n)   #+ seqq
-    #theta  <- rep(i.rho, n)   #+ seqq
     
     
     set.seed(1)
@@ -645,8 +707,24 @@ l.gam7 <- length(coef(gam7))
   
   if(gamlssfit == TRUE){
   
-  
-  
+ 
+  if(margins[2] %in% m1d && l.sp2!=0){  
+
+                                          spgamlss <- c(sp2)
+                                          qu.mag1 <- S.m(gam1, gam2, gam3, gam4, gam5, gam6, gam7, 
+                                                         0, l.sp2, 0, 0, 0, 0, 0,     
+                                                         0, l.gam2, 0, 0, 0, 0, 0)     
+                                                         
+                                                              } 
+ 
+  if(margins[2] %in% c(m2,m2d) && (l.sp2!=0 || l.sp3!=0)){  
+
+                                          spgamlss <- c(sp2, sp3)
+                                          qu.mag1 <- S.m(gam1, gam2, gam3, gam4, gam5, gam6, gam7, 
+                                                         0, l.sp2, l.sp3, 0, 0, 0, 0,     
+                                                         0, l.gam2, l.gam3, 0, 0, 0, 0)     
+                                                         
+                                                              }     
   
   if(margins[2] %in% m3 && (l.sp2!=0 || l.sp3!=0 || l.sp4!=0)){  
 
@@ -657,14 +735,7 @@ l.gam7 <- length(coef(gam7))
                                                          
                                                               }
                                                               
-  if(margins[2] %in% m2 && (l.sp2!=0 || l.sp3!=0)){  
-
-                                          spgamlss <- c(sp2, sp3)
-                                          qu.mag1 <- S.m(gam1, gam2, gam3, gam4, gam5, gam6, gam7, 
-                                                         0, l.sp2, l.sp3, 0, 0, 0, 0,     
-                                                         0, l.gam2, l.gam3, 0, 0, 0, 0)     
-                                                         
-                                                              }                                                              
+                                                           
   
   
   }
@@ -726,8 +797,9 @@ if(missing(parscale)) parscale <- 1
              BivD = BivD,
              nC = nC, gc.l = gc.l, n = n, extra.regI = extra.regI,
              parscale = parscale, margins = margins,
-             Cont = "NO", ccss = "no", m2 = m2, m3 = m3, bl = bl,
-             X2s = X2s, X3s = X3s, triv = FALSE) # original n only needed in SemiParBIVProbit.fit
+             Cont = "NO", ccss = "no", m2 = m2, m3 = m3, m2d = m2d, m1d = m1d, m3d = NULL, bl = bl,
+             X2s = X2s, X3s = X3s, triv = FALSE, y2m = y2m,
+             theta.fx = theta.fx) # original n only needed in SemiParBIVProbit.fit
              
   if(gc.l == TRUE) gc()           
              
@@ -735,19 +807,24 @@ if(missing(parscale)) parscale <- 1
   # model fitting
   ##########################################################################################################################
 
-  if(Model=="B" && margins[2] %in% bl  )  func.opt <- bprobgHs   
+  if(Model=="B" && margins[2] %in% bl  &&  is.null(theta.fx)) func.opt <- bprobgHs   
+  if(Model=="B" && margins[2] %in% bl  && !is.null(theta.fx)) func.opt <- bprobgHsFixTheta
+  
   if(Model=="B" && margins[2] %in% m2  ) {func.opt <- bprobgHsCont  ; func.optUniv <- bprobgHsContUniv}   
-  if(Model=="B" && margins[2] %in% m3  ) {func.opt <- bprobgHsCont3 ; func.optUniv <- bprobgHsContUniv3}   
+  if(Model=="B" && margins[2] %in% m3  ) {func.opt <- bprobgHsCont3 ; func.optUniv <- bprobgHsContUniv3}  
+  
+  if(Model=="B" && margins[2] %in% m1d  ) {func.opt <- bprobgHsDiscr1 ; func.optUniv <- bprobgHsContUniv}   
+  if(Model=="B" && margins[2] %in% m2d  ) {func.opt <- bprobgHsDiscr2 ; func.optUniv <- bprobgHsContUniv}  
   
   if(Model=="BPO")                        func.opt <- bprobgHsPO 
   if(Model=="BPO0")                       func.opt <- bprobgHsPO0   
   if(Model=="BSS")                        func.opt <- bprobgHsSS 
-
+  
   ##########################################################################################################################
   ##########################################################################################################################
 
 
-  if(margins[2] %in% c(m2,m3) && gamlssfit == TRUE){ 
+  if(margins[2] %in% c(m1d,m2d,m2,m3) && gamlssfit == TRUE){ 
   
   
   
@@ -766,12 +843,23 @@ if(missing(parscale)) parscale <- 1
   # new starting values                       
                          
   if( l.flist == 2 ) start.v <- c(coef(gam1), gamlss$fit$argument, i.rho)
+  if( l.flist == 3 ) start.v <- c(coef(gam1), gamlss$fit$argument, coef(gam3))
   if( l.flist == 4 ) start.v <- c(coef(gam1), gamlss$fit$argument, coef(gam4))
   if( l.flist == 5 ) start.v <- c(coef(gam1), gamlss$fit$argument, coef(gam5))
   
-  if(l.sp2 != 0) sp2 <- gamlss$sp[1:l.sp2] 
-  if(l.sp3 != 0) sp3 <- gamlss$sp[l.sp2 + (1:l.sp3)] 
-  if( margins[2] %in% m3 ){ if(l.sp4 != 0) sp4 <- gamlss$sp[l.sp2 + l.sp3 + (1:l.sp4)] } 
+
+  if( margins[2] %in% c(m1d) ){
+  	if(l.sp2 != 0) sp2 <- gamlss$sp[1:l.sp2] 
+                              }  
+
+  if( margins[2] %in% c(m2,m2d,m3) ){
+  	if(l.sp2 != 0) sp2 <- gamlss$sp[1:l.sp2] 
+  	if(l.sp3 != 0) sp3 <- gamlss$sp[l.sp2 + (1:l.sp3)] 
+                                    }
+  
+  if( margins[2] %in% m3 ){ 
+  	if(l.sp4 != 0) sp4 <- gamlss$sp[l.sp2 + l.sp3 + (1:l.sp4)] 
+  	                  } 
   
   sp <- c(sp1, sp2, sp3, sp4, sp5, sp6)
   
@@ -855,9 +943,9 @@ me1 <- "Largest absolute gradient value is not close to 0."
 me2 <- "Information matrix is not positive definite."
 me3 <- "Read the WARNINGS section in ?SemiParBIVProbit."
 
-if(gradi > 0.1 && e.v <= 0){ warning(me1, call. = FALSE); warning(paste(me2,"\n",me3), call. = FALSE)} 
-if(gradi > 0.1 && e.v > 0)   warning(paste(me1,"\n",me3), call. = FALSE)
-if(gradi < 0.1 && e.v <= 0)  warning(paste(me2,"\n",me3), call. = FALSE)
+if(gradi > 10 && e.v <= 0){ warning(me1, call. = FALSE); warning(paste(me2,"\n",me3), call. = FALSE)} 
+if(gradi > 10 && e.v > 0)   warning(paste(me1,"\n",me3), call. = FALSE)
+if(gradi < 10 && e.v <= 0)  warning(paste(me2,"\n",me3), call. = FALSE)
 
 
   ##########################################################################################################################

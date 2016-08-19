@@ -4,14 +4,13 @@ AT <- function(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL
    xlab = "Simulated Average Effects", ...){
 
 
-if(x$Cont == "YES") stop("This function is not suitable for bivariate models with continuous margins.")
+
+
+if(x$Cont == "YES") stop("This function is not suitable for bivariate models with continuous/discrete margins.")
 
 if(x$triv == TRUE) stop("This function is not suitable for trivariate probit models.")
 
-
-if(x$Cont == "NO" && x$VC$ccss == "yes" ) stop("This function is not suitable for bivariate selection models with continuous margin.")
-
-
+if(x$Cont == "NO" && x$VC$ccss == "yes" ) stop("This function is not suitable for selection models.")
 
 delta <- FALSE
 
@@ -21,6 +20,8 @@ CIs <- est.AT <- NULL
 etap.noi <- X.int <- X.noi <- eti1 <- eti0 <- etno <- indS <- bs <- ind.excl <- p.int1 <- p.int0 <- d.int1 <- d.int0 <- p.etn <- d.etn <- ass.p <- ass.pst <- C.11 <- C.10 <- sig2 <- peti1s <- peti0s <- sigma2.st <- sigma2s <- eti1s <- eti0s <- d0 <- d1 <- p.etns <- etnos <- etds <- ass.ps <- 1
 diffEf <- fy1.y2 <- est.ATso <- y2 <- CIF <- Pr <- Effects <- C.11 <- C.10 <- NULL
 
+m1d  <- x$VC$m1d 
+m2d  <- x$VC$m2d 
 m2  <- x$VC$m2 
 m3  <- x$VC$m3 
 bin.link <- x$VC$bl  
@@ -44,9 +45,6 @@ if(x$margins[2] == "FISK"  && eq == 2) { if( min(sqrt(x$sigma2)) <= 1) stop("sig
 
 
 if( !( type %in% c("naive","univariate","bivariate") ) ) stop("Error in parameter type value. It should be one of: naive, univariate or bivariate.")
-
-
-# if(x$margins[2] != "probit" && delta == TRUE) stop("Delta method option not available.")
 
 
 if(missing(nm.end)) stop("You must provide the name of the endogenous variable.")

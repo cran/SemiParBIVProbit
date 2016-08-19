@@ -3,8 +3,8 @@ prev <- function(x, sw = NULL, type = "simultaneous", ind = NULL, delta = FALSE,
        xlab="Simulated Prevalences", ...){
 
 
-if(x$Cont == "YES") stop("This function is not suitable for bivariate models with continuous margins.")
-if(x$Cont == "NO" && x$VC$ccss == "yes" ) stop("This function is not suitable for bivariate selection models with continuous margin.")
+if(x$Cont == "YES") stop("This function is not suitable for bivariate models with continuous/discrete margins.")
+if(x$Cont == "NO" && x$VC$ccss == "yes" ) stop("This function is not suitable for selection models with continuous/discrete margin.")
 
 lb <- wm <- ub <- qz <- sv <- Vv <- G <- X2sg <- 1
 wms <- NA
@@ -186,7 +186,7 @@ if(x$Model == "BSS") inde <- x$inde
 if(x$Model == "TSS") inde <- x$inde2
 sw <- sw[inde]
 if(x$Model == "BSS") resp <- x$y2
-if(x$Model == "TSS") resp <- x$y3[inde] # because it is done a bit inefficiently at the moment
+if(x$Model == "TSS") resp <- x$y3
 
 if( !is.null(ind) ){ 
 

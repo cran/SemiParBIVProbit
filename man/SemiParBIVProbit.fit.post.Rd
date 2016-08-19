@@ -1,9 +1,12 @@
 \name{SemiParBIVProbit.fit.post}
 \alias{SemiParBIVProbit.fit.post}
+\alias{copulaReg.fit.post}
+\alias{copulaSampleSel.fit.post}
+\alias{SemiParTRIV.fit.post}
 
 \title{Internal Function}
 
-\description{Internal post estimation function.}
+\description{This and other similar internal functions calculate useful post estimation quantities.}
 
 
 \author{

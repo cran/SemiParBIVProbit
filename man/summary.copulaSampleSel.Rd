@@ -94,8 +94,6 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 \keyword{information criteria}
 \keyword{smooth}
 \keyword{regression}
-\keyword{shrinkage smoother}
-\keyword{variable selection}
 \keyword{non-random sample selection}
 
 

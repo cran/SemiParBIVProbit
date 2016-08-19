@@ -1,17 +1,12 @@
 \name{copulaReg}
 \alias{copulaReg}
 
-\title{Semiparametric Copula Bivariate Models with Continuous Margins}
+\title{Semiparametric Copula Bivariate Models with Continuous/Discrete Margins}
 
 \description{ 
-\code{copulaReg} can be used to fit bivariate models with continuous margins where the linear predictors of the two main equations can 
-be flexibly specified using parametric and regression spline components. Several bivariate copula distributions are supported. 
-During the model fitting process, the 
-possible presence of associated error equations is accounted for. Regression 
-spline bases are extracted from the package \code{mgcv}. Multi-dimensional smooths are available 
-via the use of penalized thin plate regression splines. Note that, if it makes sense, the dependence parameter of the employed bivariate 
-distribution, or more generally all distribution specific parameters can be specified as functions of covariates.
-
+\code{copulaReg} fits flexible copula bivariate models with continuous/discrete margins with several types of covariate 
+effects, copula distributions and marginal distributions. 
+ 
 }
 
 
@@ -32,7 +27,10 @@ copulaReg(formula, data = list(), weights = NULL, subset = NULL,
 \item{formula}{In the basic setup this will be a list of two formulas, one for equation 1 and the other for equation 2. \code{s} terms 
                are used to specify smooth smooth functions of 
                   predictors. For the case of more than two equations see the example below and the documentation 
-                  of \code{SemiParBIVProbit()} for more details.} 
+                  of \code{SemiParBIVProbit()} for more details. When one outcome is binary and the other continuous/discrete 
+                  then the first equation MUST refer to the binary outcome whereas 
+                  the second to the continuous/discrete one. When one outcome is discrete and the other continuous 
+                  then the first equation MUST refer to the discrete one.} 
 
 \item{data}{An optional data frame, list or environment containing the variables in the model.  If not found in \code{data}, the
             variables are taken from \code{environment(formula)}, typically the environment from which \code{copulaReg} is called.} 
@@ -42,17 +40,21 @@ copulaReg(formula, data = list(), weights = NULL, subset = NULL,
 \item{subset}{Optional vector specifying a subset of observations to be used in the fitting process.}
 
 
-\item{margins}{It indicates the distributions used for the two margins. Possible choices are: normal ("N"), log-normal ("LN"), 
-Gumbel ("GU"), reverse Gumbel ("rGU"), 
+\item{margins}{It indicates the distributions used for the two margins. Possible distributions are normal ("N"), 
+               log-normal ("LN"), Gumbel ("GU"), reverse Gumbel ("rGU"), 
                logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"), 
                gamma with identity link for the location parameter ("GAi"), Dagum ("DAGUM"), 
-               Singh-Maddala ("SM"), beta ("BE"), Fisk ("FISK", also known as log-logistic distribution).}
+               Singh-Maddala ("SM"), beta ("BE"), Fisk ("FISK", also known as log-logistic distribution), Poisson ("PO"), zero truncated 
+               Poisson ("ZTP"), negative binomial - type I ("NBI"), negative 
+               binomial - type II ("NBII"), Poisson inverse Gaussian ("PIG"). When the first equation is binary then
+               possible link functions are "probit", "logit" and "cloglog".}
                
-\item{gamlssfit}{If \code{gamlssfit = TRUE} then gamlss models are fitted. This is useful for obtaining 
+\item{gamlssfit}{If \code{gamlssfit = TRUE} then gamlss univariate models are also fitted. This is useful for obtaining 
                  starting values, for instance.}               
 
 \item{BivD}{Type of bivariate error distribution employed. Possible choices are "N", "C0", "C90", "C180", "C270", "J0", "J90", "J180", "J270", 
-            "G0", "G90", "G180", "G270", "F", "AMH", "FGM" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
+            "G0", "G90", "G180", "G270", "F", "AMH", "FGM" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), 
+            survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
              Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Ali-Mikhail-Haq and 
              Farlie-Gumbel-Morgenstern.}            
@@ -93,6 +95,9 @@ documentation of \code{trust} for more details.}
 The underlying algorithm is based on an extension of the procedure used for \code{SemiParBIVProbit()}. For more details
 see ?SemiParBIVProbit. 
 
+There are many continuous/discrete distributions and copula functions to choose from and we plan to include more 
+options. Get in touch if you are interested in a particular distribution.
+
 
 }
 
@@ -110,7 +115,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Marra G. and Radice R. (submitted), A Bivariate Copula Additive Model for Location, Scale and Shape.
+Marra G. and Radice R. (submitted), Bivariate Copula Additive Models for Location, Scale and Shape.
 
 }
 
@@ -120,7 +125,7 @@ Marra G. and Radice R. (submitted), A Bivariate Copula Additive Model for Locati
 
 Convergence failure may sometimes occur. Convergence can be checked using \code{\link{conv.check}} which provides some 
 information about 
-the score and information matrix associated with the fitted model. The former should be 0 and the latter positive definite.
+the score and information matrix associated with the fitted model. The former should be close to 0 and the latter positive definite.
 \code{copulaReg()} will produce some warnings if there is a convergence issue.
 
 In such a situation, the user may use some extra regularisation (see \code{extra.regI}) and/or
@@ -133,7 +138,7 @@ default starting value procedure has typically been found to do a satisfactory j
 
 The above suggestions may help, especially the latter option. However, the user should also consider
 re-specifying the model, and/or using a diferrent dependence structure and/or checking that the chosen marginal 
-distributions fit the responses.
+distributions fit the responses well.
 In our experience, we found that convergence failure typically occurs 
 when the model has been misspecified and/or the sample size is low compared to the complexity of the model. Examples
 of misspecification include using a Clayton copula rotated by 90 degrees when a positive
@@ -144,12 +149,6 @@ the dependence between the margins (e.g., using AMH when the association between
 It is also worth bearing in mind that the use of three parameter marginal distributions requires the data
 to be more informative than a situation in which two parameter distributions are used instead.
 
-When comparing competing models (for instance, by keeping the linear predictor specifications
-fixed and changing the copula), if the computing time for a set of alternatives
-is considerably higher than that of another set then it may mean that 
-the more computationally demanding models are not able to fit the data very well (as a higher number of 
-iterations is required to reach convergence). As a practical check, this may be verified by
-fitting all competing models and, provided convergence is achieved, comparing their respective AIC and BICs, for instance.
 
 } 
 
@@ -162,6 +161,7 @@ fitting all competing models and, provided convergence is achieved, comparing th
 library(SemiParBIVProbit)
 
 ############
+## EXAMPLE 1
 ## Generate data
 ## Correlation between the two equations 0.5 - Sample size 400 
 
@@ -204,14 +204,121 @@ AIC(out)
 BIC(out)
 jc.probs(out, 1.4, 2.3, intervals = TRUE)[1:4,]
 
+\dontrun{ 
 
+############
+## EXAMPLE 2
+############
+## Generate data with one endogenous binary variable 
+## and continuous outcome
+
+set.seed(0)
+
+n <- 1000
+
+Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
+u     <- rMVN(n, rep(0,2), Sigma)
+
+cov   <- rMVN(n, rep(0,2), Sigma)
+cov   <- pnorm(cov)
+x1 <- round(cov[,1]); x2 <- cov[,2]
+
+f1   <- function(x) cos(pi*2*x) + sin(pi*x)
+f2   <- function(x) x+exp(-30*(x-0.5)^2)   
+
+y1 <- ifelse(-1.55 + 2*x1    + f1(x2) + u[,1] > 0, 1, 0)
+y2 <-        -0.25 - 1.25*y1 + f2(x2) + u[,2] 
+
+dataSim <- data.frame(y1, y2, x1, x2)
+
+
+## RECURSIVE Model
+
+rc <- resp.check(y2, margin = "N", print.par = TRUE, loglik = TRUE)
+AIC(rc); BIC(rc)
+
+out <- copulaReg(list(y1 ~ x1 + x2, 
+                      y2 ~ y1 + x2), 
+                 data = dataSim, margins = c("probit","N"))
+conv.check(out)                        
+summary(out)
+post.check(out)
+
+## SEMIPARAMETRIC RECURSIVE Model
+
+eq.mu.1   <- y1 ~ x1 + s(x2) 
+eq.mu.2   <- y2 ~ y1 + s(x2)
+eq.sigma2 <-    ~ 1
+eq.theta  <-    ~ 1
+
+fl <- list(eq.mu.1, eq.mu.2, eq.sigma2, eq.theta)
+
+out <- copulaReg(fl, data = dataSim, 
+                 margins = c("probit","N"), gamlssfit = TRUE)
+conv.check(out)                        
+summary(out)
+post.check(out)
+jc.probs(out, 1, 1.5, intervals = TRUE)[1:4,]
+AT(out, nm.end = "y1")
+AT(out, nm.end = "y1", type = "univariate")
+
+
+#
+#
+
+############
+## EXAMPLE 3
+############
+## Generate data with one endogenous continuous exposure 
+## and binary outcome
+
+set.seed(0)
+
+n <- 1000
+
+Sigma <- matrix(0.5, 2, 2); diag(Sigma) <- 1
+u     <- rMVN(n, rep(0,2), Sigma)
+
+cov   <- rMVN(n, rep(0,2), Sigma)
+cov   <- pnorm(cov)
+x1 <- round(cov[,1]); x2 <- cov[,2]
+
+f1   <- function(x) cos(pi*2*x) + sin(pi*x)
+f2   <- function(x) x+exp(-30*(x-0.5)^2) 
+
+y1 <-        -0.25 - 2*x1    + f2(x2) + u[,2] 
+y2 <- ifelse(-0.25 - 0.25*y1 + f1(x2) + u[,1] > 0, 1, 0)
+
+dataSim <- data.frame(y1, y2, x1, x2)
+
+eq.mu.1   <- y2 ~ y1 + s(x2) 
+eq.mu.2   <- y1 ~ x1 + s(x2)
+eq.sigma2 <-    ~ 1
+eq.theta  <-    ~ 1
+
+fl <- list(eq.mu.1, eq.mu.2, eq.sigma2, eq.theta)
+
+out <- copulaReg(fl, data = dataSim, 
+                 margins = c("probit","N"))
+conv.check(out)                        
+summary(out)
+post.check(out)
+AT(out, nm.end = "y1")
+AT(out, nm.end = "y1", type = "univariate")
+RR(out, nm.end = "y1", rr.plot = TRUE)
+RR(out, nm.end = "y1", type = "univariate")
+OR(out, nm.end = "y1", or.plot = TRUE)
+OR(out, nm.end = "y1", type = "univariate")
+
+#
+#
+}
 }
 
-\keyword{semiparametric bivariate modelling} 
+\keyword{flexible copula regression modelling} 
 \keyword{smooth} 
 \keyword{regression spline}
-\keyword{shrinkage smoother}
-\keyword{variable selection}
 \keyword{copula}
+\keyword{marginal distribution}
 
 

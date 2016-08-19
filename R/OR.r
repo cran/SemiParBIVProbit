@@ -3,8 +3,8 @@ OR <- function(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL
    main = "Histogram and Kernel Density of Simulated Odds Ratios", 
    xlab = "Simulated Odds Ratios", ...){
 
-if(x$Cont == "YES") stop("This function is not suitable for bivariate models with continuous margins.")
-if(x$Cont == "NO" && x$VC$ccss == "yes" ) stop("This function is not suitable for bivariate selection models with continuous margin.")
+if(x$Cont == "YES") stop("This function is not suitable for bivariate models with continuous/discrete margins.")
+if(x$Cont == "NO" && x$VC$ccss == "yes" ) stop("This function is not suitable for selection models.")
 
 
 CIs <- est.AT <- NULL

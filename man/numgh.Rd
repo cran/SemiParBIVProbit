@@ -1,9 +1,12 @@
 \name{numgh}
 \alias{numgh}
+\alias{numch}
+\alias{mm}
+
 
 \title{Internal Function}
 
-\description{It calculates numerical first and second derivatives.}
+\description{This and other similar internal functions calculate numerical derivatives.}
 
 
 \author{

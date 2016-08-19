@@ -1,10 +1,10 @@
 \name{OR}
 \alias{OR}
 
-\title{Causal odds ratio of a binary or continuous endogenous variable}
+\title{Causal odds ratio of a binary/continuous/discrete endogenous variable}
 
 \description{ 
-\code{OR} can be used to calculate the causal odds ratio of a binary or continuous endogenous predictor/treatment, with 
+\code{OR} can be used to calculate the causal odds ratio of a binary/continuous/discrete endogenous predictor/treatment, with 
 corresponding interval obtained using posterior simulation.}
 
 
@@ -21,7 +21,7 @@ OR(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL,
 
 \arguments{ 
 
-\item{x}{A fitted \code{SemiParBIVProbit} object as produced by \code{SemiParBIVProbit()}.}
+\item{x}{A fitted \code{SemiParBIVProbit}/\code{copulaReg} object.}
  
 \item{nm.end}{Name of the endogenous variable.} 
 
@@ -43,13 +43,13 @@ the presence of unobserved confounders) and \code{"bivariate"} (the effect is ob
 
 \item{prob.lev}{Overall probability of the left and right tails of the OR distribution used for interval calculations.} 
 
-\item{length.out}{Ddesired length of the sequence to be used when calculating the effect that a continuous
+\item{length.out}{Ddesired length of the sequence to be used when calculating the effect that a continuous/discrete
                   treatment has on a binary outcome.}
 
 \item{hd.plot}{If \code{TRUE} then a plot of the histogram and kernel density estimate of the simulated odds ratios is produced. This can 
                only be produced when binary responses are used.}
 
-\item{or.plot}{For the case of continuous endogenous variable and binary outcome, if \code{TRUE} then a plot (on the log scale)  
+\item{or.plot}{For the case of continuous/discrete endogenous variable and binary outcome, if \code{TRUE} then a plot (on the log scale)  
                  showing the odd ratios that the binary outcome is equal to 1 for each incremental value of the endogenous variable 
                  and respective intervals is produced.}
 
@@ -65,7 +65,7 @@ the presence of unobserved confounders) and \code{"bivariate"} (the effect is ob
 
 \details{
 
-OR calculates the causal odds ratio for a binary or continuous treatment. Posterior simulation is used to obtain a 
+OR calculates the causal odds ratio for a binary/continuous/discrete treatment. Posterior simulation is used to obtain a 
 confidence/credible interval. 
 
 
@@ -75,11 +75,10 @@ confidence/credible interval.
 
 \value{
 
-\item{res}{It returns three values: lower confidence interval limit, estimated OR and upper interval limit.}
 \item{prob.lev}{Probability level used.}
 \item{sim.OR}{It returns a vector containing simulated values of the average OR. This 
                is used to calculate intervals.}           
-\item{Ratios}{For the case of continuous endogenous treatment and binary outcome, it returns a matrix made up of 
+\item{Ratios}{For the case of continuous/discrete endogenous treatment and binary outcome, it returns a matrix made up of 
                three columns containing the odds ratios for each incremental value in the endogenous variable and respective intervals.}            
           
 }
@@ -96,14 +95,15 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 
 \seealso{
-\code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{summary.SemiParBIVProbit}}  
+\code{\link{SemiParBIVProbit-package}}, \code{\link{SemiParBIVProbit}}, \code{\link{copulaReg}}  
 }
 
 \examples{
-## see examples for SemiParBIVProbit
+## see examples for SemiParBIVProbit and copulaReg
 }
 
-\keyword{semiparametric bivariate modelling} 
+
+\keyword{flexible copula regression modelling} 
 \keyword{OR} 
 \keyword{odds ratio} 
 \keyword{bayesian posterior simulation}

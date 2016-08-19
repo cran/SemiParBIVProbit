@@ -60,6 +60,5 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 
 \keyword{hplot} 
-\keyword{models} 
 \keyword{smooth} 
 \keyword{regression}

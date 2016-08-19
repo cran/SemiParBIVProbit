@@ -1,5 +1,5 @@
-export(AT, AT2, RR, OR, rMVN, post.check,mm,Amat,
-prev, distrHs, numch, numgh,distrHsAT,
+export(AT, AT2, RR, OR, rMVN, post.check,mm,enu.tr,
+prev, distrHs, numch, numgh,distrHsAT,distrHsDiscr,distrHsATDiscr,
 adjCov, copgHsCont, BCDF, BiCDF, jc.probs,probm,
 adjCovSD,
 gt.bpm, esp.tr, eta.tr, teta.tr,copgHsAT,
@@ -17,26 +17,26 @@ print.AT, print.AT2, print.RR, print.OR,
 print.prev, 
 print.mb,
 print.SemiParBIVProbit,
-print.SemiParTRIVProbit,
+print.SemiParTRIV,
 print.copulaReg,
 print.copulaSampleSel,
 print.summary.SemiParBIVProbit,
-print.summary.SemiParTRIVProbit,
+print.summary.SemiParTRIV,
 print.summary.copulaReg,
 print.summary.copulaSampleSel,
 S.m, 
 conv.check,
 SemiParBIVProbit.fit.post,
-SemiParTRIVProbit.fit.post,
+SemiParTRIV.fit.post,
 SemiParBIVProbit.fit,
 SemiParBIVProbit,
-SemiParTRIVProbit,
+SemiParTRIV,
 copulaReg.fit.post,
 copulaReg,
 copulaSampleSel.fit.post,
 copulaSampleSel,
 summary.SemiParBIVProbit,
-summary.SemiParTRIVProbit,
+summary.SemiParTRIV,
 summary.copulaReg,
 summary.copulaSampleSel,
 working.comp,
@@ -51,21 +51,23 @@ import(mgcv)
 importFrom(VineCopula, BiCopTau2Par, BiCopPar2Tau)
 importFrom(ggplot2, fortify)
 importFrom(matrixStats, rowQuantiles, colQuantiles, colWeightedMeans)
-
+importFrom(gamlss.dist, pNBI, dNBI, pNBII, dNBII, pPIG, dPIG, pDEL, dDEL, pSICHEL, dSICHEL, pPO)
+importFrom(Rmpfr,getPrec,mpfr,pmax)
 
 importFrom(mnormt, pmnorm)
 importFrom(graphics, axTicks, abline, hist, lines, par, polygon, plot, rug) 
 importFrom(grDevices, cm.colors, gray, heat.colors, terrain.colors, topo.colors, dev.new)   
 importFrom(stats, qlogis, plogis, dgamma, dlnorm, dlogis, dnorm, density, cor, coef, as.formula, aggregate.data.frame, integrate, 
            model.matrix, na.omit, na.pass, pbinom, pchisq, pgamma, plnorm, pnorm, printCoefmat,
-           qnorm, qqnorm, quantile, residuals, rnorm, sd, uniroot, update, var, weighted.mean, dbeta, pbeta) 
+           qnorm, qqnorm, quantile, residuals, rnorm, sd, uniroot, update, var, weighted.mean, dbeta, pbeta,
+           ks.test, shapiro.test, runif, update.formula) 
 importFrom(utils, getFromNamespace)
 
 
 
 S3method(plot, SemiParBIVProbit)
 S3method(summary, SemiParBIVProbit)
-S3method(summary, SemiParTRIVProbit)
+S3method(summary, SemiParTRIV)
 S3method(summary, copulaReg)
 S3method(summary, copulaSampleSel)
 S3method(print, AT)
@@ -73,11 +75,11 @@ S3method(print, AT2)
 S3method(print, RR)
 S3method(print, OR)
 S3method(print, SemiParBIVProbit)
-S3method(print, SemiParTRIVProbit)
+S3method(print, SemiParTRIV)
 S3method(print, copulaReg)
 S3method(print, copulaSampleSel)
 S3method(print, summary.SemiParBIVProbit)
-S3method(print, summary.SemiParTRIVProbit)
+S3method(print, summary.SemiParTRIV)
 S3method(print, summary.copulaReg)
 S3method(print, summary.copulaSampleSel)
 S3method(logLik, SemiParBIVProbit)

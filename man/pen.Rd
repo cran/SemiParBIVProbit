@@ -1,5 +1,6 @@
 \name{pen}
 \alias{pen}
+\alias{penCor}
 
 \title{Internal Function}
 
