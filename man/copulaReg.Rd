@@ -13,7 +13,7 @@ effects, copula distributions and marginal distributions.
 
 \usage{
 copulaReg(formula, data = list(), weights = NULL, subset = NULL,  
-                 BivD = "N", margins = c("N","N"), 
+                 BivD = "N", margins = c("N","N"), dof = 3,  
                  gamlssfit = FALSE, fp = FALSE, infl.fac = 1, 
                  rinit = 1, rmax = 100, 
                  iterlimsp = 50, tolsp = 1e-07,
@@ -25,7 +25,7 @@ copulaReg(formula, data = list(), weights = NULL, subset = NULL,
 \arguments{ 
 
 \item{formula}{In the basic setup this will be a list of two formulas, one for equation 1 and the other for equation 2. \code{s} terms 
-               are used to specify smooth smooth functions of 
+               are used to specify smooth functions of 
                   predictors. For the case of more than two equations see the example below and the documentation 
                   of \code{SemiParBIVProbit()} for more details. When one outcome is binary and the other continuous/discrete 
                   then the first equation MUST refer to the binary outcome whereas 
@@ -40,7 +40,9 @@ copulaReg(formula, data = list(), weights = NULL, subset = NULL,
 \item{subset}{Optional vector specifying a subset of observations to be used in the fitting process.}
 
 
-\item{margins}{It indicates the distributions used for the two margins. Possible distributions are normal ("N"), 
+\item{margins}{It indicates the distributions used for the two margins. Possible distributions are normal ("N"), normal where 
+               sigma2 corresponds to 
+               the standard deviation instead of the variance ("N2"),  
                log-normal ("LN"), Gumbel ("GU"), reverse Gumbel ("rGU"), 
                logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"), 
                gamma with identity link for the location parameter ("GAi"), Dagum ("DAGUM"), 
@@ -48,16 +50,21 @@ copulaReg(formula, data = list(), weights = NULL, subset = NULL,
                Poisson ("ZTP"), negative binomial - type I ("NBI"), negative 
                binomial - type II ("NBII"), Poisson inverse Gaussian ("PIG"). When the first equation is binary then
                possible link functions are "probit", "logit" and "cloglog".}
-               
+  
+\item{dof}{If \code{BivD = "T"} then the degrees of freedom can be set to a value greater than 2 and smaller than 249. Only for continuous margins,
+           this will be taken as a starting value and the dof estiamted from the data.}   
+  
 \item{gamlssfit}{If \code{gamlssfit = TRUE} then gamlss univariate models are also fitted. This is useful for obtaining 
                  starting values, for instance.}               
 
 \item{BivD}{Type of bivariate error distribution employed. Possible choices are "N", "C0", "C90", "C180", "C270", "J0", "J90", "J180", "J270", 
-            "G0", "G90", "G180", "G270", "F", "AMH", "FGM" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), 
+            "G0", "G90", "G180", "G270", "F", "AMH", "FGM", "T" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), 
             survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
-             Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Ali-Mikhail-Haq and 
-             Farlie-Gumbel-Morgenstern.}            
+             Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Ali-Mikhail-Haq,
+             Farlie-Gumbel-Morgenstern and Student-t with \code{dof}. Each of the Clayton, Joe and Gumbel copulae is allowed to be mixed with a rotated version of the same
+family. The options are: "C0C90", "C0C270", "C180C90", "C180C270", "G0G90", "G0G270", "G180G90",
+"G180G270", "J0J90", "J0J270", "J180J90" and "J180J270". This allows the user to model negative and positive tail dependencies.}            
 
 \item{fp}{If \code{TRUE} then a fully parametric model with unpenalised regression splines if fitted. See the example below.}              
 
@@ -123,11 +130,13 @@ Marra G. and Radice R. (submitted), Bivariate Copula Additive Models for Locatio
 
 \section{WARNINGS}{
 
-Convergence failure may sometimes occur. Convergence can be checked using \code{\link{conv.check}} which provides some 
+Convergence can be checked using \code{\link{conv.check}} which provides some 
 information about 
 the score and information matrix associated with the fitted model. The former should be close to 0 and the latter positive definite.
 \code{copulaReg()} will produce some warnings if there is a convergence issue.
 
+Convergence failure may sometimes occur. This is not necessarily a bad thing as it may indicate specific problems 
+with a fitted model.
 In such a situation, the user may use some extra regularisation (see \code{extra.regI}) and/or
 rescaling (see \code{parscale}). Using \code{gamlssfit = TRUE} is typically more effective than the first two options as
 this will provide better calibrated starting values as compared to those obtained from the default starting value procedure.
@@ -137,7 +146,7 @@ default starting value procedure has typically been found to do a satisfactory j
 \code{gamlssfit = FALSE} and \code{gamlssfit = TRUE} could also be compared to check if starting values make any difference.)
 
 The above suggestions may help, especially the latter option. However, the user should also consider
-re-specifying the model, and/or using a diferrent dependence structure and/or checking that the chosen marginal 
+re-specifying/simplifying the model, and/or using a diferrent dependence structure and/or checking that the chosen marginal 
 distributions fit the responses well.
 In our experience, we found that convergence failure typically occurs 
 when the model has been misspecified and/or the sample size is low compared to the complexity of the model. Examples
@@ -145,7 +154,8 @@ of misspecification include using a Clayton copula rotated by 90 degrees when a 
 association between the margins is present instead, using marginal distributions that do not fit
 the responses, and 
 employing a copula which does not accommodate the type and/or strength of
-the dependence between the margins (e.g., using AMH when the association between the margins is strong).
+the dependence between the margins (e.g., using AMH when the association between the margins is strong). When using 
+smooth functions, if the covariate's values are too sparse then convergence may be affected by this.
 It is also worth bearing in mind that the use of three parameter marginal distributions requires the data
 to be more informative than a situation in which two parameter distributions are used instead.
 
@@ -197,14 +207,15 @@ fl <- list(eq.mu.1, eq.mu.2, eq.sigma2.1, eq.sigma2.2, eq.theta)
 # using more than two equations
 
 out  <- copulaReg(fl, data = dataSim)
+
+\dontrun{ 
+
 conv.check(out)
 post.check(out)
 summary(out)
 AIC(out)
 BIC(out)
 jc.probs(out, 1.4, 2.3, intervals = TRUE)[1:4,]
-
-\dontrun{ 
 
 ############
 ## EXAMPLE 2

@@ -1,5 +1,6 @@
 SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
-                             Model = "T", penCor = "unpen", sp.penCor = 3, approx = FALSE, 
+                             Model = "T", margins = c("probit","probit","probit"), 
+                             penCor = "unpen", sp.penCor = 3, approx = FALSE, 
                              infl.fac = 1, gamma = 1, w.alasso = NULL, 
                              rinit = 1, rmax = 100, 
                              iterlimsp = 50, tolsp = 1e-07,
@@ -10,20 +11,23 @@ SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
   ##########################################################################################################################
   
   i.rho <- sp <- qu.mag <- qu.mag1 <- qu.mag2 <- n.sel <- y1.y2 <- y1.cy2 <- cy1.y2 <- cy1.cy2 <- cy <- cy1 <- gamlss <- inde <- spgamlss <- n.sel1 <- n.sel2 <- NULL  
-  end <- X3.d2 <- X4.d2 <- X5.d2 <- X6.d2 <- X7.d2 <- l.sp3 <- l.sp4 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
-  ngc <- 2
-  gam1 <- gam2 <- gam3 <- gam4 <- gam5 <- gam6 <- gam7 <- NULL
-  
+  end <- X3.d2 <- X4.d2 <- X5.d2 <- X6.d2 <- X7.d2 <- X8.d2 <- l.sp3 <- l.sp4 <- l.sp5 <- l.sp6 <- l.sp7 <- l.sp8 <- 0
+  ngc <- 2; hess <- TRUE
+  gam1 <- gam2 <- gam3 <- gam4 <- gam5 <- gam6 <- gam7 <- gam8 <- NULL
+  opc  <- scc <- sccn <- m2 <- m2d <- m3 <- m3d <- bl <- NULL  
+   
   fp <- FALSE
   
-  X2s <- X3s <- NULL
+  X2s <- X3s <- ct <- cta <- nC  <- nCa <- NULL
     
   sp1 <- sp2 <- NULL
   sp3 <- gp3 <- gam3 <- X3 <- NULL  
   sp4 <- gp4 <- gam4 <- X4 <- NULL  
   sp5 <- gp5 <- gam5 <- X5 <- NULL   
   sp6 <- gp6 <- gam6 <- X6 <- NULL  
-  sp7 <- gp7 <- gam7 <- X7 <- NULL  
+  sp7 <- gp7 <- gam7 <- X7 <- NULL 
+  sp8 <- gp8 <- gam8 <- X8 <- NULL 
+
   spCor <- NULL
 
   y1.y2.y3    <- NULL
@@ -39,70 +43,32 @@ SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
   y1.cy2      <- NULL
   y1.y2.cy3   <- NULL
   y1.y2.y3    <- NULL
-
-
+  
+  
+  ###################################
+  
   if(penCor != "unpen"){ spCor <- sp.penCor; names(spCor) <- "spCor"} 
-  
-
-  
-  opc  <- NULL 
-  scc  <- NULL 
-  sccn <- NULL 
-  mb   <- NULL 
-  m2   <- m2d <- NULL 
-  m3   <- m3d <- NULL 
-  
-  bl   <- NULL 
-  
-  hess <- TRUE
-    
-    
-    
-  mb   <- c("T", "TSS")
-  if(!(Model %in% mb)) stop("Error in parameter Model value. It should be one of: T, TSS.")
-    
-    
-  if(!(penCor %in% c("unpen", "ridge", "lasso", "alasso"))) stop("Error in parameter penCor value. It should be one of:\nunpen, ridge, lasso, alasso.")
-
-  if(is.null(w.alasso) && penCor == "alasso") stop("You must provide a vector of three weights when using alasso.")
-
-  if(length(w.alasso)!=3 && penCor == "alasso") stop("You must supply a vector made up of three weights.")
-
-
-  l.flist <- length(formula)
-  if(!is.list(formula)) stop("You must specify a list of equations.")
-  
-  if(!(extra.regI %in% c("t","pC","sED"))) stop("Error in parameter extra.regI value. It should be one of:\nt, pC or sED.")
-  
-  if(l.flist > 3) stop("You are only allowed to specify three equations.") 
-  
-  
-  if(Model == "TSS") stop("Check the next release for the final tested version of this model\nor get in touch to check progress.")
-
- #######################################################################################  
-
  
-  mf  <- match.call(expand.dots = FALSE)
-  ig <- interpret.gam(formula)
+  M <- list(mb = c("T", "TSS", "TESS"), margins = margins, penCor = penCor, w.alasso = w.alasso, 
+            extra.regI = extra.regI, Model = Model)
   
-  if( l.flist == 3 ){  
-    v1 <- all.vars(as.formula(formula[[1]]))[1]
-    v1 <- c(v1, ig[[1]]$pred.names)
-    v2 <- all.vars(as.formula(formula[[2]]))[1]
-    v2 <- c(v2, ig[[2]]$pred.names)
-    v3 <- all.vars(as.formula(formula[[3]]))[1]
-    v3 <- c(v3, ig[[3]]$pred.names)    
-    
-    pred.n <- union(v1,c(v2,v3))
-                    } 
+  if(!is.list(formula)) stop("You must specify a list of equations.")
+  l.flist <- length(formula)
+  pream.wm(formula, margins = margins, M, l.flist, type = "triv")
   
+  mf <- match.call(expand.dots = FALSE)        
+  pred.varR <- pred.var(formula, l.flist, triv = TRUE) 
+   
+  v1 <- pred.varR$v1  
+  v2 <- pred.varR$v2
+  v3 <- pred.varR$v3
+  pred.n <- pred.varR$pred.n  
   
-                    
-                    
+              
   fake.formula <- paste(v1[1], "~", paste(pred.n, collapse = " + ")) 
   environment(fake.formula) <- environment(formula[[1]])
   mf$formula <- fake.formula 
-  mf$infl.fac <- mf$rinit <- mf$approx <- mf$gamma <- mf$w.alasso <- mf$rmax <- mf$Model <- mf$iterlimsp <- mf$tolsp <- mf$gc.l <- mf$parscale <- mf$extra.regI <- mf$penCor <- mf$sp.penCor <- NULL                           
+  mf$margins <- mf$infl.fac <- mf$rinit <- mf$approx <- mf$gamma <- mf$w.alasso <- mf$rmax <- mf$Model <- mf$iterlimsp <- mf$tolsp <- mf$gc.l <- mf$parscale <- mf$extra.regI <- mf$penCor <- mf$sp.penCor <- NULL                           
   mf$drop.unused.levels <- TRUE 
   if(Model=="TSS") mf$na.action <- na.pass
   mf[[1]] <- as.name("model.frame")
@@ -110,7 +76,7 @@ SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
   
   if(gc.l == TRUE) gc()  
   
-  if(Model=="TSS"){  
+  if(Model=="TSS"){  # do something for TESS here?
   
      data[is.na(data[, v1[1]]), v1[1]] <- 0
      indS1 <- data[, v1[1]] 
@@ -137,23 +103,11 @@ SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
   formula.eq2 <- formula[[2]] 
   formula.eq3 <- formula[[3]]  
   
-  
- # if(Model=="B"){
- #   if(v1[1] %in% v2[-1]) end <- 1
- #   if(v2[1] %in% v1[-1]) end <- 2
- #               }
-
-
-  ct <- cta <- nC  <- nCa <- NULL  
-  
-  
  ##############################################################  
  # Equations 1, 2 and 3
  ##############################################################  
  
-  
-  
-  gam1 <- eval(substitute(gam(formula.eq1, binomial(link = "probit"), gamma=infl.fac, weights=weights, data=data),list(weights=weights))) 
+  gam1 <- eval(substitute(gam(formula.eq1, binomial(link = margins[1]), gamma=infl.fac, weights=weights, data=data),list(weights=weights))) 
 
   X1 <- model.matrix(gam1)
   X1.d2 <- dim(X1)[2]
@@ -166,9 +120,16 @@ SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
   
   if(Model == "TSS") inde1 <- inde2 <- as.logical(y1)
   
+  ###
   
+  if (Model == "TESS") inde1 <- inde2 <- inde2.1 <- as.logical(y1)
+  
+  
+  
+  
+  ###
 
-  gam2 <- eval(substitute(gam(formula.eq2, binomial(link = "probit"), gamma=infl.fac, weights=weights, data=data, subset=inde1),list(weights=weights,inde1=inde1))) 
+  gam2 <- eval(substitute(gam(formula.eq2, binomial(link = margins[2]), gamma=infl.fac, weights=weights, data=data, subset=inde1),list(weights=weights,inde1=inde1))) 
 
   if(Model == "TSS"){
   
@@ -184,12 +145,12 @@ SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
   if(l.sp2 != 0) sp2 <- gam2$sp
   
 
- 
+  ###
   
   if(Model == "TSS"){ inde2[inde1] <- as.logical(gam2$y); inde2.1 <- inde2[inde1]}
   
 
-  gam3 <- eval(substitute(gam(formula.eq3, binomial(link = "probit"), gamma=infl.fac, weights=weights, data=data, subset=inde2),list(weights=weights,inde2=inde2))) 
+  gam3 <- eval(substitute(gam(formula.eq3, binomial(link = margins[3]), gamma=infl.fac, weights=weights, data=data, subset=inde2),list(weights=weights,inde2=inde2))) 
 
 
   if(Model == "TSS"){
@@ -232,6 +193,18 @@ if(Model == "TSS"){
 
 }
 
+  if(Model == "TESS"){
+     
+    inde <- inde1
+    
+    cy1        <- (1-y1)
+    y1.y2.y3   <-  y1[inde]*y2*y3  
+    y1.y2.cy3  <- y1[inde]*y2*(1-y3)  
+    y1.cy2.cy3 <- y1[inde]*(1-y2)*(1-y3)
+    y1.cy2.y3  <- y1[inde]*(1-y2)*y3 
+    
+  }
+
 
   gp1 <- gam1$nsdf 
   gp2 <- gam2$nsdf
@@ -247,14 +220,22 @@ res1 <- residuals(gam1)
 res2 <- residuals(gam2)
 res3 <- residuals(gam3)
 
-theta12 <- atanh(cor(res1, res2))
-theta13 <- atanh(cor(res1, res3))
-theta23 <- atanh(cor(res2, res3))
+cor1 <- cor(res1, res2)
+cor2 <- cor(res1, res3)
+cor3 <- cor(res2, res3)
+
+cor1 <- sign(cor1)*ifelse(abs(cor1) > 0.85, 0.85, abs(cor1))
+cor2 <- sign(cor2)*ifelse(abs(cor2) > 0.85, 0.85, abs(cor2))
+cor3 <- sign(cor3)*ifelse(abs(cor3) > 0.85, 0.85, abs(cor3))
+
+theta12 <- atanh(cor1)
+theta13 <- atanh(cor2)
+theta23 <- atanh(cor3)
 
 }
 
 
-if(Model == "TSS") theta12 <- theta13 <- theta23 <- atanh(0.01)
+if(Model == "TSS" || Model == "TESS") theta12 <- theta13 <- theta23 <- atanh(0.01) # this can be improved for TESS
   
 names(theta12) <- "theta12.st"
 names(theta13) <- "theta13.st"
@@ -264,30 +245,32 @@ start.v <- c(coef(gam1), coef(gam2), coef(gam3), theta12, theta13, theta23)
 
 ##############################################################
 
-if(Model == "T")   func.opt <- triprobgHs
-if(Model == "TSS") func.opt <- triprobgHsSS
-  
-l.gam1 <- length(coef(gam1))
-l.gam2 <- length(coef(gam2))
-l.gam3 <- length(coef(gam3))
-l.gam4 <- length(coef(gam4))
-l.gam5 <- length(coef(gam5))
-l.gam6 <- length(coef(gam6))
-l.gam7 <- length(coef(gam7))
+if(Model == "T")    func.opt <- triprobgHs
+if(Model == "TSS")  func.opt <- triprobgHsSS
+if(Model == "TESS") func.opt <- triprobgHsESS
 
-
-if( (l.sp1!=0 || l.sp2!=0 || l.sp3!=0) && fp==FALSE ){ 
-  
-                 sp <- c(sp1, sp2, sp3, sp4, sp5, sp6, sp7)
-                 
-                 qu.mag <- S.m(gam1, gam2, gam3, gam4, gam5, gam6, gam7, 
-                               l.sp1, l.sp2, l.sp3, l.sp4, l.sp5, l.sp6, l.sp7, 
-                               l.gam1, l.gam2, l.gam3, l.gam4, l.gam5, l.gam6, l.gam7) 
-       
-  }  
+##########################################################
+# SPs and penalties
+##########################################################
   
 
+GAM <- list(gam1 = gam1, gam2 = gam2, gam3 = gam3, gam4 = gam4, 
+            gam5 = gam5, gam6 = gam6, gam7 = gam7, gam8 = gam8)   
 
+
+if( (l.sp1!=0 || l.sp2!=0 || l.sp3!=0 || l.sp4!=0 || l.sp5!=0 || l.sp6!=0 || l.sp7!=0 || l.sp8!=0) && fp==FALSE ){ 
+
+L.GAM <- list(l.gam1 = length(coef(gam1)), l.gam2 = length(coef(gam2)), l.gam3 = length(coef(gam3)), l.gam4 = length(coef(gam4)),
+              l.gam5 = length(coef(gam5)), l.gam6 = length(coef(gam6)), l.gam7 = length(coef(gam7)), l.gam8 = length(coef(gam8)))
+
+L.SP <- list(l.sp1 = l.sp1, l.sp2 = l.sp2, l.sp3 = l.sp3, l.sp4 = l.sp4, 
+             l.sp5 = l.sp5, l.sp6 = l.sp6, l.sp7 = l.sp7, l.sp8 = l.sp8)
+
+                 sp <- c(sp1, sp2, sp3, sp4, sp5, sp6, sp7, sp8)
+                 qu.mag <- S.m(GAM, L.SP, L.GAM)                             
+                                                        } 
+ 
+  
 if(!(penCor %in% c("unpen")) && fp==FALSE){
     
     l.sp4  <- 1
@@ -300,8 +283,8 @@ if(!(penCor %in% c("unpen")) && fp==FALSE){
 # here I set up rank and off as I can not do it later
 # then I will incorporate the penalty for the corrs
  
-if(l.sp1==0 && l.sp2==0 && l.sp3==0) qu.mag <- list(rank = 3, off = X1.d2 + X2.d2 + X3.d2 + 1, Ss = NULL) 
-if(l.sp1!=0 || l.sp2!=0 || l.sp3!=0) qu.mag <- list(rank = c(qu.mag$rank, 3), off = c(qu.mag$off, X1.d2 + X2.d2 + X3.d2 + 1), Ss = qu.mag$Ss)
+if(l.sp1 == 0 && l.sp2 == 0 && l.sp3 == 0) qu.mag <- list(rank = 3, off = X1.d2 + X2.d2 + X3.d2 + 1, Ss = NULL) 
+if(l.sp1 != 0 || l.sp2 != 0 || l.sp3 != 0) qu.mag <- list(rank = c(qu.mag$rank, 3), off = c(qu.mag$off, X1.d2 + X2.d2 + X3.d2 + 1), Ss = qu.mag$Ss)
 
 }
 
@@ -327,13 +310,14 @@ if(missing(parscale)) parscale <- 1
                   y1.y2.cy3 = y1.y2.cy3, univ = 0)
  
    
-  VC <- list(X1 = X1, inde1 = inde1, inde2 = inde2, inde2.1 = inde2.1,
+  VC <- list(X1 = X1, inde = inde, inde1 = inde1, inde2 = inde2, inde2.1 = inde2.1,
              X2 = X2, 
              X3 = X3,
              X4 = X4, 
              X5 = X5, 
              X6 = X6,
              X7 = X7,
+             X8 = X8,
              X1.d2 = X1.d2, 
              X2.d2 = X2.d2,
              X3.d2 = X3.d2,
@@ -341,13 +325,15 @@ if(missing(parscale)) parscale <- 1
              X5.d2 = X5.d2,
              X6.d2 = X6.d2,   
              X7.d2 = X7.d2, 
+             X8.d2 = X8.d2,
              gp1 = gp1, 
              gp2 = gp2,
              gp3 = gp3,
              gp4 = gp4, 
              gp5 = gp5,
              gp6 = gp6,  
-             gp7 = gp7,  
+             gp7 = gp7,
+             gp8 = gp8, 
              l.sp1 = l.sp1, 
              l.sp2 = l.sp2,
              l.sp3 = l.sp3,
@@ -355,18 +341,20 @@ if(missing(parscale)) parscale <- 1
              l.sp5 = l.sp5,
              l.sp6 = l.sp6,  
              l.sp7 = l.sp7,
+             l.sp8 = l.sp8,
              infl.fac = infl.fac,
-             weights = weights,
+             weights = weights, univ.gamls = FALSE,
              fp = fp,
              hess = hess, nCa = nCa,
              Model = Model, gamlssfit = TRUE,
              end = NULL,
              BivD = "N", penCor = penCor,
              nC = nC, gc.l = gc.l, n = n, extra.regI = extra.regI,
-             parscale = parscale, margins = c("probit","probit","probit"),
+             parscale = parscale, margins = margins,
              Cont = "NO", ccss = "no", m2 = m2, m3 = m3, m2d = m2d, m3d = m3d, bl = bl, triv = TRUE,
              X2s = X2s, X3s = X3s,
-             approx = approx, gamma = gamma, wc = w.alasso, qu.mag = qu.mag)
+             approx = approx, gamma = gamma, wc = w.alasso, qu.mag = qu.mag,
+             zerov = -10)
              
   if(gc.l == TRUE) gc()           
              
@@ -380,11 +368,8 @@ if(missing(parscale)) parscale <- 1
   # post estimation
   ##########################################################################################################################
 
-  SemiParFit.p <- SemiParTRIV.fit.post(SemiParFit = SemiParFit, 
-                                            VC = VC, Model = Model,
-                                            gam1 = gam1, gam2 = gam2, gam3 = gam3,
-                                            gam4 = gam4, gam5 = gam5, gam6 = gam6)
-    
+  SemiParFit.p <- SemiParTRIV.fit.post(SemiParFit = SemiParFit, VC = VC, Model = Model, GAM)
+ 
   SemiParFit <- SemiParFit.p$SemiParFit # useful for SS models, eta2 calculatons etc.    
     
   ##########################################################################################################################
@@ -406,12 +391,13 @@ if(gradi < 10 && e.v <= 0)  warning(paste(me2,"\n",me3), call. = FALSE)
   ##########################################################################################################################
 
 L <- list(fit = SemiParFit$fit, formula = formula, Model = Model,
-          gam1 = gam1, gam2 = gam2, gam3 = gam3, gam4 = gam4, gam5 = gam5, gam6 = gam6, gam7 = gam7,  
+          gam1 = gam1, gam2 = gam2, gam3 = gam3, gam4 = gam4, gam5 = gam5, gam6 = gam6, gam7 = gam7, gam8 = gam8,
           coefficients = SemiParFit$fit$argument,  iterlimsp = iterlimsp,
           weights = weights, 
           sp = SemiParFit.p$sp, iter.sp = SemiParFit$iter.sp, 
           l.sp1 = l.sp1, l.sp2 = l.sp2, l.sp3 = l.sp3, 
-          l.sp4 = l.sp4, l.sp5 = l.sp5, l.sp6 = l.sp6,l.sp7 = l.sp7, bl = bl,
+          l.sp4 = l.sp4, l.sp5 = l.sp5, l.sp6 = l.sp6,
+          l.sp7 = l.sp7, l.sp8 = l.sp8, bl = bl,
           fp = fp,  
           iter.if = SemiParFit$iter.if, iter.inner = SemiParFit$iter.inner,
           theta12   = SemiParFit.p$theta12, 
@@ -422,7 +408,8 @@ L <- list(fit = SemiParFit$fit, formula = formula, Model = Model,
           theta23.a = SemiParFit.p$theta23.a,           
           n = n, 
           X1 = X1, X2 = X2, X3 = X3, X1.d2 = X1.d2, X2.d2 = X2.d2, X3.d2 = X3.d2, 
-          X4 = X4, X5 = X5, X6 = X6, X7 = X7, X4.d2 = X4.d2, X5.d2 = X5.d2, X6.d2 = X6.d2, X7.d2 = X7.d2,           
+          X4 = X4, X5 = X5, X6 = X6, X7 = X7, X8 = X8, 
+          X4.d2 = X4.d2, X5.d2 = X5.d2, X6.d2 = X6.d2, X7.d2 = X7.d2, X8.d2 = X8.d2,            
           He = SemiParFit.p$He, HeSh = SemiParFit.p$HeSh, Vb = SemiParFit.p$Vb, Ve = SemiParFit.p$Ve, 
           F = SemiParFit.p$F, F1 = SemiParFit.p$F1,  
           t.edf = SemiParFit.p$t.edf, edf = SemiParFit.p$edf, 
@@ -430,7 +417,8 @@ L <- list(fit = SemiParFit$fit, formula = formula, Model = Model,
           edf1 = SemiParFit.p$edf1, edf2 = SemiParFit.p$edf2, edf3 = SemiParFit.p$edf3,
           edf4 = SemiParFit.p$edf4, edf5 = SemiParFit.p$edf5, edf6 = SemiParFit.p$edf6,
           edf1.1 = SemiParFit.p$edf1.1, edf1.2 = SemiParFit.p$edf1.2, edf1.3 = SemiParFit.p$edf1.3,
-          edf1.4 = SemiParFit.p$edf1.4, edf1.5 = SemiParFit.p$edf1.5, edf1.6 = SemiParFit.p$edf1.6, 
+          edf1.4 = SemiParFit.p$edf1.4, edf1.5 = SemiParFit.p$edf1.5, edf1.6 = SemiParFit.p$edf1.6,
+          edf1.7 = SemiParFit.p$edf1.7, edf1.8 = SemiParFit.p$edf1.8, 
           R = SemiParFit.p$R,
           bs.mgfit = SemiParFit$bs.mgfit, conv.sp = SemiParFit$conv.sp, 
           wor.c = SemiParFit$wor.c,
@@ -450,12 +438,12 @@ L <- list(fit = SemiParFit$fit, formula = formula, Model = Model,
           nC = nC, hess = hess, 
           respvec = respvec, 
           qu.mag = qu.mag, 
-          gp1 = gp1, gp2 = gp2, gp3 = gp3, gp4 = gp4, gp5 = gp5, gp6 = gp6, gp7 = gp7, 
+          gp1 = gp1, gp2 = gp2, gp3 = gp3, gp4 = gp4, gp5 = gp5, gp6 = gp6, gp7 = gp7, gp8 = gp8,
           VC = VC, magpp = SemiParFit$magpp,
           gamlss = gamlss, gamlssfit = TRUE, Cont = "NO", triv = TRUE,  
-          l.flist = l.flist, margins = VC$margins,
+          l.flist = l.flist, margins = margins,
           inde2 = inde2, X2s = X2s, X3s = X3s,
-          p1n = SemiParFit.p$p1n, p2n = SemiParFit.p$p2n, p3n = SemiParFit.p$p3n)
+          p1n = SemiParFit.p$p1n, p2n = SemiParFit.p$p2n, p3n = SemiParFit.p$p3n, v1 = v1, v2 = v2, v3 = v3, univar.gamlss = FALSE)
 
 class(L) <- c("SemiParTRIV","SemiParBIVProbit")
 

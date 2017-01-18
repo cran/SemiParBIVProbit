@@ -20,8 +20,9 @@ if(test == TRUE){
     if( (family == 6 || family == 8) && any(par1 <= 1))   stop("The parameter of Joe0/180 must be in (1,oo).")
     if( (family == 7 || family == 9) && any(par1 >= -1))  stop("The parameter of Joe90/270 must be in (-oo,-1).")
        
-}       
-       
+}   
+
+    if(family == 57)                    res <- BiCopCDF(u1, u2, family = 2, par = par1, par2 = par2)
     if(family == 1)                     res <- pbinorm( qnorm(u1), qnorm(u2), cov12 = par1)
     if(family %in% c(2,6,10,14,55,56))  res <- BCDF(u1, u2, family, par1)                            # 0
     if(family %in% c(4,8,12))           res <- u1 + u2 - 1 + BCDF(1 - u1, 1 - u2, family, par1)      # 180

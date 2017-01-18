@@ -11,7 +11,7 @@ corresponding interval obtained using posterior simulation.}
 
 \usage{
 
-AT(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL, 
+AT(x, nm.end, eq = NULL, E = TRUE, treat = TRUE, type = "simultaneous", ind = NULL, 
    n.sim = 100, prob.lev = 0.05, length.out = NULL,
    hd.plot = FALSE, te.plot = FALSE, 
    main = "Histogram and Kernel Density of Simulated Average Effects", 
@@ -25,6 +25,8 @@ AT(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL,
 
 \item{nm.end}{Name of the endogenous variable.} 
 
+\item{eq}{Number of equation containing the endogenous variable. This is only used for trivariate models.} 
+
 \item{E}{If \code{TRUE} then \code{AT} calculates the sample ATE. If \code{FALSE} then it calculates the sample AT 
          for the treated individuals only.}  
 
@@ -33,7 +35,7 @@ the control group. This only makes sense if \code{E = FALSE}.}
 
 \item{type}{This argument can take three values: \code{"naive"} (the effect is calculated ignoring the presence of observed and unobserved 
             confounders), \code{"univariate"} (the effect is obtained from the univariate model 
-            which neglects the presence of unobserved confounders) and \code{"bivariate"} (the effect is obtained from 
+            which neglects the presence of unobserved confounders) and \code{"simultaneous"} (the effect is obtained from 
             the simultaneous model which accounts for observed and unobserved confounders).}
 
 
@@ -124,6 +126,7 @@ Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariat
 
 \keyword{flexible copula regression modelling} 
 \keyword{bivariate model} 
+\keyword{trivariate model} 
 \keyword{ATE} 
 \keyword{average treatment effect} 
 \keyword{bayesian posterior simulation}

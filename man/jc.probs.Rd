@@ -1,5 +1,8 @@
 \name{jc.probs}
 \alias{jc.probs}
+\alias{jc.probs1}
+\alias{jc.probs2}
+\alias{jc.probs3}
 
 \title{Joint or conditional probabilities from a fitted bivariate model}
 

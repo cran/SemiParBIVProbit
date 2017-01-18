@@ -1,11 +1,13 @@
 print.AT <- function(x, ...){
 
 
+
+if(x$triv == FALSE){
+
+
 if(x$type != "naive" && !(x$mar2 %in% x$bl) && x$eq == 1){
 
 es <- format(x$Effects, digits = 3, trim=TRUE)
-
-#cat("\nRisk ratios with ",(1-x$prob.lev)*100,"% intervals:\n\n",sep="")
 
 cat("\n")
 print(es)
@@ -26,6 +28,24 @@ if( !(x$mar2 %in% x$bl) && x$eq == 2) cat("\nTreatment effect with ",(1-x$prob.l
 cat(es[2]," (",es[1],",",es[3],")\n\n",sep="")
 
 }
+
+
+}
+
+
+if(x$triv == TRUE){
+
+
+es <- format(x$res*100, digits = 3, trim=TRUE)
+
+cat("\nTreatment effect (%) with ",(1-x$prob.lev)*100,"% interval:\n\n",sep="")
+cat(es[2]," (",es[1],",",es[3],")\n\n",sep="")
+
+
+
+}
+
+
 
 
 

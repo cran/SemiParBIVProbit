@@ -30,6 +30,11 @@ binary as it would be the case when using \code{SemiParBIVProbit()}).
 
 \code{SemiParTRIV()} fits trivariate probit models (with and without double sample selection).  
 
+\code{gamlss()} fits flexible univariate regression models. The purpose of this function was only to provide, in some cases, starting values 
+for the above functions, but it has now been made available in the form of a proper function should the user wish to fit 
+univariate models using the general estimation approach of this package.
+
+
 Other models/options will be incorporated from time to time.
 
 
@@ -75,7 +80,7 @@ Thanks to Bear Braumoeller (Department of Political Science, The Ohio State Univ
 
 Key references:
 
-Filippou P., Marra G. and Radice R. (submitted), A Penalised Estimation Approach to Additive Trivariate Probit Regression.
+Filippou P., Marra G. and Radice R. (submitted), Penalized Likelihood Estimation of a Trivariate Additive Probit Model.
 
 Marra G. and Radice R. (2011), Estimation of a Semiparametric Recursive Bivariate Probit in the Presence of Endogeneity. \emph{Canadian Journal of Statistics}, 39(2), 259-279.
 
@@ -91,12 +96,12 @@ McGovern M.E., Barnighausen T., Marra G. and Radice R. (2015), On the Assumption
 
 Radice R., Marra G. and Wojtys M. (2016), Copula Regression Spline Models for Binary Outcomes. \emph{Statistics and Computing}, 26(5), 981-995. 
 
-Wojtys M. and Marra G. (submitted). Copula based generalized additive models with non-random sample selection.
+Wojtys M. and Marra G. (submitted). Copula-Based Generalized Additive Models with Non-Random Sample Selection.
 
 }
 
 
-\seealso{\code{\link{SemiParBIVProbit}}, \code{\link{copulaReg}}, \code{\link{copulaSampleSel}}, \code{\link{SemiParTRIV}}}
+\seealso{\code{\link{SemiParBIVProbit}}, \code{\link{copulaReg}}, \code{\link{copulaSampleSel}}, \code{\link{gamlss}}, \code{\link{SemiParTRIV}}}
 
 
 \keyword{endogeneity} 
@@ -104,6 +109,7 @@ Wojtys M. and Marra G. (submitted). Copula based generalized additive models wit
 \keyword{non-random sample selection} 
 \keyword{partial observability} 
 \keyword{flexible copula regression modelling} 
+\keyword{flexible regression modelling} 
 \keyword{smooth} 
 \keyword{regression}
 

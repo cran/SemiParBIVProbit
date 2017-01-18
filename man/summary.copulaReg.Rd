@@ -12,8 +12,7 @@ It takes a fitted \code{copulaReg} object produced by \code{copulaReg()} and pro
 
 \usage{
 
-\method{summary}{copulaReg}(object, n.sim = 100, prob.lev = 0.05, cm.plot = FALSE, 
-        ylab = "Margin 2", xlab = "Margin 1", n.grid = 1000, n.dig = 2, ...)
+\method{summary}{copulaReg}(object, n.sim = 100, prob.lev = 0.05, ...)
    
 
 
@@ -35,22 +34,12 @@ to calculate intervals for the association parameter, dispersion coefficient etc
             more precision is required.} 
 
 \item{prob.lev}{Probability of the left and right tails of the posterior distribution used for interval calculations.} 
-                    
-\item{cm.plot}{If \code{TRUE} then a filled bivariate contour meta plot corresponding to the assumed (estimated) bivariate model is produced.}   
-             
-\item{xlab, ylab}{Margin labels.}    
-                     
-\item{n.grid}{Number of grid points used in contour plot construction. This is relevant for continuous margins.} 
-
-\item{n.dig}{Number of digit points used in rounding bivariate pdf values for contour plot construction. This is relevant for continuous margins.} 
-           
-
+    
 \item{digits}{Number of digits printed in output.} 
 
-\item{signif.stars}{By default significance stars are printed alongside output.} 
-           
-           
-\item{...}{Other graphics parameters to pass on to plotting commands. These are used only when \code{cm.plot=TRUE}.}
+\item{signif.stars}{By default significance stars are printed alongside output.}     
+    
+\item{...}{Other arguments.}
 
 }
 

@@ -1,6 +1,7 @@
 \name{distrHs}
 \alias{distrHs}
 \alias{distrHsAT}
+\alias{distrHsAT1}
 \alias{distrHsATDiscr}
 \alias{distrHsDiscr}
 

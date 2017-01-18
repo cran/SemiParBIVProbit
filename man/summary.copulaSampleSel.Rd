@@ -12,10 +12,7 @@ It takes a fitted \code{copulaSampleSel} object produced by \code{copulaSampleSe
 
 \usage{
 
-\method{summary}{copulaSampleSel}(object, n.sim = 100, prob.lev = 0.05, cm.plot = FALSE, 
-        xlim = c(-3, 3), ylim = c(-3, 3), 
-        ylab = "Margin 2", xlab = "Margin 1", 
-        n.grid = 1000, n.dig = 2, ...)
+\method{summary}{copulaSampleSel}(object, n.sim = 100, prob.lev = 0.05, ...)
   
 \method{print}{summary.copulaSampleSel}(x, digits = max(3, getOption("digits") - 3), 
            signif.stars = getOption("show.signif.stars"), ...)  
@@ -36,21 +33,11 @@ to calculate intervals for the association parameter, dispersion coefficient, fo
 
 \item{prob.lev}{Probability of the left and right tails of the posterior distribution used for interval calculations.} 
                     
-\item{cm.plot}{If \code{TRUE} then a filled bivariate contour meta plot corresponding to the assumed (estimated) bivariate model is produced.}   
-             
-\item{xlim, ylim}{Limits of the bivariate contour meta plot.}    
-
-\item{ylab, xlab}{Labels for the bivariate contour meta plot.} 
-                     
-\item{n.grid}{Number of grid points used in contour plot construction. This is relevant for the continuous margin.} 
-
-\item{n.dig}{Number of digit points used in rounding bivariate pdf values for contour plot construction. This is relevant for the continuous margin.} 
-          
 \item{digits}{Number of digits printed in output.} 
 
 \item{signif.stars}{By default significance stars are printed alongside output.}           
           
-\item{...}{Other graphics parameters to pass on to plotting commands. These are used only when \code{cm.plot=TRUE}.}
+\item{...}{Other arguments.}
 
 }
 

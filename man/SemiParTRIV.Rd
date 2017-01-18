@@ -13,7 +13,8 @@ effects.
 
 \usage{
 SemiParTRIV(formula, data = list(), weights = NULL, subset = NULL,  
-            Model = "T", penCor = "unpen", sp.penCor = 3, 
+            Model = "T", margins = c("probit", "probit", "probit"),
+            penCor = "unpen", sp.penCor = 3, 
             approx = FALSE, infl.fac = 1, 
             gamma = 1, w.alasso = NULL, rinit = 1, rmax = 100, 
             iterlimsp = 50, tolsp = 1e-07,
@@ -24,7 +25,7 @@ SemiParTRIV(formula, data = list(), weights = NULL, subset = NULL,
 \arguments{ 
 
 \item{formula}{In the basic setup this will be a list of three formulas. \code{s} terms 
-               are used to specify smooth smooth functions of 
+               are used to specify smooth functions of 
                   predictors. See the examples below and the documentation of \code{SemiParBIVProbit} for further 
                   details.} 
 
@@ -37,6 +38,8 @@ SemiParTRIV(formula, data = list(), weights = NULL, subset = NULL,
 
 \item{Model}{It indicates the type of model to be used in the analysis. Possible values are "T" (trivariate model), 
              "TSS" (trivariate model with double sample selection).}
+
+\item{margins}{It indicates the link functions used for the three margins. Possible choices are "probit", "logit" and "cloglog".}
 
 \item{penCor}{Type of penalty for correlation coefficients. Possible values are "unpen", "lasso", "ridge", "alasso".}
 
@@ -109,7 +112,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Filippou P., Marra G. and Radice R. (submitted), A Penalised Estimation Approach to Additive Trivariate Probit Regression.
+Filippou P., Marra G. and Radice R. (submitted), Penalized Likelihood Estimation of a Trivariate Additive Probit Model.
 
 
 }
@@ -120,19 +123,19 @@ Filippou P., Marra G. and Radice R. (submitted), A Penalised Estimation Approach
 
 \section{WARNINGS}{
 
-Convergence failure may sometimes occur. Convergence can be checked using \code{\link{conv.check}} which provides some 
+Convergence can be checked using \code{\link{conv.check}} which provides some 
 information about 
 the score and information matrix associated with the fitted model. The former should be close to 0 and the latter positive definite.
 \code{SemiParTRIV()} will produce some warnings if there is a convergence issue.
 
-In such a situation, the user may use some extra regularisation (see \code{extra.regI}) and/or
+Convergence failure may sometimes occur. This is not necessarily a bad thing as it may indicate specific problems 
+with a fitted model. In such a situation, the user may use some extra regularisation (see \code{extra.regI}) and/or
 rescaling (see \code{parscale}). Penalising the correlations using argument \code{penCor} may help a lot as
 in our experience in hard situations the correlation coefficients are typically the most difficult to estimate. 
-
-The above suggestions may help, especially the latter option. However, the user should also consider
-looking into the proportions of 1 and 0 available for each event of the trivariate model. It may 
+The user should also consider re-specifying/simplifying the model. Moreover, when using 
+smooth functions, if the covariate's values are too sparse then convergence may be affected by this. It is also helpful to 
+look into the proportions of 1 and 0 available for each event of the trivariate model; it may 
 be the case that certain events do not have many observations associated with them, in which case estimation may be more challenging.
-As usual, model complexity plays a role.
 
 } 
 
@@ -170,10 +173,11 @@ y3 <- ifelse(-0.75 + 0.25*x1          + u[,3] > 0, 1, 0)
 
 dataSim <- data.frame(y1, y2, y3, x1, x2)
 
-out  <- SemiParTRIV(list(y1 ~ x1 + s(x2), 
-                         y2 ~ x1 + s(x2),
-                         y3 ~ x1), 
-                         data = dataSim)
+f.l <- list(y1 ~ x1 + s(x2), 
+            y2 ~ x1 + s(x2),
+            y3 ~ x1)  
+
+out  <- SemiParTRIV(f.l, data = dataSim)
 conv.check(out)
 summary(out)
 plot(out, eq = 1)
@@ -181,6 +185,9 @@ plot(out, eq = 2)
 AIC(out)
 BIC(out)
 
+out  <- SemiParTRIV(f.l, data = dataSim, 
+                    margins = c("probit","logit","cloglog"))
+                         
 ############
 ## EXAMPLE 2
 ############

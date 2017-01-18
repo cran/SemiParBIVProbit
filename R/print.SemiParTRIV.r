@@ -6,15 +6,25 @@ print.SemiParTRIV <- function(x, ...){
   as.p13 <- x$theta13.a
   as.p23 <- x$theta23.a
   
-      main.t <- "\nCOPULA:  "     
-
-      m1l <- m2l <- m3l <- "probit"
+  main.t <- "\nCOPULA:  "     
       
-      cat(main.t,cop) 
+  if(x$margins[1]=="probit")  m1l <- "probit"
+  if(x$margins[1]=="logit")   m1l <- "logit"
+  if(x$margins[1]=="cloglog") m1l <- "cloglog"
+  
+  if(x$margins[2]=="probit")  m2l <- "probit"
+  if(x$margins[2]=="logit")   m2l <- "logit"
+  if(x$margins[2]=="cloglog") m2l <- "cloglog"
+ 
+  if(x$margins[3]=="probit")  m3l <- "probit"
+  if(x$margins[3]=="logit")   m3l <- "logit"
+  if(x$margins[3]=="cloglog") m3l <- "cloglog" 
+       
+  cat(main.t,cop) 
     
-      cat("\nMARGIN 1: Bernoulli")  
-      cat("\nMARGIN 2: Bernoulli")
-      cat("\nMARGIN 3: Bernoulli") 
+  cat("\nMARGIN 1: Bernoulli")  
+  cat("\nMARGIN 2: Bernoulli")
+  cat("\nMARGIN 3: Bernoulli") 
       
   cat("\n\nEQUATION 1")
   cat("\nLink function for mu.1:",m1l,"\n")
@@ -29,21 +39,12 @@ print.SemiParTRIV <- function(x, ...){
   cat("Formula: "); print(x$formula[[3]])  
   
   cat("\n")
-        
-        
-if(x$Model == "T"){          
-  cat("n = ",x$n,"\ntheta12 = ", format(as.p12, digits=3),"  theta13 = ", format(as.p13, digits=3),"  theta23 = ", format(as.p23, digits=3),"\ntotal edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
+            
+if(x$Model == "T" || x$Model == "TESS")   cat("n = ",x$n,"\ntheta12 = ", format(as.p12, digits=3),"  theta13 = ", format(as.p13, digits=3),"  theta23 = ", format(as.p23, digits=3),"\ntotal edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
+if(x$Model == "TSS") cat("n = ",x$n,"  n.sel1 = ",x$n.sel1,"  n.sel2 = ",x$n.sel2,"\ntheta12 = ", format(as.p12, digits=3),"  theta13 = ", format(as.p13, digits=3),"  theta23 = ", format(as.p23, digits=3),"\ntotal edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
 
-}
+# tess can be improved with n.sel
 
-
-if(x$Model == "TSS"){
-
-  cat("n = ",x$n,"  n.sel1 = ",x$n.sel1,"  n.sel2 = ",x$n.sel2,"\ntheta12 = ", format(as.p12, digits=3),"  theta13 = ", format(as.p13, digits=3),"  theta23 = ", format(as.p23, digits=3),"\ntotal edf = ",format(x$t.edf, digits=3),"\n\n", sep="")
-
-}
-
- 
 invisible(x)
 
 }

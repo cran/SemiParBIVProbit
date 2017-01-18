@@ -28,7 +28,7 @@ teta.st <- resT$teta.st
 teta    <- resT$teta
 
 
-  p11 <- BiCDF(p1[VC$inde], p2, VC$nC, teta)
+  p11 <- BiCDF(p1[VC$inde], p2, VC$nC, teta, VC$dof)
 
 ########################################################################################################
 
@@ -41,7 +41,7 @@ teta    <- resT$teta
   l.par           <- VC$weights*l.par1 
 
 
-dH <- copgHs(p1[VC$inde], p2, eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD)
+dH <- copgHs(p1[VC$inde], p2, eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD, VC$dof)
 
 c.copula.be1   <- dH$c.copula.be1
 c.copula.be2   <- dH$c.copula.be2

@@ -1,4 +1,4 @@
-copgHsAT <- function(p1, p2, teta, BivD, Ln = FALSE){
+copgHsAT <- function(p1, p2, teta, BivD, Ln = FALSE, par2 = NULL){
 
 
 c.copula.be2 <- c.copula2.be1be2 <- 1
@@ -55,6 +55,13 @@ c.copula.be2 <- pnorm( (qnorm(p1) - teta*qnorm(p2))/sqrt(1 - teta^2)   )
 
 }
 
+if(BivD == "T"){
+                    
+c.copula.be2 <- BiCopHfunc2(p1, p2, family = 2, par = teta, par2 = par2) 
+
+
+}
+
 
 if(BivD == "F"){
 
@@ -93,10 +100,8 @@ if(BivD %in% c("J0","J90","J180","J270") ){
 if(BivD %in% c("C90","J90","G90") )    c.copula.be2  <- 1 - c.copula.be2
 if(BivD %in% c("C180","J180","G180") ) c.copula.be2  <- 1 - c.copula.be2
 
-epsilon <- 0.0000001 
-max.p   <- 0.9999999
-c.copula.be2 <- ifelse(c.copula.be2 > max.p, max.p, c.copula.be2) 
-c.copula.be2 <- ifelse(c.copula.be2 < epsilon,     epsilon, c.copula.be2)
+
+c.copula.be2 <- mm(c.copula.be2)
 
 
 
@@ -141,6 +146,16 @@ if(BivD == "N"){
 c.copula2.be1be2 <- 1/sqrt(1 - teta^2)*exp(  - (teta^2*( qnorm(p1)^2 +  qnorm(p2)^2 ) - 2*teta*qnorm(p1)*qnorm(p2) ) / (2*(1 - teta^2)) ) 
 
 }
+
+
+
+if(BivD == "T"){
+                    
+c.copula2.be1be2 <- BiCopPDF(p1, p2, family = 2, teta, par2) 
+
+}
+
+
 
 
 if(BivD == "F"){

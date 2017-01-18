@@ -1,4 +1,4 @@
-AT <- function(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL, 
+AT <- function(x, nm.end, eq = NULL, E = TRUE, treat = TRUE, type = "simultaneous", ind = NULL, 
    n.sim = 100, prob.lev = 0.05, length.out = NULL, hd.plot = FALSE, te.plot = FALSE, 
    main = "Histogram and Kernel Density of Simulated Average Effects", 
    xlab = "Simulated Average Effects", ...){
@@ -7,14 +7,102 @@ AT <- function(x, nm.end, E = TRUE, treat = TRUE, type = "bivariate", ind = NULL
 
 
 if(x$Cont == "YES") stop("This function is not suitable for bivariate models with continuous/discrete margins.")
-
-if(x$triv == TRUE) stop("This function is not suitable for trivariate probit models.")
-
+if(x$triv == TRUE && x$Model == "TSS") stop("This function is not suitable for trivariate probit models with double sample selection.")
 if(x$Cont == "NO" && x$VC$ccss == "yes" ) stop("This function is not suitable for selection models.")
+
+# TESS case? not done yet
 
 delta <- FALSE
 
 CIs <- est.AT <- NULL
+
+##################################################
+##################################################
+##################################################
+
+if(x$triv == TRUE){
+
+if( is.null(eq)  ) stop("You need to provide the number of the equation containing the endogenous variable.")
+if(!is.null(ind) ) stop("This option is not currently allowed for. Get in touch to check progress.")
+if(type == "naive" ) stop("This type is not currently implemented. Get in touch to check progress.")
+if(missing(nm.end)) stop("You must provide the name of the endogenous variable.")
+
+
+
+if(eq==1){ X.int <- as.matrix(x$X1); ind.int <- 1:x$X1.d2                       } 
+if(eq==2){ X.int <- as.matrix(x$X2); ind.int <- (1:x$X2.d2) + x$X1.d2           }  
+if(eq==3){ X.int <- as.matrix(x$X3); ind.int <- (1:x$X3.d2) + x$X1.d2 + x$X2.d2 }  
+
+if(type == "simultaneous") coef.int <- as.numeric(coef(x)[ind.int])
+
+if(type == "univariate"){
+
+	if(eq==1) ngam <- x$gam1 
+	if(eq==2) ngam <- x$gam2 
+	if(eq==3) ngam <- x$gam3 
+	
+	coef.int <- coef(ngam)  
+
+                        }
+
+d0 <- d1 <- X.int
+d0[, nm.end] <- 0
+d1[, nm.end] <- 1
+
+eti1 <- d1%*%coef.int 
+eti0 <- d0%*%coef.int 
+
+p.int1 <- probm(eti1, x$margins[eq])$pr 
+p.int0 <- probm(eti0, x$margins[eq])$pr
+
+est.AT <- mean(p.int1, na.rm = TRUE) - mean(p.int0, na.rm = TRUE) 
+
+
+
+if(type == "univariate") {bs <- rMVN(n.sim, mean = coef.int, sigma=ngam$Vp)
+                          eti1s <- d1%*%t(bs)
+                          eti0s <- d0%*%t(bs) }
+
+if(type == "simultaneous")  {bs <- rMVN(n.sim, mean = coef(x), sigma=x$Vb)
+                          eti1s <- d1%*%t(bs[,ind.int])
+                          eti0s <- d0%*%t(bs[,ind.int]) } 
+
+ peti1s  <- probm(eti1s, x$margins[eq])$pr 
+ peti0s  <- probm(eti0s, x$margins[eq])$pr 
+ 
+ est.ATb <- colMeans(peti1s, na.rm = TRUE) - colMeans(peti0s, na.rm = TRUE) 
+ CIs     <- as.numeric(quantile(est.ATb, c(prob.lev/2, 1 - prob.lev/2), na.rm = TRUE))
+
+                  
+  if(hd.plot == TRUE){
+  
+  mult <- 100
+  
+  hist(est.ATb*mult, freq = FALSE, main=main, 
+       xlab=xlab, 
+       ylim=c(0,max(density(est.ATb*mult)$y,hist(est.ATb*mult, plot = FALSE)$density)), ...)
+  lines(density(est.ATb*mult))
+
+                     }
+
+
+res <- c(CIs[1], est.AT, CIs[2])
+
+
+out <- list(res=res, prob.lev=prob.lev, sim.AT=est.ATb, type = type, eq = eq, triv = x$triv)
+
+
+}
+
+
+##################################################
+##################################################
+##################################################
+
+
+
+if(x$triv == FALSE){
+
 
 
 etap.noi <- X.int <- X.noi <- eti1 <- eti0 <- etno <- indS <- bs <- ind.excl <- p.int1 <- p.int0 <- d.int1 <- d.int0 <- p.etn <- d.etn <- ass.p <- ass.pst <- C.11 <- C.10 <- sig2 <- peti1s <- peti0s <- sigma2.st <- sigma2s <- eti1s <- eti0s <- d0 <- d1 <- p.etns <- etnos <- etds <- ass.ps <- 1
@@ -44,14 +132,14 @@ if(x$margins[2] == "SM"    && eq == 2) { if( min(sqrt(x$sigma2)*x$nu) <= 1) stop
 if(x$margins[2] == "FISK"  && eq == 2) { if( min(sqrt(x$sigma2)) <= 1) stop("sigma parameter has value(s) smaller than 1, hence the mean is indeterminate.")}
 
 
-if( !( type %in% c("naive","univariate","bivariate") ) ) stop("Error in parameter type value. It should be one of: naive, univariate or bivariate.")
+if( !( type %in% c("naive","univariate","simultaneous") ) ) stop("Error in parameter type value. It should be one of: naive, univariate or simultaneous.")
 
 
 if(missing(nm.end)) stop("You must provide the name of the endogenous variable.")
 
 if(x$Model=="BSS" || x$Model=="BPO" || x$Model=="BPO0" || end==0) stop("Calculation of this average treatment effect is valid for recursive models only.")
 
-if(type == "univariate" && x$margins[2] == "N" && eq == 2 && x$gamlssfit == FALSE) stop("You need to fit the univariate model to obtain the AT. Refit the model and set gamlssfit = TRUE.")
+if(type == "univariate" && x$margins[2] %in% c("N","N2") && eq == 2 && x$gamlssfit == FALSE) stop("You need to fit the univariate model to obtain the AT. Refit the model and set gamlssfit = TRUE.")
 
 if(x$margins[2] %in% mat && eq == 2) stop("AT currently available for Gaussian outcome margin only.")
 
@@ -94,7 +182,7 @@ if(E == FALSE ) {
 if(type == "naive" && !(x$margins[2] %in% bin.link) ) stop("Please fit a bivariate model with intercept and endogenous variable only and then use AT with the univariate type option.")
 
 ######################################################################
-######################################################################
+
 
 if(type == "naive" && x$margins[2] %in% bin.link){ ## binary binary case with eq = 1 or eq = 2
 
@@ -130,20 +218,20 @@ if(type != "naive" && x$margins[2] %in% bin.link){ ## binary binary case with eq
 
 #############
 
-if(type == "bivariate"){
+if(type == "simultaneous"){
 	indD[[1]] <- 1:x$X1.d2 
 	indD[[2]] <- x$X1.d2+(1:x$X2.d2)
                        }
 
 if(eq==1){ X.int <- as.matrix(x$X1[ind,])
-    if(type == "bivariate") ind.int <- indD[[1]]
+    if(type == "simultaneous") ind.int <- indD[[1]]
          }
 
 if(eq==2){ X.int <- as.matrix(x$X2[ind,])
-    if(type == "bivariate") ind.int <- indD[[2]] 
+    if(type == "simultaneous") ind.int <- indD[[2]] 
          }
 
-if(type == "bivariate") coef.int <- as.numeric(coef(x)[ind.int])
+if(type == "simultaneous") coef.int <- as.numeric(coef(x)[ind.int])
 	   
              
 d0 <- d1 <- X.int
@@ -151,7 +239,7 @@ d0[,nm.end] <- 0
 d1[,nm.end] <- 1
 
 
-if(type == "bivariate"){
+if(type == "simultaneous"){
 	eti1 <- d1%*%coef.int 
 	eti0 <- d0%*%coef.int 
                        }
@@ -178,7 +266,7 @@ est.AT <- mean(p.int1, na.rm = TRUE) - mean(p.int0, na.rm = TRUE)
 if(delta == FALSE){
 
  if(type == "univariate") {bs <- rMVN(n.sim, mean = coef(ngam), sigma=ngam$Vp); eti1s <- d1%*%t(bs);           eti0s <- d0%*%t(bs) }
- if(type == "bivariate")  {bs <- rMVN(n.sim, mean = coef(x), sigma=x$Vb);       eti1s <- d1%*%t(bs[,ind.int]); eti0s <- d0%*%t(bs[,ind.int]) } 
+ if(type == "simultaneous")  {bs <- rMVN(n.sim, mean = coef(x), sigma=x$Vb);       eti1s <- d1%*%t(bs[,ind.int]); eti0s <- d0%*%t(bs[,ind.int]) } 
 
  peti1s  <- probm(eti1s, x$margins[eq])$pr 
  peti0s  <- probm(eti0s, x$margins[eq])$pr 
@@ -221,7 +309,7 @@ y2   <- round( seq( min(ceiling(x$y2)) , max(floor(x$y2)), length.out = length.o
  ly2  <- length(y2)
  data <- x$dataset[ind,]
  
- if(type == "bivariate")  {
+ if(type == "simultaneous")  {
                            ind.int <- 1:x$X1.d2
                            bs <- rMVN(n.sim, mean = coef(x), sigma = x$Vb) 
                            coefe  <- x$coef[ind.int] 
@@ -298,14 +386,14 @@ for (i in 1:(ly2-1)) lines( y = c(diffEfSquant[i,1], diffEfSquant[i,2]), x = c(y
 
 
 
-if(type != "naive" && x$margins[2] == "N" && eq == 2){
+if(type != "naive" && x$margins[2] %in% c("N","N2") && eq == 2){
 
- if(type == "univariate") {bs <- rMVN(n.sim, mean = x$gamlss$fit$argument, sigma=x$gamlss$magpp$Vb)
-                           est.AT  <- est.ATso <- x$gamlss$fit$argument[nm.end] 
-                           est.ATb <- bs[, which(names(x$gamlss$fit$argument)==nm.end) ]
+ if(type == "univariate") {bs <- rMVN(n.sim, mean = coef(x$gamlss), sigma=x$gamlss$Vb)
+                           est.AT  <- est.ATso <- coef(x$gamlss)[nm.end] 
+                           est.ATb <- bs[, which(names(coef(x$gamlss))==nm.end) ]
                            } 
                            
- if(type == "bivariate")  {bs <- rMVN(n.sim, mean = coef(x), sigma=x$Vb)
+ if(type == "simultaneous")  {bs <- rMVN(n.sim, mean = coef(x), sigma=x$Vb)
                            est.AT  <- est.ATso <- x$coefficients[nm.end]
                            est.ATb <- bs[, nm.end]        
                            }
@@ -326,12 +414,18 @@ rm(etap.noi, X.int, X.noi, eti1, eti0, etno, indS, bs, ind.excl, p.int1, p.int0,
    p.etn, d.etn, ass.p, ass.pst, C.11, C.10, sig2, peti1s, peti0s, sigma2.st, sigma2s, eti1s, eti0s, d0, d1,
    p.etns, etnos, etds, ass.ps) 
 
+
 res <- c(CIs[1], est.AT, CIs[2])
 
+
 out <- list(res=res, prob.lev=prob.lev, sim.AT=est.ATb, mar2=x$margins[2], type = type, 
-            Effects = Effects, treat = y2, eq = eq, bl = x$VC$bl)
+            Effects = Effects, treat = y2, eq = eq, bl = x$VC$bl, triv = x$triv)
  							 
-   
+}#### triv   
+
+
+
+
  
 class(out) <- "AT"
 

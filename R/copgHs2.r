@@ -1,4 +1,4 @@
-copgHs2 <- function(p1, p2, eta1 = NULL, eta2 = NULL, teta, teta.st, BivD){
+copgHs2 <- function(p1, p2, eta1 = NULL, eta2 = NULL, teta, teta.st, BivD, par2 = NULL){
 
 ########################################################################################
 # Rotations
@@ -47,6 +47,14 @@ c.copula.be2 <- p1 * (1 - p2 * teta * (1 - p1)/(1 - teta * (1 - p1) * (1 - p2)))
 if(BivD=="N"){
 
 c.copula.be2 <- pnorm( (qnorm(p1) - teta*qnorm(p2))/sqrt(1 - teta^2)   ) 
+
+}
+
+
+if(BivD == "T"){
+                    
+c.copula.be2 <- BiCopHfunc2(p1, p2, family = 2, par = teta, par2 = par2) 
+
 
 }
 

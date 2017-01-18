@@ -97,21 +97,17 @@ p2  <- rowSums( matrix(as.numeric( pdf2FUNC(y2m, mu2)),dim(y2m)[1],dim(y2m)[2]),
 
 
 
+
 epsilon <- 0.0000001 
-max.p   <- 0.9999999
+pdf2 <- ifelse(pdf2 < epsilon, epsilon, pdf2 )
 
-  #pdf2 <- ifelse(pdf2 < epsilon, epsilon, pdf2 )
-
-  p2 <- ifelse(p2 > max.p, max.p, p2) 
-  p2 <- ifelse(p2 < epsilon, epsilon, p2) 
+p2 <- mm(p2) 
 
 
 ifef <- function(dv){
 
 epsilon <- 0.0000001 
 dv <- ifelse(is.na(dv), epsilon, dv ) 
-#dv <- ifelse(dv == Inf ,  8.218407e+307, dv )
-#dv <- ifelse(dv == -Inf ,  8.218407e+307, dv )
 dv <- ifelse(dv == Inf ,  8.218407e+20, dv )
 dv <- ifelse(dv == -Inf ,  -8.218407e+20, dv )
 dv

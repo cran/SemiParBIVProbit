@@ -1,6 +1,6 @@
 plot.SemiParBIVProbit <- function(x, eq, ...){
 
- if(missing(eq)) stop("You must provide the equation from which smooth terms should be plotted.")
+ if(missing(eq)) stop("You must provide the equation number.")
 
 
  if(eq > x$l.flist) stop("The fitted model has a smaller number of equations.") 
@@ -12,7 +12,9 @@ plot.SemiParBIVProbit <- function(x, eq, ...){
  if(eq==4 && x$l.sp4==0) stop("There is no model component to plot.")   
  if(eq==5 && x$l.sp5==0) stop("There is no model component to plot.")   
  if(eq==6 && x$l.sp6==0) stop("There is no model component to plot.")   
- if(eq==7 && x$l.sp7==0) stop("There is no model component to plot.")   
+ if(eq==7 && x$l.sp7==0) stop("There is no model component to plot.") 
+ if(eq==8 && x$l.sp8==0) stop("There is no model component to plot.")   
+
  
 
  if(eq==1){ ss.plot <- x$gam1
@@ -35,7 +37,11 @@ plot.SemiParBIVProbit <- function(x, eq, ...){
             
  if(eq==7){ ss.plot <- x$gam7
             ind <- (x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + x$X5.d2 + x$X6.d2 + 1):(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + x$X5.d2 + x$X6.d2 + x$X7.d2) }             
-                                    
+               
+ if(eq==8){ ss.plot <- x$gam8
+            ind <- (x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + x$X5.d2 + x$X6.d2 + x$X7.d2 + 1):(x$X1.d2 + x$X2.d2 + x$X3.d2 + x$X4.d2 + x$X5.d2 + x$X6.d2 + x$X7.d2 + + x$X8.d2) }             
+                            
+               
            ss.plot$coefficients <- x$coefficients[ind]
            ss.plot$Vp <- x$Vb[ind,ind]
            ss.plot$sig2 <- 1

@@ -1,3 +1,9 @@
+version 3.8-1
+- manual updated.
+- Univariate generalised additive models for location, scale and shape. The new function is gamlss().
+- Gaussian distribution with sigma2 corresponding to standard deviation allowed for.
+- Other models, links, marginal distributions, copulae included.
+
 version 3.8
 - copula additive models dealing with non-random sample selection implemented. The new function is copulaSampleSel().
 - Fisk distribution included. Total number of available continuous distributions is now 12.

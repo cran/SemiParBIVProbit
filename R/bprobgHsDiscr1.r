@@ -32,36 +32,134 @@ bprobgHsDiscr1 <- function(params, respvec, VC, ps, AT = FALSE){
   ########################################################################################################  
     
   resT    <- teta.tr(VC, teta.st)
-  teta.st <- resT$teta.st
-  teta    <- resT$teta
+
+teta.st1 <- teta.st2 <- teta.st <- resT$teta.st
+teta1 <- teta2 <- teta <- resT$teta 
+    
+##################
+
+Cop1 <- Cop2 <- VC$BivD 
+nC1 <- nC2 <- VC$nC 
+
+
+teta.ind1 <- as.logical(c(1,0,round(runif(VC$n-2))) ) 
+teta.ind2 <- teta.ind1 == FALSE  
+
+
+if(!(VC$BivD %in% VC$BivD2) && length(teta.st) > 1){
+
+teta.st1 <- teta.st[teta.ind1]
+teta.st2 <- teta.st[teta.ind2]
+
+teta1 <- teta[teta.ind1]
+teta2 <- teta[teta.ind2]
+
+}
+
+ 
+ 
+if(VC$BivD %in% VC$BivD2){
+
+if(VC$BivD %in% VC$BivD2[1:4])  teta.ind1 <- ifelse(VC$my.env$signind*teta > exp(VC$zerov), TRUE, FALSE)
+if(VC$BivD %in% VC$BivD2[5:12]) teta.ind1 <- ifelse(VC$my.env$signind*teta > exp(VC$zerov) + 1, TRUE, FALSE) 
+teta.ind2 <- teta.ind1 == FALSE 
+
+VC$my.env$signind <- ifelse(teta.ind1 == TRUE,  1, -1) 
+
+teta1 <-  teta[teta.ind1]
+teta2 <- -teta[teta.ind2]
+
+teta.st1 <- teta.st[teta.ind1]
+teta.st2 <- teta.st[teta.ind2]
+
+if(length(teta) == 1) teta.ind2 <- teta.ind1 <- rep(TRUE, VC$n)  
+
+Cop1Cop2R <- Cop1Cop2(VC$BivD)
+Cop1 <- Cop1Cop2R$Cop1
+Cop2 <- Cop1Cop2R$Cop2
+
+nC1 <- VC$ct[which(VC$ct[,1] == Cop1),2] 
+nC2 <- VC$ct[which(VC$ct[,1] == Cop2),2]
+
+} 
       
   
   ########################################################################################################
   
-  C1 <- BiCDF(p1, p2,          VC$nC, teta)
-  C2 <- BiCDF(p1, mm(p2-pdf2), VC$nC, teta)
   
-  A <- ifelse(C1 - C2 < epsilon, epsilon, C1 - C2)
-  B <- ifelse( pdf2 - A < epsilon, epsilon, pdf2 - A)
+  C1 <- C2 <- A <- B <- NA
+  
+  
+if( length(teta1) != 0){  
+  
+  C1[teta.ind1] <- BiCDF(p1[teta.ind1], p2[teta.ind1],          nC1, teta1, VC$dof)
+  C2[teta.ind1] <- BiCDF(p1[teta.ind1], mm(p2[teta.ind1]-pdf2[teta.ind1]), nC1, teta1, VC$dof)
+  
+  A[teta.ind1] <- ifelse(C1[teta.ind1] - C2[teta.ind1] < epsilon, epsilon, C1[teta.ind1] - C2[teta.ind1])
+  B[teta.ind1] <- ifelse( pdf2[teta.ind1] - A[teta.ind1] < epsilon, epsilon, pdf2[teta.ind1] - A[teta.ind1])
+  
+}  
+
+
+if( length(teta2) != 0){  
+  
+  C1[teta.ind2] <- BiCDF(p1[teta.ind2], p2[teta.ind2],          nC2, teta2, VC$dof)
+  C2[teta.ind2] <- BiCDF(p1[teta.ind2], mm(p2[teta.ind2]-pdf2[teta.ind2]), nC2, teta2, VC$dof)
+  
+  A[teta.ind2] <- ifelse(C1[teta.ind2] - C2[teta.ind2] < epsilon, epsilon, C1[teta.ind2] - C2[teta.ind2])
+  B[teta.ind2] <- ifelse( pdf2[teta.ind2] - A[teta.ind2] < epsilon, epsilon, pdf2[teta.ind2] - A[teta.ind2])
+  
+}
+
+  
   
   l.par <- VC$weights*( respvec$cy*log( A ) + respvec$y1*log( B ) )
     
   ########################################################################################################
    
-  dH1 <- copgHs(p1, p2,          eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD)
-  dH2 <- copgHs(p1, mm(p2-pdf2), eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD) 
+  c.copula.be1.C1 <- c.copula.be1.C2 <- c.copula.be2.C1 <- c.copula.be2.C2 <- c.copula.theta.C1 <- c.copula.theta.C2 <- NA
+  
+  
+  
+  
+  if( length(teta1) != 0) dH1F <- copgHs(p1[teta.ind1], p2[teta.ind1], eta1=NULL, eta2=NULL, teta1, teta.st1, Cop1, VC$dof)
+  if( length(teta2) != 0) dH1S <- copgHs(p1[teta.ind2], p2[teta.ind2], eta1=NULL, eta2=NULL, teta2, teta.st2, Cop2, VC$dof)
+  
+  if( length(teta1) != 0) dH2F <- copgHs(p1[teta.ind1], mm(p2[teta.ind1]-pdf2[teta.ind1]), eta1=NULL, eta2=NULL, teta1, teta.st1, Cop1, VC$dof) 
+  if( length(teta2) != 0) dH2S <- copgHs(p1[teta.ind2], mm(p2[teta.ind2]-pdf2[teta.ind2]), eta1=NULL, eta2=NULL, teta2, teta.st2, Cop2, VC$dof) 
+  
+  
+if( length(teta1) != 0){  
    
-  c.copula.be1.C1 <- dH1$c.copula.be1 
-  c.copula.be1.C2 <- dH2$c.copula.be1 
+  c.copula.be1.C1[teta.ind1] <- dH1F$c.copula.be1 
+  c.copula.be1.C2[teta.ind1] <- dH2F$c.copula.be1 
   
-  c.copula.be2.C1 <- dH1$c.copula.be2 
-  c.copula.be2.C2 <- dH2$c.copula.be2 
+  c.copula.be2.C1[teta.ind1] <- dH1F$c.copula.be2 
+  c.copula.be2.C2[teta.ind1] <- dH2F$c.copula.be2 
   
-  derp2m1.dereta2     <- derp2.dereta2 - derpdf2.dereta2
+  c.copula.theta.C1[teta.ind1] <- dH1F$c.copula.theta # here there is theta star already
+  c.copula.theta.C2[teta.ind1] <- dH2F$c.copula.theta
   
-  c.copula.theta.C1 <- dH1$c.copula.theta # here there is theta star already
-  c.copula.theta.C2 <- dH2$c.copula.theta
+}  
   
+  
+  if( length(teta2) != 0){  
+     
+    c.copula.be1.C1[teta.ind2] <- dH1S$c.copula.be1 
+    c.copula.be1.C2[teta.ind2] <- dH2S$c.copula.be1 
+    
+    c.copula.be2.C1[teta.ind2] <- dH1S$c.copula.be2 
+    c.copula.be2.C2[teta.ind2] <- dH2S$c.copula.be2 
+    
+    c.copula.theta.C1[teta.ind2] <- dH1S$c.copula.theta # here there is theta star already
+    c.copula.theta.C2[teta.ind2] <- dH2S$c.copula.theta
+    
+  }  
+    
+  
+  
+  
+  derp2m1.dereta2 <- derp2.dereta2 - derpdf2.dereta2
   derp1.dereta1   <- pd1$derp1.dereta1    # -dnorm(-eta1) 
   
   
@@ -78,36 +176,76 @@ bprobgHsDiscr1 <- function(params, respvec, VC, ps, AT = FALSE){
    
   ######################################################################################################## 
    
+ c.copula2.be1.C1 <- c.copula2.be1.C2 <- c.copula2.be2.C1 <- c.copula2.be2.C2 <- c.copula2.be1be2.C1 <- c.copula2.be1be2.C2 <- c.copula2.be2th.C1 <- c.copula2.be2th.C2 <- c.copula2.theta.C1 <- c.copula2.theta.C2 <- c.copula.thet.C1 <- c.copula.thet.C2 <- derteta.derteta.st <- der2teta.derteta.stteta.st <- c.copula2.be1th.C1 <- c.copula2.be1th.C2 <- NA
+   
+   
+   
+if( length(teta1) != 0){     
+   
     
-    c.copula2.be1.C1 <- dH1$c.copula2.be1
-    c.copula2.be1.C2 <- dH2$c.copula2.be1
+    c.copula2.be1.C1[teta.ind1]           <- dH1F$c.copula2.be1
+    c.copula2.be1.C2[teta.ind1]           <- dH2F$c.copula2.be1
     
-    c.copula2.be2.C1 <- dH1$c.copula2.be2
-    c.copula2.be2.C2 <- dH2$c.copula2.be2
+    c.copula2.be2.C1[teta.ind1]           <- dH1F$c.copula2.be2
+    c.copula2.be2.C2[teta.ind1]           <- dH2F$c.copula2.be2
     
-    c.copula2.be1be2.C1 <- dH1$c.copula2.be1be2
-    c.copula2.be1be2.C2 <- dH2$c.copula2.be1be2
+    c.copula2.be1be2.C1[teta.ind1]        <- dH1F$c.copula2.be1be2
+    c.copula2.be1be2.C2[teta.ind1]        <- dH2F$c.copula2.be1be2
     
-    c.copula2.be2th.C1 <- dH1$c.copula2.be2th
-    c.copula2.be2th.C2 <- dH2$c.copula2.be2th  
+    c.copula2.be2th.C1[teta.ind1]         <- dH1F$c.copula2.be2th
+    c.copula2.be2th.C2[teta.ind1]         <- dH2F$c.copula2.be2th  
     
+    c.copula2.theta.C1[teta.ind1]         <- dH1F$bit1.th2ATE 
+    c.copula2.theta.C2[teta.ind1]         <- dH2F$bit1.th2ATE 
     
+    c.copula.thet.C1[teta.ind1]           <- dH1F$c.copula.thet # NO star
+    c.copula.thet.C2[teta.ind1]           <- dH2F$c.copula.thet    
+   
+    derteta.derteta.st[teta.ind1]         <- dH1F$derteta.derteta.st         # does not matter dH1 or dH2 
+    der2teta.derteta.stteta.st[teta.ind1] <- dH1F$der2teta.derteta.stteta.st   
+   
+    c.copula2.be1th.C1[teta.ind1]         <- dH1F$c.copula2.be1th 
+    c.copula2.be1th.C2[teta.ind1]         <- dH2F$c.copula2.be1th    
+   
+}   
+
+
+
+if( length(teta2) != 0){     
+   
+    c.copula2.be1.C1[teta.ind2]           <- dH1S$c.copula2.be1
+    c.copula2.be1.C2[teta.ind2]           <- dH2S$c.copula2.be1
+    
+    c.copula2.be2.C1[teta.ind2]           <- dH1S$c.copula2.be2
+    c.copula2.be2.C2[teta.ind2]           <- dH2S$c.copula2.be2
+    
+    c.copula2.be1be2.C1[teta.ind2]        <- dH1S$c.copula2.be1be2
+    c.copula2.be1be2.C2[teta.ind2]        <- dH2S$c.copula2.be1be2
+    
+    c.copula2.be2th.C1[teta.ind2]         <- dH1S$c.copula2.be2th
+    c.copula2.be2th.C2[teta.ind2]         <- dH2S$c.copula2.be2th  
+    
+    c.copula2.theta.C1[teta.ind2]         <- dH1S$bit1.th2ATE 
+    c.copula2.theta.C2[teta.ind2]         <- dH2S$bit1.th2ATE 
+    
+    c.copula.thet.C1[teta.ind2]           <- dH1S$c.copula.thet # NO star
+    c.copula.thet.C2[teta.ind2]           <- dH2S$c.copula.thet    
+   
+    derteta.derteta.st[teta.ind2]         <- dH1S$derteta.derteta.st         # does not matter dH1 or dH2 
+    der2teta.derteta.stteta.st[teta.ind2] <- dH1S$der2teta.derteta.stteta.st   
+   
+    c.copula2.be1th.C1[teta.ind2]         <- dH1S$c.copula2.be1th 
+    c.copula2.be1th.C2[teta.ind2]         <- dH2S$c.copula2.be1th    
+   
+}   
+
+
+
+   
    
     der2p1.dereta1eta1 <- pd1$der2p1.dereta1eta1
     
     derC.dereta1 <- (c.copula2.be1.C1 - c.copula2.be1.C2)*derp1.dereta1^2 + Cc*der2p1.dereta1eta1
-    
-    
-    
-    
-    c.copula2.theta.C1 <- dH1$bit1.th2ATE 
-    c.copula2.theta.C2 <- dH2$bit1.th2ATE 
-    
-    c.copula.thet.C1 <- dH1$c.copula.thet # NO star
-    c.copula.thet.C2 <- dH2$c.copula.thet
-    
-    derteta.derteta.st         <- dH1$derteta.derteta.st         # does not matter dH1 or dH2 
-    der2teta.derteta.stteta.st <- dH1$der2teta.derteta.stteta.st
     
     derCs.dertheta.st <- (c.copula2.theta.C1 - c.copula2.theta.C2)*derteta.derteta.st^2 + (c.copula.thet.C1 - c.copula.thet.C2)*der2teta.derteta.stteta.st
     
@@ -118,8 +256,7 @@ bprobgHsDiscr1 <- function(params, respvec, VC, ps, AT = FALSE){
           
     derC.dereta2 <- (c.copula2.be1be2.C1*derp2.dereta2 - c.copula2.be1be2.C2*derp2m1.dereta2)*derp1.dereta1    
    
-    c.copula2.be1th.C1 <- dH1$c.copula2.be1th 
-    c.copula2.be1th.C2 <- dH2$c.copula2.be1th 
+ 
     
     derC.dertheta.st <- (c.copula2.be1th.C1 - c.copula2.be1th.C2)*derp1.dereta1 
     
@@ -215,7 +352,9 @@ if(VC$extra.regI == "sED") H <- regH(H, type = 2)
          list(value=res, gradient=G, hessian=H, S.h=S.h, S.h1=S.h1, S.h2=S.h2, l=S.res, l.par=l.par, ps = ps, etas = etas,
               eta1=eta1, eta2=eta2, etad=etad,
               dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.dteta.st = dl.dteta.st,
-              BivD=VC$BivD, p1=1-p1, p2=p2, theta.star = teta.st)      
+              BivD=VC$BivD, p1=1-p1, p2=p2, theta.star = teta.st,
+              teta.ind2 = teta.ind2, teta.ind1 = teta.ind1,
+              Cop1 = Cop1, Cop2 = Cop2, teta1 = teta1, teta2 = teta2)      
 
 }
 

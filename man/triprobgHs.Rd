@@ -1,6 +1,7 @@
 \name{triprobgHs}
 \alias{triprobgHs}
 \alias{triprobgHsSS}
+\alias{triprobgHsESS}
 
 \title{Internal Function}
 

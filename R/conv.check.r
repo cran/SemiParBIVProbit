@@ -18,9 +18,9 @@ cat("\nTrust region iterations within smoothing loops:",x$iter.inner,"\n\n")
 
 }else{cat("\nTrust region iterations:",x$iter.if,"\n\n")}
 
-if(!is.null(x$conv.sp)){
-if(x$iter.sp >= x$iterlimsp) cat("Smoothing algorithm reached the max. number of loops allowed.\n\n")
-}
+#if(!is.null(x$conv.sp)){
+#if(x$iter.sp >= x$iterlimsp) cat("Smoothing algorithm reached the max. number of loops allowed.\n\n")
+#}
 
 
 }

@@ -1,5 +1,6 @@
 \name{post.check}
 \alias{post.check}
+\alias{int.postcheck}
 
 \title{Diagnostic plots for discrete/continuous response margin}
 
@@ -14,7 +15,7 @@ It produces diagnostic plots based on (randomised) quantile residuals.
 post.check(x, main = "Histogram and Density Estimate of Residuals", 
            main2 = "Histogram and Density Estimate of Residuals",
            xlab = "Quantile Residuals", xlab2 = "Quantile Residuals", 
-           test = FALSE, ...)
+           intervals = FALSE, n.sim = 100, prob.lev = 0.05, ...)
 
 }
 
@@ -30,7 +31,11 @@ post.check(x, main = "Histogram and Density Estimate of Residuals",
 
 \item{xlab2}{Title for the x axis in the second row. As above.}
 
-\item{test}{If \code{TRUE} then the shapiro test for normality is performed on normalised quantile residuals.}
+\item{intervals}{If \code{TRUE} then intervals for the qqplots are produced.}   
+  
+\item{n.sim}{Number of replicate datasets used to simulate quantiles of the residual distribution.} 
+
+\item{prob.lev}{Overall probability of the left and right tails of the probabilities' distributions used for interval calculations.} 
 
 \item{...}{Other graphics parameters to pass on to plotting commands.}
 
@@ -46,6 +51,14 @@ labelling across the plots.
 }
 
 
+\value{
+
+\item{qr}{It returns the (randomised) quantile residuals for the continuous or discrete margin when 
+          fitting a model that involves a binary response.}
+\item{qr1}{As above but for first equation (this applies when fitting models with continuous/discrete margins).}
+\item{qr2}{As above but for second equation.}
+          
+}
 
 
 \author{

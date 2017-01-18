@@ -13,9 +13,8 @@ effects, copula distributions and marginal distributions.
 
 \usage{
 copulaSampleSel(formula, data = list(), weights = NULL, subset = NULL,  
-                 BivD = "N", margins = c("probit", "N"), gamlssfit = FALSE,
-                 fp = FALSE, infl.fac = 1, 
-                 rinit = 1, rmax = 100, 
+                 BivD = "N", margins = c("probit", "N"), dof = 3, 
+                 fp = FALSE, infl.fac = 1, rinit = 1, rmax = 100, 
                  iterlimsp = 50, tolsp = 1e-07,
                  gc.l = FALSE, parscale, extra.regI = "t")
 }
@@ -25,7 +24,7 @@ copulaSampleSel(formula, data = list(), weights = NULL, subset = NULL,
 \arguments{ 
 
 \item{formula}{In the basic setup, this will be a list of two formulas, one for equation 1 and the other for equation 2. \code{s} terms 
-               are used to specify smooth smooth functions of 
+               are used to specify smooth functions of 
                   predictors. For the case of more than two equations see the example below and the documentation 
                   of \code{SemiParBIVProbit()} for more details. Note that 
                   the first formula MUST refer to the selection equation.} 
@@ -40,24 +39,22 @@ copulaSampleSel(formula, data = list(), weights = NULL, subset = NULL,
 
 \item{margins}{It indicates the distributions used for the two margins. The first is one of "probit", "logit", "cloglog" which refer 
                to the link function of the first equation whose response is always assumed to be binary. The response 
-               for the second equation can be normal ("N"), 
-               log-normal ("LN"), Gumbel ("GU"), reverse Gumbel ("rGU"), 
+               for the second equation can be normal ("N"), normal where sigma2 corresponds to 
+               the standard deviation instead of the variance ("N2"), log-normal ("LN"), Gumbel ("GU"), reverse Gumbel ("rGU"), 
                logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"), 
                gamma with identity link for the location parameter ("GAi"), Dagum ("DAGUM"), 
                Singh-Maddala ("SM"), beta ("BE"), Fisk ("FISK", also known as log-logistic distribution),
                Poisson ("PO"), zero truncated 
                Poisson ("ZTP"), negative binomial - type I ("NBI"), negative 
                binomial - type II ("NBII"), Poisson inverse Gaussian ("PIG").}
-               
-\item{gamlssfit}{If \code{gamlssfit = TRUE} then a gamlss is also fitted for the outcome equation. This is may used for 
-obtaining better calibrated starting values, for instance.
-               }               
 
+\item{dof}{If \code{BivD = "T"} then the degrees of freedom can be set to a value greater than 2 and smaller than 249.}          
+                 
 \item{BivD}{Type of bivariate error distribution employed. Possible choices are "N", "C0", "C90", "C180", "C270", "J0", "J90", "J180", "J270", 
-            "G0", "G90", "G180", "G270", "F", "AMH", "FGM" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
+            "G0", "G90", "G180", "G270", "F", "AMH", "FGM", "T" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
-             Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Ali-Mikhail-Haq and 
-             Farlie-Gumbel-Morgenstern.}            
+             Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Ali-Mikhail-Haq, 
+             Farlie-Gumbel-Morgenstern and Student-t with fixed \code{dof}.}            
 
 \item{fp}{If \code{TRUE} then a fully parametric model with unpenalised regression splines if fitted. See the example below.}              
 
@@ -132,28 +129,22 @@ Marra G. and Radice R. (2013), Estimation of a Regression Spline Sample Selectio
 
 Marra G. and Wyszynski K. (in press), Semi-Parametric Copula Sample Selection Models for Count Responses. \emph{Computational Statistics and Data Analysis}.
 
-Wojtys M. and Marra G. (submitted). Copula based generalized additive models with non-random sample selection.
+Wojtys M. and Marra G. (submitted). Copula-Based Generalized Additive Models with Non-Random Sample Selection.
 
 }
 
 
 \section{WARNINGS}{
 
-Convergence failure may sometimes occur. Convergence can be checked using \code{\link{conv.check}} which provides some 
+Convergence can be checked using \code{\link{conv.check}} which provides some 
 information about 
 the score and information matrix associated with the fitted model. The former should be close to 0 and the latter positive definite.
 \code{SemiParBIVProbit()} will produce some warnings if there is a convergence issue.
 
-In such a situation, the user may use some extra regularisation (see \code{extra.regI}) and/or
-rescaling (see \code{parscale}). Using \code{gamlssfit = TRUE} is typically more effective than the first two options as
-this may provide better calibrated starting values as compared to those obtained from the default starting value procedure.
-The default option is, however, \code{gamlssfit = FALSE} only because it tends to be computationally cheaper and because the 
-default starting value procedure has typically been found to do a satisfactory job in most cases. 
-(The results obtained when using 
-\code{gamlssfit = FALSE} and \code{gamlssfit = TRUE} could also be compared to check if starting values make any difference.)
-
-The above suggestions may help, especially the latter option. However, the user should also consider
-re-specifying the model and/or using a diferrent dependence structure and/or checking that the chosen marginal 
+Convergence failure may sometimes occur. This is not necessarily a bad thing as it may indicate specific problems 
+with a fitted model. In such a situation, the user may use some extra regularisation (see \code{extra.regI}) and/or
+rescaling (see \code{parscale}). However, the user should also consider
+re-specifying/simplifying the model and/or using a diferrent dependence structure and/or checking that the chosen marginal 
 distributions are adequate.
 In our experience, we found that convergence failure typically occurs 
 when the model has been misspecified and/or the sample size/number of selected observations is low compared 
@@ -162,7 +153,8 @@ of misspecification include using a Clayton copula rotated by 90 degrees when a 
 association between the margins is present instead, using marginal distributions that do not fit
 the responses or that contain many parameters, and 
 employing a copula which does not accommodate the type and/or strength of
-the dependence between the margins (e.g., using AMH when the association between the margins is strong).
+the dependence between the margins (e.g., using AMH when the association between the margins is strong). When using 
+smooth functions, if the covariate's values are too sparse then convergence may be affected by this.
 It is also worth bearing in mind that the use of a three parameter marginal distribution requires the data
 to be more informative than a situation in which a two parameter distribution is used instead.
 
@@ -181,6 +173,8 @@ areas, for instance.
 }
 
 \examples{
+
+\dontrun{ 
 
 library(SemiParBIVProbit)
 
@@ -266,7 +260,25 @@ plot(out$gam2, se = FALSE, lty = 3, lwd = 2, ylim = c(-1, 0.8),
      ylab = "", rug = FALSE)
 
 
-\dontrun{ 
+## IMPUTE MISSING VALUES
+
+n.m <- 10
+res <- imputeSS(out, n.m)
+bet <- NA
+
+for(i in 1:n.m){
+
+dataSim$yo[dataSim$ys == 0] <- res[[i]]
+
+outg <- gamlss(list(yo ~ bi + s(x1)), data = dataSim)
+bet[i] <- coef(outg)["bi"]
+print(i)
+}
+
+mean(bet)
+
+##
+
 
 ## SEMIPARAMETRIC SAMPLE SELECTION MODEL with association 
 ## and dispersion parameters 
@@ -294,6 +306,11 @@ post.check(outC0)
 AIC(out, outC0)
 BIC(out, outC0)
 
+## IMPUTE MISSING VALUES
+
+n.m <- 10
+res <- imputeSS(outC0, n.m)
+
 #
 #
 
@@ -317,6 +334,19 @@ conv.check(out)
 post.check(out)
 summary(out)
 
+n.m <- 10
+res <- imputeSS(out, n.m)
+
+for(i in 1:n.m){
+
+dataSim$yo[dataSim$ys == 0] <- res[[i]]
+
+outg <- gamlss(list(yo ~ bi + s(x1)), margin = "GA", data = dataSim)
+bet[i] <- coef(outg)["bi"]
+print(i)
+}
+
+mean(bet)
 
 #
 #

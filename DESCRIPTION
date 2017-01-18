@@ -1,5 +1,5 @@
 Package: SemiParBIVProbit
-Version: 3.8
+Version: 3.8-1
 Author: Giampiero Marra <giampiero.marra@ucl.ac.uk> and Rosalba Radice <r.radice@bbk.ac.uk>
 Maintainer: Giampiero Marra <giampiero.marra@ucl.ac.uk>
 Title: Semiparametric Copula Regression Models
@@ -13,6 +13,6 @@ LazyLoad: yes
 License: GPL (>= 2)
 URL: http://www.ucl.ac.uk/statistics/people/giampieromarra
 Repository: CRAN
-Date/Publication: 2016-08-19 00:52:59
+Date/Publication: 2017-01-18 08:37:35
 NeedsCompilation: no
-Packaged: 2016-08-18 11:24:36 UTC; USER
+Packaged: 2017-01-17 23:54:17 UTC; Giampiero

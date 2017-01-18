@@ -1,21 +1,34 @@
-copgHsCont <- function(p1, p2, teta, teta.st, VC, Cont = FALSE){
+copgHsCont <- function(p1, p2, teta, teta.st, BivD, Cont = FALSE, par2 = NULL, nu.st = NULL){
      
 
-der2c.derrho.derrho <- der2c.derp1.derp1 <- der2c.derp2.derp2 <- der2c.derp1.derp2 <- der2c.derp1.derrho <- der2c.derp2.derrho <- 1     
+der2c.derp1.dernu <- der2c.derp2.dernu <- der2c.dernu.dernu <- der2c.derrho.dernu <- dernu.dernu.st <- der2nu.dernu.stnu.st <- der2h.derp1nu <- der2c.derrho.derrho <- der2c.derp1.derp1 <- der2c.derp2.derp2 <- der2c.derp1.derp2 <- der2c.derp1.derrho <- der2c.derp2.derrho <- 1     
      
 ########################################################################################   
 # Transformations on teta parameter
 ########################################################################################   
 
-   
-if(VC$BivD %in% c("N","AMH","FGM") ) {
+if(BivD %in% c("T") ) {
+
+mm <- function(ob){
+  epsilon <- 0.00001; max.p   <- 0.99999
+  res <- ifelse(ob > max.p, max.p, ob) 
+  res <- ifelse(res < epsilon, epsilon, res) 
+  res    
+}
+
+dernu.dernu.st <- der2nu.dernu.stnu.st <- exp(nu.st)  
+
+}
+ 
+ 
+if(BivD %in% c("N","AMH","FGM","T") ) {
 
 derteta.derteta.st <- 1/cosh(teta.st)^2
 der2teta.derteta.stteta.st <- -(2 * (sinh(teta.st) * cosh(teta.st))/(cosh(teta.st)^2)^2)
        
 }  
 
-if(VC$BivD %in% c("F") ) {
+if(BivD %in% c("F") ) {
 
 derteta.derteta.st <- 1
 der2teta.derteta.stteta.st <- 0
@@ -23,8 +36,8 @@ der2teta.derteta.stteta.st <- 0
 } 
    
 
-if(VC$BivD %in% c("C0", "C180","J0", "J180","G0", "G180") ) derteta.derteta.st <- der2teta.derteta.stteta.st <-  exp(teta.st) 
-if(VC$BivD %in% c("C90","C270","J90","J270","G90","G270") ) derteta.derteta.st <- der2teta.derteta.stteta.st <- -exp(teta.st)  
+if(BivD %in% c("C0", "C180","J0", "J180","G0", "G180") ) derteta.derteta.st <- der2teta.derteta.stteta.st <-  exp(teta.st) 
+if(BivD %in% c("C90","C270","J90","J270","G90","G270") ) derteta.derteta.st <- der2teta.derteta.stteta.st <- -exp(teta.st)  
 
   
 
@@ -36,17 +49,17 @@ if(VC$BivD %in% c("C90","C270","J90","J270","G90","G270") ) derteta.derteta.st <
 # Rotations
 ########################################################################################
 
-if(VC$BivD %in% c("C90","J90","G90") ) {
+if(BivD %in% c("C90","J90","G90") ) {
 p1 <- 1 - p1 
 teta <- -teta
 }  
 
-if(VC$BivD %in% c("C180","J180","G180") ) {
+if(BivD %in% c("C180","J180","G180") ) {
 p1 <- 1 - p1
 p2 <- 1 - p2
 }  
 
-if(VC$BivD %in% c("C270","J270","G270") ) {
+if(BivD %in% c("C270","J270","G270") ) {
 p2 <- 1 - p2 
 teta <- -teta 
 }   
@@ -59,7 +72,7 @@ teta <- -teta
      
      
      
-if(VC$BivD == "N"){
+if(BivD == "N"){
 
 
 der2h.derp2teta <- -((1 + teta * ((qnorm(p1) - teta * qnorm(p2)) * (qnorm(p2) - 
@@ -200,7 +213,46 @@ der2c.derp2.derrho <- diffc*t6*t3 + c*t3*t9;
 
 
 
-if(VC$BivD == "FGM"){
+if(BivD == "T"){
+
+
+der2h.derp2teta       <- BiCopHfuncDeriv2(p1, p2, family = 2, teta, par2, deriv = "par1u2")
+der2h.derp2p2         <- BiCopHfuncDeriv2(p1, p2, family = 2, teta, par2, deriv = "u2") 
+der2h.derteta.teta.st <- BiCopHfuncDeriv2(p1, p2, family = 2, teta, par2, deriv = "par")
+der2h.derp1p2         <- BiCopDeriv(p1, p2, family = 2, teta, par2, deriv = "u2")
+der2h.derp1teta       <- BiCopDeriv(p1, p2, family = 2, teta, par2, deriv = "par")  
+der2h.derp1nu         <- BiCopDeriv(p1, p2, family = 2, teta, par2, deriv = "par2")
+der2h.derp1p1         <- BiCopDeriv(p1, p2, family = 2, teta, par2, deriv = "u1")   
+
+
+if(Cont == TRUE){
+
+der2c.derrho.derrho <- BiCopDeriv2(p1, p2, family = 2, teta, par2, deriv = "par")
+der2c.dernu.dernu   <- BiCopDeriv2(p1, p2, family = 2, teta, par2, deriv = "par2")
+der2c.derrho.dernu  <- BiCopDeriv2(p1, p2, family = 2, teta, par2, deriv = "par1par2") 
+der2c.derp1.dernu   <- BiCopDeriv2(p1, p2, family = 2, teta, par2, deriv = "par2u1")
+der2c.derp2.dernu   <- BiCopDeriv2(p1, p2, family = 2, teta, par2, deriv = "par2u2")
+der2c.derp1.derp1   <- BiCopDeriv2(p1, p2, family = 2, teta, par2, deriv = "u1") 
+der2c.derp2.derp2   <- BiCopDeriv2(p1, p2, family = 2, teta, par2, deriv = "u2")  
+
+p1 <- mm(p1)
+
+funcDD <- function(p1) BiCopDeriv(p1, p2, family = 2, teta, par2, deriv = "u2") 
+der2c.derp1.derp2   <- numgh(funcDD, p1)$fi  
+der2c.derp1.derrho  <- BiCopDeriv2(p1, p2, family = 2, teta, par2, deriv = "par1u1")  
+der2c.derp2.derrho  <- BiCopDeriv2(p1, p2, family = 2, teta, par2, deriv = "par1u2") 
+
+                }
+
+
+}
+
+
+
+
+
+
+if(BivD == "FGM"){
 
 der2h.derp2teta <-  -(2 * (p1 * (1 - p1)))
    
@@ -268,7 +320,7 @@ der2c.derp2.derrho <- -(2 * (1 - 2 * p1))
 
 
 
-if(VC$BivD == "AMH"){
+if(BivD == "AMH"){
 
 der2h.derp2teta <-  -(p1 * (1 - p1) * (2 + teta * (1 - p1) * (2 * (1 - p2 * (2 + 
     2 * (teta * (1 - p1) * (1 - p2)/(1 - teta * (1 - p1) * (1 - 
@@ -469,7 +521,7 @@ der2c.derp2.derrho <- -(((1 - p1) * (1 + teta * (((1 - p2) * (2 * (1 - teta * (p
         
 
 
-if(VC$BivD %in% c("C0","C90","C180","C270")){
+if(BivD %in% c("C0","C90","C180","C270")){
 
 der2h.derp2teta <-  -(p1^teta * p2^(-2 + teta) * ((p1^teta - 1) * (teta * 
     (1 + teta) * log(p2) * (p1^teta * (1 + teta) + p2^teta * 
@@ -778,7 +830,7 @@ der2c.derp2.derrho <- t3*t2*t12-t3*t11*t10*t16*t18-t22*t5*t23*t11-t21*t12+t21*t2
 
 
 
-if(VC$BivD == "F"){
+if(BivD == "F"){
 
 der2h.derp2teta <- -(((1 + p2 * teta) * exp(2 * teta) + (1 + teta * (1 - 
     p2)) * exp(teta * (3 * p1 + p2)) + (1 + teta * (p1 - p2)) * 
@@ -1063,7 +1115,7 @@ der2c.derp2.derrho <- 2.0*t3*t17-2.0*t2*t7*t22*t25+t29*t1*t17-2.0*teta*t1*t34+t3
 
 
 
-if(VC$BivD %in% c("G0","G90","G180","G270")){
+if(BivD %in% c("G0","G90","G180","G270")){
 
  der2h.derp2teta <-  -((-log(p2))^(-2 + teta) * ((-log(p1))^teta + (-log(p2))^teta)^(1/teta - 
     3) * (((-log(p1))^teta * (((-log(p1))^teta + (-log(p2))^teta)^(1/teta) - 
@@ -1697,7 +1749,7 @@ der2c.derp2.derrho <- t140+t1
 
 
 
-if(VC$BivD %in% c("J0","J90","J180","J270")){
+if(BivD %in% c("J0","J90","J180","J270")){
 
  der2h.derp2teta <- (((-1 + teta) * (((1 - p1)^teta - 1) * (1 - p2)^teta - 
     (1 - p1)^teta) * log((1 - p1)^teta - ((1 - p1)^teta - 1) * 
@@ -2120,7 +2172,7 @@ der2c.derp2.derrho <- t19*t33*t35*t39+t9*(-t21*t16*t17+t8*t52*t17-t31/t55*t16)*t
 
 
 
-if( VC$BivD %in% c("C90","J90","G90") ) {
+if(BivD %in% c("C90","J90","G90") ) {
 
 der2h.derp1p1         <- -der2h.derp1p1
 der2h.derp2p2         <- -der2h.derp2p2
@@ -2133,7 +2185,7 @@ der2c.derp2.derrho 	= -der2c.derp2.derrho
 
 }
 
-if( VC$BivD %in% c("C180","J180","G180") ) {
+if(BivD %in% c("C180","J180","G180") ) {
 
 der2h.derp2p2              = -der2h.derp2p2
 der2h.derteta.teta.st      = -der2h.derteta.teta.st
@@ -2152,7 +2204,7 @@ der2h.derp1p1              = -der2h.derp1p1
 
 
 
-if( VC$BivD %in% c("C270","J270","G270") ) {
+if(BivD %in% c("C270","J270","G270") ) {
 
 der2h.derp1p2   <- -der2h.derp1p2
 der2h.derp1teta <- -der2h.derp1teta
@@ -2186,10 +2238,13 @@ der2h.derteta.teta.st      =  ifef(der2h.derteta.teta.st     )
 derteta.derteta.st         =  ifef(derteta.derteta.st        )
 der2teta.derteta.stteta.st =  ifef(der2teta.derteta.stteta.st)
 der2h.derp1p2              =  ifef(der2h.derp1p2       )      
-der2h.derp1teta            =  ifef(der2h.derp1teta     )      
+der2h.derp1teta            =  ifef(der2h.derp1teta     )     
+der2h.derp1nu              =  ifef(der2h.derp1nu       )
 der2h.derp2teta            =  ifef(der2h.derp2teta     )      
 der2h.derp1p1              =  ifef(der2h.derp1p1       )      
-der2c.derrho.derrho        =  ifef(der2c.derrho.derrho )      
+der2c.derrho.derrho        =  ifef(der2c.derrho.derrho )   
+der2c.derrho.dernu         =  ifef(der2c.derrho.dernu)
+der2c.dernu.dernu          =  ifef(der2c.dernu.dernu)
 der2c.derp1.derp1          =  ifef(der2c.derp1.derp1 )        
 der2c.derp2.derp2          =  ifef(der2c.derp2.derp2 )        
 der2c.derp1.derp2          =  ifef(der2c.derp1.derp2 )        
@@ -2206,17 +2261,24 @@ list(
 der2h.derp2p2              = der2h.derp2p2, 
 der2h.derteta.teta.st      = der2h.derteta.teta.st,  
 derteta.derteta.st         = derteta.derteta.st, 
+dernu.dernu.st             = dernu.dernu.st,
+der2nu.dernu.stnu.st       = der2nu.dernu.stnu.st,
 der2teta.derteta.stteta.st = der2teta.derteta.stteta.st,  
 der2h.derp1p2              = der2h.derp1p2,  
-der2h.derp1teta            = der2h.derp1teta,                                     
+der2h.derp1teta            = der2h.derp1teta,  
+der2h.derp1nu              = der2h.derp1nu,
 der2h.derp2teta            = der2h.derp2teta,  
 der2h.derp1p1              = der2h.derp1p1,
 der2c.derrho.derrho        = der2c.derrho.derrho,
+der2c.derrho.dernu         = der2c.derrho.dernu,
+der2c.dernu.dernu          = der2c.dernu.dernu,
 der2c.derp1.derp1          = der2c.derp1.derp1, 
 der2c.derp2.derp2          = der2c.derp2.derp2, 
 der2c.derp1.derp2          = der2c.derp1.derp2, 
 der2c.derp1.derrho         = der2c.derp1.derrho, 
-der2c.derp2.derrho         = der2c.derp2.derrho)     
+der2c.derp2.derrho         = der2c.derp2.derrho,
+der2c.derp1.dernu          = der2c.derp1.dernu,
+der2c.derp2.dernu          = der2c.derp2.dernu   )     
 
 
 

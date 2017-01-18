@@ -14,7 +14,7 @@ possible presence of associated error equations, endogeneity, non-random sample 
 \usage{
 SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,  
                  Model = "B", BivD = "N", 
-                 margins = c("probit","probit"), gamlssfit = FALSE,
+                 margins = c("probit","probit"), dof = 3, gamlssfit = FALSE,
                  fp = FALSE, hess = TRUE, infl.fac = 1, theta.fx = NULL, 
                  rinit = 1, rmax = 100, 
                  iterlimsp = 50, tolsp = 1e-07,
@@ -26,7 +26,7 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
 \arguments{ 
 
 \item{formula}{In the basic setup this will be a list of two formulas, one for equation 1 and the other for equation 2. \code{s} terms 
-               are used to specify smooth smooth functions of 
+               are used to specify smooth functions of 
                   predictors. \code{SemiParBIVProbit} supports the use shrinkage smoothers for variable
                   selection purposes and more. See the examples below and the documentation of \code{mgcv} for further 
                   details on formula specifications. Note that 
@@ -44,16 +44,21 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
              "BSS" (bivariate model with non-random sample selection), "BPO" (bivariate model with partial observability)
              and "BPO0" (bivariate model with partial observability and zero correlation).}
 
-\item{margins}{It indicates the link functions used for the two margins. Possible choiced are "probit", "logit" and "cloglog".}
-               
+\item{margins}{It indicates the link functions used for the two margins. Possible choices are "probit", "logit" and "cloglog".}
+           
+\item{dof}{If \code{BivD = "T"} then the degrees of freedom can be set to a value greater than 2 and smaller than 249.}          
+           
 \item{gamlssfit}{This is for internal purposes only.}               
 
 \item{BivD}{Type of bivariate error distribution employed. Possible choices are "N", "C0", "C90", "C180", "C270", "J0", "J90", "J180", "J270", 
-            "G0", "G90", "G180", "G270", "F", "AMH", "FGM" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
+            "G0", "G90", "G180", "G270", "F", "AMH", "FGM", "T" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
-             Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Ali-Mikhail-Haq and 
-             Farlie-Gumbel-Morgenstern. Note that Clayton, Joe and Gumbel are somewhat similar. Also, 
-             there might be situations in which the use of a specific copula may result in more stable computations.}            
+             Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Ali-Mikhail-Haq,
+             Farlie-Gumbel-Morgenstern and Student-t with fixed \code{dof}. Note that Clayton, Joe and Gumbel are somewhat similar. Also, 
+             there might be situations in which the use of a specific copula may result in more stable computations. If \code{Model = "B"} then
+             each of the Clayton, Joe and Gumbel copulae is allowed to be mixed with a rotated version of the same
+family. The options are: "C0C90", "C0C270", "C180C90", "C180C270", "G0G90", "G0G270", "G180G90",
+"G180G270", "J0J90", "J0J270", "J180J90" and "J180J270". This allows the user to model negative and positive tail dependencies.}            
 
 \item{fp}{If \code{TRUE} then a fully parametric model with unpenalised regression splines if fitted. See the example below.}              
 
@@ -161,23 +166,23 @@ Poirier D.J. (1980), Partial Observability in Bivariate Probit Models. \emph{Jou
 
 \section{WARNINGS}{
 
-Convergence failure may sometimes occur. Convergence can be checked using \code{\link{conv.check}} which provides some 
+Convergence can be checked using \code{\link{conv.check}} which provides some 
 information about 
 the score and information matrix associated with the fitted model. The former should be close to 0 and the latter positive definite.
 \code{SemiParBIVProbit()} will produce some warnings when there is a convergence issue.
 
-In such a situation, the user may use some extra regularisation (see \code{extra.regI}) and/or
+Convergence failure may sometimes occur. This is not necessarily a bad thing as it may indicate specific problems 
+with a fitted model. In such a situation, the user may use some extra regularisation (see \code{extra.regI}) and/or
 rescaling (see \code{parscale}). These suggestions may help, especially the latter option. However, the user should also consider
-re-specifying the model and/or using a diferrent dependence structure and/or using different links.
+re-specifying/simplifying the model and/or using a diferrent dependence structure and/or using different link functions.
 In our experience, we found that convergence failure typically occurs 
 when the model has been misspecified and/or the sample size (and/or number of selected observations in selection models) is low 
 compared to the complexity of the model. Examples
 of misspecification include using a Clayton copula rotated by 90 degrees when a positive
 association between the margins is present instead, using marginal distributions that are not adequate, and 
 employing a copula which does not accommodate the type and/or strength of
-the dependence between the margins (e.g., using AMH when the association between the margins is strong).
-
-
+the dependence between the margins (e.g., using AMH when the association between the margins is strong). When using 
+smooth functions, if the covariate's values are too sparse then convergence may be affected by this.
 
 In the contexts of endogeneity and non-random sample selection, extra attention is required when specifying
 the dependence parameter as a function of covariates. This is because in these situations the dependence parameter mainly models the 
@@ -232,6 +237,8 @@ summary(out)
 AIC(out)
 BIC(out)
 
+\dontrun{ 
+
 ## SEMIPARAMETRIC BIVARIATE PROBIT
 
 ## "cr" cubic regression spline basis      - "cs" shrinkage version of "cr"
@@ -245,7 +252,7 @@ out  <- SemiParBIVProbit(list(y1 ~ x1 + s(x2, bs = "tp", k = 10, m = 2) + s(x3),
                               y2 ~ x1 + s(x2) + s(x3)),  
                          data = dataSim)
 conv.check(out)
-summary(out, cm.plot = TRUE)
+summary(out)
 AIC(out)
 
 
@@ -278,8 +285,6 @@ plot(outSS, eq = 1, select = 1, scale = 0, shade = TRUE)
 plot(outSS, eq = 1, select = 2, ylim = c(-0.1,0.1))
 plot(outSS, eq = 2, select = 1, scale = 0, shade = TRUE)
 plot(outSS, eq = 2, select = 2, ylim = c(-0.1,0.1))
-
-\dontrun{ 
 
 ## SEMIPARAMETRIC BIVARIATE PROBIT with association parameter 
 ## depending on covariates as well
@@ -386,7 +391,7 @@ outJ <- SemiParBIVProbit(list(y1 ~ x1 + s(x2),
                               y2 ~ y1 + s(x2)), 
                          data = dataSim, BivD = "J0")
 conv.check(outJ)
-summary(outJ, cm.plot = TRUE)
+summary(outJ)
 AT(outJ, "y1") 
 
 
@@ -487,7 +492,7 @@ outC <- SemiParBIVProbit(list(ys ~ bi + s(x1) + s(x2),
                               yo ~ bi + s(x1)), 
                          data = dataSim, Model = "BSS", BivD = "C0")
 conv.check(outC)
-summary(outC, cm.plot = TRUE)
+summary(outC)
 prev(outC)
 
 # in the above examples a third equation could be introduced
@@ -548,7 +553,7 @@ out  <- SemiParBIVProbit(list(y ~ x1 + s(x2),
                          data = dataSim, Model = "BPO")
 
 conv.check(out)
-summary(out, cm.plot = TRUE)
+summary(out)
 
 
 # plot estimated and true functions

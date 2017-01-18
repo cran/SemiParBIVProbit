@@ -1,6 +1,7 @@
 \name{g.tri}
 \alias{g.tri}
 \alias{g.triSS}
+\alias{g.triESS}
 
 \title{Internal Function}
 

@@ -11,10 +11,7 @@ It takes a fitted \code{SemiParBIVProbit} object produced by \code{SemiParBIVPro
 
 \usage{
 
-\method{summary}{SemiParBIVProbit}(object, n.sim = 100, prob.lev = 0.05, cm.plot = FALSE, 
-        xlim = c(-3, 3), ylim = c(-3, 3), 
-        ylab = "Margin 2", xlab = "Margin 1", 
-        gm = FALSE, n.grid = 1000, n.dig = 2, ...)
+\method{summary}{SemiParBIVProbit}(object, n.sim = 100, prob.lev = 0.05, gm = FALSE, ...)
         
 \method{print}{summary.SemiParBIVProbit}(x, digits = max(3, getOption("digits") - 3), 
            signif.stars = getOption("show.signif.stars"), ...)    
@@ -33,24 +30,15 @@ to calculate intervals for the association parameter, dispersion coefficient and
             more precision is required.} 
 
 \item{prob.lev}{Probability of the left and right tails of the posterior distribution used for interval calculations.} 
-                    
-\item{cm.plot}{If \code{TRUE} then a filled bivariate contour meta plot corresponding to the assumed (estimated) bivariate model is produced.}   
-             
-\item{xlim, ylim}{Limits of the bivariate contour meta plot.}    
-
-\item{ylab, xlab}{Labels for the bivariate contour meta plot.} 
-
-\item{gm}{If \code{TRUE} then intervals for the gamma measure and odds ratio are calculated.} 
-                     
-\item{n.grid}{Number of grid points used in contour plot construction. This is relevant for continuous margins.} 
-
-\item{n.dig}{Number of digit points used in rounding bivariate pdf values for contour plot construction. This is relevant for continuous margins.} 
-
+     
+\item{gm}{If TRUE then intervals for the gamma measure and odds ratio are calculated.}     
+     
 \item{digits}{Number of digits printed in output.} 
 
 \item{signif.stars}{By default significance stars are printed alongside output.} 
-                         
-\item{...}{Other graphics parameters to pass on to plotting commands. These are used only when \code{cm.plot=TRUE}.}
+         
+         
+\item{...}{Other arguments.}
 
 }
 
@@ -96,7 +84,7 @@ latent distribution of the model errors.
 \item{GM, CIgm}{Gamma measure and related CI. This measure of association was proposed by Goodman and Kruskal (1954). It is defined as 
                 (\code{OR} - 1)/(\code{OR} + 1), can take values in the range (-1, 1) and does not depend on the marginal probabilities.
                 Interval is calculated using posterior simulation.}
-\item{tau, CIkt}{Kendall's tau and respective intervals.}                
+\item{tau, CItau}{Kendall's tau and respective intervals.}                
 
 }
 

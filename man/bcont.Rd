@@ -3,6 +3,7 @@
 \alias{bcont3}
 \alias{bcont23}
 \alias{bcont32}
+\alias{bcontROB}
 
 \title{Internal Function}
 

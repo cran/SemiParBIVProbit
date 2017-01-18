@@ -57,7 +57,7 @@ teta    <- resT$teta
 
 ########################################################################################################
 
-dH <- copgHs(p1[VC$inde], p2, eta1 = NULL, eta2 = NULL, teta, teta.st, VC$BivD)
+dH <- copgHs(p1[VC$inde], p2, eta1 = NULL, eta2 = NULL, teta, teta.st, VC$BivD, VC$dof)
 
 h <- dH$c.copula.be2  
 
@@ -91,7 +91,7 @@ l.par <- VC$weights*l.par1
  
 ######################################################################################################## 
  
-  BITS <- copgHsCont(p1[VC$inde], p2, teta, teta.st, VC)
+  BITS <- copgHsCont(p1[VC$inde], p2, teta, teta.st, VC$BivD, par2 = VC$dof, nu.st = log(VC$dof-2))
   
   der2h.derp2p2              <- BITS$der2h.derp2p2 
   der2h.derteta.teta.st      <- BITS$der2h.derteta.teta.st  

@@ -38,8 +38,8 @@ bprobgHsDiscr1SS <- function(params, respvec, VC, ps, AT = FALSE){
    
    ########################################################################################################
    
-   C1 <- BiCDF(p1[VC$inde], p2,          VC$nC, teta)
-   C2 <- BiCDF(p1[VC$inde], mm(p2-pdf2), VC$nC, teta)
+   C1 <- BiCDF(p1[VC$inde], p2,          VC$nC, teta, VC$dof)
+   C2 <- BiCDF(p1[VC$inde], mm(p2-pdf2), VC$nC, teta, VC$dof)
    
    A <- ifelse(C1 - C2 < epsilon, epsilon, C1 - C2)
    B <- ifelse( pdf2 - A < epsilon, epsilon, pdf2 - A)
@@ -52,8 +52,8 @@ bprobgHsDiscr1SS <- function(params, respvec, VC, ps, AT = FALSE){
    
    ########################################################################################################
     
-   dH1 <- copgHs(p1[VC$inde], p2,          eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD)
-   dH2 <- copgHs(p1[VC$inde], mm(p2-pdf2), eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD) 
+   dH1 <- copgHs(p1[VC$inde], p2,          eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD, VC$dof)
+   dH2 <- copgHs(p1[VC$inde], mm(p2-pdf2), eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD, VC$dof) 
     
    c.copula.be1.C1 <- dH1$c.copula.be1 
    c.copula.be1.C2 <- dH2$c.copula.be1 

@@ -1,5 +1,6 @@
 \name{adjCov}
 \alias{adjCov}
+\alias{aCov}
 
 \title{Adjustment for the covariance matrix from a fitted SemiParBIVProbit/copulaReg/copulaSampleSel/SemiParTRIV model}
 

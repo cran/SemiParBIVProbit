@@ -1,34 +1,42 @@
 H.triSS <- function(params, respvec, VC, TIn, LgTRI){
   
-  dst.1 <- dnorm( (TIn$eta2  - TIn$theta12 * TIn$eta1[VC$inde1] )/sqrt(1 - TIn$theta12^2) )  
-  pst.1 <- pnorm( ( ((TIn$eta3 - TIn$theta13 * TIn$eta1[VC$inde2])/sqrt(1 - TIn$theta13^2)) - ((TIn$theta23 - TIn$theta12 * TIn$theta13)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta13^2))) * ((TIn$eta2[VC$inde2.1]  - TIn$theta12 * TIn$eta1[VC$inde2])/sqrt(1 - TIn$theta12^2)) )/sqrt(1 - ((TIn$theta23 - TIn$theta12 * TIn$theta13)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta13^2)))^2))
+  #####
+  # ! #
+  ########################################################################
+  ## I replaced TIn$eta1 with TIn$mar1. Same for TIn$eta2 and TIn$eta3  ##                 
+  ########################################################################
+  
+  dst.1 <- dnorm( (TIn$mar2  - TIn$theta12 * TIn$mar1[VC$inde1] )/sqrt(1 - TIn$theta12^2) )  
+  pst.1 <- pnorm( ( ((TIn$mar3 - TIn$theta13 * TIn$mar1[VC$inde2])/sqrt(1 - TIn$theta13^2)) - ((TIn$theta23 - TIn$theta12 * TIn$theta13)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta13^2))) * ((TIn$mar2[VC$inde2.1]  - TIn$theta12 * TIn$mar1[VC$inde2])/sqrt(1 - TIn$theta12^2)) )/sqrt(1 - ((TIn$theta23 - TIn$theta12 * TIn$theta13)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta13^2)))^2))
   pst.1 <- mm(pst.1)
   st.1 <- -TIn$theta12/sqrt(1 - TIn$theta12^2)
   
-  dst.2 <- dnorm((TIn$eta3 - TIn$theta13 * TIn$eta1[VC$inde2])/sqrt(1 - TIn$theta13^2))
-  pst.2 <- pnorm( ( ((TIn$eta2[VC$inde2.1]  - TIn$theta12 * TIn$eta1[VC$inde2])/sqrt(1 - TIn$theta12^2)) - ((TIn$theta23 - TIn$theta12 * TIn$theta13)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta13^2))) * ((TIn$eta3 - TIn$theta13 * TIn$eta1[VC$inde2])/sqrt(1 - TIn$theta13^2)) )/sqrt(1 - ((TIn$theta23 - TIn$theta12 * TIn$theta13)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta13^2)))^2))
+  dst.2 <- dnorm((TIn$mar3 - TIn$theta13 * TIn$mar1[VC$inde2])/sqrt(1 - TIn$theta13^2))
+  pst.2 <- pnorm( ( ((TIn$mar2[VC$inde2.1]  - TIn$theta12 * TIn$mar1[VC$inde2])/sqrt(1 - TIn$theta12^2)) - ((TIn$theta23 - TIn$theta12 * TIn$theta13)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta13^2))) * ((TIn$mar3 - TIn$theta13 * TIn$mar1[VC$inde2])/sqrt(1 - TIn$theta13^2)) )/sqrt(1 - ((TIn$theta23 - TIn$theta12 * TIn$theta13)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta13^2)))^2))
   pst.2 <- mm(pst.2)
   st.2 <- -TIn$theta13/sqrt(1 - TIn$theta13^2)
   
-  dst.3 <- dnorm((TIn$eta1[VC$inde1] - TIn$theta12 * TIn$eta2)/sqrt(1 - TIn$theta12^2))
-  pst.3 <- pnorm( ( ((TIn$eta3 - TIn$theta23 * TIn$eta2[VC$inde2.1])/sqrt(1 - TIn$theta23^2)) - ((TIn$theta13 - TIn$theta12 * TIn$theta23)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta23^2))) * ((TIn$eta1[VC$inde2] - TIn$theta12 * TIn$eta2[VC$inde2.1])/sqrt(1 - TIn$theta12^2)) )/sqrt(1 - ((TIn$theta13 - TIn$theta12 * TIn$theta23)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta23^2)))^2))
+  dst.3 <- dnorm((TIn$mar1[VC$inde1] - TIn$theta12 * TIn$mar2)/sqrt(1 - TIn$theta12^2))
+  pst.3 <- pnorm( ( ((TIn$mar3 - TIn$theta23 * TIn$mar2[VC$inde2.1])/sqrt(1 - TIn$theta23^2)) - ((TIn$theta13 - TIn$theta12 * TIn$theta23)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta23^2))) * ((TIn$mar1[VC$inde2] - TIn$theta12 * TIn$mar2[VC$inde2.1])/sqrt(1 - TIn$theta12^2)) )/sqrt(1 - ((TIn$theta13 - TIn$theta12 * TIn$theta23)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta23^2)))^2))
   pst.3 <- mm(pst.3)
   st.3 <- -TIn$theta12/sqrt(1 - TIn$theta12^2)
   
-  dst.4 <- dnorm((TIn$eta3 - TIn$theta23 * TIn$eta2[VC$inde2.1])/sqrt(1 - TIn$theta23^2))
-  pst.4 <- pnorm( ( ((TIn$eta1[VC$inde2] - TIn$theta12 * TIn$eta2[VC$inde2.1])/sqrt(1 - TIn$theta12^2)) - ((TIn$theta13 - TIn$theta12 * TIn$theta23)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta23^2))) * ((TIn$eta3 - TIn$theta23 * TIn$eta2[VC$inde2.1])/sqrt(1 - TIn$theta23^2)) )/sqrt(1 - ((TIn$theta13 - TIn$theta12 * TIn$theta23)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta23^2)))^2))
+  dst.4 <- dnorm((TIn$mar3 - TIn$theta23 * TIn$mar2[VC$inde2.1])/sqrt(1 - TIn$theta23^2))
+  pst.4 <- pnorm( ( ((TIn$mar1[VC$inde2] - TIn$theta12 * TIn$mar2[VC$inde2.1])/sqrt(1 - TIn$theta12^2)) - ((TIn$theta13 - TIn$theta12 * TIn$theta23)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta23^2))) * ((TIn$mar3 - TIn$theta23 * TIn$mar2[VC$inde2.1])/sqrt(1 - TIn$theta23^2)) )/sqrt(1 - ((TIn$theta13 - TIn$theta12 * TIn$theta23)/sqrt((1 - TIn$theta12^2) * (1 - TIn$theta23^2)))^2))
   pst.4 <- mm(pst.4)
   st.4  <- -TIn$theta23/sqrt(1 - TIn$theta23^2)
   
-  dst.5 <- dnorm((TIn$eta1[VC$inde2] - TIn$theta13 * TIn$eta3)/sqrt(1 - TIn$theta13^2))
-  pst.5 <- pnorm( ( ((TIn$eta2[VC$inde2.1]  - TIn$theta23 * TIn$eta3)/sqrt(1 - TIn$theta23^2)) - ((TIn$theta12 - TIn$theta13 * TIn$theta23)/sqrt((1 - TIn$theta13^2) * (1 - TIn$theta23^2))) * ((TIn$eta1[VC$inde2] - TIn$theta13 * TIn$eta3)/sqrt(1 - TIn$theta13^2)) )/sqrt(1 - ((TIn$theta12 - TIn$theta13 * TIn$theta23)/sqrt((1 - TIn$theta13^2) * (1 - TIn$theta23^2)))^2))
+  dst.5 <- dnorm((TIn$mar1[VC$inde2] - TIn$theta13 * TIn$mar3)/sqrt(1 - TIn$theta13^2))
+  pst.5 <- pnorm( ( ((TIn$mar2[VC$inde2.1]  - TIn$theta23 * TIn$mar3)/sqrt(1 - TIn$theta23^2)) - ((TIn$theta12 - TIn$theta13 * TIn$theta23)/sqrt((1 - TIn$theta13^2) * (1 - TIn$theta23^2))) * ((TIn$mar1[VC$inde2] - TIn$theta13 * TIn$mar3)/sqrt(1 - TIn$theta13^2)) )/sqrt(1 - ((TIn$theta12 - TIn$theta13 * TIn$theta23)/sqrt((1 - TIn$theta13^2) * (1 - TIn$theta23^2)))^2))
   pst.5 <- mm(pst.5)
   st.5  <- -TIn$theta13/sqrt(1 - TIn$theta13^2)
   
-  dst.6 <- dnorm((TIn$eta2[VC$inde2.1] - TIn$theta23 * TIn$eta3)/sqrt(1 - TIn$theta23^2))
-  pst.6 <- pnorm( ( ((TIn$eta1[VC$inde2] - TIn$theta13 * TIn$eta3)/sqrt(1 - TIn$theta13^2)) - ((TIn$theta12 - TIn$theta13 * TIn$theta23)/sqrt((1 - TIn$theta13^2) * (1 - TIn$theta23^2))) * ((TIn$eta2[VC$inde2.1] - TIn$theta23 * TIn$eta3)/sqrt(1 - TIn$theta23^2)) )/sqrt(1 - ((TIn$theta12 - TIn$theta13 * TIn$theta23)/sqrt((1 - TIn$theta13^2) * (1 - TIn$theta23^2)))^2))
+  dst.6 <- dnorm((TIn$mar2[VC$inde2.1] - TIn$theta23 * TIn$mar3)/sqrt(1 - TIn$theta23^2))
+  pst.6 <- pnorm( ( ((TIn$mar1[VC$inde2] - TIn$theta13 * TIn$mar3)/sqrt(1 - TIn$theta13^2)) - ((TIn$theta12 - TIn$theta13 * TIn$theta23)/sqrt((1 - TIn$theta13^2) * (1 - TIn$theta23^2))) * ((TIn$mar2[VC$inde2.1] - TIn$theta23 * TIn$mar3)/sqrt(1 - TIn$theta23^2)) )/sqrt(1 - ((TIn$theta12 - TIn$theta13 * TIn$theta23)/sqrt((1 - TIn$theta13^2) * (1 - TIn$theta23^2)))^2))
   pst.6 <- mm(pst.6)
   st.6  <- -TIn$theta23/sqrt(1 - TIn$theta23^2)
+  
+  ########################################################################
   
   dp.1.11.de1 <- dst.1[VC$inde2.1] * pst.1        * st.1      + dst.2 * pst.2       * st.2
   dp.1.10.de1 <- dst.1[VC$inde2.1] * (1 - pst.1)  * st.1      + dst.2 * pst.2       * ( -st.2 )
@@ -38,32 +46,78 @@ H.triSS <- function(params, respvec, VC, TIn, LgTRI){
   
   dp.3.11.de3 <- dst.5 * pst.5        * st.5      + dst.6 * pst.6       * st.6
   
-  d.1 <- dnorm(TIn$eta1)
-  d.2 <- dnorm(TIn$eta2)
-  d.3 <- dnorm(TIn$eta3)
+  #####
+  # ! #
+  ###############################
+  ## The next 6 lines are new  ##                 
+  ###############################
+  
+  der2p.dereta1 <- probm(TIn$eta1, VC$margins[1], only.pr = FALSE)$der2p.dereta
+  der2p.dereta2 <- probm(TIn$eta2, VC$margins[2], only.pr = FALSE)$der2p.dereta
+  der2p.dereta3 <- probm(TIn$eta3, VC$margins[3], only.pr = FALSE)$der2p.dereta
+  
+  d2F1.de1 <- (TIn$mar1 * LgTRI$dmar1^2)/LgTRI$d.1^2 + der2p.dereta1/LgTRI$d.1
+  d2F2.de2 <- (TIn$mar2 * LgTRI$dmar2^2)/LgTRI$d.2^2 + der2p.dereta2/LgTRI$d.2
+  d2F3.de3 <- (TIn$mar3 * LgTRI$dmar3^2)/LgTRI$d.3^2 + der2p.dereta3/LgTRI$d.3
+  
+  ###################################################################
+  
+  d2l.dF1.F1.1           <- respvec$cy1       * ( -1/TIn$p0^2   * (LgTRI$d.1)^2 + 1/TIn$p0 * (TIn$mar1 * LgTRI$d.1) )
+  d2l.dF1.F1.1[VC$inde1] <- respvec$y1.cy2    * ( -1/TIn$p10^2  * (LgTRI$d.1[VC$inde1] - LgTRI$d.1[VC$inde1] * LgTRI$upst.1)^2 + 1/TIn$p10  * ( - TIn$mar1[VC$inde1] * LgTRI$d.1[VC$inde1] + TIn$mar1[VC$inde1] * LgTRI$d.1[VC$inde1] * LgTRI$upst.1 - LgTRI$d.1[VC$inde1] * dst.1 * st.1) ) 
+  d2l.dF1.F1.1[VC$inde2] <- respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * (LgTRI$d.1[VC$inde2] * LgTRI$p.1.10)^2   + 1/TIn$p110 * ( -TIn$mar1[VC$inde2] * LgTRI$d.1[VC$inde2] * LgTRI$p.1.10   + LgTRI$d.1[VC$inde2] * dp.1.10.de1)  ) +
+    respvec$y1.y2.y3  * ( -1/TIn$p111^2 * (LgTRI$d.1[VC$inde2] * LgTRI$p.1.11)^2   + 1/TIn$p111 * ( -TIn$mar1[VC$inde2] * LgTRI$d.1[VC$inde2] * LgTRI$p.1.11   + LgTRI$d.1[VC$inde2] * dp.1.11.de1)  ) 
+  d2l.dF1.F1 <- d2l.dF1.F1.1
+  
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
+  
+  d2l.de1.e1 <- d2l.dF1.F1 * LgTRI$dF1.de1^2 + LgTRI$dl.dF1 * d2F1.de1
+  
+  ################################################################
+  
+  d2l.dF2.F2.1        <- respvec$y1.cy2 * ( -1/TIn$p10^2  * ( - LgTRI$d.2 * LgTRI$upst.2)^2 + 1/TIn$p10  * ( TIn$mar2 * LgTRI$d.2 * LgTRI$upst.2 - LgTRI$d.2 * dst.3 * st.3) ) 
+  d2l.dF2.F2.1[VC$inde2.1] <- respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * (LgTRI$d.2[VC$inde2.1] * LgTRI$p.2.10)^2 + 1/TIn$p110 * ( -TIn$mar2[VC$inde2.1]  * LgTRI$d.2[VC$inde2.1] * LgTRI$p.2.10 + LgTRI$d.2[VC$inde2.1] * dp.2.10.de2) ) +
+    respvec$y1.y2.y3  * ( -1/TIn$p111^2 * (LgTRI$d.2[VC$inde2.1] * LgTRI$p.2.11)^2 + 1/TIn$p111 * ( -TIn$mar2[VC$inde2.1]  * LgTRI$d.2[VC$inde2.1] * LgTRI$p.2.11 + LgTRI$d.2[VC$inde2.1] * dp.2.11.de2) ) 
+  d2l.dF2.F2 <- d2l.dF2.F2.1
+  
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
+  
+  d2l.de2.e2 <- d2l.dF2.F2 * LgTRI$dF2.de2^2 + LgTRI$dl.dF2 * d2F2.de2
+  
+  ################################################################
+  
+  d2l.dF3.F3 <-  - respvec$y1.y2.cy3 * (  1/TIn$p110^2 * (LgTRI$d.3 * LgTRI$p.3.11)^2 + 1/TIn$p110 * ( -TIn$mar3 * LgTRI$d.3 * LgTRI$p.3.11 + LgTRI$d.3 * dp.3.11.de3) ) +
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * (LgTRI$d.3 * LgTRI$p.3.11)^2 + 1/TIn$p111 * ( -TIn$mar3 * LgTRI$d.3 * LgTRI$p.3.11 + LgTRI$d.3 * dp.3.11.de3) ) 
+  
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
+  
+  d2l.de3.e3 <- d2l.dF3.F3 * LgTRI$dF3.de3^2 + LgTRI$dl.dF3 * d2F3.de3
+  
+  ################################################################
   
   
-  d2l.de1.e1.1        <- respvec$cy1       * ( -1/TIn$p0^2 * (d.1)^2 + 1/TIn$p0 * (TIn$eta1 * d.1) )
-  d2l.de1.e1.1[VC$inde1] <- respvec$y1.cy2    * ( -1/TIn$p10^2  * (d.1[VC$inde1] - d.1[VC$inde1] * LgTRI$upst.1)^2 + 1/TIn$p10  * ( - TIn$eta1[VC$inde1] * d.1[VC$inde1] + TIn$eta1[VC$inde1] * d.1[VC$inde1] * LgTRI$upst.1 - d.1[VC$inde1] * dst.1 * st.1) ) 
-  d2l.de1.e1.1[VC$inde2] <- respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * (d.1[VC$inde2] * LgTRI$p.1.10)^2   + 1/TIn$p110 * ( -TIn$eta1[VC$inde2] * d.1[VC$inde2] * LgTRI$p.1.10   + d.1[VC$inde2] * dp.1.10.de1)  ) +
-    respvec$y1.y2.y3  * ( -1/TIn$p111^2 * (d.1[VC$inde2] * LgTRI$p.1.11)^2   + 1/TIn$p111 * ( -TIn$eta1[VC$inde2] * d.1[VC$inde2] * LgTRI$p.1.11   + d.1[VC$inde2] * dp.1.11.de1)  ) 
+  #####
+  # ! #
+  ########################################################################
+  ## I replaced TIn$eta1 with TIn$mar1. Same for TIn$eta2 and TIn$eta3  ##                 
+  ########################################################################
   
-  d2l.de1.e1 <- d2l.de1.e1.1
+  mean11 <- TIn$theta23 * TIn$mar2 + ((TIn$theta13 - TIn$theta12 * TIn$theta23) * (TIn$mar1[VC$inde1]   - TIn$theta12 * TIn$mar2))/(1 - TIn$theta12^2)
+  mean22 <- TIn$theta23 * TIn$mar3 + ((TIn$theta12 - TIn$theta13 * TIn$theta23) * (TIn$mar1[VC$inde2]   - TIn$theta13 * TIn$mar3))/(1 - TIn$theta13^2)
+  mean33 <- TIn$theta13 * TIn$mar3 + ((TIn$theta12 - TIn$theta13 * TIn$theta23) * (TIn$mar2[VC$inde2.1] - TIn$theta23 * TIn$mar3))/(1 - TIn$theta23^2)
   
-  
-  d2l.de2.e2.1        <- respvec$y1.cy2 * ( -1/TIn$p10^2  * ( - d.2 * LgTRI$upst.2)^2 + 1/TIn$p10  * ( TIn$eta2 * d.2 * LgTRI$upst.2 - d.2 * dst.3 * st.3) ) 
-  d2l.de2.e2.1[VC$inde2.1] <- respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * (d.2[VC$inde2.1] * LgTRI$p.2.10)^2 + 1/TIn$p110 * ( -TIn$eta2[VC$inde2.1]  * d.2[VC$inde2.1] * LgTRI$p.2.10 + d.2[VC$inde2.1] * dp.2.10.de2) ) +
-    respvec$y1.y2.y3  * ( -1/TIn$p111^2 * (d.2[VC$inde2.1] * LgTRI$p.2.11)^2 + 1/TIn$p111 * ( -TIn$eta2[VC$inde2.1]  * d.2[VC$inde2.1] * LgTRI$p.2.11 + d.2[VC$inde2.1] * dp.2.11.de2) ) 
-  
-  d2l.de2.e2 <- d2l.de2.e2.1
-  
-  
-  d2l.de3.e3 <-  - respvec$y1.y2.cy3 * (  1/TIn$p110^2 * (d.3 * LgTRI$p.3.11)^2 + 1/TIn$p110 * ( -TIn$eta3 * d.3 * LgTRI$p.3.11 + d.3 * dp.3.11.de3) ) +
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * (d.3 * LgTRI$p.3.11)^2 + 1/TIn$p111 * ( -TIn$eta3 * d.3 * LgTRI$p.3.11 + d.3 * dp.3.11.de3) ) 
-  
-  mean11 <- TIn$theta23 * TIn$eta2 + ((TIn$theta13 - TIn$theta12 * TIn$theta23) * (TIn$eta1[VC$inde1] - TIn$theta12 * TIn$eta2))/(1 - TIn$theta12^2)
-  mean22 <- TIn$theta23 * TIn$eta3 + ((TIn$theta12 - TIn$theta13 * TIn$theta23) * (TIn$eta1[VC$inde2] - TIn$theta13 * TIn$eta3))/(1 - TIn$theta13^2)
-  mean33 <- TIn$theta13 * TIn$eta3 + ((TIn$theta12 - TIn$theta13 * TIn$theta23) * (TIn$eta2[VC$inde2.1] - TIn$theta23 * TIn$eta3))/(1 - TIn$theta23^2)
+  ###################################################################################
   
   deno <- 1 - TIn$theta12^2 - TIn$theta13^2 - TIn$theta23^2 + 2 * TIn$theta12 * TIn$theta13 * TIn$theta23
   
@@ -71,83 +125,232 @@ H.triSS <- function(params, respvec, VC, TIn, LgTRI){
   sd22 <- sqrt( deno / ( 1 - TIn$theta13^2 ) )
   sd33 <- sqrt( deno / ( 1 - TIn$theta23^2 ) )
   
-  p1 <- mm( pnorm((TIn$eta3 - mean11[VC$inde2.1])/sd11) )
-  p2 <- mm( pnorm((TIn$eta2[VC$inde2.1] - mean22)/sd22) )
-  p3 <- mm( pnorm((TIn$eta1[VC$inde2] - mean33)/sd33) )
+  #####
+  # ! #
+  ########################################################################
+  ## I replaced TIn$eta1 with TIn$mar1. Same for TIn$eta2 and TIn$eta3  ##                 
+  ########################################################################
   
-  p1.c <- mm(1 - p1)
-  p2.c <- mm(1 - p2)
-  p3.c <- mm(1 - p3)
+  p1.1 <- mm( pnorm((TIn$mar3             - mean11[VC$inde2.1])/sd11) )
+  p2.2 <- mm( pnorm((TIn$mar2[VC$inde2.1] - mean22)/sd22) )
+  p3.3 <- mm( pnorm((TIn$mar1[VC$inde2]   - mean33)/sd33) )
   
-  d.1.1  <- dnorm(TIn$eta1[VC$inde1],   mean = TIn$theta12 * TIn$eta2, sd = sqrt(1 - TIn$theta12^2))
-  d.1.2  <- dnorm(TIn$eta1[VC$inde2],   mean = TIn$theta13 * TIn$eta3, sd = sqrt(1 - TIn$theta13^2))
-  d.1.3  <- dnorm(TIn$eta2[VC$inde2.1], mean = TIn$theta23 * TIn$eta3, sd = sqrt(1 - TIn$theta23^2))
+  ###########################################################################
   
-  d2l.de1.e2.1          <- respvec$y1.cy2 * ( -1/TIn$p10^2  * (d.1[VC$inde1] - d.1[VC$inde1] * LgTRI$upst.1) * ( - d.2 * LgTRI$upst.2) - 1/TIn$p10 * d.2 * dst.3 * 1/sqrt(1 - TIn$theta12^2)) 
-  d2l.de1.e2.1[VC$inde2.1] <- respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * d.2[VC$inde2.1] * LgTRI$p.2.10 * d.1[VC$inde2] * LgTRI$p.1.10 + 1/TIn$p110 * d.2[VC$inde2.1] * d.1.1[VC$inde2.1] * p1.c ) + 
-    respvec$y1.y2.y3  * ( -1/TIn$p111^2 * d.2[VC$inde2.1] * LgTRI$p.2.11 * d.1[VC$inde2] * LgTRI$p.1.11 + 1/TIn$p111 * d.2[VC$inde2.1] * d.1.1[VC$inde2.1] * p1   )
+  p1.1.c <- mm(1 - p1.1)
   
-  d2l.de1.e2 <- d2l.de1.e2.1
+  #####
+  # ! #
+  ########################################################################
+  ## I replaced TIn$eta1 with TIn$mar1. Same for TIn$eta2 and TIn$eta3  ##                 
+  ########################################################################
   
-  d2l.de1.e3 <- - respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * d.3 * LgTRI$p.3.11 * d.1[VC$inde2] * LgTRI$p.1.10 + 1/TIn$p110 * d.3 * d.1.2 * p2   ) + 
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * d.3 * LgTRI$p.3.11 * d.1[VC$inde2] * LgTRI$p.1.11 + 1/TIn$p111 * d.3 * d.1.2 * p2   )
+  d.1.1  <- dnorm(TIn$mar1[VC$inde1]  , mean = TIn$theta12 * TIn$mar2, sd = sqrt(1 - TIn$theta12^2))
+  d.1.2  <- dnorm(TIn$mar1[VC$inde2]  , mean = TIn$theta13 * TIn$mar3, sd = sqrt(1 - TIn$theta13^2))
+  d.1.3  <- dnorm(TIn$mar2[VC$inde2.1], mean = TIn$theta23 * TIn$mar3, sd = sqrt(1 - TIn$theta23^2))
+  
+  ###########################################################################
+  
+  d2l.dF1.F2.1          <- respvec$y1.cy2 * ( -1/TIn$p10^2  * (LgTRI$d.1[VC$inde1] - LgTRI$d.1[VC$inde1] * LgTRI$upst.1) * ( - LgTRI$d.2 * LgTRI$upst.2) - 1/TIn$p10 * LgTRI$d.2 * dst.3 * 1/sqrt(1 - TIn$theta12^2)) 
+  d2l.dF1.F2.1[VC$inde2.1] <- respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * LgTRI$d.2[VC$inde2.1] * LgTRI$p.2.10 * LgTRI$d.1[VC$inde2] * LgTRI$p.1.10 + 1/TIn$p110 * LgTRI$d.2[VC$inde2.1] * d.1.1[VC$inde2.1] * p1.1.c ) + 
+    respvec$y1.y2.y3  * ( -1/TIn$p111^2 * LgTRI$d.2[VC$inde2.1] * LgTRI$p.2.11 * LgTRI$d.1[VC$inde2] * LgTRI$p.1.11 + 1/TIn$p111 * LgTRI$d.2[VC$inde2.1] * d.1.1[VC$inde2.1] * p1.1   )
+  d2l.dF1.F2 <- d2l.dF1.F2.1
+  
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
+  
+  d2l.de1.e2 <- d2l.dF1.F2 * LgTRI$dF1.de1[VC$inde1] * LgTRI$dF2.de2  
+  
+  ###########################################################
+  
+  d2l.dF1.F3 <- - respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * LgTRI$d.3 * LgTRI$p.3.11 * LgTRI$d.1[VC$inde2] * LgTRI$p.1.10 + 1/TIn$p110 * LgTRI$d.3 * d.1.2 * p2.2   ) + 
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d.3 * LgTRI$p.3.11 * LgTRI$d.1[VC$inde2] * LgTRI$p.1.11 + 1/TIn$p111 * LgTRI$d.3 * d.1.2 * p2.2   )
+  
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
+  
+  d2l.de1.e3 <- d2l.dF1.F3 * LgTRI$dF1.de1[VC$inde2] * LgTRI$dF3.de3  
+  
+  ###########################################################
+  
+  d2l.dF2.F3 <- - respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * LgTRI$d.3 * LgTRI$p.3.11 * LgTRI$d.2[VC$inde2.1] * LgTRI$p.2.10 + 1/TIn$p110 * LgTRI$d.3 * d.1.3 * p3.3   ) + 
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d.3 * LgTRI$p.3.11 * LgTRI$d.2[VC$inde2.1] * LgTRI$p.2.11 + 1/TIn$p111 * LgTRI$d.3 * d.1.3 * p3.3   ) 
+  
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
+  
+  d2l.de2.e3 <- d2l.dF2.F3 * LgTRI$dF2.de2[VC$inde2.1] * LgTRI$dF3.de3  
+  
+  ###########################################################
+  
+  #####
+  # ! #
+  ########################################################################
+  ## I replaced TIn$eta1 with TIn$mar1. Same for TIn$eta2 and TIn$eta3  ##                 
+  ########################################################################
+  
+  d12 <- dnorm( (TIn$mar3             - LgTRI$mean.12[VC$inde2.1])/LgTRI$sd.12 )
+  d13 <- dnorm( (TIn$mar2[VC$inde2.1] - LgTRI$mean.13)/LgTRI$sd.13 )
+  d23 <- dnorm( (TIn$mar1[VC$inde2]   - LgTRI$mean.23)/LgTRI$sd.23 )
+  
+  #############################################################################
+  
+  d2l.dF1.theta12.1          <- respvec$y1.cy2 * ( -1/TIn$p10^2 * (LgTRI$d.1[VC$inde1] - LgTRI$d.1[VC$inde1] * LgTRI$upst.1) * ( - LgTRI$d11.12) + 1/TIn$p10 * LgTRI$d11.12 * (TIn$mar1[VC$inde1] - TIn$theta12 * TIn$mar2)/(1 - TIn$theta12^2) )
+  d2l.dF1.theta12.1[VC$inde2.1] <- respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * LgTRI$d.1[VC$inde2] * LgTRI$p.1.10 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g.c + 1/TIn$p110 * ( LgTRI$d11.12[VC$inde2.1] * (TIn$theta12*TIn$mar2[VC$inde2.1]  - TIn$mar1[VC$inde2])/(1 - TIn$theta12^2) * LgTRI$p12.g.c + LgTRI$d11.12[VC$inde2.1] * d12/LgTRI$sd.12 * ((TIn$theta13 - TIn$theta12 * TIn$theta23)/(1 - TIn$theta12^2)) )) + 
+    respvec$y1.y2.y3  * ( -1/TIn$p111^2 * LgTRI$d.1[VC$inde2] * LgTRI$p.1.11 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g   + 1/TIn$p111 * ( LgTRI$d11.12[VC$inde2.1] * (TIn$theta12*TIn$mar2[VC$inde2.1]  - TIn$mar1[VC$inde2])/(1 - TIn$theta12^2) * LgTRI$p12.g   - LgTRI$d11.12[VC$inde2.1] * d12/LgTRI$sd.12 * ((TIn$theta13 - TIn$theta12 * TIn$theta23)/(1 - TIn$theta12^2)) )) 
+  d2l.dF1.theta12 <- d2l.dF1.theta12.1
+  
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
+  
+  d2l.de1.theta12 <- d2l.dF1.theta12 * LgTRI$dF1.de1[VC$inde1]
+  
+  ###########################################################
   
   
-  d2l.de2.e3 <- - respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * d.3 * LgTRI$p.3.11 * d.2[VC$inde2.1] * LgTRI$p.2.10 + 1/TIn$p110 * d.3 * d.1.3 * p3   ) + 
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * d.3 * LgTRI$p.3.11 * d.2[VC$inde2.1] * LgTRI$p.2.11 + 1/TIn$p111 * d.3 * d.1.3 * p3   ) 
+  d2l.dF1.theta13 <- - respvec$y1.y2.cy3   * ( -1/TIn$p110^2 * LgTRI$d.1[VC$inde2] * LgTRI$p.1.10 * LgTRI$d11.13 * LgTRI$p13.g   + 1/TIn$p110 * ( LgTRI$d11.13 * (TIn$theta13 * TIn$mar3 - TIn$mar1[VC$inde2])/(1 - TIn$theta13^2) * LgTRI$p13.g   - LgTRI$d11.13 * d13/LgTRI$sd.13 * ((TIn$theta12 - TIn$theta13 * TIn$theta23)/(1 - TIn$theta13^2)) )) +
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d.1[VC$inde2] * LgTRI$p.1.11 * LgTRI$d11.13 * LgTRI$p13.g   + 1/TIn$p111 * ( LgTRI$d11.13 * (TIn$theta13 * TIn$mar3 - TIn$mar1[VC$inde2])/(1 - TIn$theta13^2) * LgTRI$p13.g   - LgTRI$d11.13 * d13/LgTRI$sd.13 * ((TIn$theta12 - TIn$theta13 * TIn$theta23)/(1 - TIn$theta13^2)) )) 
   
-  d12 <- dnorm( (TIn$eta3          - LgTRI$mean.12[VC$inde2.1])/LgTRI$sd.12 )
-  d13 <- dnorm( (TIn$eta2[VC$inde2.1] - LgTRI$mean.13)/LgTRI$sd.13 )
-  d23 <- dnorm( (TIn$eta1[VC$inde2]   - LgTRI$mean.23)/LgTRI$sd.23 )
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
   
-  d2l.de1.theta12.1          <- respvec$y1.cy2 * ( -1/TIn$p10^2 * (d.1[VC$inde1] - d.1[VC$inde1] * LgTRI$upst.1) * ( - LgTRI$d11.12) + 1/TIn$p10 * LgTRI$d11.12 * (TIn$eta1[VC$inde1] - TIn$theta12 * TIn$eta2)/(1 - TIn$theta12^2) )
-  d2l.de1.theta12.1[VC$inde2.1] <- respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * d.1[VC$inde2] * LgTRI$p.1.10 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g.c + 1/TIn$p110 * ( LgTRI$d11.12[VC$inde2.1] * (TIn$theta12*TIn$eta2[VC$inde2.1]  - TIn$eta1[VC$inde2])/(1 - TIn$theta12^2) * LgTRI$p12.g.c + LgTRI$d11.12[VC$inde2.1] * d12/LgTRI$sd.12 * ((TIn$theta13 - TIn$theta12 * TIn$theta23)/(1 - TIn$theta12^2)) )) + 
-    respvec$y1.y2.y3  * ( -1/TIn$p111^2 * d.1[VC$inde2] * LgTRI$p.1.11 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g   + 1/TIn$p111 * ( LgTRI$d11.12[VC$inde2.1] * (TIn$theta12*TIn$eta2[VC$inde2.1]  - TIn$eta1[VC$inde2])/(1 - TIn$theta12^2) * LgTRI$p12.g   - LgTRI$d11.12[VC$inde2.1] * d12/LgTRI$sd.12 * ((TIn$theta13 - TIn$theta12 * TIn$theta23)/(1 - TIn$theta12^2)) )) 
+  d2l.de1.theta13 <- d2l.dF1.theta13 * LgTRI$dF1.de1[VC$inde2]
   
-  d2l.de1.theta12 <- d2l.de1.theta12.1
+  ###########################################################
   
+  d2l.dF1.theta23 <- - respvec$y1.y2.cy3  * ( -1/TIn$p110^2 * LgTRI$d.1[VC$inde2] * LgTRI$p.1.10 * LgTRI$d11.23 * LgTRI$p23.g   + 1/TIn$p110 * LgTRI$d11.23 * d23/LgTRI$sd.23 ) +
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d.1[VC$inde2] * LgTRI$p.1.11 * LgTRI$d11.23 * LgTRI$p23.g   + 1/TIn$p111 * LgTRI$d11.23 * d23/LgTRI$sd.23) 
   
-  d2l.de1.theta13 <- - respvec$y1.y2.cy3   * ( -1/TIn$p110^2 * d.1[VC$inde2] * LgTRI$p.1.10 * LgTRI$d11.13 * LgTRI$p13.g   + 1/TIn$p110 * ( LgTRI$d11.13 * (TIn$theta13 * TIn$eta3 - TIn$eta1[VC$inde2])/(1 - TIn$theta13^2) * LgTRI$p13.g   - LgTRI$d11.13 * d13/LgTRI$sd.13 * ((TIn$theta12 - TIn$theta13 * TIn$theta23)/(1 - TIn$theta13^2)) )) +
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * d.1[VC$inde2] * LgTRI$p.1.11 * LgTRI$d11.13 * LgTRI$p13.g   + 1/TIn$p111 * ( LgTRI$d11.13 * (TIn$theta13 * TIn$eta3 - TIn$eta1[VC$inde2])/(1 - TIn$theta13^2) * LgTRI$p13.g   - LgTRI$d11.13 * d13/LgTRI$sd.13 * ((TIn$theta12 - TIn$theta13 * TIn$theta23)/(1 - TIn$theta13^2)) )) 
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
   
-  d2l.de1.theta23 <- - respvec$y1.y2.cy3  * ( -1/TIn$p110^2 * d.1[VC$inde2] * LgTRI$p.1.10 * LgTRI$d11.23 * LgTRI$p23.g   + 1/TIn$p110 * LgTRI$d11.23 * d23/LgTRI$sd.23 ) +
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * d.1[VC$inde2] * LgTRI$p.1.11 * LgTRI$d11.23 * LgTRI$p23.g   + 1/TIn$p111 * LgTRI$d11.23 * d23/LgTRI$sd.23) 
+  d2l.de1.theta23 <- d2l.dF1.theta23 * LgTRI$dF1.de1[VC$inde2]
   
-  d2l.de2.theta12.1          <- respvec$y1.cy2 * ( -1/TIn$p10^2 * d.2 *  LgTRI$upst.2 * LgTRI$d11.12 - 1/TIn$p10  * LgTRI$d11.12  * (TIn$theta12 * TIn$eta1[VC$inde1] - TIn$eta2)/(1 - TIn$theta12^2) )
-  d2l.de2.theta12.1[VC$inde2.1] <- respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * d.2[VC$inde2.1] * LgTRI$p.2.10 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g.c + 1/TIn$p110 * (LgTRI$d11.12[VC$inde2.1] * (TIn$theta12 * TIn$eta1[VC$inde2] - TIn$eta2[VC$inde2.1])/(1 - TIn$theta12^2) * LgTRI$p12.g.c + LgTRI$d11.12[VC$inde2.1] * (d12/LgTRI$sd.12) * (TIn$theta23 - TIn$theta12 * TIn$theta13)/(1 - TIn$theta12^2) ) ) + 
-    respvec$y1.y2.y3  * ( -1/TIn$p111^2 * d.2[VC$inde2.1] * LgTRI$p.2.11 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g   + 1/TIn$p111 * (LgTRI$d11.12[VC$inde2.1] * (TIn$theta12 * TIn$eta1[VC$inde2] - TIn$eta2[VC$inde2.1])/(1 - TIn$theta12^2) * LgTRI$p12.g   - LgTRI$d11.12[VC$inde2.1] * (d12/LgTRI$sd.12) * (TIn$theta23 - TIn$theta12 * TIn$theta13)/(1 - TIn$theta12^2) ) ) 
+  ###########################################################
   
-  d2l.de2.theta12 <- d2l.de2.theta12.1
+  d2l.dF2.theta12.1          <- respvec$y1.cy2 * ( -1/TIn$p10^2 * LgTRI$d.2 *  LgTRI$upst.2 * LgTRI$d11.12 - 1/TIn$p10  * LgTRI$d11.12  * (TIn$theta12 * TIn$mar1[VC$inde1] - TIn$mar2)/(1 - TIn$theta12^2) )
+  d2l.dF2.theta12.1[VC$inde2.1] <- respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * LgTRI$d.2[VC$inde2.1] * LgTRI$p.2.10 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g.c + 1/TIn$p110 * (LgTRI$d11.12[VC$inde2.1] * (TIn$theta12 * TIn$mar1[VC$inde2] - TIn$mar2[VC$inde2.1])/(1 - TIn$theta12^2) * LgTRI$p12.g.c + LgTRI$d11.12[VC$inde2.1] * (d12/LgTRI$sd.12) * (TIn$theta23 - TIn$theta12 * TIn$theta13)/(1 - TIn$theta12^2) ) ) + 
+    respvec$y1.y2.y3  * ( -1/TIn$p111^2 * LgTRI$d.2[VC$inde2.1] * LgTRI$p.2.11 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g   + 1/TIn$p111 * (LgTRI$d11.12[VC$inde2.1] * (TIn$theta12 * TIn$mar1[VC$inde2] - TIn$mar2[VC$inde2.1])/(1 - TIn$theta12^2) * LgTRI$p12.g   - LgTRI$d11.12[VC$inde2.1] * (d12/LgTRI$sd.12) * (TIn$theta23 - TIn$theta12 * TIn$theta13)/(1 - TIn$theta12^2) ) ) 
+  d2l.dF2.theta12 <- d2l.dF2.theta12.1
   
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
   
-  d2l.de2.theta13 <- - respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * d.2[VC$inde2.1] * LgTRI$p.2.10 * LgTRI$d11.13 * LgTRI$p13.g   + 1/TIn$p110 * LgTRI$d11.13 * d13/LgTRI$sd.13 ) + 
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * d.2[VC$inde2.1] * LgTRI$p.2.11 * LgTRI$d11.13 * LgTRI$p13.g   + 1/TIn$p111 * LgTRI$d11.13 * d13/LgTRI$sd.13 )
+  d2l.de2.theta12 <- d2l.dF2.theta12 * LgTRI$dF2.de2
   
-  d2l.de2.theta23 <- - respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * d.2[VC$inde2.1] * LgTRI$p.2.10 * LgTRI$d11.23 * LgTRI$p23.g   + 1/TIn$p110 * (LgTRI$d11.23 * (TIn$theta23 * TIn$eta3 - TIn$eta2[VC$inde2.1])/(1 - TIn$theta23^2) * LgTRI$p23.g   - LgTRI$d11.23 * d23/LgTRI$sd.23 * (TIn$theta12 - TIn$theta13 * TIn$theta23)/(1 - TIn$theta23^2) ) ) + 
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * d.2[VC$inde2.1] * LgTRI$p.2.11 * LgTRI$d11.23 * LgTRI$p23.g   + 1/TIn$p111 * (LgTRI$d11.23 * (TIn$theta23 * TIn$eta3 - TIn$eta2[VC$inde2.1])/(1 - TIn$theta23^2) * LgTRI$p23.g   - LgTRI$d11.23 * d23/LgTRI$sd.23 * (TIn$theta12 - TIn$theta13 * TIn$theta23)/(1 - TIn$theta23^2) ) )
-  
-  d2l.de3.theta12 <- - respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * d.3 * LgTRI$p.3.11 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g.c + 1/TIn$p110 * LgTRI$d11.12[VC$inde2.1] * d12/LgTRI$sd.12 ) +
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * d.3 * LgTRI$p.3.11 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g   + 1/TIn$p111 * LgTRI$d11.12[VC$inde2.1] * d12/LgTRI$sd.12 ) 
-  
-  d2l.de3.theta13 <- - respvec$y1.y2.cy3 * (  1/TIn$p110^2 * d.3 * LgTRI$p.3.11 * LgTRI$d11.13 * LgTRI$p13.g   + 1/TIn$p110 * (LgTRI$d11.13 * ((TIn$theta13 * TIn$eta1[VC$inde2] - TIn$eta3)/(1 - TIn$theta13^2)) * LgTRI$p13.g   - LgTRI$d11.13 * (d13/LgTRI$sd.13) * (TIn$theta23 - TIn$theta12 * TIn$theta13)/(1 - TIn$theta13^2) ) ) +
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * d.3 * LgTRI$p.3.11 * LgTRI$d11.13 * LgTRI$p13.g   + 1/TIn$p111 * (LgTRI$d11.13 * ((TIn$theta13*TIn$eta1[VC$inde2] - TIn$eta3)/(1 - TIn$theta13^2)) * LgTRI$p13.g   - LgTRI$d11.13 * (d13/LgTRI$sd.13) * (TIn$theta23 - TIn$theta12 * TIn$theta13)/(1 - TIn$theta13^2) ) ) 
-  
-  d2l.de3.theta23 <- - respvec$y1.y2.cy3 * (  1/TIn$p110^2 * d.3 * LgTRI$p.3.11 * LgTRI$d11.23 * LgTRI$p23.g   + 1/TIn$p110 * (LgTRI$d11.23 * ((TIn$theta23*TIn$eta2[VC$inde2.1]  - TIn$eta3)/(1 - TIn$theta23^2)) * LgTRI$p23.g   - LgTRI$d11.23 * d23/LgTRI$sd.23 * (TIn$theta13 - TIn$theta12*TIn$theta23)/(1 - TIn$theta23^2) ) ) +
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * d.3 * LgTRI$p.3.11 * LgTRI$d11.23 * LgTRI$p23.g   + 1/TIn$p111 * (LgTRI$d11.23 * ((TIn$theta23*TIn$eta2[VC$inde2.1]  - TIn$eta3)/(1 - TIn$theta23^2)) * LgTRI$p23.g   - LgTRI$d11.23 * d23/LgTRI$sd.23 * (TIn$theta13 - TIn$theta12 * TIn$theta23)/(1 - TIn$theta23^2) ) ) 
-  
-  
-  dd11.12.dtheta12 <- (LgTRI$d11.12/(1 - TIn$theta12^2)) * ( ( (TIn$theta12 * TIn$eta2 - TIn$eta1[VC$inde1]  ) * (TIn$theta12 * TIn$eta1[VC$inde1]   - TIn$eta2)/(1 - TIn$theta12^2) ) + TIn$theta12)
-  dd11.13.dtheta13 <- (LgTRI$d11.13/(1 - TIn$theta13^2)) * ( ( (TIn$theta13 * TIn$eta3 - TIn$eta1[VC$inde2]  ) * (TIn$theta13 * TIn$eta1[VC$inde2]   - TIn$eta3)/(1 - TIn$theta13^2) ) + TIn$theta13)
-  dd11.23.dtheta23 <- (LgTRI$d11.23/(1 - TIn$theta23^2)) * ( ( (TIn$theta23 * TIn$eta3 - TIn$eta2[VC$inde2.1]) * (TIn$theta23 * TIn$eta2[VC$inde2.1] - TIn$eta3)/(1 - TIn$theta23^2) ) + TIn$theta23)
+  ###########################################################
   
   
-  dmean12.dtheta12 <- ( (-TIn$eta1[VC$inde1]   * TIn$theta23 - TIn$eta2 * TIn$theta13) * (1 - TIn$theta12^2) + 2 * TIn$theta12 * (TIn$eta1[VC$inde1]   * (TIn$theta13 - TIn$theta12 * TIn$theta23) + TIn$eta2 * (TIn$theta23 - TIn$theta12 * TIn$theta13)))/(1 - TIn$theta12^2)^2
-  dmean13.dtheta13 <- ( (-TIn$eta1[VC$inde2]   * TIn$theta23 - TIn$eta3 * TIn$theta12) * (1 - TIn$theta13^2) + 2 * TIn$theta13 * (TIn$eta1[VC$inde2]   * (TIn$theta12 - TIn$theta13 * TIn$theta23) + TIn$eta3 * (TIn$theta23 - TIn$theta12 * TIn$theta13)))/(1 - TIn$theta13^2)^2
-  dmean23.dtheta23 <- ( (-TIn$eta2[VC$inde2.1] * TIn$theta13 - TIn$eta3 * TIn$theta12) * (1 - TIn$theta23^2) + 2 * TIn$theta23 * (TIn$eta2[VC$inde2.1] * (TIn$theta12 - TIn$theta13 * TIn$theta23) + TIn$eta3 * (TIn$theta13 - TIn$theta12 * TIn$theta23)))/(1 - TIn$theta23^2)^2
+  d2l.dF2.theta13 <- - respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * LgTRI$d.2[VC$inde2.1] * LgTRI$p.2.10 * LgTRI$d11.13 * LgTRI$p13.g   + 1/TIn$p110 * LgTRI$d11.13 * d13/LgTRI$sd.13 ) + 
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d.2[VC$inde2.1] * LgTRI$p.2.11 * LgTRI$d11.13 * LgTRI$p13.g   + 1/TIn$p111 * LgTRI$d11.13 * d13/LgTRI$sd.13 )
   
-  dmean13.dtheta12 <- ( TIn$eta1[VC$inde2]   - TIn$eta3 * TIn$theta13           )/( 1 - TIn$theta13^2 )
-  dmean23.dtheta12 <- ( TIn$eta2[VC$inde2.1] - TIn$eta3 * TIn$theta23           )/( 1 - TIn$theta23^2 )
-  dmean23.dtheta13 <- ( TIn$eta3          - TIn$eta2[VC$inde2.1]  * TIn$theta23 )/( 1 - TIn$theta23^2 )
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
+  
+  d2l.de2.theta13 <- d2l.dF2.theta13 * LgTRI$dF2.de2[VC$inde2.1]
+  
+  ###########################################################
+  
+  d2l.dF2.theta23 <- - respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * LgTRI$d.2[VC$inde2.1] * LgTRI$p.2.10 * LgTRI$d11.23 * LgTRI$p23.g   + 1/TIn$p110 * (LgTRI$d11.23 * (TIn$theta23 * TIn$mar3 - TIn$mar2[VC$inde2.1])/(1 - TIn$theta23^2) * LgTRI$p23.g   - LgTRI$d11.23 * d23/LgTRI$sd.23 * (TIn$theta12 - TIn$theta13 * TIn$theta23)/(1 - TIn$theta23^2) ) ) + 
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d.2[VC$inde2.1] * LgTRI$p.2.11 * LgTRI$d11.23 * LgTRI$p23.g   + 1/TIn$p111 * (LgTRI$d11.23 * (TIn$theta23 * TIn$mar3 - TIn$mar2[VC$inde2.1])/(1 - TIn$theta23^2) * LgTRI$p23.g   - LgTRI$d11.23 * d23/LgTRI$sd.23 * (TIn$theta12 - TIn$theta13 * TIn$theta23)/(1 - TIn$theta23^2) ) )
+  
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
+  
+  d2l.de2.theta23 <- d2l.dF2.theta23 * LgTRI$dF2.de2[VC$inde2.1]
+  
+  ###########################################################
+  
+  d2l.dF3.theta12 <- - respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * LgTRI$d.3 * LgTRI$p.3.11 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g.c + 1/TIn$p110 * LgTRI$d11.12[VC$inde2.1] * d12/LgTRI$sd.12 ) +
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d.3 * LgTRI$p.3.11 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g   + 1/TIn$p111 * LgTRI$d11.12[VC$inde2.1] * d12/LgTRI$sd.12 ) 
+  
+  
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
+  
+  d2l.de3.theta12 <- d2l.dF3.theta12 * LgTRI$dF3.de3
+  
+  ###########################################################
+  
+  
+  d2l.dF3.theta13 <- - respvec$y1.y2.cy3 * (  1/TIn$p110^2 * LgTRI$d.3 * LgTRI$p.3.11 * LgTRI$d11.13 * LgTRI$p13.g   + 1/TIn$p110 * (LgTRI$d11.13 * ((TIn$theta13 * TIn$mar1[VC$inde2] - TIn$mar3)/(1 - TIn$theta13^2)) * LgTRI$p13.g   - LgTRI$d11.13 * (d13/LgTRI$sd.13) * (TIn$theta23 - TIn$theta12 * TIn$theta13)/(1 - TIn$theta13^2) ) ) +
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d.3 * LgTRI$p.3.11 * LgTRI$d11.13 * LgTRI$p13.g   + 1/TIn$p111 * (LgTRI$d11.13 * ((TIn$theta13*TIn$mar1[VC$inde2] - TIn$mar3)/(1 - TIn$theta13^2)) * LgTRI$p13.g   - LgTRI$d11.13 * (d13/LgTRI$sd.13) * (TIn$theta23 - TIn$theta12 * TIn$theta13)/(1 - TIn$theta13^2) ) ) 
+  
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
+  
+  d2l.de3.theta13 <- d2l.dF3.theta13 * LgTRI$dF3.de3
+  
+  ###########################################################
+  
+  
+  d2l.dF3.theta23 <- - respvec$y1.y2.cy3 * (  1/TIn$p110^2 * LgTRI$d.3 * LgTRI$p.3.11 * LgTRI$d11.23 * LgTRI$p23.g   + 1/TIn$p110 * (LgTRI$d11.23 * ((TIn$theta23*TIn$mar2[VC$inde2.1]  - TIn$mar3)/(1 - TIn$theta23^2)) * LgTRI$p23.g   - LgTRI$d11.23 * d23/LgTRI$sd.23 * (TIn$theta13 - TIn$theta12*TIn$theta23)/(1 - TIn$theta23^2) ) ) +
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d.3 * LgTRI$p.3.11 * LgTRI$d11.23 * LgTRI$p23.g   + 1/TIn$p111 * (LgTRI$d11.23 * ((TIn$theta23*TIn$mar2[VC$inde2.1]  - TIn$mar3)/(1 - TIn$theta23^2)) * LgTRI$p23.g   - LgTRI$d11.23 * d23/LgTRI$sd.23 * (TIn$theta13 - TIn$theta12 * TIn$theta23)/(1 - TIn$theta23^2) ) ) 
+  
+  #####
+  # ! #
+  ###########################
+  ## The following is new: ##                 
+  ###########################
+  
+  d2l.de3.theta23 <- d2l.dF3.theta23 * LgTRI$dF3.de3
+  
+  ###########################################################
+  
+  
+  #####
+  # ! #
+  ########################################################################
+  ## I replaced TIn$eta1 with TIn$mar1. Same for TIn$eta2 and TIn$eta3  ##                 
+  ########################################################################
+  
+  dd11.12.dtheta12 <- (LgTRI$d11.12/(1 - TIn$theta12^2)) * ( ( (TIn$theta12 * TIn$mar2 - TIn$mar1[VC$inde1]  ) * (TIn$theta12 * TIn$mar1[VC$inde1]   - TIn$mar2)/(1 - TIn$theta12^2) ) + TIn$theta12)
+  dd11.13.dtheta13 <- (LgTRI$d11.13/(1 - TIn$theta13^2)) * ( ( (TIn$theta13 * TIn$mar3 - TIn$mar1[VC$inde2]  ) * (TIn$theta13 * TIn$mar1[VC$inde2]   - TIn$mar3)/(1 - TIn$theta13^2) ) + TIn$theta13)
+  dd11.23.dtheta23 <- (LgTRI$d11.23/(1 - TIn$theta23^2)) * ( ( (TIn$theta23 * TIn$mar3 - TIn$mar2[VC$inde2.1]) * (TIn$theta23 * TIn$mar2[VC$inde2.1] - TIn$mar3)/(1 - TIn$theta23^2) ) + TIn$theta23)
+  
+  
+  dmean12.dtheta12 <- ( (-TIn$mar1[VC$inde1]   * TIn$theta23 - TIn$mar2 * TIn$theta13) * (1 - TIn$theta12^2) + 2 * TIn$theta12 * (TIn$mar1[VC$inde1]   * (TIn$theta13 - TIn$theta12 * TIn$theta23) + TIn$mar2 * (TIn$theta23 - TIn$theta12 * TIn$theta13)))/(1 - TIn$theta12^2)^2
+  dmean13.dtheta13 <- ( (-TIn$mar1[VC$inde2]   * TIn$theta23 - TIn$mar3 * TIn$theta12) * (1 - TIn$theta13^2) + 2 * TIn$theta13 * (TIn$mar1[VC$inde2]   * (TIn$theta12 - TIn$theta13 * TIn$theta23) + TIn$mar3 * (TIn$theta23 - TIn$theta12 * TIn$theta13)))/(1 - TIn$theta13^2)^2
+  dmean23.dtheta23 <- ( (-TIn$mar2[VC$inde2.1] * TIn$theta13 - TIn$mar3 * TIn$theta12) * (1 - TIn$theta23^2) + 2 * TIn$theta23 * (TIn$mar2[VC$inde2.1] * (TIn$theta12 - TIn$theta13 * TIn$theta23) + TIn$mar3 * (TIn$theta13 - TIn$theta12 * TIn$theta23)))/(1 - TIn$theta23^2)^2
+  
+  dmean13.dtheta12 <- ( TIn$mar1[VC$inde2]   - TIn$mar3              * TIn$theta13 )/( 1 - TIn$theta13^2 )
+  dmean23.dtheta12 <- ( TIn$mar2[VC$inde2.1] - TIn$mar3              * TIn$theta23 )/( 1 - TIn$theta23^2 )
+  dmean23.dtheta13 <- ( TIn$mar3             - TIn$mar2[VC$inde2.1]  * TIn$theta23 )/( 1 - TIn$theta23^2 )
+  
+  #############################################################################################################
   
   dvar12.dtheta12 <- ( 2 * (TIn$theta13 * TIn$theta23 - TIn$theta12) * (1 - TIn$theta12^2) + 2 * TIn$theta12 * deno )/(1 - TIn$theta12^2)^2
   dvar13.dtheta13 <- ( 2 * (TIn$theta12 * TIn$theta23 - TIn$theta13) * (1 - TIn$theta13^2) + 2 * TIn$theta13 * deno )/(1 - TIn$theta13^2)^2
@@ -159,25 +362,25 @@ H.triSS <- function(params, respvec, VC, TIn, LgTRI){
   
   
   d2l.dtheta12.theta12.1          <- respvec$y1.cy2 * ( -1/TIn$p10^2  * LgTRI$d11.12^2 - 1/TIn$p10 * dd11.12.dtheta12)
-  d2l.dtheta12.theta12.1[VC$inde2.1] <- respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * (LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g.c )^2 + 1/TIn$p110 * (( dd11.12.dtheta12[VC$inde2.1] * LgTRI$p12.g.c) + ((d12/LgTRI$sd.12) * (dmean12.dtheta12[VC$inde2.1]  + (((TIn$eta3 - LgTRI$mean.12[VC$inde2.1])/(2 * LgTRI$sd.12^2)) * dvar12.dtheta12)) * LgTRI$d11.12[VC$inde2.1]) )) + 
-    respvec$y1.y2.y3  * ( -1/TIn$p111^2 * (LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g   )^2 + 1/TIn$p111 * (( dd11.12.dtheta12[VC$inde2.1] * LgTRI$p12.g  ) - ((d12/LgTRI$sd.12) * (dmean12.dtheta12[VC$inde2.1]  + (((TIn$eta3 - LgTRI$mean.12[VC$inde2.1])/(2 * LgTRI$sd.12^2)) * dvar12.dtheta12)) * LgTRI$d11.12[VC$inde2.1]) ))
+  d2l.dtheta12.theta12.1[VC$inde2.1] <- respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * (LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g.c )^2 + 1/TIn$p110 * (( dd11.12.dtheta12[VC$inde2.1] * LgTRI$p12.g.c) + ((d12/LgTRI$sd.12) * (dmean12.dtheta12[VC$inde2.1]  + (((TIn$mar3 - LgTRI$mean.12[VC$inde2.1])/(2 * LgTRI$sd.12^2)) * dvar12.dtheta12)) * LgTRI$d11.12[VC$inde2.1]) )) + 
+    respvec$y1.y2.y3  * ( -1/TIn$p111^2 * (LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g   )^2 + 1/TIn$p111 * (( dd11.12.dtheta12[VC$inde2.1] * LgTRI$p12.g  ) - ((d12/LgTRI$sd.12) * (dmean12.dtheta12[VC$inde2.1]  + (((TIn$mar3 - LgTRI$mean.12[VC$inde2.1])/(2 * LgTRI$sd.12^2)) * dvar12.dtheta12)) * LgTRI$d11.12[VC$inde2.1]) ))
   
   d2l.dtheta12.theta12 <- d2l.dtheta12.theta12.1
   
-  d2l.dtheta13.theta13 <- - respvec$y1.y2.cy3 * (  1/TIn$p110^2 * (LgTRI$d11.13 * LgTRI$p13.g)^2 + 1/TIn$p110 * ((dd11.13.dtheta13 * LgTRI$p13.g  ) - ((d13/LgTRI$sd.13) * (dmean13.dtheta13 + (((TIn$eta2[VC$inde2.1] - LgTRI$mean.13)/(2 * LgTRI$sd.13^2)) * dvar13.dtheta13)) * LgTRI$d11.13) )) + 
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * (LgTRI$d11.13 * LgTRI$p13.g)^2 + 1/TIn$p111 * (( dd11.13.dtheta13 * LgTRI$p13.g  ) - ((d13/LgTRI$sd.13) * (dmean13.dtheta13 + (((TIn$eta2[VC$inde2.1] - LgTRI$mean.13)/(2 * LgTRI$sd.13^2)) * dvar13.dtheta13)) * LgTRI$d11.13) )) 
+  d2l.dtheta13.theta13 <- - respvec$y1.y2.cy3 * (  1/TIn$p110^2 * (LgTRI$d11.13 * LgTRI$p13.g)^2 + 1/TIn$p110 * ((dd11.13.dtheta13 * LgTRI$p13.g  ) - ((d13/LgTRI$sd.13) * (dmean13.dtheta13 + (((TIn$mar2[VC$inde2.1] - LgTRI$mean.13)/(2 * LgTRI$sd.13^2)) * dvar13.dtheta13)) * LgTRI$d11.13) )) + 
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * (LgTRI$d11.13 * LgTRI$p13.g)^2 + 1/TIn$p111 * (( dd11.13.dtheta13 * LgTRI$p13.g  ) - ((d13/LgTRI$sd.13) * (dmean13.dtheta13 + (((TIn$mar2[VC$inde2.1] - LgTRI$mean.13)/(2 * LgTRI$sd.13^2)) * dvar13.dtheta13)) * LgTRI$d11.13) )) 
   
-  d2l.dtheta23.theta23 <- - respvec$y1.y2.cy3 * (  1/TIn$p110^2 * (LgTRI$d11.23 * LgTRI$p23.g   )^2 + 1/TIn$p110 * ((dd11.23.dtheta23 * LgTRI$p23.g  ) - ((d23/LgTRI$sd.23) * (dmean23.dtheta23 + ((TIn$eta1[VC$inde2] - LgTRI$mean.23)/(2*LgTRI$sd.23^2) * dvar23.dtheta23)) * LgTRI$d11.23) )) + 
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * (LgTRI$d11.23 * LgTRI$p23.g   )^2 + 1/TIn$p111 * ((dd11.23.dtheta23 * LgTRI$p23.g  ) - ((d23/LgTRI$sd.23) * (dmean23.dtheta23 + ((TIn$eta1[VC$inde2] - LgTRI$mean.23)/(2*LgTRI$sd.23^2) * dvar23.dtheta23)) * LgTRI$d11.23) )) 
+  d2l.dtheta23.theta23 <- - respvec$y1.y2.cy3 * (  1/TIn$p110^2 * (LgTRI$d11.23 * LgTRI$p23.g   )^2 + 1/TIn$p110 * ((dd11.23.dtheta23 * LgTRI$p23.g  ) - ((d23/LgTRI$sd.23) * (dmean23.dtheta23 + ((TIn$mar1[VC$inde2] - LgTRI$mean.23)/(2*LgTRI$sd.23^2) * dvar23.dtheta23)) * LgTRI$d11.23) )) + 
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * (LgTRI$d11.23 * LgTRI$p23.g   )^2 + 1/TIn$p111 * ((dd11.23.dtheta23 * LgTRI$p23.g  ) - ((d23/LgTRI$sd.23) * (dmean23.dtheta23 + ((TIn$mar1[VC$inde2] - LgTRI$mean.23)/(2*LgTRI$sd.23^2) * dvar23.dtheta23)) * LgTRI$d11.23) )) 
   
-  d2l.dtheta12.theta13 <- - respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g.c * LgTRI$d11.13 * LgTRI$p13.g   - 1/TIn$p110 * LgTRI$d11.13 * (d13/LgTRI$sd.13) * (dmean13.dtheta12 + ((TIn$eta2[VC$inde2.1] - LgTRI$mean.13)/(2*LgTRI$sd.13^2) * dvar13.dtheta12) )) +
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g   * LgTRI$d11.13 * LgTRI$p13.g   - 1/TIn$p111 * LgTRI$d11.13 * (d13/LgTRI$sd.13) * (dmean13.dtheta12 + ((TIn$eta2[VC$inde2.1] - LgTRI$mean.13)/(2*LgTRI$sd.13^2) * dvar13.dtheta12) )) 
+  d2l.dtheta12.theta13 <- - respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g.c * LgTRI$d11.13 * LgTRI$p13.g   - 1/TIn$p110 * LgTRI$d11.13 * (d13/LgTRI$sd.13) * (dmean13.dtheta12 + ((TIn$mar2[VC$inde2.1] - LgTRI$mean.13)/(2*LgTRI$sd.13^2) * dvar13.dtheta12) )) +
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g   * LgTRI$d11.13 * LgTRI$p13.g   - 1/TIn$p111 * LgTRI$d11.13 * (d13/LgTRI$sd.13) * (dmean13.dtheta12 + ((TIn$mar2[VC$inde2.1] - LgTRI$mean.13)/(2*LgTRI$sd.13^2) * dvar13.dtheta12) )) 
   
-  d2l.dtheta12.theta23 <- - respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g.c * LgTRI$d11.23 * LgTRI$p23.g   - 1/TIn$p110 * LgTRI$d11.23 * (d23/LgTRI$sd.23) * (dmean23.dtheta12 + ((TIn$eta1[VC$inde2] - LgTRI$mean.23)/(2*LgTRI$sd.23^2) * dvar23.dtheta12) )) +
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g   * LgTRI$d11.23 * LgTRI$p23.g   - 1/TIn$p111 * LgTRI$d11.23 * (d23/LgTRI$sd.23) * (dmean23.dtheta12 + ((TIn$eta1[VC$inde2] - LgTRI$mean.23)/(2*LgTRI$sd.23^2) * dvar23.dtheta12) )) 
+  d2l.dtheta12.theta23 <- - respvec$y1.y2.cy3 * ( -1/TIn$p110^2 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g.c * LgTRI$d11.23 * LgTRI$p23.g   - 1/TIn$p110 * LgTRI$d11.23 * (d23/LgTRI$sd.23) * (dmean23.dtheta12 + ((TIn$mar1[VC$inde2] - LgTRI$mean.23)/(2*LgTRI$sd.23^2) * dvar23.dtheta12) )) +
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d11.12[VC$inde2.1] * LgTRI$p12.g   * LgTRI$d11.23 * LgTRI$p23.g   - 1/TIn$p111 * LgTRI$d11.23 * (d23/LgTRI$sd.23) * (dmean23.dtheta12 + ((TIn$mar1[VC$inde2] - LgTRI$mean.23)/(2*LgTRI$sd.23^2) * dvar23.dtheta12) )) 
   
-  d2l.dtheta13.theta23 <- - respvec$y1.y2.cy3 * (  1/TIn$p110^2 * LgTRI$d11.13 * LgTRI$p13.g   * LgTRI$d11.23 * LgTRI$p23.g   - 1/TIn$p110 * LgTRI$d11.23 * (d23/LgTRI$sd.23) * (dmean23.dtheta13 + ((TIn$eta1[VC$inde2] - LgTRI$mean.23)/(2 * LgTRI$sd.23^2) * dvar23.dtheta13) )) +
-    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d11.13 * LgTRI$p13.g   * LgTRI$d11.23 * LgTRI$p23.g   - 1/TIn$p111 * LgTRI$d11.23 * (d23/LgTRI$sd.23) * (dmean23.dtheta13 + ((TIn$eta1[VC$inde2] - LgTRI$mean.23)/(2 * LgTRI$sd.23^2) * dvar23.dtheta13) )) 
+  d2l.dtheta13.theta23 <- - respvec$y1.y2.cy3 * (  1/TIn$p110^2 * LgTRI$d11.13 * LgTRI$p13.g   * LgTRI$d11.23 * LgTRI$p23.g   - 1/TIn$p110 * LgTRI$d11.23 * (d23/LgTRI$sd.23) * (dmean23.dtheta13 + ((TIn$mar1[VC$inde2] - LgTRI$mean.23)/(2 * LgTRI$sd.23^2) * dvar23.dtheta13) )) +
+    respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d11.13 * LgTRI$p13.g   * LgTRI$d11.23 * LgTRI$p23.g   - 1/TIn$p111 * LgTRI$d11.23 * (d23/LgTRI$sd.23) * (dmean23.dtheta13 + ((TIn$mar1[VC$inde2] - LgTRI$mean.23)/(2 * LgTRI$sd.23^2) * dvar23.dtheta13) )) 
   
   
   dtheta12.dtheta12.st <- 4 * exp( 2 * TIn$theta12.st )/( exp(2 * TIn$theta12.st) + 1 )^2

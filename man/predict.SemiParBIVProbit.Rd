@@ -47,6 +47,9 @@ is because for all distributions (except the Gaussian) implemented in this packa
 determine the mean and variance
 through functions of them.
 
+When predicting based on a new data set, this function can not return correct predictions for models based on a BivD value of "C0C90", "C0C270", "C180C90", "C180C270", "G0G90", "G0G270", "G180G90",
+"G180G270", "J0J90", "J0J270", "J180J90" or "J180J270". 
+
 } 
 
 

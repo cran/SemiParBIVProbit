@@ -27,11 +27,9 @@ pen <- function(qu.mag, sp, VC, univ, l.splist){
                             
 ##############################################################
     
-##############################################################
-    
 if(!is.null(VC$gp3)){ # this starts after first two equations
 
- EQ4P <- EQ5P <- EQ6P <- EQ7P <- NULL 
+ EQ4P <- EQ5P <- EQ6P <- EQ7P <- EQ8P <- NULL 
 
     ma3 <- matrix(0,VC$gp3,VC$gp3) 
     if(l.splist$l.sp3 == 0) EQ3P <- adiag(ma3)    
@@ -93,27 +91,68 @@ if(!is.null(VC$gp3)){ # this starts after first two equations
 	    S7 <- do.call(adiag, lapply(S7, unlist))
 	    EQ7P <- adiag(ma7, S7)
 	                     }               
+                                }  
+                                
+            if(!is.null(VC$gp8)){
+	    
+	    ma8 <- matrix(0,VC$gp8,VC$gp8) 
+	    if(l.splist$l.sp8 == 0) EQ8P <- adiag(ma8)    
+	    
+	    if(l.splist$l.sp8 != 0){
+	    ind <- (l.splist$l.sp1 + l.splist$l.sp2 + l.splist$l.sp3 + l.splist$l.sp4 + l.splist$l.sp5 + l.splist$l.sp6 + l.splist$l.sp7 + 1):(l.splist$l.sp1 + l.splist$l.sp2 + l.splist$l.sp3 + l.splist$l.sp4 + l.splist$l.sp5 + l.splist$l.sp6 + l.splist$l.sp7 + l.splist$l.sp8)
+	    S8 <- mapply("*", qu.mag$Ss[ind], sp[ind], SIMPLIFY=FALSE)
+	    S8 <- do.call(adiag, lapply(S8, unlist))
+	    EQ8P <- adiag(ma8, S8)
+	                     }               
                                 }                                  
                                 
                                 
 }else{
 
-    if(VC$Model == "BPO0")                                                       {EQ3P <- EQ4P <- EQ5P <- EQ6P <- EQ7P <- NULL                 }
-    if(VC$margins[1] %in% c(VC$bl)        && VC$Model != "BPO0")                 {EQ3P <- 0; EQ4P <- NULL; EQ5P <- NULL; EQ6P <- EQ7P <- NULL  }
+
+
+if(VC$univ.gamls == FALSE){
+
+
+                  
+   
+   if(VC$margins[1] %in% c(VC$m2,VC$m3) && VC$margins[2] %in% c(VC$m2,VC$m3) && VC$BivD == "T"){
+   
+       if(VC$margins[1] %in% VC$m2 && VC$margins[2] %in% VC$m2 ) {EQ3P <- 0; EQ4P <- 0; EQ5P <- 0; EQ6P <- 0; EQ7P <- EQ8P <- NULL     } 
+       if(VC$margins[1] %in% VC$m3 && VC$margins[2] %in% VC$m3 ) {EQ3P <- 0; EQ4P <- 0; EQ5P <- 0; EQ6P <- 0; EQ7P <- EQ8P <- 0        } 
+       if(VC$margins[1] %in% VC$m2 && VC$margins[2] %in% VC$m3 ) {EQ3P <- 0; EQ4P <- 0; EQ5P <- 0; EQ6P <- 0; EQ7P <- 0; EQ8P <- NULL  }  
+       if(VC$margins[1] %in% VC$m3 && VC$margins[2] %in% VC$m2 ) {EQ3P <- 0; EQ4P <- 0; EQ5P <- 0; EQ6P <- 0; EQ7P <- 0; EQ8P <- NULL  }  
+       
+   }else{
+   
+    if(VC$Model == "BPO0")                                                       {EQ3P <- EQ4P <- EQ5P <- EQ6P <- EQ7P <- EQ8P <- NULL                 }
+    if(VC$margins[1] %in% c(VC$bl)        && VC$Model != "BPO0")                 {EQ3P <- 0; EQ4P <- NULL; EQ5P <- NULL; EQ6P <- EQ7P <- EQ8P <- NULL  }
     
-    if(VC$margins[1] %in% c(VC$bl,VC$m1d) && VC$margins[2] %in% c(VC$m1d))       {EQ3P <- 0; EQ4P <- NULL; EQ5P <- NULL; EQ6P <- EQ7P <- NULL  }
-    
-    if(VC$margins[1] %in% c(VC$bl,VC$m1d) && VC$margins[2] %in% c(VC$m2,VC$m2d)) {EQ3P <- 0; EQ4P <- 0;    EQ5P <- NULL; EQ6P <- EQ7P <- NULL  }
-    if(VC$margins[1] %in% c(VC$bl,VC$m1d) && VC$margins[2] %in% VC$m3)           {EQ3P <- 0; EQ4P <- 0;    EQ5P <- 0;    EQ6P <- EQ7P <- NULL  }
+    if(VC$margins[1] %in% c(VC$bl,VC$m1d) && VC$margins[2] %in% VC$m1d)          {EQ3P <- 0; EQ4P <- NULL; EQ5P <- NULL; EQ6P <- EQ7P <- EQ8P <- NULL  }
+    if(VC$margins[1] %in% c(VC$bl,VC$m1d) && VC$margins[2] %in% VC$m2d)          {EQ3P <- 0; EQ4P <- 0;    EQ5P <- NULL; EQ6P <- EQ7P <- EQ8P <- NULL  }
     
 
-    if(VC$margins[1] %in% c(VC$m2,VC$m2d) && VC$margins[2] %in% c(VC$m2,VC$m2d)) {EQ3P <- 0; EQ4P <- 0; EQ5P <- 0; EQ6P <- NULL; EQ7P <- NULL  } 
-    if(VC$margins[1] %in% VC$m3           && VC$margins[2] %in% VC$m3)           {EQ3P <- 0; EQ4P <- 0; EQ5P <- 0; EQ6P <- 0;    EQ7P <- 0  } 
-    if(VC$margins[1] %in% c(VC$m2,VC$m2d) && VC$margins[2] %in% VC$m3)           {EQ3P <- 0; EQ4P <- 0; EQ5P <- 0; EQ6P <- 0;    EQ7P <- NULL  }  
-    if(VC$margins[1] %in% VC$m3           && VC$margins[2] %in% c(VC$m2,VC$m2d)) {EQ3P <- 0; EQ4P <- 0; EQ5P <- 0; EQ6P <- 0;    EQ7P <- NULL  }  
+    if(VC$margins[1] %in% c(VC$bl,VC$m1d) && VC$margins[2] %in% VC$m2)           {EQ3P <- 0; EQ4P <- 0;    EQ5P <- NULL; EQ6P <- EQ7P <- EQ8P <- NULL  }
+    if(VC$margins[1] %in% c(VC$bl,VC$m1d) && VC$margins[2] %in% VC$m3)           {EQ3P <- 0; EQ4P <- 0;    EQ5P <- 0;    EQ6P <- EQ7P <- EQ8P <- NULL  }     
+    
+    if(VC$margins[1] %in% c(VC$m2,VC$m2d) && VC$margins[2] %in% c(VC$m2,VC$m2d)  )  {EQ3P <- 0; EQ4P <- 0; EQ5P <- 0; EQ6P <- NULL; EQ7P <- EQ8P <- NULL  }     
+    if(VC$margins[1] %in% VC$m3           && VC$margins[2] %in% VC$m3            )  {EQ3P <- 0; EQ4P <- 0; EQ5P <- 0; EQ6P <- 0;    EQ7P <- 0; EQ8P <- NULL  }   
+    if(VC$margins[1] %in% c(VC$m2,VC$m2d) && VC$margins[2] %in% VC$m3            )  {EQ3P <- 0; EQ4P <- 0; EQ5P <- 0; EQ6P <- 0;    EQ7P <- EQ8P <- NULL  }  
+    if(VC$margins[1] %in% VC$m3           && VC$margins[2] %in% c(VC$m2,VC$m2d)  )  {EQ3P <- 0; EQ4P <- 0; EQ5P <- 0; EQ6P <- 0;    EQ7P <- EQ8P <- NULL  }  
+    
+    if(VC$Model == "B" && !is.null(VC$theta.fx)) {EQ3P <- EQ4P <- EQ5P <- EQ6P <- EQ7P <- EQ8P <- NULL                 }
 
-    if(VC$Model == "B" && !is.null(VC$theta.fx))                                     {EQ3P <- EQ4P <- EQ5P <- EQ6P <- EQ7P <- NULL                 }
+    }
+
+
+
+    
+    
+    
     # not efficient, it could be done above but done here for the moment
+
+
+}
 
 
 }  
@@ -131,49 +170,17 @@ if(!is.null(VC$gp3)){ # this starts after first two equations
 if(VC$triv == FALSE){    ### TRIV
     
     
-    
-    if(univ == 0) S.h <- adiag(EQ1P, EQ2P, EQ3P, EQ4P, EQ5P, EQ6P, EQ7P)
-    
-    
-    
-    if(univ == 1){
-    
-       if(VC$margins[2] %in% c(VC$m1d))       {S.h <- adiag(EQ2P)}  
-       if(VC$margins[2] %in% c(VC$m2,VC$m2d)) {S.h <- adiag(EQ2P, EQ3P)}  
-       if(VC$margins[2] %in% VC$m3)           {S.h <- adiag(EQ2P, EQ3P, EQ4P)}  
-    
-                 }
+    if(univ == 0) S.h <- adiag(EQ1P, EQ2P, EQ3P, EQ4P, EQ5P, EQ6P, EQ7P, EQ8P)
     
     
     if(univ == 2){
     
-    
-       if(VC$margins[1] %in% c(VC$m1d) && VC$margins[2] %in% c(VC$m2,VC$m3,VC$m2d,VC$m1d)) {S.h <- adiag(EQ1P)        } 
-       
-       if(VC$margins[1] %in% c(VC$m2,VC$m2d) && VC$margins[2] %in% c(VC$m2,VC$m2d)) {S.h <- adiag(EQ1P, EQ3P)        } 
-       if(VC$margins[1] %in% VC$m3           && VC$margins[2] %in% c(VC$m2,VC$m2d)) {S.h <- adiag(EQ1P, EQ3P, EQ5P)  } 
-       if(VC$margins[1] %in% c(VC$m2,VC$m2d) && VC$margins[2] %in% VC$m3) {S.h <- adiag(EQ1P, EQ3P)        }  
-       if(VC$margins[1] %in% VC$m3           && VC$margins[2] %in% VC$m3) {S.h <- adiag(EQ1P, EQ3P, EQ5P)  }     
-    
+       if(VC$margins[1] %in% c(VC$m1d))        S.h <- adiag(EQ1P)         
+       if(VC$margins[1] %in% c(VC$m2,VC$m2d) ) S.h <- adiag(EQ1P, EQ2P)         
+       if(VC$margins[1] %in% VC$m3           ) S.h <- adiag(EQ1P, EQ2P, EQ3P)   
+   
     }
-    
-    
-    if(univ == 3){ 
-    
-       if(VC$margins[1] %in% c(VC$m1d)       && VC$margins[2] %in% c(VC$m1d))       {S.h <- adiag(EQ2P)              }     
-       if(VC$margins[1] %in% c(VC$m1d)       && VC$margins[2] %in% c(VC$m2,VC$m2d)) {S.h <- adiag(EQ2P, EQ3P)        } 
-       if(VC$margins[1] %in% c(VC$m1d)       && VC$margins[2] %in% VC$m3)           {S.h <- adiag(EQ2P, EQ3P, EQ4P)  }  
-       
-    
-       if(VC$margins[1] %in% c(VC$m2,VC$m2d) && VC$margins[2] %in% c(VC$m2,VC$m2d)) {S.h <- adiag(EQ2P, EQ4P)        } 
-       if(VC$margins[1] %in% VC$m3           && VC$margins[2] %in% VC$m3)           {S.h <- adiag(EQ2P, EQ4P, EQ6P)  } 
-       if(VC$margins[1] %in% c(VC$m2,VC$m2d) && VC$margins[2] %in% VC$m3)           {S.h <- adiag(EQ2P, EQ4P, EQ5P)  }  
-       if(VC$margins[1] %in% VC$m3           && VC$margins[2] %in% c(VC$m2,VC$m2d)) {S.h <- adiag(EQ2P, EQ4P)        }     
-    
-    }    
-    
-        
-        
+                
         
 }    ### TRIV    
         

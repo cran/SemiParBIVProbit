@@ -26,10 +26,70 @@ bprobgHs <- function(params, respvec, VC, ps, AT = FALSE){
 ########################################################################################################  
   
 resT    <- teta.tr(VC, teta.st)
-teta.st <- resT$teta.st
-teta    <- resT$teta 
+
+
+teta.st1 <- teta.st2 <- teta.st <- resT$teta.st
+teta1 <- teta2 <- teta <- resT$teta 
     
-p11 <- BiCDF(p1, p2, VC$nC, teta)
+##################
+
+Cop1 <- Cop2 <- VC$BivD 
+nC1 <- nC2 <- VC$nC 
+
+
+teta.ind1 <- as.logical(c(1,0,round(runif(VC$n-2))) ) 
+teta.ind2 <- teta.ind1 == FALSE  
+
+
+if(!(VC$BivD %in% VC$BivD2) && length(teta.st) > 1){
+
+teta.st1 <- teta.st[teta.ind1]
+teta.st2 <- teta.st[teta.ind2]
+
+teta1 <- teta[teta.ind1]
+teta2 <- teta[teta.ind2]
+
+}
+
+ 
+ 
+if(VC$BivD %in% VC$BivD2){
+
+if(VC$BivD %in% VC$BivD2[1:4])  teta.ind1 <- ifelse(VC$my.env$signind*teta > exp(VC$zerov), TRUE, FALSE)
+if(VC$BivD %in% VC$BivD2[5:12]) teta.ind1 <- ifelse(VC$my.env$signind*teta > exp(VC$zerov) + 1, TRUE, FALSE) 
+teta.ind2 <- teta.ind1 == FALSE 
+
+VC$my.env$signind <- ifelse(teta.ind1 == TRUE,  1, -1) 
+
+teta1 <-  teta[teta.ind1]
+teta2 <- -teta[teta.ind2]
+
+teta.st1 <- teta.st[teta.ind1]
+teta.st2 <- teta.st[teta.ind2]
+
+if(length(teta) == 1) teta.ind2 <- teta.ind1 <- rep(TRUE, VC$n)  
+
+Cop1Cop2R <- Cop1Cop2(VC$BivD)
+Cop1 <- Cop1Cop2R$Cop1
+Cop2 <- Cop1Cop2R$Cop2
+
+nC1 <- VC$ct[which(VC$ct[,1] == Cop1),2] 
+nC2 <- VC$ct[which(VC$ct[,1] == Cop2),2]
+
+} 
+
+
+
+    
+    
+########################################################################################################
+
+
+p11 <- NA
+
+if( length(teta1) != 0) p11[teta.ind1] <- BiCDF(p1[teta.ind1], p2[teta.ind1], nC1, teta1, VC$dof)
+if( length(teta2) != 0) p11[teta.ind2] <- BiCDF(p1[teta.ind2], p2[teta.ind2], nC2, teta2, VC$dof)
+
 
 ########################################################################################################
 
@@ -39,14 +99,50 @@ p11 <- BiCDF(p1, p2, VC$nC, teta)
 
   l.par <- VC$weights*( respvec$y1.y2*log(p11) + respvec$y1.cy2*log(p10) + respvec$cy1.y2*log(p01) + respvec$cy1.cy2*log(p00) )
 
-dH <- copgHs(p1,p2,eta1=NULL,eta2=NULL,teta,teta.st,VC$BivD)
+########################################################################################################
 
-c.copula.be1   <- dH$c.copula.be1
-c.copula.be2   <- dH$c.copula.be2
-c.copula.theta <- dH$c.copula.theta 
-  
-c.copula2.be1 <- dH$c.copula2.be1   
-c.copula2.be2 <- dH$c.copula2.be2 
+
+
+
+
+c.copula.be1 <- c.copula.be2 <- c.copula.theta <- c.copula2.be1 <- c.copula2.be2 <- c.copula2.be1be2 <- c.copula2.be1th <- c.copula2.be2th <- bit1.th2 <- NA
+
+if( length(teta1) != 0){
+
+dH <- copgHs(p1[teta.ind1],p2[teta.ind1],eta1=NULL,eta2=NULL,teta1,teta.st1,Cop1, VC$dof)
+
+c.copula.be1[teta.ind1]     <- dH$c.copula.be1
+c.copula.be2[teta.ind1]     <- dH$c.copula.be2
+c.copula.theta[teta.ind1]   <- dH$c.copula.theta 
+c.copula2.be1[teta.ind1]    <- dH$c.copula2.be1   
+c.copula2.be2[teta.ind1]    <- dH$c.copula2.be2 
+c.copula2.be1be2[teta.ind1] <- dH$c.copula2.be1be2
+c.copula2.be1th[teta.ind1]  <- dH$c.copula2.be1th 
+c.copula2.be2th[teta.ind1]  <- dH$c.copula2.be2th
+
+if(AT==TRUE) bit1.th2[teta.ind1] <- dH$bit1.th2ATE else bit1.th2[teta.ind1] <- dH$bit1.th2
+
+}
+
+
+
+if( length(teta2) != 0){
+
+dH <- copgHs(p1[teta.ind2],p2[teta.ind2],eta1=NULL,eta2=NULL,teta2,teta.st2,Cop2, VC$dof)
+
+c.copula.be1[teta.ind2]     <- dH$c.copula.be1
+c.copula.be2[teta.ind2]     <- dH$c.copula.be2
+c.copula.theta[teta.ind2]   <- dH$c.copula.theta 
+c.copula2.be1[teta.ind2]    <- dH$c.copula2.be1   
+c.copula2.be2[teta.ind2]    <- dH$c.copula2.be2 
+c.copula2.be1be2[teta.ind2] <- dH$c.copula2.be1be2
+c.copula2.be1th[teta.ind2]  <- dH$c.copula2.be1th 
+c.copula2.be2th[teta.ind2]  <- dH$c.copula2.be2th
+
+if(AT==TRUE) bit1.th2[teta.ind2] <- dH$bit1.th2ATE else bit1.th2[teta.ind2] <- dH$bit1.th2
+
+}
+
 
 
 bit1.b1b1 <- c.copula2.be1*d.n1^2 + c.copula.be1*der2p1.dereta12                                                                                                                                
@@ -60,25 +156,20 @@ bit2.b2b2 <- -bit1.b2b2
 bit3.b2b2 <- -c.copula2.be2*d.n2^2 + (1-c.copula.be2)*der2p2.dereta22
 bit4.b2b2 <- -bit3.b2b2
 
-c.copula2.be1be2 <- dH$c.copula2.be1be2
 bit1.b1b2 <- c.copula2.be1be2*d.n1*d.n2
 bit2.b1b2 <- -bit1.b1b2
 bit3.b1b2 <- -bit1.b1b2
 bit4.b1b2 <- bit1.b1b2
 
-c.copula2.be1th <- dH$c.copula2.be1th 
 bit1.b1th <- c.copula2.be1th*d.n1
 bit2.b1th <- -bit1.b1th 
 bit3.b1th <- -bit1.b1th 
 bit4.b1th <- bit1.b1th 
 
-c.copula2.be2th <- dH$c.copula2.be2th
 bit1.b2th <- c.copula2.be2th*d.n2
 bit2.b2th <- -bit1.b2th 
 bit3.b2th <- -bit1.b2th 
 bit4.b2th <- bit1.b2th 
-
-if(AT==TRUE) bit1.th2 <- dH$bit1.th2ATE else bit1.th2 <- dH$bit1.th2
 
 bit2.th2 <- -bit1.th2 
 bit3.th2 <- -bit1.th2 
@@ -262,14 +353,6 @@ if( is.null(VC$X3) ){
 
 if( !is.null(VC$X3) ){
 
-
-#nr <- 20000
-#nc <- 1000
-#X <- matrix(runif(nr*nc), nr, nc)
-#system.time(crossprod(X))
-#system.time(crossprod(X[1:(nr/2),]) + crossprod(X[(nr/2 + 1):nr,]))
-
-
   be1.be1 <- crossprod(VC$X1*c(d2l.be1.be1),VC$X1)
   be2.be2 <- crossprod(VC$X2*c(d2l.be2.be2),VC$X2)
   be1.be2 <- crossprod(VC$X1*c(d2l.be1.be2),VC$X2)
@@ -322,10 +405,9 @@ if(VC$extra.regI == "sED") H <- regH(H, type = 2)
          list(value=res, gradient=G, hessian=H, S.h=S.h, S.h1=S.h1, S.h2=S.h2, l=S.res, l.par=l.par, ps = ps, 
               p11=p11, p10=p10, p01=p01, p00=p00, eta1=eta1, eta2=eta2, etad=etad, 
               dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.drho=dl.drho,
-              #d2l.be1.be1=d2l.be1.be1, d2l.be2.be2=d2l.be2.be2, 
-              #d2l.be1.be2=d2l.be1.be2, d2l.be1.rho=d2l.be1.rho,
-              #d2l.be2.rho=d2l.be2.rho, d2l.rho.rho=d2l.rho.rho, 
-              BivD=VC$BivD, p1=p1, p2=p2, theta.star = teta.st)      
+              BivD=VC$BivD, p1=p1, p2=p2, theta.star = teta.st,
+              teta.ind2 = teta.ind2, teta.ind1 = teta.ind1,
+              Cop1 = Cop1, Cop2 = Cop2, teta1 = teta1, teta2 = teta2)      
 
 }
 

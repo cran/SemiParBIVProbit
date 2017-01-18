@@ -82,7 +82,7 @@ p2  <- pPO(as.numeric(y2), mu = as.numeric(mu2))
  
 mu2 <- c(mu2)
 
-derp2.dermu2           <- rowSums(  matrix(as.numeric(derpdf2.dermu2FUNCpo(y2m, mu2)),dim(y2m)[1],dim(y2m)[2]), na.rm = TRUE ) 
+derp2.dermu2           <- rowSums( matrix(as.numeric(derpdf2.dermu2FUNCpo(y2m, mu2)), dim(y2m)[1],dim(y2m)[2]), na.rm = TRUE ) 
 derp2.dersigma2        <- 0
 der2p2.dermu22         <- rowSums( matrix(as.numeric(der2pdf2.dermu2FUNCpo(y2m, mu2)),dim(y2m)[1],dim(y2m)[2]), na.rm = TRUE ) 
 der2p2.dersigma22      <- 0
@@ -135,7 +135,7 @@ mu2 <- c(mu2)
 
 p2  <- rowSums( matrix(as.numeric(pdf2FUNCztp(y2m, mu2)),dim(y2m)[1],dim(y2m)[2]), na.rm = TRUE )
 
-derp2.dermu2           <- rowSums(  matrix(as.numeric(derpdf2.dermu2FUNCztp(y2m, mu2)),dim(y2m)[1],dim(y2m)[2]), na.rm = TRUE )
+derp2.dermu2           <- rowSums( matrix(as.numeric(derpdf2.dermu2FUNCztp(y2m, mu2)), dim(y2m)[1],dim(y2m)[2]), na.rm = TRUE )
 derp2.dersigma2        <- 0
 der2p2.dermu22         <- rowSums( matrix(as.numeric(der2pdf2.dermu2FUNCztp(y2m, mu2)),dim(y2m)[1],dim(y2m)[2]), na.rm = TRUE )
 der2p2.dersigma22      <- 0
@@ -164,7 +164,7 @@ der2p2.derdermu2sigma2 <- 0
 
 
 
-if(margin2 == "NBIa"){
+if(margin2 == "NBIa"){ # all analytical
 
 sigma2    <- ifelse(sigma2 < 4.151334e-05, 4.151334e-05, sigma2) # related to gamma function
 sigma2.st <- log(sigma2) 
@@ -382,16 +382,15 @@ der2p2.derdermu2sigma2 <- rowSums( der2pdf2.mu2dersigma2FUNC( y2m, mu2, sigma2) 
 
 # seems that numerical is best (in terms of convergence and speed) when 
 # sigma approaches 0
-# followed by half-halp and fully analy
-
-# it does not give the most accurate results 
+# followed by half-half and fully analytical
+# full numerical does not give the most accurate results 
 # when sigma is not zero, although it tends to be the fastest
 # perhaps on occasion it may not convergence
 # due to poor gradient and H approximation
 
 
 
-if(margin2 == "NBIan"){ # all Num
+if(margin2 == "NBIan"){ # all Numerical - does not need y2m
 
 sigma2    <- ifelse(sigma2 < 4.151334e-06, 4.151334e-06, sigma2) # related to gamma function
 sigma2.st <- log(sigma2) 
@@ -447,7 +446,7 @@ der2p2.derdermu2sigma2 <- der2pdf2.mu2dersigma2FUNC2p(function(mu2, sigma2) pNBI
 
 
 
-if(margin2 == "NBI"){ # half analy half numer
+if(margin2 == "NBI"){ # half analy half numerical - we need y2m
 
 sigma2    <- ifelse(sigma2 < 4.151334e-05, 4.151334e-05, sigma2) # related to gamma function
 sigma2.st <- log(sigma2) 
@@ -457,19 +456,14 @@ dersigma2.dersigma2.st <- exp(sigma2.st)
 
 pdf2 <- dNBI(y2, mu = mu2, sigma = sqrt(sigma2))
 
-derpdf2.dermu2FUNC <- function(y2, mu2, sigma2) dNBI(y2, mu = mu2, sigma = sqrt(sigma2))/mu2*(y2*(mu2*sqrt(sigma2))^(-1)*sqrt(sigma2)*mu2-(y2+1/sqrt(sigma2))*(mu2*sqrt(sigma2)+1)^(-1)*sqrt(sigma2)*mu2) 
-
-# (gamma(y2+1/sqrt(sigma2))/(gamma(1/sqrt(sigma2))*gamma(y2+1))*(sqrt(sigma2)*mu2/(1+sqrt(sigma2)*mu2))^y2*(1/(1+sqrt(sigma2)*mu2))^(1/sqrt(sigma2)))/mu2*(y2*(mu2*sqrt(sigma2))^(-1)*sqrt(sigma2)*mu2-(y2+1/sqrt(sigma2))*(mu2*sqrt(sigma2)+1)^(-1)*sqrt(sigma2)*mu2)    
+derpdf2.dermu2FUNC <- function(y2, mu2, sigma2) (gamma(y2+1/sqrt(sigma2))/(gamma(1/sqrt(sigma2))*gamma(y2+1))*(sqrt(sigma2)*mu2/(1+sqrt(sigma2)*mu2))^y2*(1/(1+sqrt(sigma2)*mu2))^(1/sqrt(sigma2)))/mu2*(y2*(mu2*sqrt(sigma2))^(-1)*sqrt(sigma2)*mu2-(y2+1/sqrt(sigma2))*(mu2*sqrt(sigma2)+1)^(-1)*sqrt(sigma2)*mu2)
 
 derpdf2.dermu2     <- derpdf2.dermu2FUNC(y2, mu2, sigma2) 
     
-derpdf2.sigma2FUNC <- function(y2, mu2, sigma2) (  dNBI(y2, mu = mu2, sigma = sqrt(sigma2))*(digamma(y2+1/sqrt(sigma2))*(-1/sigma2)+y2*(mu2*sqrt(sigma2))^(-1)*mu2-(digamma(1/sqrt(sigma2))*(-1/sigma2)+(-1/sigma2)*log(mu2*sqrt(sigma2)+1)+(y2+1/sqrt(sigma2))*(1/(mu2*sqrt(sigma2)+1))*mu2))   )*0.5/sqrt(sigma2)
-
-# 0.5*(1/sqrt(sigma2))*(gamma(y2+1/sqrt(sigma2))/(gamma(1/sqrt(sigma2))*gamma(y2+1))*(sqrt(sigma2)*mu2/(1+sqrt(sigma2)*mu2))^y2*(1/(1+sqrt(sigma2)*mu2))^(1/sqrt(sigma2)))*(digamma(y2+1/sqrt(sigma2))*(-1/sigma2)+y2*(mu2*sqrt(sigma2))^(-1)*mu2-(digamma(1/sqrt(sigma2))*(-1/sigma2)+(-1/sigma2)*log(mu2*sqrt(sigma2)+1)+(y2+1/sqrt(sigma2))*(1/(mu2*sqrt(sigma2)+1))*mu2))
+derpdf2.sigma2FUNC <- function(y2, mu2, sigma2) 0.5*(1/sqrt(sigma2))*(gamma(y2+1/sqrt(sigma2))/(gamma(1/sqrt(sigma2))*gamma(y2+1))*(sqrt(sigma2)*mu2/(1+sqrt(sigma2)*mu2))^y2*(1/(1+sqrt(sigma2)*mu2))^(1/sqrt(sigma2)))*(digamma(y2+1/sqrt(sigma2))*(-1/sigma2)+y2*(mu2*sqrt(sigma2))^(-1)*mu2-(digamma(1/sqrt(sigma2))*(-1/sigma2)+(-1/sigma2)*log(mu2*sqrt(sigma2)+1)+(y2+1/sqrt(sigma2))*(1/(mu2*sqrt(sigma2)+1))*mu2))
 
 derpdf2.sigma2     <- derpdf2.sigma2FUNC(y2, mu2, sigma2)  
-                
-                          
+                                      
 der2pdf2.dermu2       <- derpdf2.dermu2FUNC2p(function(mu2)    derpdf2.dermu2FUNC(y2, mu2, sigma2), y2, mu2, sigma2)$fi  
 der2pdf2.dersigma22   <- derpdf2.sigma2FUNC2p(function(sigma2) derpdf2.sigma2FUNC(y2, mu2, sigma2), y2, mu2, sigma2)$fi  
 der2pdf2.mu2dersigma2 <- derpdf2.sigma2FUNC2p(function(sigma2) derpdf2.dermu2FUNC(y2, mu2, sigma2), y2, mu2, sigma2)$fi       
@@ -509,7 +503,7 @@ der2p2.derdermu2sigma2 <- derpdf2.sigma2FUNC2p(function(sigma2) rowSums( derpdf2
 
 
 
-if(margin2 == "NBII"){ # all Num
+if(margin2 == "NBII"){ # all Numerical - does not need y2m
 
 sigma2    <- ifelse(sigma2 < 4.151334e-06, 4.151334e-06, sigma2) # related to gamma function
 sigma2.st <- log(sigma2) 
@@ -569,7 +563,7 @@ der2p2.derdermu2sigma2 <- der2pdf2.mu2dersigma2FUNC2p(function(mu2, sigma2) pNBI
 
 
 
-if(margin2 == "NBIIhahn"){ # half analy half numer
+if(margin2 == "NBIIhahn"){ # half analy half numer - needs y2m
 
 sigma2    <- ifelse(sigma2 < 4.151334e-05, 4.151334e-05, sigma2) # related to gamma function
 sigma2.st <- log(sigma2) 
@@ -645,7 +639,7 @@ der2p2.derdermu2sigma2 <- derpdf2.sigma2FUNC2p(function(sigma2) rowSums( derpdf2
 
 
 
-if(margin2 == "NBIIa"){
+if(margin2 == "NBIIa"){ # all analytical - needs y2m
 
 sigma2    <- ifelse(sigma2 < 4.151334e-05, 4.151334e-05, sigma2) # related to gamma function
 sigma2.st <- log(sigma2) 

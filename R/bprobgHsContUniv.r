@@ -4,50 +4,7 @@ epsilon <- 0.0000001 # 0.9999999 0.0001 # sqrt(.Machine$double.eps)
 
 weights <- VC$weights
 
-#########################################################################
-
-if(VC$Cont == "NO"){
-
-X2 <- VC$X2
-X3 <- VC$X3
-y2 <- respvec$y2
-
-if(VC$ccss == "yes"){weights <- weights[VC$inde]} #; y2 <- y2[VC$inde]; X2 <- X2[VC$inde,]; X3 <- X3[VC$inde,] } 
-
-
-eta2 <- X2%*%params[1:VC$X2.d2]
-eta2 <- eta.tr(eta2, VC$margins[2])
-
-
-
-if( !(VC$margins[2] %in% c(VC$m1d)) ){ 
-
-
-if(is.null(VC$X3))  sigma2.st <- params[(VC$X2.d2 + 1)] 
-if(!is.null(VC$X3)) sigma2.st <- X3%*%params[(VC$X2.d2+1):(VC$X2.d2+VC$X3.d2)] 
-              
-}              
-              
-if(VC$margins[2] %in% VC$m1d) sigma2.st <- 0 # as there is no sigma              
-              
-                  
-    sstr1 <- esp.tr(sigma2.st, VC$margins[2])  
-    sigma2.st <- sstr1$vrb.st 
-    sigma2    <- sstr1$vrb 
-
-
-if(VC$margins[2] %in% VC$m2)            dHs  <-      distrHs(y2, eta2, sigma2, sigma2.st, nu = 1, nu.st = 1, margin2=VC$margins[2], naive = TRUE)
-if(VC$margins[2] %in% c(VC$m1d,VC$m2d)) dHs  <- distrHsDiscr(y2, eta2, sigma2, sigma2.st, nu = 1, nu.st = 1, margin2=VC$margins[2], naive = TRUE, y2m = VC$y2m)
-
-
-}
-
-#########################################################################
-#########################################################################
-
-
-if(VC$Cont == "YES" && respvec$univ == 2){ # interested in first equation
-
+l.lnun <- NULL
 
 eta2 <- VC$X1%*%params[1:VC$X1.d2] # this is eta1 but changed to eta2 for convenience
 eta2 <- eta.tr(eta2, VC$margins[1])
@@ -55,8 +12,8 @@ eta2 <- eta.tr(eta2, VC$margins[1])
 
 if( !(VC$margins[1] %in% c(VC$m1d)) ){ 
 
-if(is.null(VC$X3))  sigma2.st <- params[(VC$X1.d2 + 1)] 
-if(!is.null(VC$X3)) sigma2.st <- VC$X3%*%params[(VC$X1.d2+1):(VC$X1.d2+VC$X3.d2)]
+if(is.null(VC$X2))  sigma2.st <- params[(VC$X1.d2 + 1)] 
+if(!is.null(VC$X2)) sigma2.st <- VC$X2%*%params[(VC$X1.d2+1):(VC$X1.d2+VC$X2.d2)]
 
 }
 
@@ -69,39 +26,16 @@ if(VC$margins[1] %in% VC$m1d) sigma2.st <- 0
     sigma2    <- sstr1$vrb 
 
 
+if(VC$robust == TRUE){ 
+
+if(length(sigma2) == 1){ sigma2t <- rep(sigma2, VC$n); sigma2.stt <- rep(sigma2.st, VC$n)} else{ sigma2t <- sigma2; sigma2.stt <- sigma2.st}
+
+esnl <- list(eta = eta2, sigma2 = sigma2t, sigma2.st = sigma2.stt, nu = NULL)
+
+}
+
 if(VC$margins[1] %in% VC$m2)            dHs  <-      distrHs(respvec$y1, eta2, sigma2, sigma2.st, nu = 1, nu.st = 1, margin2=VC$margins[1], naive = TRUE)
 if(VC$margins[1] %in% c(VC$m1d,VC$m2d)) dHs  <- distrHsDiscr(respvec$y1, eta2, sigma2, sigma2.st, nu = 1, nu.st = 1, margin2=VC$margins[1], naive = TRUE, y2m = VC$y1m)
-
-}
-
-
-if(VC$Cont == "YES" && respvec$univ == 3){ # interested in second equation
-
-
-eta2 <- VC$X2%*%params[1:VC$X2.d2]
-eta2 <- eta.tr(eta2, VC$margins[2])
-
-
-if( !(VC$margins[2] %in% c(VC$m1d)) ){ 
-
-if(is.null(VC$X3))  sigma2.st <- params[(VC$X2.d2 + 1)] 
-if(!is.null(VC$X3)) sigma2.st <- VC$X4%*%params[(VC$X2.d2+1):(VC$X2.d2+VC$X4.d2)]
-
-}
-
-
-if(VC$margins[2] %in% VC$m1d) sigma2.st <- 0
-
-
-    sstr1 <- esp.tr(sigma2.st, VC$margins[2])  
-    sigma2.st <- sstr1$vrb.st 
-    sigma2    <- sstr1$vrb 
-
-if(VC$margins[2] %in% VC$m2)            dHs <-      distrHs(respvec$y2, eta2, sigma2, sigma2.st, nu = 1, nu.st = 1, margin2=VC$margins[2], naive = TRUE)
-if(VC$margins[2] %in% c(VC$m1d,VC$m2d)) dHs <- distrHsDiscr(respvec$y2, eta2, sigma2, sigma2.st, nu = 1, nu.st = 1, margin2=VC$margins[2], naive = TRUE, y2m = VC$y2m)
-
-
-}
 
 #########################################################################
 #########################################################################
@@ -117,103 +51,104 @@ der2pdf2.dereta2dersigma2.st <- dHs$der2pdf2.dereta2dersigma2.st
     
 ########################################################################################################
 
+if(VC$robust == FALSE){
+
 l.par <- weights*log(pdf2)
 res   <- -sum(l.par)
+d.psi <- 1
+
+bcorR <- list(b = 0, bp = 0, bs = 0)
+
+}else{
+
+
+bcorR <- bcorrec(VC, esnl, length(params))
+
+l.par1    <- log(pdf2)
+Robj.lpar <- llpsi(l.par1, VC$rc)
+psi       <- Robj.lpar$psi
+d.psi     <- Robj.lpar$d.psi
+d2.psi    <- Robj.lpar$d2.psi 
+l.par     <- psi  # weight in or out??
+res       <- -( sum(l.par) - bcorR$b )
+}
+
+
+
   
 ########################################################################################################
  
-dl.dbe       <- -weights*( derpdf2.dereta2/pdf2 )
-dl.dsigma.st <- -weights*( derpdf2.dersigma2.st/pdf2 )
+dl.dbe0       <- derpdf2.dereta2/pdf2
+dl.dsigma.st0 <- derpdf2.dersigma2.st/pdf2  
+ 
+dl.dbe       <- weights*d.psi*dl.dbe0            
+dl.dsigma.st <- weights*d.psi*dl.dsigma.st0
                      
-d2l.be.be        <- -weights*( (der2pdf2.dereta2*pdf2 - (derpdf2.dereta2)^2)/pdf2^2 )
-d2l.sigma.sigma  <- -weights*( (der2pdf2.dersigma2.st2*pdf2-(derpdf2.dersigma2.st)^2)/pdf2^2 )
-d2l.be.sigma     <- -weights*( (der2pdf2.dereta2dersigma2.st*pdf2 - derpdf2.dereta2*derpdf2.dersigma2.st)/pdf2^2 )
-     
+########################################################################################################
+      
+if(VC$robust == TRUE){     
+      
+d2l.be.be0        <- (der2pdf2.dereta2*pdf2 - (derpdf2.dereta2)^2)/pdf2^2 
+d2l.sigma.sigma0  <- (der2pdf2.dersigma2.st2*pdf2-(derpdf2.dersigma2.st)^2)/pdf2^2 
+d2l.be.sigma0     <- (der2pdf2.dereta2dersigma2.st*pdf2 - derpdf2.dereta2*derpdf2.dersigma2.st)/pdf2^2 
+ 
+d2l.be.be         <- weights*( d2.psi*dl.dbe0^2             + d.psi*d2l.be.be0 )  
+d2l.sigma.sigma   <- weights*( d2.psi*dl.dsigma.st0^2       + d.psi*d2l.sigma.sigma0 )
+d2l.be.sigma      <- weights*( d2.psi*dl.dsigma.st0*dl.dbe0 + d.psi*d2l.be.sigma0 )
+ 
+} 
+
+if(VC$robust == FALSE){     
+      
+d2l.be.be        <- weights*( (der2pdf2.dereta2*pdf2 - (derpdf2.dereta2)^2)/pdf2^2 )
+d2l.sigma.sigma  <- weights*( (der2pdf2.dersigma2.st2*pdf2-(derpdf2.dersigma2.st)^2)/pdf2^2 ) 
+d2l.be.sigma     <- weights*( (der2pdf2.dereta2dersigma2.st*pdf2 - derpdf2.dereta2*derpdf2.dersigma2.st)/pdf2^2 )
+ 
+} 
+ 
 ########################################################################################################
      
 
-if(VC$Cont == "NO"){
 
-
-if( !(VC$margins[2] %in% c(VC$m1d)) ){ ##
-
-if( is.null(VC$X3) ){
-
-  G   <- c( colSums( c(dl.dbe)*X2 ) ,
-            sum( dl.dsigma.st ) )
-                
-  be.be    <- crossprod(X2*c(d2l.be.be),X2)
-  be.sigma <- t(t(rowSums(t(X2*c(d2l.be.sigma))))) 
-
-  H <- rbind( cbind( be.be      , be.sigma             ), 
-              cbind( t(be.sigma), sum(d2l.sigma.sigma) )  ) 
-                            
-                    }
-
-
-if( !is.null(VC$X3) ){
-
-  G   <- c( colSums( c(dl.dbe)*X2        ) ,
-            colSums( c(dl.dsigma.st)*X3  ) )
-                
-  be.be    <- crossprod(X2*c(d2l.be.be),X2)
-  be.sigma <- crossprod(X2*c(d2l.be.sigma),X3)
-  si.sigma <- crossprod(X3*c(d2l.sigma.sigma),X3)  
-
-  H <- rbind( cbind( be.be      , be.sigma  ), 
-              cbind( t(be.sigma), si.sigma  )  ) 
-              
-                      }
-
-} ##
-
-
-if( VC$margins[2] %in% c(VC$m1d) ){
-
-  G <- c( colSums( c(dl.dbe)*X2 ) )          
-  H <- crossprod(X2*c(d2l.be.be),X2)
-
-}
-
-
-}
-
-
-
-if(VC$Cont == "YES" && respvec$univ == 2){
 
 
 
 if( !(VC$margins[1] %in% c(VC$m1d)) ){ ##
 
-if( is.null(VC$X3) ){
+if( is.null(VC$X2) ){
 
   G   <- c( colSums( c(dl.dbe)*VC$X1 ) ,
             sum( dl.dsigma.st )
-          )
+          ) - bcorR$bp 
+  G <- -G        
+          
                 
   be.be    <- crossprod(VC$X1*c(d2l.be.be),VC$X1)
   be.sigma <- t(t(rowSums(t(VC$X1*c(d2l.be.sigma))))) 
 
   H <- rbind( cbind( be.be      , be.sigma             ), 
               cbind( t(be.sigma), sum(d2l.sigma.sigma) )  
-            ) 
+            )    -  bcorR$bs  
+  H <- -H          
+            
                     }
 
 
-if( !is.null(VC$X3) ){
+if( !is.null(VC$X2) ){
 
   G   <- c( colSums( c(dl.dbe)*VC$X1        ) ,
-            colSums( c(dl.dsigma.st)*VC$X3  )
-          )
+            colSums( c(dl.dsigma.st)*VC$X2  )
+          ) - bcorR$bp 
+  G <- -G         
                 
   be.be    <- crossprod(VC$X1*c(d2l.be.be),VC$X1)
-  be.sigma <- crossprod(VC$X1*c(d2l.be.sigma),VC$X3)
-  si.sigma <- crossprod(VC$X3*c(d2l.sigma.sigma),VC$X3)  
+  be.sigma <- crossprod(VC$X1*c(d2l.be.sigma),VC$X2)
+  si.sigma <- crossprod(VC$X2*c(d2l.sigma.sigma),VC$X2)  
 
   H <- rbind( cbind( be.be      , be.sigma  ), 
               cbind( t(be.sigma), si.sigma  )  
-            )  
+            )-  bcorR$bs
+  H <- -H          
                      }
                                          
                      
@@ -223,71 +158,10 @@ if( !is.null(VC$X3) ){
 
 if( VC$margins[1] %in% c(VC$m1d) ){
 
-  G <- c( colSums( c(dl.dbe)*VC$X1 ) )          
-  H <- crossprod(VC$X1*c(d2l.be.be),VC$X1)
-
-}
-
-
-
-
-}
-
-
-
-
-
-if(VC$Cont == "YES" && respvec$univ == 3){
-
-
-if( !(VC$margins[2] %in% c(VC$m1d)) ){ ##
-
-if( is.null(VC$X3) ){
-
-  G   <- c( colSums( c(dl.dbe)*VC$X2 ) ,
-            sum( dl.dsigma.st )
-          )
-                
-  be.be    <- crossprod(VC$X2*c(d2l.be.be),VC$X2)
-  be.sigma <- t(t(rowSums(t(VC$X2*c(d2l.be.sigma))))) 
-
-  H <- rbind( cbind( be.be      , be.sigma             ), 
-              cbind( t(be.sigma), sum(d2l.sigma.sigma) )  
-            ) 
-                     }
-
-
-if( !is.null(VC$X3) ){
-
-  G   <- c( colSums( c(dl.dbe)*VC$X2        ) ,
-            colSums( c(dl.dsigma.st)*VC$X4  )
-          )
-                
-  be.be    <- crossprod(VC$X2*c(d2l.be.be),VC$X2)
-  be.sigma <- crossprod(VC$X2*c(d2l.be.sigma),VC$X4)
-  si.sigma <- crossprod(VC$X4*c(d2l.sigma.sigma),VC$X4)  
-
-  H <- rbind( cbind( be.be      , be.sigma  ), 
-              cbind( t(be.sigma), si.sigma  )  
-            )  
-                      }
-
-
-
-
-}
-
-
-
-if( VC$margins[2] %in% c(VC$m1d) ){ # this useful for later
-
-  G <- c( colSums( c(dl.dbe)*VC$X2 )  )         
-  H <- crossprod(VC$X2*c(d2l.be.be),VC$X2)
-
-}
-
-
-
+  G <- c( colSums( c(dl.dbe)*VC$X1 ) )  -  bcorR$bp
+  G <- -G
+  H <- crossprod(VC$X1*c(d2l.be.be),VC$X1) -  bcorR$bs
+  H <- -H
 
 }
 
@@ -313,8 +187,20 @@ if(VC$extra.regI == "pC") H <- regH(H, type = 1)
         
 if(VC$extra.regI == "sED") H <- regH(H, type = 2) 
   
+  
+  
+if( VC$margins[1] == "LN"){
+  
+  dHs1 <- distrHsAT(exp(respvec$y1), eta2, sigma2, 1, margin2=VC$margins[1])
+  l.lnun <- -sum(weights*log(dHs1$pdf2))
+  
+  }  
+  
 
-list(value=res, gradient=G, hessian=H, S.h=S.h, S.h1=S.h1, S.h2=S.h2, l=S.res, l.par=l.par, ps = ps, sigma2.st = sigma2.st,
+
+list(value=res, gradient=G, hessian=H, S.h=S.h, S.h1=S.h1, S.h2=S.h2, l=S.res, l.lnun = l.lnun, 
+     l.par=l.par, ps = ps, sigma2.st = sigma2.st,
+     etas1 = sigma2.st, eta1 = eta2, 
      BivD=VC$BivD, eta2 = eta2, sigma2 = sigma2, nu = NULL)      
 
 

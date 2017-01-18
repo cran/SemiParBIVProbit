@@ -3,6 +3,22 @@
 \alias{esp.tr}
 \alias{enu.tr}
 \alias{teta.tr}
+\alias{dof.tr}
+\alias{form.eq12}
+\alias{ass.dp}
+\alias{overall.sv}
+\alias{overall.svG}
+\alias{gamls.upsv}
+\alias{pp}
+\alias{susutsn}
+\alias{susu}
+\alias{pscr}
+\alias{pscr0}
+\alias{startsn}
+\alias{bcorrec}
+\alias{Cop1Cop2}
+\alias{Reg2Copost}
+
 
 \title{Internal Function}
 

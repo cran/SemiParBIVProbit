@@ -48,10 +48,52 @@ nu2    <- sstr2$vrb
        
     
 resT    <- teta.tr(VC, teta.st)
-teta.st <- resT$teta.st
-teta    <- resT$teta 
-  
+
+teta.st1 <- teta.st2 <- teta.st <- resT$teta.st
+teta1 <- teta2 <- teta <- resT$teta 
+    
 ##################
+
+Cop1 <- Cop2 <- VC$BivD 
+
+teta.ind1 <- as.logical(c(1,0,round(runif(VC$n-2))) ) 
+teta.ind2 <- teta.ind1 == FALSE  
+
+
+if(!(VC$BivD %in% VC$BivD2) && length(teta.st) > 1){
+
+teta.st1 <- teta.st[teta.ind1]
+teta.st2 <- teta.st[teta.ind2]
+
+teta1 <- teta[teta.ind1]
+teta2 <- teta[teta.ind2]
+
+}
+
+ 
+ 
+if(VC$BivD %in% VC$BivD2){
+
+if(VC$BivD %in% VC$BivD2[1:4])  teta.ind1 <- ifelse(VC$my.env$signind*teta > exp(VC$zerov), TRUE, FALSE)
+if(VC$BivD %in% VC$BivD2[5:12]) teta.ind1 <- ifelse(VC$my.env$signind*teta > exp(VC$zerov) + 1, TRUE, FALSE) 
+teta.ind2 <- teta.ind1 == FALSE 
+
+VC$my.env$signind <- ifelse(teta.ind1 == TRUE,  1, -1) 
+
+teta1 <-  teta[teta.ind1]
+teta2 <- -teta[teta.ind2]
+
+teta.st1 <- teta.st[teta.ind1]
+teta.st2 <- teta.st[teta.ind2]
+
+if(length(teta) == 1) teta.ind2 <- teta.ind1 <- rep(TRUE, VC$n)  
+
+Cop1Cop2R <- Cop1Cop2(VC$BivD)
+Cop1 <- Cop1Cop2R$Cop1
+Cop2 <- Cop1Cop2R$Cop2
+
+
+} 
 ##################
 
   dHs1 <- distrHsDiscr(respvec$y1, eta1, sigma21, sigma21.st, nu = 1, nu.st = 1, margin2=VC$margins[1], naive = FALSE, y2m = VC$y1m)
@@ -63,27 +105,52 @@ teta    <- resT$teta
   p1 <- dHs1$p2
   p2 <- dHs2$p2
   
-  dH1 <- copgHs(p1, p2, eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD)
-  h1  <- dH1$c.copula.be2  
+  if( length(teta1) != 0) dH11 <- copgHs(p1[teta.ind1], p2[teta.ind1], eta1=NULL, eta2=NULL, teta1, teta.st1, Cop1, VC$dof)
+  if( length(teta2) != 0) dH12 <- copgHs(p1[teta.ind2], p2[teta.ind2], eta1=NULL, eta2=NULL, teta2, teta.st2, Cop2, VC$dof)
+  h1  <- NA    
+  if( length(teta1) != 0) h1[teta.ind1] <- dH11$c.copula.be2
+  if( length(teta2) != 0) h1[teta.ind2] <- dH12$c.copula.be2      
     
-  dH2 <- copgHs(mm(p1-pdf1), p2, eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD)
-  h2  <- dH2$c.copula.be2    
+
+  if( length(teta1) != 0) dH21 <- copgHs(mm(p1[teta.ind1]-pdf1[teta.ind1]), p2[teta.ind1], eta1=NULL, eta2=NULL, teta1, teta.st1, Cop1, VC$dof)
+  if( length(teta2) != 0) dH22 <- copgHs(mm(p1[teta.ind2]-pdf1[teta.ind2]), p2[teta.ind2], eta1=NULL, eta2=NULL, teta2, teta.st2, Cop2, VC$dof)
+  h2  <- NA    
+  if( length(teta1) != 0) h2[teta.ind1] <- dH21$c.copula.be2
+  if( length(teta2) != 0) h2[teta.ind2] <- dH22$c.copula.be2       
   
   diffh1.h2 <- h1 - h2 
-    diffh1.h2 <- ifelse(diffh1.h2 < epsilon, epsilon, diffh1.h2)  
+  diffh1.h2 <- ifelse(diffh1.h2 < epsilon, epsilon, diffh1.h2)  
 
   
   l.par <- VC$weights*( log(pdf2) + log(diffh1.h2) ) 
  
 ##################
-
-
- c.copula2.be1be2H1 <- dH1$c.copula2.be1be2
- c.copula2.be1be2H2 <- dH2$c.copula2.be1be2
- c.copula2.be2H1    <- dH1$c.copula2.be2 
- c.copula2.be2H2    <- dH2$c.copula2.be2  
- c.copula2.be2thH1  <- dH1$c.copula2.be2th
- c.copula2.be2thH2  <- dH2$c.copula2.be2th  
+ c.copula2.be1be2H1 <- NA
+  if( length(teta1) != 0) c.copula2.be1be2H1[teta.ind1] <- dH11$c.copula2.be1be2
+  if( length(teta2) != 0) c.copula2.be1be2H1[teta.ind2] <- dH12$c.copula2.be1be2   
+ 
+ c.copula2.be1be2H2 <- NA
+  if( length(teta1) != 0) c.copula2.be1be2H2[teta.ind1] <- dH21$c.copula2.be1be2
+  if( length(teta2) != 0) c.copula2.be1be2H2[teta.ind2] <- dH22$c.copula2.be1be2 
+ 
+ c.copula2.be2H1 <- NA
+  if( length(teta1) != 0) c.copula2.be2H1[teta.ind1] <- dH11$c.copula2.be2 
+  if( length(teta2) != 0) c.copula2.be2H1[teta.ind2] <- dH12$c.copula2.be2   
+ 
+ c.copula2.be2H2 <- NA
+  if( length(teta1) != 0) c.copula2.be2H2[teta.ind1] <- dH21$c.copula2.be2 
+  if( length(teta2) != 0) c.copula2.be2H2[teta.ind2] <- dH22$c.copula2.be2   
+ 
+  c.copula2.be2thH1 <- NA
+  if( length(teta1) != 0) c.copula2.be2thH1[teta.ind1] <- dH11$c.copula2.be2th
+  if( length(teta2) != 0) c.copula2.be2thH1[teta.ind2] <- dH12$c.copula2.be2th
+ 
+  c.copula2.be2thH2 <- NA
+  if( length(teta1) != 0) c.copula2.be2thH2[teta.ind1] <- dH21$c.copula2.be2th
+  if( length(teta2) != 0) c.copula2.be2thH2[teta.ind2] <- dH22$c.copula2.be2th 
+ 
+ 
+ 
  
  derpdf1.dereta1    <- dHs1$derpdf2.dereta2 
  derp1.dereta1      <- dHs1$derp2.dereta2
@@ -104,27 +171,67 @@ teta    <- resT$teta
  
  ####################
   
-  BITS.H1 <- copgHsCont(p1, p2, teta, teta.st, VC, Cont = TRUE)
-  BITS.H2 <- copgHsCont(mm(p1-pdf1), p2, teta, teta.st, VC, Cont = TRUE) 
+
+ 
+  if( length(teta1) != 0) BITS.H11 <- copgHsCont(p1[teta.ind1], p2[teta.ind1], teta1, teta.st1, Cop1, Cont = TRUE, par2 = VC$dof, nu.st = log(VC$dof-2))
+  if( length(teta2) != 0) BITS.H12 <- copgHsCont(p1[teta.ind2], p2[teta.ind2], teta2, teta.st2, Cop2, Cont = TRUE, par2 = VC$dof, nu.st = log(VC$dof-2))
   
-  der2h.derp1p1.H1 <- BITS.H1$der2h.derp1p1
-  der2h.derp1p1.H2 <- BITS.H2$der2h.derp1p1
+  if( length(teta1) != 0) BITS.H21 <- copgHsCont(mm(p1[teta.ind1]-pdf1[teta.ind1]), p2[teta.ind1], teta1, teta.st1, Cop1, Cont = TRUE, par2 = VC$dof, nu.st = log(VC$dof-2)) 
+  if( length(teta2) != 0) BITS.H22 <- copgHsCont(mm(p1[teta.ind2]-pdf1[teta.ind2]), p2[teta.ind2], teta2, teta.st2, Cop2, Cont = TRUE, par2 = VC$dof, nu.st = log(VC$dof-2)) 
   
-  der2h.derp1p2.H1 <- BITS.H1$der2h.derp1p2  
-  der2h.derp1p2.H2 <- BITS.H2$der2h.derp1p2
+   der2h.derp1p1.H1 <- NA
+   if( length(teta1) != 0) der2h.derp1p1.H1[teta.ind1] <- BITS.H11$der2h.derp1p1 
+   if( length(teta2) != 0) der2h.derp1p1.H1[teta.ind2] <- BITS.H12$der2h.derp1p1 
   
-  derteta.derteta.st.H1 <- BITS.H1$derteta.derteta.st 
-  der2h.derp1teta.H1    <- BITS.H1$der2h.derp1teta  
+    der2h.derp1p1.H2 <- NA
+    if( length(teta1) != 0) der2h.derp1p1.H2[teta.ind1] <- BITS.H21$der2h.derp1p1 
+    if( length(teta2) != 0) der2h.derp1p1.H2[teta.ind2] <- BITS.H22$der2h.derp1p1 
+    
+   der2h.derp1p2.H1 <- NA
+   if( length(teta1) != 0) der2h.derp1p2.H1[teta.ind1] <- BITS.H11$der2h.derp1p2 
+   if( length(teta2) != 0) der2h.derp1p2.H1[teta.ind2] <- BITS.H12$der2h.derp1p2 
+   
+   der2h.derp1p2.H2 <- NA
+   if( length(teta1) != 0) der2h.derp1p2.H2[teta.ind1] <- BITS.H21$der2h.derp1p2 
+   if( length(teta2) != 0) der2h.derp1p2.H2[teta.ind2] <- BITS.H22$der2h.derp1p2  
+  
+   derteta.derteta.st.H1 <- NA
+   if( length(teta1) != 0) derteta.derteta.st.H1[teta.ind1] <- BITS.H11$derteta.derteta.st 
+   if( length(teta2) != 0) derteta.derteta.st.H1[teta.ind2] <- BITS.H12$derteta.derteta.st 
+  
+    der2h.derp1teta.H1 <- NA
+    if( length(teta1) != 0) der2h.derp1teta.H1[teta.ind1] <- BITS.H11$der2h.derp1teta  
+    if( length(teta2) != 0) der2h.derp1teta.H1[teta.ind2] <- BITS.H12$der2h.derp1teta  
+  
+    derteta.derteta.st.H2 <- NA
+    if( length(teta1) != 0) derteta.derteta.st.H2[teta.ind1] <- BITS.H21$derteta.derteta.st  
+    if( length(teta2) != 0) derteta.derteta.st.H2[teta.ind2] <- BITS.H22$derteta.derteta.st   
+  
+    der2h.derp1teta.H2 <- NA
+    if( length(teta1) != 0) der2h.derp1teta.H2[teta.ind1] <- BITS.H21$der2h.derp1teta   
+    if( length(teta2) != 0) der2h.derp1teta.H2[teta.ind2] <- BITS.H22$der2h.derp1teta    
+  
+    der2h.derp2teta.H1 <- NA
+    if( length(teta1) != 0) der2h.derp2teta.H1[teta.ind1] <- BITS.H11$der2h.derp2teta    
+    if( length(teta2) != 0) der2h.derp2teta.H1[teta.ind2] <- BITS.H12$der2h.derp2teta 
+    
+    der2h.derp2teta.H2 <- NA
+    if( length(teta1) != 0) der2h.derp2teta.H2[teta.ind1] <- BITS.H21$der2h.derp2teta    
+    if( length(teta2) != 0) der2h.derp2teta.H2[teta.ind2] <- BITS.H22$der2h.derp2teta  
+ 
+ 
+  
+  
+  
   der2h.derp1teta.st.H1 <- der2h.derp1teta.H1 * derteta.derteta.st.H1 
   
-  derteta.derteta.st.H2 <- BITS.H2$derteta.derteta.st 
-  der2h.derp1teta.H2    <- BITS.H2$der2h.derp1teta  
+
   der2h.derp1teta.st.H2 <- der2h.derp1teta.H2 * derteta.derteta.st.H2 
   
-  der2h.derp2teta.H1    <- BITS.H1$der2h.derp2teta  
+
   der2h.derp2teta.st.H1 <- der2h.derp2teta.H1 * derteta.derteta.st.H1 
    
-  der2h.derp2teta.H2    <- BITS.H2$der2h.derp2teta  
+
   der2h.derp2teta.st.H2 <- der2h.derp2teta.H2 * derteta.derteta.st.H2 
  
 ####################   
@@ -140,8 +247,33 @@ teta    <- resT$teta
         
 #################################################################################################
 
-der2h.derp2p2.H1 <- BITS.H1$der2h.derp2p2
-der2h.derp2p2.H2 <- BITS.H2$der2h.derp2p2
+
+   der2h.derp2p2.H1 <- NA
+   if( length(teta1) != 0) der2h.derp2p2.H1[teta.ind1] <- BITS.H11$der2h.derp2p2   
+   if( length(teta2) != 0) der2h.derp2p2.H1[teta.ind2] <- BITS.H12$der2h.derp2p2 
+
+  der2h.derp2p2.H2 <- NA
+   if( length(teta1) != 0) der2h.derp2p2.H2[teta.ind1] <- BITS.H21$der2h.derp2p2  
+   if( length(teta2) != 0) der2h.derp2p2.H2[teta.ind2] <- BITS.H22$der2h.derp2p2
+
+   derteta.derteta.st <- NA
+   if( length(teta1) != 0) derteta.derteta.st[teta.ind1] <- BITS.H11$derteta.derteta.st  
+   if( length(teta2) != 0) derteta.derteta.st[teta.ind2] <- BITS.H12$derteta.derteta.st 
+
+   der2teta.derteta.stteta.st <- NA
+   if( length(teta1) != 0) der2teta.derteta.stteta.st[teta.ind1] <- BITS.H11$der2teta.derteta.stteta.st  
+   if( length(teta2) != 0) der2teta.derteta.stteta.st[teta.ind2] <- BITS.H12$der2teta.derteta.stteta.st 
+
+   der2h.derteta.teta.st.H1 <- NA
+   if( length(teta1) != 0) der2h.derteta.teta.st.H1[teta.ind1] <- BITS.H11$der2h.derteta.teta.st
+   if( length(teta2) != 0) der2h.derteta.teta.st.H1[teta.ind2] <- BITS.H12$der2h.derteta.teta.st
+
+   der2h.derteta.teta.st.H2 <- NA
+   if( length(teta1) != 0) der2h.derteta.teta.st.H2[teta.ind1] <- BITS.H21$der2h.derteta.teta.st
+   if( length(teta2) != 0) der2h.derteta.teta.st.H2[teta.ind2] <- BITS.H22$der2h.derteta.teta.st
+   
+   
+
 
 der2p1.dereta1eta1   <- dHs1$der2p2.dereta2eta2
 der2p1m1.dereta1eta1 <- der2p1.dereta1eta1 - dHs1$der2pdf2.dereta2 
@@ -169,11 +301,7 @@ der2pdf2.dersigma22.stdernu2.st <-  dHs2$der2pdf2.sigma2.st2dernu.st
 der2p2.dersigma22.stdernu2.st   <-  dHs2$der2p2.dersigma2.stdernu.st
 
 
-derteta.derteta.st         <- BITS.H1$derteta.derteta.st 
-der2teta.derteta.stteta.st <- BITS.H1$der2teta.derteta.stteta.st 
 
-der2h.derteta.teta.st.H1 <- BITS.H1$der2h.derteta.teta.st
-der2h.derteta.teta.st.H2 <- BITS.H2$der2h.derteta.teta.st
 
 
 
@@ -336,7 +464,9 @@ if(VC$extra.regI == "sED") H <- regH(H, type = 2)
               dl.dsigma21.st   =dl.dsigma21.st,
               dl.dsigma22.st   =dl.dsigma22.st,
               dl.dnu2.st       =dl.dnu2.st,
-              dl.dteta.st      =dl.dteta.st) 
+              dl.dteta.st      =dl.dteta.st,
+                            teta.ind2 = teta.ind2, teta.ind1 = teta.ind1,
+              Cop1 = Cop1, Cop2 = Cop2, teta1 = teta1, teta2 = teta2) 
               
               
 

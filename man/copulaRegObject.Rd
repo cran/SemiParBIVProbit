@@ -43,6 +43,8 @@
 
 \item{Vb}{Inverse of \code{He}. This corresponds to the Bayesian variance-covariance matrix 
           used for confidence/credible interval calculations.}
+
+\item{F}{This is obtained multiplying Vb by HeSh.} 
  
 \item{t.edf}{Total degrees of freedom of the estimated bivariate model. It is calculated as \code{sum(diag(F))}.}
 

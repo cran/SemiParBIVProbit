@@ -1,6 +1,7 @@
 \name{H.tri}
 \alias{H.tri}
 \alias{H.triSS}
+\alias{H.triESS}
 
 \title{Internal Function}
 

@@ -14,7 +14,9 @@ the (randomised) normalised quantile response. It also provides the log-likeliho
 
 resp.check(y, margin = "N", main = "Histogram and Density of Response",
            xlab = "Response", print.par = FALSE, plots = TRUE, 
-           loglik = FALSE, os = FALSE, test = FALSE, i.f = FALSE, ...)
+           loglik = FALSE, os = FALSE,  
+           intervals = FALSE, n.sim = 100, prob.lev = 0.05, 
+           i.f = FALSE, ...)
 
 }
 
@@ -22,7 +24,9 @@ resp.check(y, margin = "N", main = "Histogram and Density of Response",
 
 \item{y}{Response.}
  
-\item{margin}{The distributions allowed are: normal ("N"), log-normal ("LN"), 
+\item{margin}{The distributions allowed are: normal ("N"), normal where 
+               sigma2 corresponds to 
+               the standard deviation instead of the variance ("N2"), log-normal ("LN"), 
               Gumbel ("GU"), reverse Gumbel ("rGU"), logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"),
               Dagum ("DAGUM"), Singh-Maddala ("SM"), beta ("BE"), Fisk ("FISK"), Poisson ("PO"), zero truncated Poisson ("ZTP"), 
               negative binomial - type I ("NBI"), negative 
@@ -40,10 +44,13 @@ resp.check(y, margin = "N", main = "Histogram and Density of Response",
 
 \item{os}{If \code{TRUE} then the estimated parameters are returned on the original scale.}
 
-\item{test}{If \code{TRUE} then the shapiro test for normality is performed on normalised quantile residuals.}
+\item{intervals}{If \code{TRUE} then intervals for the qqplot are produced.}   
+  
+\item{n.sim}{Number of replicate datasets used to simulate quantiles of the residual distribution.} 
+
+\item{prob.lev}{Overall probability of the left and right tails of the probabilities' distribution used for interval calculations.} 
 
 \item{i.f}{Internal fitting option. This is not for user purposes.}
-
 
 \item{...}{Other graphics parameters to pass on to plotting commands.}
 

@@ -49,23 +49,94 @@ if(!is.null(VC$X3)){
 ########################################################################################################  
   
 resT    <- teta.tr(VC, teta.st)
-teta.st <- resT$teta.st
-teta    <- resT$teta
+
+teta.st1 <- teta.st2 <- teta.st <- resT$teta.st
+teta1 <- teta2 <- teta <- resT$teta 
     
+########################################################################################################  
+
+
+Cop1 <- Cop2 <- VC$BivD 
+
+teta.ind1 <- as.logical(c(1,0,round(runif(VC$n-2))) ) 
+teta.ind2 <- teta.ind1 == FALSE 
+
+
+if(!(VC$BivD %in% VC$BivD2) && length(teta.st) > 1){
+
+teta.st1 <- teta.st[teta.ind1]
+teta.st2 <- teta.st[teta.ind2]
+
+teta1 <- teta[teta.ind1]
+teta2 <- teta[teta.ind2]
+
+}
+
+
+ 
+if(VC$BivD %in% VC$BivD2){
+
+if(VC$BivD %in% VC$BivD2[1:4])  teta.ind1 <- ifelse(VC$my.env$signind*teta > exp(VC$zerov), TRUE, FALSE)
+if(VC$BivD %in% VC$BivD2[5:12]) teta.ind1 <- ifelse(VC$my.env$signind*teta > exp(VC$zerov) + 1, TRUE, FALSE) 
+teta.ind2 <- teta.ind1 == FALSE 
+
+VC$my.env$signind <- ifelse(teta.ind1 == TRUE,  1, -1) 
+
+teta1 <-  teta[teta.ind1]
+teta2 <- -teta[teta.ind2]
+
+teta.st1 <- teta.st[teta.ind1]
+teta.st2 <- teta.st[teta.ind2]
+
+if(length(teta) == 1) teta.ind2 <- teta.ind1 <- rep(TRUE, VC$n)  
+
+Cop1Cop2R <- Cop1Cop2(VC$BivD)
+Cop1 <- Cop1Cop2R$Cop1
+Cop2 <- Cop1Cop2R$Cop2
+
+} 
+
+
 
 ########################################################################################################
 
-dH <- copgHs(p1,p2,eta1=NULL,eta2=NULL,teta,teta.st,VC$BivD)
 
-h <- dH$c.copula.be2  
+  if( length(teta1) != 0) dH1 <- copgHs(p1[teta.ind1], p2[teta.ind1], eta1=NULL, eta2=NULL, teta1, teta.st1, Cop1, VC$dof)
+  if( length(teta2) != 0) dH2 <- copgHs(p1[teta.ind2], p2[teta.ind2], eta1=NULL, eta2=NULL, teta2, teta.st2, Cop2, VC$dof)
+  
+  h <- NA
+  if( length(teta1) != 0) h[teta.ind1] <- dH1$c.copula.be2 
+  if( length(teta2) != 0) h[teta.ind2] <- dH2$c.copula.be2 
+ 
 
 l.par <- VC$weights*( respvec$cy*log(h) + respvec$y1*log(1 - h) + log(pdf2) )
   
 ########################################################################################################
  
-  c.copula2.be2    <- dH$c.copula2.be2 
-  c.copula2.be1be2 <- dH$c.copula2.be1be2   
-  c.copula2.be2th  <- dH$c.copula2.be2th  
+ 
+ c.copula2.be2 <- c.copula2.be1be2 <- c.copula2.be2th <- NA
+ 
+ 
+if( length(teta1) != 0){
+ 
+  c.copula2.be2[teta.ind1]    <- dH1$c.copula2.be2 
+  c.copula2.be1be2[teta.ind1] <- dH1$c.copula2.be1be2   
+  c.copula2.be2th[teta.ind1]  <- dH1$c.copula2.be2th  
+    
+}  
+  
+
+if( length(teta2) != 0){
+ 
+  c.copula2.be2[teta.ind2]    <- dH2$c.copula2.be2 
+  c.copula2.be1be2[teta.ind2] <- dH2$c.copula2.be1be2   
+  c.copula2.be2th[teta.ind2]  <- dH2$c.copula2.be2th  
+    
+}  
+   
+  
+  
+  
   
   derp1.dereta1    <- pd1$derp1.dereta1 # -dnorm(-eta1) 
   
@@ -80,16 +151,44 @@ l.par <- VC$weights*( respvec$cy*log(h) + respvec$y1*log(1 - h) + log(pdf2) )
  
 ######################################################################################################## 
  
-  BITS <- copgHsCont(p1, p2, teta, teta.st, VC)
+ 
+ der2h.derp2p2 <- der2h.derteta.teta.st <- derteta.derteta.st <- der2teta.derteta.stteta.st <- der2h.derp1p2 <- der2h.derp1teta <- der2h.derp2teta <- der2h.derp1p1 <- NA
+ 
+  if( length(teta1) != 0) BITS1 <- copgHsCont(p1[teta.ind1], p2[teta.ind1], teta1, teta.st1, Cop1, par2 = VC$dof, nu.st = log(VC$dof-2))
+  if( length(teta2) != 0) BITS2 <- copgHsCont(p1[teta.ind2], p2[teta.ind2], teta2, teta.st2, Cop2, par2 = VC$dof, nu.st = log(VC$dof-2)) 
+ 
+ 
+if( length(teta1) != 0){ 
+   
+  der2h.derp2p2[teta.ind1]              <- BITS1$der2h.derp2p2 
+  der2h.derteta.teta.st[teta.ind1]      <- BITS1$der2h.derteta.teta.st  
+  derteta.derteta.st[teta.ind1]         <- BITS1$derteta.derteta.st 
+  der2teta.derteta.stteta.st[teta.ind1] <- BITS1$der2teta.derteta.stteta.st  
+  der2h.derp1p2[teta.ind1]              <- BITS1$der2h.derp1p2  
+  der2h.derp1teta[teta.ind1]            <- BITS1$der2h.derp1teta                                     
+  der2h.derp2teta[teta.ind1]            <- BITS1$der2h.derp2teta  
+  der2h.derp1p1[teta.ind1]              <- BITS1$der2h.derp1p1
   
-  der2h.derp2p2              <- BITS$der2h.derp2p2 
-  der2h.derteta.teta.st      <- BITS$der2h.derteta.teta.st  
-  derteta.derteta.st         <- BITS$derteta.derteta.st 
-  der2teta.derteta.stteta.st <- BITS$der2teta.derteta.stteta.st  
-  der2h.derp1p2              <- BITS$der2h.derp1p2  
-  der2h.derp1teta            <- BITS$der2h.derp1teta                                     
-  der2h.derp2teta            <- BITS$der2h.derp2teta  
-  der2h.derp1p1              <- BITS$der2h.derp1p1
+}
+
+
+if( length(teta2) != 0){ 
+   
+  der2h.derp2p2[teta.ind2]              <- BITS2$der2h.derp2p2 
+  der2h.derteta.teta.st[teta.ind2]      <- BITS2$der2h.derteta.teta.st  
+  derteta.derteta.st[teta.ind2]         <- BITS2$derteta.derteta.st 
+  der2teta.derteta.stteta.st[teta.ind2] <- BITS2$der2teta.derteta.stteta.st  
+  der2h.derp1p2[teta.ind2]              <- BITS2$der2h.derp1p2  
+  der2h.derp1teta[teta.ind2]            <- BITS2$der2h.derp1teta                                     
+  der2h.derp2teta[teta.ind2]            <- BITS2$der2h.derp2teta  
+  der2h.derp1p1[teta.ind2]              <- BITS2$der2h.derp1p1
+  
+}
+  
+
+  
+  
+  
   
  
   der2p1.dereta1eta1 <- pd1$der2p1.dereta1eta1            #####eta1 * dnorm(-eta1)      
@@ -218,8 +317,16 @@ if(VC$extra.regI == "sED") H <- regH(H, type = 2)
  dHs  <- distrHsAT(exp(respvec$y2), eta2, sigma2, 1, margin2 = VC$margins[2])
  pdf2 <- dHs$pdf2
  p2   <- dHs$p2 
- dH   <- copgHsAT(p1, p2, teta, VC$BivD)
- h    <- dH$c.copula.be2  
+ 
+  
+  if( length(teta1) != 0) dH1 <- copgHsAT(p1[teta.ind1], p2[teta.ind1], teta1, Cop1)
+  if( length(teta2) != 0) dH2 <- copgHsAT(p1[teta.ind2], p2[teta.ind2], teta2, Cop2)
+   
+  h <- NA
+  if( length(teta1) != 0) h[teta.ind1] <- dH1$c.copula.be2 
+  if( length(teta2) != 0) h[teta.ind2] <- dH2$c.copula.be2 
+ 
+ 
  l.ln <- -sum(VC$weights*( respvec$cy*log(h) + respvec$y1*log(1 - h) + log(pdf2) ))
 
  }
@@ -228,7 +335,9 @@ if(VC$extra.regI == "sED") H <- regH(H, type = 2)
          list(value=res, gradient=G, hessian=H, S.h=S.h, S.h1=S.h1, S.h2=S.h2, l=S.res, l.ln=l.ln, l.par=l.par, ps = ps, etas = etas,
               eta1=eta1, eta2=eta2, etad=etad,
               dl.dbe1=dl.dbe1, dl.dbe2=dl.dbe2, dl.dsigma.st = dl.dsigma.st, dl.dteta.st = dl.dteta.st,
-              BivD=VC$BivD, p1=1-p1, p2=p2, theta.star = teta.st)      
+              BivD=VC$BivD, p1=1-p1, p2=p2, theta.star = teta.st,
+              teta.ind2 = teta.ind2, teta.ind1 = teta.ind1,
+              Cop1 = Cop1, Cop2 = Cop2, teta1 = teta1, teta2 = teta2)      
 
 }
 

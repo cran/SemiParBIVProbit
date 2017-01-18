@@ -1,6 +1,11 @@
-copgHs <- function(p1, p2, eta1 = NULL, eta2 = NULL, teta, teta.st, BivD){
+copgHs <- function(p1, p2, eta1 = NULL, eta2 = NULL, teta, teta.st, BivD, nu = NULL, nu.st = NULL){
 
 ########################################################################################
+
+
+c.copula.dof.st <- c.copula2.be1dof.st <- c.copula2.be2dof.st <- c.copula2.dof2.st <- c.copula2.thdof.st <- 1
+
+
 
 cjg <- c("C0","J0","G0","C90","J90","G90","C180","J180","G180","C270","J270","G270")
 
@@ -11,7 +16,7 @@ derteta.derteta.st <- der2teta.derteta.stteta.st <- exp(teta.st)
 }   
 
 
-if(BivD %in% c("N","FGM","AMH") ) {
+if(BivD %in% c("N", "T","FGM","AMH") ) {
 
 derteta.derteta.st <- 1/cosh(teta.st)^2
 der2teta.derteta.stteta.st <- -(2 * (sinh(teta.st) * cosh(teta.st))/(cosh(teta.st)^2)^2)
@@ -27,6 +32,11 @@ der2teta.derteta.stteta.st <- 0
        
 } 
 
+
+#####
+
+
+#if(BivD %in% c("T") ) derdof.derdof.st <- der2dof.derdof.stdof.st <- exp(nu.st)
 
 
    
@@ -88,6 +98,58 @@ bit1.th2ATE <- (0.5 * (pi * teta/(pi * sqrt(1 - teta^2))^2) - 0.5 *
 
 
 }
+
+
+if(BivD=="T"){
+ 
+
+c.copula.be1 <- BiCopHfunc1(p1, p2, family = 2, par = teta, par2 = nu)                         
+c.copula.be2 <- BiCopHfunc2(p1, p2, family = 2, par = teta, par2 = nu) 
+
+c.copula.thet <- ( 1 + (qt(p1,nu)^2+qt(p2,nu)^2-2*teta*qt(p1,nu)*qt(p2,nu))/(nu*(1-teta^2)))^(-nu/2)/(2*pi*sqrt(1-teta^2))
+
+#funcD <- function(nu) BiCopCDF(p1, p2, family = 2, par = teta, par2 = nu)
+ 
+# mayhave to be careful with nu values here as it must be > 2  
+ 
+#nde <- numgh(funcD, nu) 
+#
+#c.copula.dof   <- nde$fi
+#c.copula2.dof2 <- nde$se
+
+
+c.copula2.be1 <-  BiCopHfuncDeriv(p2, p1, 2, par=teta, par2=nu, deriv="u2")     
+c.copula2.be2 <-  BiCopHfuncDeriv(p1, p2, 2, par=teta, par2=nu, deriv="u2") 
+
+c.copula2.be1be2 <- BiCopPDF(p1, p2, 2, par=teta, par2=nu) 
+
+
+c.copula2.be1t <- BiCopHfuncDeriv(p2, p1, 2, par=teta, par2=nu, deriv="par")                                                    
+                                                                                                                                                                      
+c.copula2.be2t <- BiCopHfuncDeriv(p1, p2, 2, par=teta, par2=nu, deriv="par")
+
+
+#c.copula2.be1dof <- BiCopHfuncDeriv(p2, p1, 2, par=teta, par2=nu, deriv="par2")                                                    
+#                                                                                                                                                                      
+#c.copula2.be2dof <- BiCopHfuncDeriv(p1, p2, 2, par=teta, par2=nu, deriv="par2")
+                                                                                                                                                                                                                 
+bit1.th2ATE <- -((1 + (qt(p1,nu)^2 + qt(p2,nu)^2 - 2 * teta * qt(p1,nu) * qt(p2,nu))/(nu * (1 - teta^2)))^((-nu/2) - 
+    1) * ((-nu/2) * (2 * qt(p1,nu) * qt(p2,nu)/(nu * (1 - teta^2)) - (qt(p1,nu)^2 + 
+    qt(p2,nu)^2 - 2 * teta * qt(p1,nu) * qt(p2,nu)) * (nu * (2 * teta))/(nu * (1 - 
+    teta^2))^2))/(2 * pi * sqrt(1 - teta^2)) - (1 + (qt(p1,nu)^2 + qt(p2,nu)^2 - 
+    2 * teta * qt(p1,nu) * qt(p2,nu))/(nu * (1 - teta^2)))^(-nu/2) * (2 * pi * 
+    (0.5 * (2 * teta * (1 - teta^2)^-0.5)))/(2 * pi * sqrt(1 - 
+    teta^2))^2)       
+
+#funcD1 <- function(teta, nu) BiCopCDF(p1, p2, family = 2, par = teta, par2 = nu)
+#
+#c.copula2.tetadof <- numch(funcD1, teta, nu)
+
+
+}
+
+
+
 
 
 
@@ -547,6 +609,21 @@ bit1.th2ATE <- 0
 c.copula.theta  <- c.copula.thet*derteta.derteta.st
 c.copula2.be1th <- c.copula2.be1t*derteta.derteta.st
 c.copula2.be2th <- c.copula2.be2t*derteta.derteta.st 
+
+
+#if(BivD == "T"){
+#
+#c.copula.dof.st     <- c.copula.dof*derdof.derdof.st
+#c.copula2.be1dof.st <- c.copula2.be1dof*derdof.derdof.st
+#c.copula2.be2dof.st <- c.copula2.be2dof*derdof.derdof.st
+#
+#c.copula2.dof2.st <- c.copula2.dof2*derdof.derdof.st^2 + c.copula.dof*der2dof.derdof.stdof.st 
+#
+#c.copula2.thdof.st <- c.copula2.tetadof*derdof.derdof.st*derteta.derteta.st 
+#
+#}
+
+                    
 bit1.th2 <- bit1.th2ATE*derteta.derteta.st^2 + c.copula.thet*der2teta.derteta.stteta.st   
 
 #########################
@@ -642,12 +719,18 @@ c.copula2.be2    <- ifef(c.copula2.be2   )
 c.copula2.be1be2 <- ifef(c.copula2.be1be2) 
 c.copula2.be1th  <- ifef(c.copula2.be1th ) 
 c.copula2.be2th  <- ifef(c.copula2.be2th ) 
-c.copula2.be1t  <- ifef(c.copula2.be1t ) 
-c.copula2.be2t  <- ifef(c.copula2.be2t ) 
+c.copula2.be1t   <- ifef(c.copula2.be1t  ) 
+c.copula2.be2t   <- ifef(c.copula2.be2t  ) 
 bit1.th2ATE      <- ifef(bit1.th2ATE     ) 
 bit1.th2         <- ifef(bit1.th2        ) 
 derteta.derteta.st         <- ifef(derteta.derteta.st        )
 der2teta.derteta.stteta.st <- ifef(der2teta.derteta.stteta.st)
+
+c.copula.dof.st      <- ifef(c.copula.dof.st    ) 
+c.copula2.be1dof.st  <- ifef(c.copula2.be1dof.st) 
+c.copula2.be2dof.st  <- ifef(c.copula2.be2dof.st) 
+c.copula2.dof2.st    <- ifef(c.copula2.dof2.st)
+c.copula2.thdof.st   <- ifef(c.copula2.thdof.st) 
 
 
 
@@ -661,13 +744,18 @@ c.copula2.be2    = c.copula2.be2,
 c.copula2.be1be2 = c.copula2.be1be2,
 c.copula2.be1th  = c.copula2.be1th, 
 c.copula2.be2th  = c.copula2.be2th, 
-c.copula2.be1t  = c.copula2.be1t, 
-c.copula2.be2t  = c.copula2.be2t, 
+c.copula2.be1t   = c.copula2.be1t, 
+c.copula2.be2t   = c.copula2.be2t, 
 bit1.th2ATE      = bit1.th2ATE,     
 bit1.th2         = bit1.th2, 
 derteta.derteta.st = derteta.derteta.st,
-der2teta.derteta.stteta.st = der2teta.derteta.stteta.st )     
-
+der2teta.derteta.stteta.st = der2teta.derteta.stteta.st,
+c.copula.dof.st     =  c.copula.dof.st,         
+c.copula2.be1dof.st =  c.copula2.be1dof.st,
+c.copula2.be2dof.st =  c.copula2.be2dof.st,
+c.copula2.dof2.st = c.copula2.dof2.st,
+c.copula2.thdof.st = c.copula2.thdof.st
+)
 
 }
 

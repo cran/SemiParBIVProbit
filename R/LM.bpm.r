@@ -99,11 +99,21 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, Model,
   gp2 <- gam2$nsdf   
   
   
+if( l.sp1!=0 || l.sp2!=0){ 
   
-  if( l.sp1!=0 || l.sp2!=0){ sp <- c(sp1, sp2)
-  qu.mag <- S.m(gam1, gam2, gam3 = NULL, gam4 = NULL, gam5 = NULL, gam6 = NULL, gam7 = NULL, 
-                l.sp1, l.sp2, l.sp3 = 0, l.sp4 = 0, l.sp5 = 0, l.sp6 = 0, l.sp7 = 0, 
-                length(coef(gam1)) ) 
+ sp <- c(sp1, sp2)
+ GAM <- list(gam1 = gam1, gam2 = gam2, gam3 = NULL, gam4 = NULL, 
+             gam5 = NULL, gam6 = NULL, gam7 = NULL, gam8 = NULL)  
+             
+ L.SP <- list(l.sp1 = l.sp1, l.sp2 = l.sp2, l.sp3 = 0, l.sp4 = 0, 
+             l.sp5 = 0, l.sp6 = 0, l.sp7 = 0, l.sp8 = 0)    
+             
+ L.GAM <- list(l.gam1 = length(coef(gam1)), l.gam2 = 0, l.gam3 = 0, l.gam4 = 0,
+              l.gam5 = 0, l.gam6 = 0, l.gam7 = 0, l.gam8 = 0)             
+ 
+ qu.mag <- S.m(GAM, L.SP, L.GAM)               
+                
+
                            }
 
 
@@ -120,7 +130,7 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, Model,
              X1.d2 = X1.d2, 
              X2.d2 = X2.d2,
              gp1 = gp1, 
-             gp2 = gp2,
+             gp2 = gp2, gp3 = NULL,
              l.sp1 = l.sp1, 
              l.sp2 = l.sp2, l.sp3 = 0,
              weights = weights,
@@ -128,7 +138,7 @@ LM.bpm <- function(formula, data = list(), weights = NULL, subset = NULL, Model,
              Model = Model,
              end = end, fp = fp,
              BivD = BivD, nC = 1, extra.regI = FALSE, margins = c("probit","probit"),
-             bl = c("probit", "logit", "cloglog", "cauchit"), triv = FALSE )
+             bl = c("probit", "logit", "cloglog", "cauchit"), triv = FALSE, univ.gamls = FALSE , n = n)
 
 
 params <- c(coef(gam1),coef(gam2),0)
@@ -136,7 +146,7 @@ params <- c(coef(gam1),coef(gam2),0)
 
 l.splist <- list( l.sp1 = l.sp1, l.sp2 = l.sp2, l.sp3 = 0, 
                   l.sp4 = 0, l.sp5 = 0, l.sp6 = 0, 
-                  l.sp7 = 0 )
+                  l.sp7 = 0, l.sp8 = 0 )
 
 
 if( l.sp1==0 && l.sp2==0 ) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0) else ps <- pen(qu.mag, sp, VC, univ = 0, l.splist)

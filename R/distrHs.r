@@ -13,7 +13,7 @@ der2p2.dereta2dernu.st      = 1
 der2p2.dersigma2.stdernu.st = 1
 
 
-cont2par <- c("WEI","iG","LO","rGU","GU","GA","GAi","BE","FISK") # "N" escluded for a reason
+cont2par <- c("WEI","iG","LO","rGU","GU","GA","GAi","BE","FISK","N","N2","LN") 
 cont3par <- c("DAGUM", "SM")
 
 # library(Deriv); library(numDeriv)
@@ -27,64 +27,84 @@ cont3par <- c("DAGUM", "SM")
 # otherwise things are fine
 ############################################################################
 
-#######################################################################
-
-
-
 if(margin2 %in% c("N","LN")){
 
-  pdf2          <- dnorm(y2, mean=eta2, sd = sqrt(sigma2))
+                   mu2 <- eta2
+dermu2.dereta2         <- 1
+der2mu2.dereta2eta2    <- 0 
+dersigma2.dersigma2.st <- exp(sigma2.st)  
 
-derpdf2.dereta2 <- (1/(sqrt(2 * pi * sigma2))) * (exp(-0.5 * (y2 - eta2)^2/sigma2) * (0.5 * (2 * (y2 - eta2))/sigma2))    
-
-derpdf2.sigma2 <-  -((0.5 - 0.5 * ((y2 - eta2)^2/sigma2)) * exp(-(0.5 * 
-    ((y2 - eta2)^2/sigma2)))/(sigma2 * sqrt(2 * (pi * sigma2))))
-                   
-dersigma2.dersigma2.st <- exp(sigma2.st)   
-
-derpdf2.dersigma2.st <- derpdf2.sigma2 * dersigma2.dersigma2.st   # left here for a reason
-
-der2pdf2.dereta2 <- ((y2 - eta2)^2/sigma2 - 1) * exp(-(0.5 * ((y2 - eta2)^2/sigma2)))/(sigma2 * 
-    sqrt(2 * (pi * sigma2)))
-                     
-                     
-der2pdf2.dersigma2.st2 <- (((0.25 * ((y2 - eta2)^2/exp(sigma2.st)) - 1.5) * 
-    (y2 - eta2)^2/exp(sigma2.st)^2 + 3 * (pi^2 * exp(sigma2.st)/(2 * 
-    (pi * exp(sigma2.st)))^2)) * exp(sigma2.st) + 0.5 * ((y2 - 
-    eta2)^2/exp(sigma2.st)) - 0.5) * exp(-(0.5 * ((y2 - eta2)^2/exp(sigma2.st))))/sqrt(2 * 
-    (pi * exp(sigma2.st)))
-                          
-
-der2pdf2.dereta2dersigma2.st <-  -((1.5 - 0.5 * ((y2 - eta2)^2/exp(sigma2.st))) * exp(-(0.5 * 
-    ((y2 - eta2)^2/exp(sigma2.st)))) * (y2 - eta2)/(exp(sigma2.st) * 
-    sqrt(2 * (pi * exp(sigma2.st)))))
-  
-  
+  pdf2                <- dnorm(y2, mean=eta2, sd = sqrt(sigma2))  # 1/(sqrt(2*sigma2*pi))*exp(-(y2-eta2)^2/(2*sigma2))  
+derpdf2.dermu2        <- (1/(sqrt(2 * pi * sigma2))) * (exp(-0.5 * (y2 - eta2)^2/sigma2) * (0.5 * (2 * (y2 - eta2))/sigma2))  
+der2pdf2.dermu2       <- ((y2 - eta2)^2/sigma2 - 1) * exp(-(0.5 * ((y2 - eta2)^2/sigma2)))/(sigma2 * sqrt(2 * (pi * sigma2)))
+derpdf2.sigma2        <- (2 * ((y2 - eta2)^2/(2 * sigma2)^2) - 1/(2 * sigma2)) * exp(-((y2 - eta2)^2/(2 * sigma2)))/sqrt(2 * (pi * sigma2)) 
+der2pdf2.dersigma22   <- (((4 * (y2 - eta2)^2 - 16 * sigma2)/(2 * sigma2)^2 - 2/sigma2) * (y2 - eta2)^2/(2 * sigma2)^2 + 3 * (pi^2/(2 * (pi * sigma2))^2)) * exp(-((y2 - eta2)^2/(2 * sigma2)))/sqrt(2 * (pi * sigma2))  
+der2pdf2.mu2dersigma2 <- ((2 * ((y2 - eta2)^2/sigma2) - 4)/(2 * sigma2)^2 - 1/(2 * sigma2^2)) * exp(-((y2 - eta2)^2/(2 * sigma2))) * (y2 - eta2)/sqrt(2 * (pi * sigma2))   
   
 if(naive == FALSE){  
   
-    p2          <- pnorm(y2, mean=eta2, sd = sqrt(sigma2))
-
-derp2.dereta2    <- -pdf2
-                    
-derp2.dersigma.st <- 0.5*(y2-eta2)*derp2.dereta2     
-
-
-der2p2.dereta2eta2 <- -((1/(sqrt(2 * pi * sigma2))) * (exp(-0.5 * (y2 - eta2)^2/sigma2) * 
-                        (0.5 * (2 * (y2 - eta2))/sigma2)))
-
-
-der2p2.dersigma2.st2 <-  0.5 * ((0.5 - 0.5 * ((y2 - eta2)^2/exp(sigma2.st))) * 
-    exp(-(0.5 * ((y2 - eta2)^2/exp(sigma2.st)))) * (y2 - eta2)/sqrt(2 * 
-    (pi * exp(sigma2.st))))
-
-der2p2.dereta2dersigma2.st <-  (0.5 - 0.5 * ((y2 - eta2)^2/exp(sigma2.st))) * exp(-(0.5 * 
-    ((y2 - eta2)^2/exp(sigma2.st))))/sqrt(2 * (pi * exp(sigma2.st))) 
-    
-                }
-
+    p2                 <- pnorm(y2, mean=eta2, sd = sqrt(sigma2))
+derp2.dermu2           <- -pdf2                
+ der2p2.dermu22        <- -((1/(sqrt(2 * pi * sigma2))) * (exp(-0.5 * (y2 - eta2)^2/sigma2) * (0.5 * (2 * (y2 - eta2))/sigma2)))
+derp2.dersigma2        <- 0.5*(y2-eta2)*derp2.dermu2/sigma2
+der2p2.dersigma22      <- (0.75/sigma2 - (y2 - eta2)^2/(2 * sigma2)^2) * exp(-((y2 - eta2)^2/(2 * sigma2))) * (y2 - eta2)/(sigma2 * sqrt(2 * (pi * sigma2)))
+der2p2.derdermu2sigma2 <- (0.5 - 0.5 * ((y2 - eta2)^2/sigma2)) * exp(-((y2 - eta2)^2/(2 *  sigma2)))/(sigma2 * sqrt(2 * (pi * sigma2)))
+                
+                  }
 
 }
+
+
+
+
+
+
+
+if(margin2 == "N2"){
+
+
+sqrt.sig2 <- sigma2   # which means sigma 
+sig2.sq   <- sigma2^2 # sigma^2 
+
+
+                   mu2 <- eta2
+dermu2.dereta2         <- 1
+der2mu2.dereta2eta2    <- 0 
+dersigma2.dersigma2.st <- exp(sigma2.st)  
+
+  pdf2                <- dnorm(y2, mean=eta2, sd = sqrt.sig2)  # 1/(sqrt(2*sig2.sq*pi))*exp(-(y2-eta2)^2/(2*sig2.sq))
+derpdf2.dermu2        <- (1/(sqrt(2 * pi * sig2.sq))) * (exp(-0.5 * (y2 - eta2)^2/sig2.sq) * (0.5 * (2 * (y2 - eta2))/sig2.sq))  
+der2pdf2.dermu2       <- ((y2 - eta2)^2/sig2.sq - 1) * exp(-(0.5 * ((y2 - eta2)^2/sig2.sq)))/(sig2.sq * sqrt(2 * (pi * sig2.sq)))
+
+derpdf2.sigma2        <- (-((0.5 - 0.5 * ((y2 - eta2)^2/sig2.sq)) * exp(-(0.5 * ((y2 - eta2)^2/sig2.sq)))/(sig2.sq * sqrt(2 * (pi * sig2.sq)))))*2*sqrt.sig2
+der2pdf2.dersigma22   <- -((2 * ((0.5 - 0.5 * ((y2 - eta2)^2/sig2.sq))/(sig2.sq * sqrt(2 * (pi * sig2.sq)))) + 2 * (sqrt.sig2 * ((1.5 - 0.5 * ((y2 - eta2)^2/sig2.sq)) * (y2 - eta2)^2/(sqrt.sig2^5 * sqrt(2 * (pi * sig2.sq))) - sqrt.sig2 * (0.5 - 0.5 * ((y2 - eta2)^2/sig2.sq)) * (2 * (pi * sig2.sq/sqrt(2 * (pi * sig2.sq))) + 2 * sqrt(2 * (pi * sig2.sq)))/(sig2.sq * sqrt(2 * (pi * sig2.sq)))^2))) * exp(-(0.5 * ((y2 - eta2)^2/sig2.sq))))  
+der2pdf2.mu2dersigma2 <- -((3 - (y2 - eta2)^2/sig2.sq) * exp(-(0.5 * ((y2 - eta2)^2/sig2.sq))) * (y2 - eta2)/(sqrt.sig2^3 * sqrt(2 * (pi * sig2.sq))))  
+  
+
+if(naive == FALSE){  
+  
+    p2                 <- pnorm(y2, mean=eta2, sd = sqrt.sig2)
+derp2.dermu2           <- -pdf2                
+ der2p2.dermu22        <- -((1/(sqrt(2 * pi * sig2.sq))) * (exp(-0.5 * (y2 - eta2)^2/sig2.sq) * (0.5 * (2 * (y2 - eta2))/sig2.sq)))
+derp2.dersigma2        <- -dnorm((y2-eta2)/sqrt.sig2)*(y2-eta2)/sig2.sq   
+der2p2.dersigma22      <- -(((y2 - eta2)^2/sig2.sq - 2) * dnorm((y2 - eta2)/sqrt.sig2) * (y2 - eta2)/sqrt.sig2^3) 
+der2p2.derdermu2sigma2 <- (1 - (y2 - eta2)^2/sqrt.sig2^2) * dnorm((y2 - eta2)/sqrt.sig2)/sig2.sq
+                
+                
+                }
+
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -92,12 +112,10 @@ der2p2.dereta2dersigma2.st <-  (0.5 - 0.5 * ((y2 - eta2)^2/exp(sigma2.st))) * ex
 
 if(margin2 == "DAGUM"){
 
-
 mu2 <- dermu2.dereta2 <- der2mu2.dereta2eta2 <- exp(eta2) 
 dersigma2.dersigma2.st <- exp(sigma2.st)   
 dernu.dernu.st <- exp(nu.st)
  
-
 pdf2 <- sqrt(sigma2)*nu/y2*( ((y2/mu2)^(sqrt(sigma2)*nu))/( (y2/mu2)^sqrt(sigma2) + 1 )^(nu+1) )            
   
 derpdf2.dermu2 <-  -(nu * (nu * (y2/mu2)^(nu * sqrt(sigma2) - 1)/((y2/mu2)^sqrt(sigma2) + 
@@ -1443,15 +1461,7 @@ der2p2.dersigma22 <- nde$se
 ##########################################################
 
 
-
-
-if(margin2 %in% c(cont2par,cont3par)){ #### the stuff below does not apply to N case and there is a reason ####
-
-
-
-
-
-
+if(margin2 %in% c(cont2par,cont3par)){ 
 
 derpdf2.dereta2              <- derpdf2.dermu2*dermu2.dereta2       
 der2pdf2.dereta2             <- der2pdf2.dermu2* dermu2.dereta2^2 + derpdf2.dermu2*der2mu2.dereta2eta2        
@@ -1460,8 +1470,6 @@ der2pdf2.dereta2dersigma2    <- der2pdf2.mu2dersigma2* dermu2.dereta2
 derpdf2.dersigma2.st         <- derpdf2.sigma2 * dersigma2.dersigma2.st   
 der2pdf2.dersigma2.st2       <- der2pdf2.dersigma22 * dersigma2.dersigma2.st^2 + derpdf2.sigma2  * dersigma2.dersigma2.st     
 der2pdf2.dereta2dersigma2.st <- der2pdf2.dereta2dersigma2 *  dersigma2.dersigma2.st
-
-
 
 
 if(margin2 %in% cont3par){
@@ -1477,10 +1485,7 @@ der2pdf2.dernu.st2           <- der2pdf2.dernu2 * dernu.dernu.st^2 +  derpdf2.nu
                          }
                          
                          
-                         
-                         
-                        
-
+                  
 if(naive == FALSE){  
 
 
@@ -1517,12 +1522,8 @@ der2p2.dersigma2.stdernu.st  <- der2p2.dersigma2dernu * dersigma2.dersigma2.st *
 
 
 epsilon <- 0.0000001 
-max.p   <- 0.9999999
-
-  pdf2 <- ifelse(pdf2 < epsilon, epsilon, pdf2 )
-
-  p2   <- ifelse(p2 > max.p, max.p, p2) 
-  p2   <- ifelse(p2 < epsilon, epsilon, p2) 
+pdf2 <- ifelse(pdf2 < epsilon, epsilon, pdf2 )
+p2   <- mm(p2) 
 
 
 

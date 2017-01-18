@@ -1,6 +1,7 @@
 \name{copgHs}
 \alias{copgHs}
 \alias{copgHs2}
+\alias{copgHs3}
 \alias{copgHsAT}
 \alias{copgHsCont}
 

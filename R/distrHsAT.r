@@ -45,6 +45,15 @@ if(margin2 == "N"){
      
 }
 
+if(margin2 == "N2"){
+
+# sigma2  which means sigma 
+
+  pdf2          <- dnorm(y2, mean=eta2, sd = sigma2)
+    p2          <- pnorm(y2, mean=eta2, sd = sigma2)
+     
+}
+
 
 if(margin2 == "LN"){
 
@@ -178,26 +187,16 @@ pdf2 <- dbeta(y2, shape1 = plogis(eta2) * (1 - sigma2)/(sigma2), shape2 = (1-plo
 
 
 
-
-
-
-
+p2 <- mm(p2) 
 
 epsilon <- 0.0000001 
-max.p   <- 0.9999999
-
-  #pdf2 <- ifelse(pdf2 < epsilon, epsilon, pdf2 )
-
-  p2 <- ifelse(p2 > max.p, max.p, p2) 
-  p2 <- ifelse(p2 < epsilon, epsilon, p2) 
+pdf2 <- ifelse(pdf2 < epsilon, epsilon, pdf2 )
 
 
 ifef <- function(dv){
 
 epsilon <- 0.0000001 
 dv <- ifelse(is.na(dv), epsilon, dv ) 
-#dv <- ifelse(dv == Inf ,  8.218407e+307, dv )
-#dv <- ifelse(dv == -Inf ,  8.218407e+307, dv )
 dv <- ifelse(dv == Inf ,  8.218407e+20, dv )
 dv <- ifelse(dv == -Inf ,  -8.218407e+20, dv )
 dv

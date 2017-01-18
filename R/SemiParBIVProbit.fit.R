@@ -4,13 +4,6 @@ SemiParBIVProbit.fit  <- function(func.opt, start.v,
                                    sp = NULL, qu.mag = NULL){ 
 
 
-###########################################################
-
-# univ == 0 means bivariate fitting
-# univ == 1 applies to margins probit and cont/discr with interest in second margin
-# univ == 2 applies to margins cont/discr and cont/discr with interest in first margin
-# univ == 3 applies to margins cont/discr and cont/discr with interest in second margin
-
 l.sp1 <- VC$l.sp1 
 l.sp2 <- VC$l.sp2 
 l.sp3 <- VC$l.sp3 
@@ -18,36 +11,16 @@ l.sp4 <- VC$l.sp4
 l.sp5 <- VC$l.sp5 
 l.sp6 <- VC$l.sp6 
 l.sp7 <- VC$l.sp7 
-
-
-if(respvec$univ != 0){ 
-
-if(VC$Cont == "NO" && VC$margins[2] %in% VC$m1d           && respvec$univ == 1) l.sp1 <- l.sp3 <- l.sp4 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
-if(VC$Cont == "NO" && VC$margins[2] %in% c(VC$m2,VC$m2d)  && respvec$univ == 1) l.sp1 <- l.sp4 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
-if(VC$Cont == "NO" && VC$margins[2] %in% VC$m3            && respvec$univ == 1) l.sp1 <- l.sp5 <- l.sp6 <- l.sp7 <- 0  
-
-if(VC$Cont == "YES" && VC$margins[1] %in% c(VC$m1d)       && respvec$univ == 2) l.sp2 <- l.sp3 <- l.sp4 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
-if(VC$Cont == "YES" && VC$margins[1] %in% c(VC$m2,VC$m2d) && respvec$univ == 2) l.sp2 <- l.sp4 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
-if(VC$Cont == "YES" && VC$margins[1] %in% VC$m3           && respvec$univ == 2) l.sp2 <- l.sp4 <- l.sp6 <- l.sp7 <- 0
-
-if(VC$Cont == "YES" && VC$margins[1] %in% c(VC$m1d)       && VC$margins[2] %in% c(VC$m1d)       && respvec$univ == 3) l.sp1 <- l.sp3 <- l.sp4 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
-if(VC$Cont == "YES" && VC$margins[1] %in% c(VC$m1d)       && VC$margins[2] %in% c(VC$m2,VC$m2d) && respvec$univ == 3) l.sp1 <- l.sp4 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
-if(VC$Cont == "YES" && VC$margins[1] %in% c(VC$m1d)       && VC$margins[2] %in% VC$m3           && respvec$univ == 3) l.sp1 <- l.sp5 <- l.sp6 <- l.sp7 <- 0 
-if(VC$Cont == "YES" && VC$margins[1] %in% c(VC$m2,VC$m2d) && VC$margins[2] %in% c(VC$m2,VC$m2d) && respvec$univ == 3) l.sp1 <- l.sp3 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
-if(VC$Cont == "YES" && VC$margins[1] %in% c(VC$m2,VC$m2d) && VC$margins[2] %in% VC$m3           && respvec$univ == 3) l.sp1 <- l.sp3 <- l.sp6 <- l.sp7 <- 0 
-if(VC$Cont == "YES" && VC$margins[1] %in% VC$m3           && VC$margins[2] %in% c(VC$m2,VC$m2d) && respvec$univ == 3) l.sp1 <- l.sp3 <- l.sp5 <- l.sp6 <- l.sp7 <- 0
-if(VC$Cont == "YES" && VC$margins[1] %in% VC$m3           && VC$margins[2] %in% VC$m3           && respvec$univ == 3) l.sp1 <- l.sp3 <- l.sp5 <- l.sp7 <- 0
-  
-} 
+l.sp8 <- VC$l.sp8 
 
 
 l.splist <- list( l.sp1 = l.sp1, l.sp2 = l.sp2, l.sp3 = l.sp3, 
                   l.sp4 = l.sp4, l.sp5 = l.sp5, l.sp6 = l.sp6, 
-                  l.sp7 = l.sp7 )
+                  l.sp7 = l.sp7, l.sp8 = l.sp8 )
 
 
 
-if( ( l.sp1==0 && l.sp2==0 && l.sp3==0 && l.sp4==0 && l.sp5==0 && l.sp6==0 && l.sp7==0 ) || VC$fp==TRUE) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0, qu.mag = NULL) else ps <- pen(qu.mag, sp, VC, univ = respvec$univ, l.splist)
+if( ( l.sp1==0 && l.sp2==0 && l.sp3==0 && l.sp4==0 && l.sp5==0 && l.sp6==0 && l.sp7==0 && l.sp8==0 ) || VC$fp==TRUE) ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0, qu.mag = NULL) else ps <- pen(qu.mag, sp, VC, univ = respvec$univ, l.splist)
 
 
 
@@ -104,7 +77,7 @@ if((class(fit) == "try-error" || is.null(fit$l)) && VC$gamlssfit == TRUE  ) stop
   #####################################################################
   
   
-    if((VC$fp==FALSE && (l.sp1!=0 || l.sp2!=0 || l.sp3!=0 || l.sp4!=0 || l.sp5!=0 || l.sp6!=0 || l.sp7!=0)) ){
+    if((VC$fp==FALSE && (l.sp1!=0 || l.sp2!=0 || l.sp3!=0 || l.sp4!=0 || l.sp5!=0 || l.sp6!=0 || l.sp7!=0 || l.sp8!=0)) ){
 
        stoprule.SP <- 1; conv.sp <- TRUE; iter.inner <- iter.sp <- 0  
 

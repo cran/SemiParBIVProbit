@@ -39,10 +39,56 @@ bdiscrdiscr11 <- function(params, respvec, VC, ps, AT = FALSE){
     eta2 <- eta.tr(eta2, VC$margins[2])
     
 resT    <- teta.tr(VC, teta.st)
-teta.st <- resT$teta.st
-teta    <- resT$teta
+
+teta.st1 <- teta.st2 <- teta.st <- resT$teta.st
+teta1 <- teta2 <- teta <- resT$teta 
     
 ##################
+
+Cop1 <- Cop2 <- VC$BivD
+nC1 <- nC2 <- VC$nC 
+
+
+teta.ind1 <- as.logical(c(1,0,round(runif(VC$n-2))) ) 
+teta.ind2 <- teta.ind1 == FALSE  
+
+
+if(!(VC$BivD %in% VC$BivD2) && length(teta.st) > 1){
+
+teta.st1 <- teta.st[teta.ind1]
+teta.st2 <- teta.st[teta.ind2]
+
+teta1 <- teta[teta.ind1]
+teta2 <- teta[teta.ind2]
+
+}
+
+ 
+ 
+if(VC$BivD %in% VC$BivD2){
+
+if(VC$BivD %in% VC$BivD2[1:4])  teta.ind1 <- ifelse(VC$my.env$signind*teta > exp(VC$zerov), TRUE, FALSE)
+if(VC$BivD %in% VC$BivD2[5:12]) teta.ind1 <- ifelse(VC$my.env$signind*teta > exp(VC$zerov) + 1, TRUE, FALSE) 
+teta.ind2 <- teta.ind1 == FALSE 
+
+VC$my.env$signind <- ifelse(teta.ind1 == TRUE,  1, -1) 
+
+teta1 <-  teta[teta.ind1]
+teta2 <- -teta[teta.ind2]
+
+teta.st1 <- teta.st[teta.ind1]
+teta.st2 <- teta.st[teta.ind2]
+
+if(length(teta) == 1) teta.ind2 <- teta.ind1 <- rep(TRUE, VC$n)  
+
+Cop1Cop2R <- Cop1Cop2(VC$BivD)
+Cop1 <- Cop1Cop2R$Cop1
+Cop2 <- Cop1Cop2R$Cop2
+
+nC1 <- VC$ct[which(VC$ct[,1] == Cop1),2] 
+nC2 <- VC$ct[which(VC$ct[,1] == Cop2),2]
+
+} 
 ##################
 
   dHs1 <- distrHsDiscr(respvec$y1, eta1, sigma21, sigma21.st, nu = 1, nu.st = 1, margin2=VC$margins[1], naive = FALSE, y2m = VC$y1m)
@@ -54,10 +100,21 @@ teta    <- resT$teta
   p1 <- dHs1$p2
   p2 <- dHs2$p2
   
-  C11 <- BiCDF(p1, p2, VC$nC, teta)
-  C01 <- BiCDF(mm(p1-pdf1), p2, VC$nC, teta)
-  C10 <- BiCDF(p1, mm(p2-pdf2), VC$nC, teta)
-  C00 <- BiCDF(mm(p1-pdf1), mm(p2-pdf2), VC$nC, teta)
+C11 <- C01 <- C10 <- C00 <- NA
+
+if( length(teta1) != 0){  
+  C11[teta.ind1] <- BiCDF(p1[teta.ind1], p2[teta.ind1], nC1, teta1, VC$dof)
+  C01[teta.ind1] <- BiCDF(mm(p1[teta.ind1]-pdf1[teta.ind1]), p2[teta.ind1], nC1, teta1, VC$dof)
+  C10[teta.ind1] <- BiCDF(p1[teta.ind1], mm(p2[teta.ind1]-pdf2[teta.ind1]), nC1, teta1, VC$dof)
+  C00[teta.ind1] <- BiCDF(mm(p1[teta.ind1]-pdf1[teta.ind1]), mm(p2[teta.ind1]-pdf2[teta.ind1]), nC1, teta1, VC$dof)
+}  
+
+if( length(teta2) != 0){
+  C11[teta.ind2] <- BiCDF(p1[teta.ind2], p2[teta.ind2], nC2, teta2, VC$dof)
+  C01[teta.ind2] <- BiCDF(mm(p1[teta.ind2]-pdf1[teta.ind2]), p2[teta.ind2], nC2, teta2, VC$dof)
+  C10[teta.ind2] <- BiCDF(p1[teta.ind2], mm(p2[teta.ind2]-pdf2[teta.ind2]), nC2, teta2, VC$dof)
+  C00[teta.ind2] <- BiCDF(mm(p1[teta.ind2]-pdf1[teta.ind2]), mm(p2[teta.ind2]-pdf2[teta.ind2]), nC2, teta2, VC$dof)
+}
 
   E <- C11 - C01 - C10 + C00 
   E <- ifelse(E < epsilon, epsilon, E)  
@@ -68,27 +125,86 @@ teta    <- resT$teta
   
 ##################
 
-  dHC11 <- copgHs(p1, p2,                   eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD)
-  dHC01 <- copgHs(mm(p1-pdf1), p2,          eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD)
-  dHC10 <- copgHs(p1, mm(p2-pdf2),          eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD)
-  dHC00 <- copgHs(mm(p1-pdf1), mm(p2-pdf2), eta1=NULL, eta2=NULL, teta, teta.st, VC$BivD)
+
+
+if( length(teta1) != 0){  
+
+  dHC11F <- copgHs(p1[teta.ind1], p2[teta.ind1],                   eta1=NULL, eta2=NULL, teta1, teta.st1, Cop1, VC$dof)
+  dHC01F <- copgHs(mm(p1[teta.ind1]-pdf1[teta.ind1]), p2[teta.ind1],          eta1=NULL, eta2=NULL, teta1, teta.st1, Cop1, VC$dof)
+  dHC10F <- copgHs(p1[teta.ind1], mm(p2[teta.ind1]-pdf2[teta.ind1]),          eta1=NULL, eta2=NULL, teta1, teta.st1, Cop1, VC$dof)
+  dHC00F <- copgHs(mm(p1[teta.ind1]-pdf1[teta.ind1]), mm(p2[teta.ind1]-pdf2[teta.ind1]), eta1=NULL, eta2=NULL, teta1, teta.st1, Cop1, VC$dof)
  
-  derC11.derp1 <- dHC11$c.copula.be1  
-  derC01.derp1 <- dHC01$c.copula.be1  
-  derC10.derp1 <- dHC10$c.copula.be1  
-  derC00.derp1 <- dHC00$c.copula.be1 
+} 
+ 
+ 
+if( length(teta2) != 0){  
+
+  dHC11S <- copgHs(p1[teta.ind2], p2[teta.ind2],                   eta1=NULL, eta2=NULL, teta2, teta.st2, Cop2, VC$dof)
+  dHC01S <- copgHs(mm(p1[teta.ind2]-pdf1[teta.ind2]), p2[teta.ind2],          eta1=NULL, eta2=NULL, teta2, teta.st2, Cop2, VC$dof)
+  dHC10S <- copgHs(p1[teta.ind2], mm(p2[teta.ind2]-pdf2[teta.ind2]),          eta1=NULL, eta2=NULL, teta2, teta.st2, Cop2, VC$dof)
+  dHC00S <- copgHs(mm(p1[teta.ind2]-pdf1[teta.ind2]), mm(p2[teta.ind2]-pdf2[teta.ind2]), eta1=NULL, eta2=NULL, teta2, teta.st2, Cop2, VC$dof)
+ 
+} 
   
-  derC11.derp2 <- dHC11$c.copula.be2  
-  derC01.derp2 <- dHC01$c.copula.be2  
-  derC10.derp2 <- dHC10$c.copula.be2  
-  derC00.derp2 <- dHC00$c.copula.be2   
+ 
+ 
+ 
+derC11.derp1 <- derC01.derp1 <- derC10.derp1 <- derC00.derp1 <- derC11.derp2 <- derC01.derp2 <- derC10.derp2 <- derC00.derp2 <- derC11.derthet <- derC01.derthet <- derC10.derthet <- derC00.derthet <- derteta.derteta.st <- NA 
+ 
+ 
+if( length(teta1) != 0){ 
+ 
+  derC11.derp1[teta.ind1]       <- dHC11F$c.copula.be1  
+  derC01.derp1[teta.ind1]       <- dHC01F$c.copula.be1  
+  derC10.derp1[teta.ind1]       <- dHC10F$c.copula.be1  
+  derC00.derp1[teta.ind1]       <- dHC00F$c.copula.be1 
+ 
+  derC11.derp2[teta.ind1]       <- dHC11F$c.copula.be2  
+  derC01.derp2[teta.ind1]       <- dHC01F$c.copula.be2  
+  derC10.derp2[teta.ind1]       <- dHC10F$c.copula.be2  
+  derC00.derp2[teta.ind1]       <- dHC00F$c.copula.be2   
   
-  derC11.derthet <- dHC11$c.copula.thet 
-  derC01.derthet <- dHC01$c.copula.thet  
-  derC10.derthet <- dHC10$c.copula.thet  
-  derC00.derthet <- dHC00$c.copula.thet  
+  derC11.derthet[teta.ind1]     <- dHC11F$c.copula.thet 
+  derC01.derthet[teta.ind1]     <- dHC01F$c.copula.thet  
+  derC10.derthet[teta.ind1]     <- dHC10F$c.copula.thet  
+  derC00.derthet[teta.ind1]     <- dHC00F$c.copula.thet  
   
-  derteta.derteta.st <- dHC11$derteta.derteta.st
+  derteta.derteta.st[teta.ind1] <- dHC11F$derteta.derteta.st
+  
+}  
+  
+
+if( length(teta2) != 0){ 
+ 
+  derC11.derp1[teta.ind2]       <- dHC11S$c.copula.be1  
+  derC01.derp1[teta.ind2]       <- dHC01S$c.copula.be1  
+  derC10.derp1[teta.ind2]       <- dHC10S$c.copula.be1  
+  derC00.derp1[teta.ind2]       <- dHC00S$c.copula.be1 
+ 
+  derC11.derp2[teta.ind2]       <- dHC11S$c.copula.be2  
+  derC01.derp2[teta.ind2]       <- dHC01S$c.copula.be2  
+  derC10.derp2[teta.ind2]       <- dHC10S$c.copula.be2  
+  derC00.derp2[teta.ind2]       <- dHC00S$c.copula.be2   
+  
+  derC11.derthet[teta.ind2]     <- dHC11S$c.copula.thet 
+  derC01.derthet[teta.ind2]     <- dHC01S$c.copula.thet  
+  derC10.derthet[teta.ind2]     <- dHC10S$c.copula.thet  
+  derC00.derthet[teta.ind2]     <- dHC00S$c.copula.thet  
+  
+  derteta.derteta.st[teta.ind2] <- dHC11S$derteta.derteta.st
+  
+}  
+   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   derpdf1.dereta1    <- dHs1$derpdf2.dereta2 
   derp1.dereta1      <- dHs1$derp2.dereta2
@@ -108,37 +224,87 @@ teta    <- resT$teta
 
 ##################
 
-  der2C11.derp1p1 <- dHC11$c.copula2.be1
-  der2C01.derp1p1 <- dHC01$c.copula2.be1  
-  der2C10.derp1p1 <- dHC10$c.copula2.be1  
-  der2C00.derp1p1 <- dHC00$c.copula2.be1 
-  
-  der2C11.derp2p2 <- dHC11$c.copula2.be2
-  der2C01.derp2p2 <- dHC01$c.copula2.be2  
-  der2C10.derp2p2 <- dHC10$c.copula2.be2  
-  der2C00.derp2p2 <- dHC00$c.copula2.be2  
-  
-  der2C11.derp1p2 <- dHC11$c.copula2.be1be2
-  der2C01.derp1p2 <- dHC01$c.copula2.be1be2 
-  der2C10.derp1p2 <- dHC10$c.copula2.be1be2  
-  der2C00.derp1p2 <- dHC00$c.copula2.be1be2
- 
-  der2C11.derp1t  <- dHC11$c.copula2.be1t
-  der2C01.derp1t  <- dHC01$c.copula2.be1t 
-  der2C10.derp1t  <- dHC10$c.copula2.be1t  
-  der2C00.derp1t  <- dHC00$c.copula2.be1t 
-  
-  der2C11.derp2t  <- dHC11$c.copula2.be2t
-  der2C01.derp2t  <- dHC01$c.copula2.be2t 
-  der2C10.derp2t  <- dHC10$c.copula2.be2t  
-  der2C00.derp2t  <- dHC00$c.copula2.be2t   
-  
-  der2C11.derthet2 <- dHC11$bit1.th2ATE
-  der2C01.derthet2 <- dHC01$bit1.th2ATE  
-  der2C10.derthet2 <- dHC10$bit1.th2ATE  
-  der2C00.derthet2 <- dHC00$bit1.th2ATE   
 
-  der2teta.derteta.stteta.st <- dHC11$der2teta.derteta.stteta.st 
+der2C11.derp1p1 <- der2C01.derp1p1 <- der2C10.derp1p1 <- der2C00.derp1p1 <- der2C11.derp2p2 <- der2C01.derp2p2 <- der2C10.derp2p2 <- der2C00.derp2p2 <- der2C11.derp1p2 <- der2C01.derp1p2 <- der2C10.derp1p2 <- der2C00.derp1p2 <- der2C11.derp1t <- der2C01.derp1t <- der2C10.derp1t <- der2C00.derp1t <- der2C11.derp2t <- der2C01.derp2t <- der2C10.derp2t <- der2C00.derp2t <- der2C11.derthet2 <- der2C01.derthet2 <- der2C10.derthet2 <- der2C00.derthet2 <- der2teta.derteta.stteta.st <- NA
+
+if( length(teta1) != 0){ 
+
+  der2C11.derp1p1[teta.ind1]            <- dHC11F$c.copula2.be1
+  der2C01.derp1p1[teta.ind1]            <- dHC01F$c.copula2.be1  
+  der2C10.derp1p1[teta.ind1]            <- dHC10F$c.copula2.be1  
+  der2C00.derp1p1[teta.ind1]            <- dHC00F$c.copula2.be1 
+  
+  der2C11.derp2p2[teta.ind1]            <- dHC11F$c.copula2.be2
+  der2C01.derp2p2[teta.ind1]            <- dHC01F$c.copula2.be2  
+  der2C10.derp2p2[teta.ind1]            <- dHC10F$c.copula2.be2  
+  der2C00.derp2p2[teta.ind1]            <- dHC00F$c.copula2.be2  
+  
+  der2C11.derp1p2[teta.ind1]            <- dHC11F$c.copula2.be1be2
+  der2C01.derp1p2[teta.ind1]            <- dHC01F$c.copula2.be1be2 
+  der2C10.derp1p2[teta.ind1]            <- dHC10F$c.copula2.be1be2  
+  der2C00.derp1p2[teta.ind1]            <- dHC00F$c.copula2.be1be2
+ 
+  der2C11.derp1t[teta.ind1]             <- dHC11F$c.copula2.be1t
+  der2C01.derp1t[teta.ind1]             <- dHC01F$c.copula2.be1t 
+  der2C10.derp1t[teta.ind1]             <- dHC10F$c.copula2.be1t  
+  der2C00.derp1t[teta.ind1]             <- dHC00F$c.copula2.be1t 
+   
+  der2C11.derp2t[teta.ind1]             <- dHC11F$c.copula2.be2t
+  der2C01.derp2t[teta.ind1]             <- dHC01F$c.copula2.be2t 
+  der2C10.derp2t[teta.ind1]             <- dHC10F$c.copula2.be2t  
+  der2C00.derp2t[teta.ind1]             <- dHC00F$c.copula2.be2t   
+   
+  der2C11.derthet2[teta.ind1]           <- dHC11F$bit1.th2ATE
+  der2C01.derthet2[teta.ind1]           <- dHC01F$bit1.th2ATE  
+  der2C10.derthet2[teta.ind1]           <- dHC10F$bit1.th2ATE  
+  der2C00.derthet2[teta.ind1]           <- dHC00F$bit1.th2ATE   
+
+  der2teta.derteta.stteta.st[teta.ind1] <- dHC11F$der2teta.derteta.stteta.st 
+  
+ } 
+  
+
+
+
+if( length(teta2) != 0){ 
+
+
+  der2C11.derp1p1[teta.ind2]            <- dHC11S$c.copula2.be1
+  der2C01.derp1p1[teta.ind2]            <- dHC01S$c.copula2.be1  
+  der2C10.derp1p1[teta.ind2]            <- dHC10S$c.copula2.be1  
+  der2C00.derp1p1[teta.ind2]            <- dHC00S$c.copula2.be1 
+  
+  der2C11.derp2p2[teta.ind2]            <- dHC11S$c.copula2.be2
+  der2C01.derp2p2[teta.ind2]            <- dHC01S$c.copula2.be2  
+  der2C10.derp2p2[teta.ind2]            <- dHC10S$c.copula2.be2  
+  der2C00.derp2p2[teta.ind2]            <- dHC00S$c.copula2.be2  
+  
+  der2C11.derp1p2[teta.ind2]            <- dHC11S$c.copula2.be1be2
+  der2C01.derp1p2[teta.ind2]            <- dHC01S$c.copula2.be1be2 
+  der2C10.derp1p2[teta.ind2]            <- dHC10S$c.copula2.be1be2  
+  der2C00.derp1p2[teta.ind2]            <- dHC00S$c.copula2.be1be2
+ 
+  der2C11.derp1t[teta.ind2]             <- dHC11S$c.copula2.be1t
+  der2C01.derp1t[teta.ind2]             <- dHC01S$c.copula2.be1t 
+  der2C10.derp1t[teta.ind2]             <- dHC10S$c.copula2.be1t  
+  der2C00.derp1t[teta.ind2]             <- dHC00S$c.copula2.be1t 
+   
+  der2C11.derp2t[teta.ind2]             <- dHC11S$c.copula2.be2t
+  der2C01.derp2t[teta.ind2]             <- dHC01S$c.copula2.be2t 
+  der2C10.derp2t[teta.ind2]             <- dHC10S$c.copula2.be2t  
+  der2C00.derp2t[teta.ind2]             <- dHC00S$c.copula2.be2t   
+   
+  der2C11.derthet2[teta.ind2]           <- dHC11S$bit1.th2ATE
+  der2C01.derthet2[teta.ind2]           <- dHC01S$bit1.th2ATE  
+  der2C10.derthet2[teta.ind2]           <- dHC10S$bit1.th2ATE  
+  der2C00.derthet2[teta.ind2]           <- dHC00S$bit1.th2ATE   
+
+  der2teta.derteta.stteta.st[teta.ind2] <- dHC11S$der2teta.derteta.stteta.st 
+  
+ } 
+  
+    
+  
 
   der2pdf1.dereta1     <- dHs1$der2pdf2.dereta2 
   der2p1.dereta1eta1   <- dHs1$der2p2.dereta2eta2
@@ -283,7 +449,9 @@ if(VC$extra.regI == "sED") H <- regH(H, type = 2)
               BivD=VC$BivD, p1 = p1, p2 = p2,
               dl.dbe1          =dl.dbe1,       
               dl.dbe2          =dl.dbe2,       
-              dl.dteta.st      =dl.dteta.st) 
+              dl.dteta.st      =dl.dteta.st,
+                            teta.ind2 = teta.ind2, teta.ind1 = teta.ind1,
+              Cop1 = Cop1, Cop2 = Cop2, teta1 = teta1, teta2 = teta2) 
               
               
 
