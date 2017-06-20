@@ -14,6 +14,7 @@ effects, copula distributions and marginal distributions.
 \usage{
 copulaReg(formula, data = list(), weights = NULL, subset = NULL,  
                  BivD = "N", margins = c("N","N"), dof = 3,  
+                 surv = FALSE, cens1 = NULL, cens2 = NULL,
                  gamlssfit = FALSE, fp = FALSE, infl.fac = 1, 
                  rinit = 1, rmax = 100, 
                  iterlimsp = 50, tolsp = 1e-07,
@@ -44,25 +45,30 @@ copulaReg(formula, data = list(), weights = NULL, subset = NULL,
                sigma2 corresponds to 
                the standard deviation instead of the variance ("N2"),  
                log-normal ("LN"), Gumbel ("GU"), reverse Gumbel ("rGU"), 
-               logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"), 
-               gamma with identity link for the location parameter ("GAi"), Dagum ("DAGUM"), 
+               logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"), Dagum ("DAGUM"), 
                Singh-Maddala ("SM"), beta ("BE"), Fisk ("FISK", also known as log-logistic distribution), Poisson ("PO"), zero truncated 
                Poisson ("ZTP"), negative binomial - type I ("NBI"), negative 
                binomial - type II ("NBII"), Poisson inverse Gaussian ("PIG"). When the first equation is binary then
-               possible link functions are "probit", "logit" and "cloglog".}
+               possible link functions are "probit", "logit", "cloglog"".}
   
 \item{dof}{If \code{BivD = "T"} then the degrees of freedom can be set to a value greater than 2 and smaller than 249. Only for continuous margins,
            this will be taken as a starting value and the dof estiamted from the data.}   
-  
+ 
+\item{surv}{If \code{TRUE} then a bivariate survival model is fitted.}    
+
+\item{cens1}{Binary censoring indicator 1. This is required when \code{surv = TRUE}.}
+
+\item{cens2}{Binary censoring indicator 2. This is required when \code{surv = TRUE}.}
+
 \item{gamlssfit}{If \code{gamlssfit = TRUE} then gamlss univariate models are also fitted. This is useful for obtaining 
                  starting values, for instance.}               
 
 \item{BivD}{Type of bivariate error distribution employed. Possible choices are "N", "C0", "C90", "C180", "C270", "J0", "J90", "J180", "J270", 
-            "G0", "G90", "G180", "G270", "F", "AMH", "FGM", "T" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), 
+            "G0", "G90", "G180", "G270", "F", "AMH", "FGM", "T", "PL", "HO" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), 
             survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
              Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Ali-Mikhail-Haq,
-             Farlie-Gumbel-Morgenstern and Student-t with \code{dof}. Each of the Clayton, Joe and Gumbel copulae is allowed to be mixed with a rotated version of the same
+             Farlie-Gumbel-Morgenstern, Student-t with \code{dof}, Plackett, Hougaard. Each of the Clayton, Joe and Gumbel copulae is allowed to be mixed with a rotated version of the same
 family. The options are: "C0C90", "C0C270", "C180C90", "C180C270", "G0G90", "G0G270", "G180G90",
 "G180G270", "J0J90", "J0J270", "J180J90" and "J180J270". This allows the user to model negative and positive tail dependencies.}            
 
@@ -122,7 +128,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Marra G. and Radice R. (submitted), Bivariate Copula Additive Models for Location, Scale and Shape.
+Marra G. and Radice R. (2017), Bivariate Copula Additive Models for Location, Scale and Shape. \emph{Computational Statistics and Data Analysis}, 112, 99-113.
 
 }
 
@@ -170,6 +176,8 @@ to be more informative than a situation in which two parameter distributions are
 
 library(SemiParBIVProbit)
 
+\dontrun{
+
 ############
 ## EXAMPLE 1
 ## Generate data
@@ -207,8 +215,6 @@ fl <- list(eq.mu.1, eq.mu.2, eq.sigma2.1, eq.sigma2.2, eq.theta)
 # using more than two equations
 
 out  <- copulaReg(fl, data = dataSim)
-
-\dontrun{ 
 
 conv.check(out)
 post.check(out)
@@ -323,6 +329,105 @@ OR(out, nm.end = "y1", type = "univariate")
 
 #
 #
+
+############
+## EXAMPLE 4
+############
+## Survival model
+
+set.seed(0)
+
+n  <- 2000
+c  <- runif(n, 3, 8)
+u  <- runif(n, 0, 1)
+z1 <- rbinom(n, 1, 0.5)
+z2 <- runif(n, 0, 1)
+t  <- rep(NA, n)
+
+beta_0 <- -0.2357
+beta_1 <- 1
+
+f <- function(t, beta_0, beta_1, u, z1, z2){ 
+  S_0 <- 0.7 * exp(-0.03*t^1.9) + 0.3*exp(-0.3*t^2.5)
+  exp(-exp(log(-log(S_0))+beta_0*z1 + beta_1*z2))-u
+}
+
+
+for (i in 1:n){
+   t[i] <- uniroot(f, c(0, 8), tol = .Machine$double.eps^0.5, 
+                   beta_0 = beta_0, beta_1 = beta_1, u = u[i], 
+                   z1 = z1[i], z2 = z2[i], extendInt = "yes" )$root
+}
+
+delta1  <- ifelse(t < c, 1, 0)
+u1      <- apply(cbind(t, c), 1, min)
+dataSim <- data.frame(u1, delta1, z1, z2)
+
+
+c <- runif(n, 4, 8)
+u <- runif(n, 0, 1)
+z <- rbinom(n, 1, 0.5)
+beta_0 <- -1.05
+t      <- rep(NA, n)
+
+f <- function(t, beta_0, u, z){ 
+  S_0 <- 0.7 * exp(-0.03*t^1.9) + 0.3*exp(-0.3*t^2.5)
+  1/(1 + exp(log((1-S_0)/S_0)+beta_0*z))-u
+}
+
+
+
+for (i in 1:n){
+    t[i] <- uniroot(f, c(0, 8), tol = .Machine$double.eps^0.5, 
+                    beta_0 = beta_0, u = u[i], z = z[i], 
+                    extendInt="yes" )$root
+}
+
+delta2 <- ifelse(t < c,1, 0)
+u2     <- apply(cbind(t, c), 1, min)
+dataSim$delta2 <- delta2
+dataSim$u2     <- u2
+
+
+eq1 <- u1 ~ z1 + s(z2) + s(u1, bs = "mpi")
+eq2 <- u2 ~ z + s(u2, bs = "mpi") 
+eq3 <-    ~ s(z2)
+
+out <- copulaReg(list(eq1, eq2), data = dataSim, surv = TRUE,
+                 margins = c("PH", "PO"), 
+                 cens1 = delta1, cens2 = delta2)
+                 
+# PH margin fit can also be compared with cox.ph from mgcv
+                 
+conv.check(out)
+post.check(out)
+summary(out)
+AIC(out); BIC(out)
+plot(out, eq = 1, scale = 0, pages = 1)
+plot(out, eq = 2, scale = 0, pages = 1)
+
+hazsurv.plot(out, eq = 1, newdata = data.frame(z1 = 0, z2 = 0), 
+             shade = TRUE, n.sim = 1000)
+hazsurv.plot(out, eq = 1, newdata = data.frame(z1 = 0, z2 = 0), 
+             shade = TRUE, n.sim = 1000, type = "hazard")
+hazsurv.plot(out, eq = 2, newdata = data.frame(z = 0), 
+             shade = TRUE, n.sim = 1000)
+hazsurv.plot(out, eq = 2, newdata = data.frame(z = 0), 
+             shade = TRUE, n.sim = 1000, type = "hazard")
+ 
+out1 <- copulaReg(list(eq1, eq2, eq3), data = dataSim, surv = TRUE,
+                  margins = c("PH", "PO"), 
+                  cens1 = delta1, cens2 = delta2, gamlssfit = TRUE) 
+
+eq1 <- u1 ~ z1 + s(z2)
+eq2 <- u2 ~ z  
+eq3 <-    ~ s(z2)    
+
+# note that Weibull is implemented as AFT model
+out2 <- copulaReg(list(eq1, eq2, ~ 1, ~ 1, eq3), data = dataSim, surv = TRUE,
+                  margins = c("WEI", "WEI"), 
+                  cens1 = delta1, cens2 = delta2)                   
+                   
 }
 }
 

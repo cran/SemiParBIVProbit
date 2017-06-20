@@ -383,14 +383,6 @@ H.triSS <- function(params, respvec, VC, TIn, LgTRI){
     respvec$y1.y2.y3 * ( -1/TIn$p111^2 * LgTRI$d11.13 * LgTRI$p13.g   * LgTRI$d11.23 * LgTRI$p23.g   - 1/TIn$p111 * LgTRI$d11.23 * (d23/LgTRI$sd.23) * (dmean23.dtheta13 + ((TIn$mar1[VC$inde2] - LgTRI$mean.23)/(2 * LgTRI$sd.23^2) * dvar23.dtheta13) )) 
   
   
-  dtheta12.dtheta12.st <- 4 * exp( 2 * TIn$theta12.st )/( exp(2 * TIn$theta12.st) + 1 )^2
-  dtheta13.dtheta13.st <- 4 * exp( 2 * TIn$theta13.st )/( exp(2 * TIn$theta13.st) + 1 )^2
-  dtheta23.dtheta23.st <- 4 * exp( 2 * TIn$theta23.st )/( exp(2 * TIn$theta23.st) + 1 )^2
-  
-  d2theta12.theta12.st <- (8 * exp( 2 * TIn$theta12.st ) - 8 * exp( 4 * TIn$theta12.st ))/( exp(2 * TIn$theta12.st) + 1 )^3
-  d2theta13.theta13.st <- (8 * exp( 2 * TIn$theta13.st ) - 8 * exp( 4 * TIn$theta13.st ))/( exp(2 * TIn$theta13.st) + 1 )^3
-  d2theta23.theta23.st <- (8 * exp( 2 * TIn$theta23.st ) - 8 * exp( 4 * TIn$theta23.st ))/( exp(2 * TIn$theta23.st) + 1 )^3
-  
   d2l.dbe1.be1 <- crossprod( VC$X1 * c(VC$weights*d2l.de1.e1), VC$X1 )
   d2l.dbe2.be2 <- crossprod( VC$X2 * c(VC$weights[VC$inde1]*d2l.de2.e2), VC$X2 )
   d2l.dbe3.be3 <- crossprod( VC$X3 * c(VC$weights[VC$inde2]*d2l.de3.e3), VC$X3 )
@@ -398,25 +390,162 @@ H.triSS <- function(params, respvec, VC, TIn, LgTRI){
   d2l.dbe1.be3 <- crossprod( VC$X1[VC$inde2,   ] * c(VC$weights[VC$inde2]*d2l.de1.e3), VC$X3 )
   d2l.dbe2.be3 <- crossprod( VC$X2[VC$inde2.1, ] * c(VC$weights[VC$inde2]*d2l.de2.e3), VC$X3 )
   
-  d2l.dbe1.theta12.st <- colSums(c(VC$weights[VC$inde1]*d2l.de1.theta12* dtheta12.dtheta12.st) * VC$X1[VC$inde1, ]) 
-  d2l.dbe1.theta13.st <- colSums(c(VC$weights[VC$inde2]*d2l.de1.theta13* dtheta13.dtheta13.st) * VC$X1[VC$inde2, ]) 
-  d2l.dbe1.theta23.st <- colSums(c(VC$weights[VC$inde2]*d2l.de1.theta23* dtheta23.dtheta23.st) * VC$X1[VC$inde2, ]) 
+  if(VC$Chol == FALSE){
+    dtheta12.dtheta12.st <- 4 * exp( 2 * TIn$theta12.st )/( exp(2 * TIn$theta12.st) + 1 )^2
+    dtheta13.dtheta13.st <- 4 * exp( 2 * TIn$theta13.st )/( exp(2 * TIn$theta13.st) + 1 )^2
+    dtheta23.dtheta23.st <- 4 * exp( 2 * TIn$theta23.st )/( exp(2 * TIn$theta23.st) + 1 )^2
+    
+    d2theta12.theta12.st <- (8 * exp( 2 * TIn$theta12.st ) - 8 * exp( 4 * TIn$theta12.st ))/( exp(2 * TIn$theta12.st) + 1 )^3
+    d2theta13.theta13.st <- (8 * exp( 2 * TIn$theta13.st ) - 8 * exp( 4 * TIn$theta13.st ))/( exp(2 * TIn$theta13.st) + 1 )^3
+    d2theta23.theta23.st <- (8 * exp( 2 * TIn$theta23.st ) - 8 * exp( 4 * TIn$theta23.st ))/( exp(2 * TIn$theta23.st) + 1 )^3
+    
+    d2l.dbe1.theta12.st <- colSums(c(VC$weights[VC$inde1]*d2l.de1.theta12* dtheta12.dtheta12.st) * VC$X1[VC$inde1, ]) 
+    d2l.dbe1.theta13.st <- colSums(c(VC$weights[VC$inde2]*d2l.de1.theta13* dtheta13.dtheta13.st) * VC$X1[VC$inde2, ]) 
+    d2l.dbe1.theta23.st <- colSums(c(VC$weights[VC$inde2]*d2l.de1.theta23* dtheta23.dtheta23.st) * VC$X1[VC$inde2, ]) 
+    
+    d2l.dbe2.theta12.st <- colSums(c(VC$weights[VC$inde1]*d2l.de2.theta12* dtheta12.dtheta12.st) * VC$X2) 
+    d2l.dbe2.theta13.st <- colSums(c(VC$weights[VC$inde2]*d2l.de2.theta13* dtheta13.dtheta13.st) * VC$X2[VC$inde2.1, ]) 
+    d2l.dbe2.theta23.st <- colSums(c(VC$weights[VC$inde2]*d2l.de2.theta23* dtheta23.dtheta23.st) * VC$X2[VC$inde2.1, ]) 
+    
+    d2l.dbe3.theta12.st <- colSums(c(VC$weights[VC$inde2]*d2l.de3.theta12* dtheta12.dtheta12.st) * VC$X3) 
+    d2l.dbe3.theta13.st <- colSums(c(VC$weights[VC$inde2]*d2l.de3.theta13* dtheta13.dtheta13.st) * VC$X3) 
+    d2l.dbe3.theta23.st <- colSums(c(VC$weights[VC$inde2]*d2l.de3.theta23* dtheta23.dtheta23.st) * VC$X3) 
+    
+    d2l.dtheta12.st <- sum( VC$weights[VC$inde1]*(d2l.dtheta12.theta12 * (dtheta12.dtheta12.st)^2  + LgTRI$dl.dtheta12 * d2theta12.theta12.st) )
+    d2l.dtheta13.st <- sum( VC$weights[VC$inde2]*(d2l.dtheta13.theta13 * (dtheta13.dtheta13.st)^2  + LgTRI$dl.dtheta13 * d2theta13.theta13.st) )
+    d2l.dtheta23.st <- sum( VC$weights[VC$inde2]*(d2l.dtheta23.theta23 * (dtheta23.dtheta23.st)^2  + LgTRI$dl.dtheta23 * d2theta23.theta23.st) )
+    
+    d2l.dtheta12.st.theta13.st <- sum(VC$weights[VC$inde2]*d2l.dtheta12.theta13 * dtheta12.dtheta12.st * dtheta13.dtheta13.st )
+    d2l.dtheta12.st.theta23.st <- sum(VC$weights[VC$inde2]*d2l.dtheta12.theta23 * dtheta12.dtheta12.st * dtheta23.dtheta23.st )
+    d2l.dtheta13.st.theta23.st <- sum(VC$weights[VC$inde2]*d2l.dtheta13.theta23 * dtheta13.dtheta13.st * dtheta23.dtheta23.st )
+    
+  }
   
-  d2l.dbe2.theta12.st <- colSums(c(VC$weights[VC$inde1]*d2l.de2.theta12* dtheta12.dtheta12.st) * VC$X2) 
-  d2l.dbe2.theta13.st <- colSums(c(VC$weights[VC$inde2]*d2l.de2.theta13* dtheta13.dtheta13.st) * VC$X2[VC$inde2.1, ]) 
-  d2l.dbe2.theta23.st <- colSums(c(VC$weights[VC$inde2]*d2l.de2.theta23* dtheta23.dtheta23.st) * VC$X2[VC$inde2.1, ]) 
+  if(VC$Chol == TRUE){
+    
+    d2l.de1.theta <- matrix(0,length(VC$inde1),3)
+    d2l.de1.theta[VC$inde1, 1] <- VC$weights[VC$inde1]*d2l.de1.theta12
+    d2l.de1.theta[VC$inde2, 2] <- VC$weights[VC$inde2]*d2l.de1.theta13
+    d2l.de1.theta[VC$inde2, 3] <- VC$weights[VC$inde2]*d2l.de1.theta23
+    
+    d2l.de2.theta <-  matrix(0,length(VC$inde1),3)
+    d2l.de2.theta[VC$inde1, 1] <- VC$weights[VC$inde1]*d2l.de2.theta12
+    d2l.de2.theta[VC$inde2, 2] <- VC$weights[VC$inde2]*d2l.de2.theta13
+    d2l.de2.theta[VC$inde2, 3] <- VC$weights[VC$inde2]*d2l.de2.theta23
+    
+    d2l.de3.theta <-  matrix(0,length(VC$inde1),3)
+    d2l.de3.theta[VC$inde2, 1] <- VC$weights[VC$inde2]*d2l.de3.theta12
+    d2l.de3.theta[VC$inde2, 2] <- VC$weights[VC$inde2]*d2l.de3.theta13
+    d2l.de3.theta[VC$inde2, 3] <- VC$weights[VC$inde2]*d2l.de3.theta23
+    
+    dth12.dth12.st <- 1/(1 + TIn$theta12.st^2)^(3/2) 
+    dth12.dth13.st <- 0
+    dth12.dth23.st <- 0
+    
+    dth13.dth12.st <- 0
+    dth13.dth13.st <- (1 + TIn$theta23.st^2)/(1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2)
+    dth13.dth23.st <- - (TIn$theta13.st * TIn$theta23.st)/(1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2)
+    
+    
+    dth23.dth12.st <- TIn$theta13.st/sqrt( (1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)) - (TIn$theta12.st * (TIn$theta12.st * TIn$theta13.st + TIn$theta23.st))/((1 + TIn$theta12.st^2)^(3/2) * sqrt(1 + TIn$theta13.st^2 + TIn$theta23.st^2))
+    dth23.dth13.st <- TIn$theta12.st/sqrt((1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)) - (TIn$theta13.st * (TIn$theta12.st * TIn$theta13.st + TIn$theta23.st))/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2))
+    dth23.dth23.st <- 1/sqrt((1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)) - (TIn$theta23.st * (TIn$theta12.st * TIn$theta13.st + TIn$theta23.st))/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2))
+    
+    dtheta.theta.st <- matrix( c(  dth12.dth12.st,  dth13.dth12.st, dth23.dth12.st,
+                                   dth12.dth13.st,  dth13.dth13.st, dth23.dth13.st,
+                                   dth12.dth23.st,  dth13.dth23.st, dth23.dth23.st ), 3 , 3)
+    
+    
+    d2l.dbe1.theta12.st <- (t(VC$X1) %*%  d2l.de1.theta %*% dtheta.theta.st)[, 1]
+    d2l.dbe1.theta13.st <- (t(VC$X1) %*%  d2l.de1.theta %*% dtheta.theta.st)[, 2]
+    d2l.dbe1.theta23.st <- (t(VC$X1) %*%  d2l.de1.theta %*% dtheta.theta.st)[, 3]
+    
+    d2l.dbe2.theta12.st <- (t(VC$X2) %*%  d2l.de2.theta[VC$inde1, ] %*% dtheta.theta.st)[, 1]
+    d2l.dbe2.theta13.st <- (t(VC$X2) %*%  d2l.de2.theta[VC$inde1, ] %*% dtheta.theta.st)[, 2]
+    d2l.dbe2.theta23.st <- (t(VC$X2) %*%  d2l.de2.theta[VC$inde1, ] %*% dtheta.theta.st)[, 3]
+    
+    d2l.dbe3.theta12.st <- (t(VC$X3) %*%  d2l.de3.theta[VC$inde2, ] %*% dtheta.theta.st)[, 1]
+    d2l.dbe3.theta13.st <- (t(VC$X3) %*%  d2l.de3.theta[VC$inde2, ] %*% dtheta.theta.st)[, 2]
+    d2l.dbe3.theta23.st <- (t(VC$X3) %*%  d2l.de3.theta[VC$inde2, ] %*% dtheta.theta.st)[, 3]
+    
+    ############################
+    ## d2l.dtheta.st.theta.st ## 
+    ############################
+    d2th12.dth12.st.th12.st <- -(3 * TIn$theta12.st)/(1 + TIn$theta12.st^2)^(5/2)
+    d2th12.dth13.st.th12.st <- 0
+    d2th12.dth23.st.th12.st <- 0
+    d2th12.dth12.st.th13.st <- 0
+    d2th12.dth13.st.th13.st <- 0
+    d2th12.dth23.st.th13.st <- 0
+    d2th12.dth12.st.th23.st <- 0
+    d2th12.dth13.st.th23.st <- 0
+    d2th12.dth23.st.th23.st <- 0
+    
+    d2th13.dth12.st.th12.st <- 0
+    d2th13.dth13.st.th12.st <- 0
+    d2th13.dth23.st.th12.st <- 0
+    d2th13.dth12.st.th13.st <- 0
+    d2th13.dth13.st.th13.st<- -(3 * TIn$theta13.st * (1 + TIn$theta23.st^2))/(1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(5/2)
+    d2th13.dth23.st.th13.st <- (2 * TIn$theta23.st)/(1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2) - (3 * TIn$theta23.st * (1 + TIn$theta23.st^2))/(1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(5/2)
+    d2th13.dth12.st.th23.st <- 0
+    d2th13.dth13.st.th23.st <- -TIn$theta23.st/(1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2) + (3 * TIn$theta13.st^2 * TIn$theta23.st)/(1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(5/2)
+    d2th13.dth23.st.th23.st <- -TIn$theta13.st/(1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2) + (3 * TIn$theta13.st * TIn$theta23.st^2)/(1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(5/2)
+    
+    d2th23.dth12.st.th12.st <- -(3 * TIn$theta12.st * TIn$theta13.st + TIn$theta23.st)/((1 + TIn$theta12.st^2)^(3/2) * sqrt(1 + TIn$theta13.st^2 + TIn$theta23.st^2)) + (3 * TIn$theta12.st^2 * (TIn$theta12.st * TIn$theta13.st + TIn$theta23.st))/((1 + TIn$theta12.st^2)^(5/2) * sqrt(1 + TIn$theta13.st^2 + TIn$theta23.st^2))
+    d2th23.dth13.st.th12.st <- (1 + TIn$theta12.st^2 + TIn$theta23.st^2 + TIn$theta12.st^2 * TIn$theta23.st^2 + TIn$theta12.st^2 * TIn$theta13.st^2 + TIn$theta12.st * TIn$theta13.st * TIn$theta23.st)/((1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2))^(3/2) - TIn$theta12.st^2/((1 + TIn$theta12.st^2)^(3/2) * sqrt(1 + TIn$theta13.st^2 + TIn$theta23.st^2))
+    d2th23.dth23.st.th12.st <- -(TIn$theta13.st * TIn$theta23.st)/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2)) - TIn$theta12.st/((1 + TIn$theta12.st^2)^(3/2) * sqrt(1 + TIn$theta13.st^2 + TIn$theta23.st^2)) + (TIn$theta12.st * TIn$theta23.st * (TIn$theta12.st * TIn$theta13.st + TIn$theta23.st))/((1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2))^(3/2)
+    d2th23.dth12.st.th13.st <- (1 + TIn$theta13.st^2 + TIn$theta23.st^2 + TIn$theta12.st * TIn$theta13.st * (TIn$theta12.st * TIn$theta13.st + TIn$theta23.st))/((1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2))^(3/2) - TIn$theta13.st^2/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2))
+    d2th23.dth13.st.th13.st <- -(3 * TIn$theta12.st * TIn$theta13.st + TIn$theta23.st)/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2)) + (3 * TIn$theta13.st^2 * (TIn$theta12.st * TIn$theta13.st + TIn$theta23.st))/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(5/2))
+    d2th23.dth23.st.th13.st <- -(TIn$theta12.st * TIn$theta23.st + TIn$theta13.st)/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2)) + (3 * TIn$theta13.st * TIn$theta23.st * (TIn$theta12.st * TIn$theta13.st + TIn$theta23.st))/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(5/2)) 
+    d2th23.dth12.st.th23.st <- -TIn$theta12.st/((1 + TIn$theta12.st^2)^(3/2) * sqrt(1 + TIn$theta13.st^2 + TIn$theta23.st^2)) - (TIn$theta13.st * TIn$theta23.st)/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2)) + (TIn$theta12.st * TIn$theta23.st * (TIn$theta12.st * TIn$theta13.st + TIn$theta23.st))/((1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2))^(3/2)
+    d2th23.dth13.st.th23.st <- -(TIn$theta13.st + TIn$theta12.st * TIn$theta23.st)/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2)) + (3 * TIn$theta13.st * TIn$theta23.st * (TIn$theta12.st * TIn$theta13.st + TIn$theta23.st))/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(5/2))
+    d2th23.dth23.st.th23.st <- -(3 * TIn$theta23.st + TIn$theta12.st * TIn$theta13.st)/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2)) + (3 * TIn$theta23.st^2 * (TIn$theta12.st * TIn$theta13.st + TIn$theta23.st))/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(5/2)) 
+    
+    
+    d2theta12.theta12.st <- matrix( c(          d2th12.dth12.st.th12.st,  d2th13.dth12.st.th12.st, d2th23.dth12.st.th12.st,
+                                                d2th12.dth12.st.th13.st,  d2th13.dth12.st.th13.st, d2th23.dth12.st.th13.st,
+                                                d2th12.dth12.st.th23.st,  d2th13.dth12.st.th23.st, d2th23.dth12.st.th23.st ), 3 , 3)
+    
+    d2theta13.theta13.st <- matrix( c(          d2th12.dth13.st.th12.st,  d2th13.dth13.st.th12.st, d2th23.dth13.st.th12.st,
+                                                d2th12.dth13.st.th13.st,  d2th13.dth13.st.th13.st, d2th23.dth13.st.th13.st,
+                                                d2th12.dth13.st.th23.st,  d2th13.dth13.st.th23.st, d2th23.dth13.st.th23.st ), 3 , 3)
+    
+    d2theta23.theta23.st <- matrix( c(          d2th12.dth23.st.th12.st,  d2th13.dth23.st.th12.st, d2th23.dth23.st.th12.st,
+                                                d2th12.dth23.st.th13.st,  d2th13.dth23.st.th13.st, d2th23.dth23.st.th13.st,
+                                                d2th12.dth23.st.th23.st,  d2th13.dth23.st.th23.st, d2th23.dth23.st.th23.st ), 3 , 3)
+    
+    
+    
+    d2l.theta <- matrix( c(          sum(VC$weights[VC$inde1]*d2l.dtheta12.theta12),  sum(VC$weights[VC$inde2]*d2l.dtheta12.theta13), sum(VC$weights[VC$inde2]*d2l.dtheta12.theta23),
+                                     sum(VC$weights[VC$inde2]*d2l.dtheta12.theta13),  sum(VC$weights[VC$inde2]*d2l.dtheta13.theta13), sum(VC$weights[VC$inde2]*d2l.dtheta13.theta23),
+                                     sum(VC$weights[VC$inde2]*d2l.dtheta12.theta23),  sum(VC$weights[VC$inde2]*d2l.dtheta13.theta23), sum(VC$weights[VC$inde2]*d2l.dtheta23.theta23) ), 3 , 3)
+    
+    
+    
+    dl.dtheta <- matrix(0,length(VC$inde1),3)
+    dl.dtheta[VC$inde1, 1] <- LgTRI$dl.dtheta12
+    dl.dtheta[VC$inde2, 2]   <- LgTRI$dl.dtheta13
+    dl.dtheta[VC$inde2, 3]   <- LgTRI$dl.dtheta23
+    
+    
+    dl.dtheta.d2theta.dtheta.st <- matrix(c(colSums(dl.dtheta) %*% d2theta12.theta12.st,
+                                            colSums(dl.dtheta) %*% d2theta13.theta13.st,
+                                            colSums(dl.dtheta) %*% d2theta23.theta23.st), 3, 3)
+    
+    d2l.dtheta12.st <- ( t(dtheta.theta.st) %*% d2l.theta %*% dtheta.theta.st + dl.dtheta.d2theta.dtheta.st )[1, 1]
+    
+    d2l.dtheta13.st <- ( t(dtheta.theta.st) %*% d2l.theta %*% dtheta.theta.st + dl.dtheta.d2theta.dtheta.st )[2, 2]
+    
+    d2l.dtheta23.st <- ( t(dtheta.theta.st) %*% d2l.theta %*% dtheta.theta.st + dl.dtheta.d2theta.dtheta.st )[3, 3]
+    
+    d2l.dtheta12.st.theta13.st <- ( t(dtheta.theta.st) %*% d2l.theta %*% dtheta.theta.st + dl.dtheta.d2theta.dtheta.st )[1, 2]
+    
+    d2l.dtheta12.st.theta23.st <- ( t(dtheta.theta.st) %*% d2l.theta %*% dtheta.theta.st + dl.dtheta.d2theta.dtheta.st )[1, 3]
+    
+    d2l.dtheta13.st.theta23.st <- ( t(dtheta.theta.st) %*% d2l.theta %*% dtheta.theta.st + dl.dtheta.d2theta.dtheta.st )[2, 3]
+    
+  }
   
-  d2l.dbe3.theta12.st <- colSums(c(VC$weights[VC$inde2]*d2l.de3.theta12* dtheta12.dtheta12.st) * VC$X3) 
-  d2l.dbe3.theta13.st <- colSums(c(VC$weights[VC$inde2]*d2l.de3.theta13* dtheta13.dtheta13.st) * VC$X3) 
-  d2l.dbe3.theta23.st <- colSums(c(VC$weights[VC$inde2]*d2l.de3.theta23* dtheta23.dtheta23.st) * VC$X3) 
-  
-  d2l.dtheta12.st <- sum( VC$weights[VC$inde1]*(d2l.dtheta12.theta12 * (dtheta12.dtheta12.st)^2  + LgTRI$dl.dtheta12 * d2theta12.theta12.st) )
-  d2l.dtheta13.st <- sum( VC$weights[VC$inde2]*(d2l.dtheta13.theta13 * (dtheta13.dtheta13.st)^2  + LgTRI$dl.dtheta13 * d2theta13.theta13.st) )
-  d2l.dtheta23.st <- sum( VC$weights[VC$inde2]*(d2l.dtheta23.theta23 * (dtheta23.dtheta23.st)^2  + LgTRI$dl.dtheta23 * d2theta23.theta23.st) )
-  
-  d2l.dtheta12.st.theta13.st <- sum(VC$weights[VC$inde2]*d2l.dtheta12.theta13 * dtheta12.dtheta12.st * dtheta13.dtheta13.st )
-  d2l.dtheta12.st.theta23.st <- sum(VC$weights[VC$inde2]*d2l.dtheta12.theta23 * dtheta12.dtheta12.st * dtheta23.dtheta23.st )
-  d2l.dtheta13.st.theta23.st <- sum(VC$weights[VC$inde2]*d2l.dtheta13.theta23 * dtheta13.dtheta13.st * dtheta23.dtheta23.st )
   
   h1 <- cbind(d2l.dbe1.be1, d2l.dbe1.be2, d2l.dbe1.be3, d2l.dbe1.theta12.st, d2l.dbe1.theta13.st, d2l.dbe1.theta23.st)
   h2 <- cbind(t(d2l.dbe1.be2), d2l.dbe2.be2, d2l.dbe2.be3, d2l.dbe2.theta12.st, d2l.dbe2.theta13.st, d2l.dbe2.theta23.st)

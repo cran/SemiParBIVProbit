@@ -26,6 +26,82 @@ teta <- -teta
 
 
 
+
+
+
+
+if(BivD == "HO"){
+
+
+
+
+ c.copula2.be2 <- ((-log(p2))^(2 * (1/teta - 1)) * ((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^(2 * 
+    (teta - 1)) - ((-log(p2))^(2 * (1/teta - 1)) * ((-log(p1))^(1/teta) + 
+    (-log(p2))^(1/teta))^(teta - 2) * (teta - 1)/teta + ((-log(p1))^(1/teta) + 
+    (-log(p2))^(1/teta))^(teta - 1) * ((-log(p2))^(1/teta - 1) + 
+    (-log(p2))^(1/teta - 2) * (1/teta - 1)))) * exp(-((-log(p1))^(1/teta) + 
+    (-log(p2))^(1/teta))^teta)/p2^2 
+
+der2h.derp2p2 <- ((-log(p2))^(1/teta - 1) * ((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^(teta - 
+    1) * ((-log(p2))^(2 * (1/teta - 1)) * ((-log(p1))^(1/teta) + 
+    (-log(p2))^(1/teta))^(2 * (teta - 1)) - ((-log(p2))^(2 * 
+    (1/teta - 1)) * ((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^(teta - 
+    2) * (teta - 1)/teta + ((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^(teta - 
+    1) * ((-log(p2))^(1/teta - 1) + (-log(p2))^(1/teta - 2) * 
+    (1/teta - 1)))) + ((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^(teta - 
+    1) * (((-log(p2))^(1/teta - 2) + (-log(p2))^(1/teta - 3) * 
+    (1/teta - 2) + 2 * (-log(p2))^(1/teta - 2)) * (1/teta - 1) + 
+    2 * (-log(p2))^(1/teta - 1)) + ((-log(p2))^(1/teta - 1) * 
+    ((-log(p2))^(2 * (1/teta - 1)) * ((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^(teta - 
+        3) * (teta - 2)/teta + ((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^(teta - 
+        2) * ((-log(p2))^(1/teta - 1) + (-log(p2))^(1/teta - 
+        2) * (1/teta - 1))) + 2 * ((-log(p2))^(1/teta - 1) * 
+    ((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^(teta - 2) * 
+    ((-log(p2))^(1/teta - 1) + (-log(p2))^(1/teta - 2) * (1/teta - 
+        1)))) * (teta - 1)/teta - 2 * ((-log(p2))^(1/teta - 1) * 
+    ((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^(teta - 1) * 
+    ((-log(p2))^(2 * (1/teta - 1)) * ((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^(teta - 
+        2) * (teta - 1)/teta + ((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^(teta - 
+        1) * ((-log(p2))^(1/teta - 1) + (-log(p2))^(1/teta - 
+        2) * (1/teta - 1))))) * exp(-((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^teta)/p2^3 
+
+
+}
+
+
+
+
+
+
+
+if(BivD == "PL"){
+
+
+
+
+ c.copula2.be2 <- -((2/sqrt(((p1 + p2) * (teta - 1) + 1)^2 - 4 * (p1 * p2 * teta * 
+    (teta - 1))) - 0.5 * ((2 * ((p1 + p2) * (teta - 1) + 1) - 
+    4 * (p1 * teta))^2/(((p1 + p2) * (teta - 1) + 1)^2 - 4 * 
+    (p1 * p2 * teta * (teta - 1)))^1.5)) * (teta - 1)/4) 
+
+der2h.derp2p2 <- (0.5 * (2 - 1.5 * ((2 * ((p1 + p2) * (teta - 1) + 1) - 4 * (p1 * 
+    teta))^2/(((p1 + p2) * (teta - 1) + 1)^2 - 4 * (p1 * p2 * 
+    teta * (teta - 1))))) + 2) * (2 * ((p1 + p2) * (teta - 1) + 
+    1) - 4 * (p1 * teta)) * (teta - 1)^2/(4 * (((p1 + p2) * (teta - 
+    1) + 1)^2 - 4 * (p1 * p2 * teta * (teta - 1)))^1.5) 
+
+
+}
+
+
+
+
+
+
+
+
+
+
 if(BivD=="N"){
 
 

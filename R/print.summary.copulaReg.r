@@ -36,14 +36,18 @@ print.summary.copulaReg <- function(x, digits = max(3, getOption("digits") - 3),
  if(x$margins[1] %in% cont3par)  CInu1 <- colMeans(x$CInu1, na.rm = TRUE)
  if(x$margins[2] %in% cont3par)  CInu2 <- colMeans(x$CInu2, na.rm = TRUE)  
   
- if(x$BivD == "T" && x$margins[1] %in% c(x$m2,x$m3) && x$margins[2] %in% c(x$m2,x$m3)) CIdof <- colMeans(x$CIdof, na.rm = TRUE)
+  
+ BivD <- x$BivD 
+ if(x$surv == TRUE) BivD <- "N" 
+  
+ if(BivD == "T" && x$margins[1] %in% c(x$m2,x$m3) && x$margins[2] %in% c(x$m2,x$m3)) CIdof <- colMeans(x$CIdof, na.rm = TRUE)
 
 
   nodi <- 3
  
  
  
- if(x$BivD == "T" && x$margins[1] %in% c(x$m2,x$m3) && x$margins[2] %in% c(x$m2,x$m3)){
+ if(BivD == "T" && x$margins[1] %in% c(x$m2,x$m3) && x$margins[2] %in% c(x$m2,x$m3)){
  
  
    if( x$margins[1] %in% cont2par && x$margins[2] %in% cont2par) cat(s1,format(s1.p,digits=nodi),"(",format(CIsig21[1],digits=nodi),",",format(CIsig21[2],digits=nodi),")",

@@ -17,14 +17,25 @@ if(family == 14 ){ # Frank -(1/par1)*log(  1 + ( (exp(-par1*u1) - 1)*(exp(-par1*
 }
 
 
-
-
 if(family == 55) res <- u1 * u2 / (1 - par1 * (1 - u1) * (1 - u2)) # AMH
 
 if(family == 56) res <- u1 * u2 * (1 + par1 * (1 - u1) * (1 - u2)) # FGM
 
 
+if(family == 60){
+	qte <- 1 + (par1 - 1)*(u1 + u2)  
+	res <- ( qte - sqrt( qte^2 - 4*par1*(par1-1)*u1*u2) ) / (2*(par1-1)) # Plackett
+                }
+            
+            
+            
+# hougaard            
+if(family == 61) res <- exp( -( (-log(u1))^(1/par1) + (-log(u2))^(1/par1)   )^par1   )
+                                
+                
 
 res
 
 }
+
+

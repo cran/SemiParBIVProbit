@@ -1,5 +1,8 @@
 aCov <- function(x){
 
+
+# no correction for gamlss
+
 if(x$VC$triv == TRUE){
 
 if( !is.null(x$X4) ) {mul2 <- x$X4; mul3 <- x$X5; mul4 <- x$X6} 

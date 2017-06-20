@@ -3,7 +3,7 @@ copulaReg.fit.post <- function(SemiParFit, VC, GAM){
 Ve <- R <- theta <- edf <- edf1 <- NULL
 theta.a <- sigma21 <- sigma22 <- sigma2.1.a <- sigma2.2.a <- nu1 <- nu2 <- nu1.a <- nu2.a <- dof <- dof.a <- nCa1 <- nCa2 <- NULL
 													     
-cont1par  <- c(VC$m1d) 
+cont1par  <- c(VC$m1d,VC$bl) 
 cont2par  <- c(VC$m2,VC$m2d) 
 cont3par  <- c(VC$m3,VC$m3d)
 
@@ -14,7 +14,8 @@ if(VC$margins[1] == "LN" || VC$margins[2] == "LN") logLik <- -SemiParFit$fit$l.l
 pVbres <- postVb(SemiParFit, VC)
 
 He         <- pVbres$He        
-Vb         <- pVbres$Vb        
+Vb         <- pVbres$Vb   
+Vb.t       <- pVbres$Vb.t
 HeSh       <- pVbres$HeSh      
 F          <- pVbres$F         
 F1         <- pVbres$F1        
@@ -22,10 +23,13 @@ R          <- pVbres$R
 Ve         <- pVbres$Ve        
 t.edf      <- pVbres$t.edf     
 SemiParFit <- pVbres$SemiParFit
+coef.t     <- pVbres$coef.t  
+
 
 ############################################################################################
 # SIGMAs
 ############################################################################################  
+# this should not bother once we set NULL
   
 sigma21 <- esp.tr(SemiParFit$fit$etas1, VC$margins[1])$vrb  
 sigma22 <- esp.tr(SemiParFit$fit$etas2, VC$margins[2])$vrb    
@@ -98,7 +102,11 @@ tau.a <- ass.msR$tau.a
 
 ######################
 
-if(VC$BivD == "T" && VC$margins[1] %in% c(VC$m2,VC$m3) && VC$margins[2] %in% c(VC$m2,VC$m3)){ dof <- dof.tr(SemiParFit$fit$etan)$vao  
+BivD <- VC$BivD
+
+if(VC$surv == TRUE) BivD <- "N"
+
+if(BivD == "T" && VC$margins[1] %in% c(VC$m2,VC$m3) && VC$margins[2] %in% c(VC$m2,VC$m3)){ dof <- dof.tr(SemiParFit$fit$etan)$vao  
 
 dof.a <- mean(dof) 
 
@@ -119,7 +127,7 @@ edf1 <- edf.loopR$edf1
 sp <- SemiParFit$sp 
    
     
-                 list(SemiParFit = SemiParFit, He = He, logLik = logLik, Vb = Vb, HeSh = HeSh, 
+                 list(SemiParFit = SemiParFit, He = He, logLik = logLik, Vb = Vb, Vb.t = Vb.t, HeSh = HeSh, Vb.t = Vb.t,
                       F = F, F1 = F1, t.edf = t.edf, edf = edf, 
                       edf11=edf1,
                       edf1 = edf[[1]], edf2 = edf[[2]], edf3 = edf[[3]], edf4 = edf[[4]], 
@@ -129,7 +137,7 @@ sp <- SemiParFit$sp
                       theta = theta, theta.a = theta.a, tau = tau, tau.a= tau.a,
                       sigma21 = sigma21, sigma22 = sigma22, sigma21.a = sigma2.1.a, sigma22.a = sigma2.2.a,
                       nu1 = nu1, nu1.a = nu1.a, nu2= nu2, nu2.a = nu2.a,
-                      sp = sp, R = R, Ve = Ve, dof.a = dof.a, dof = dof, nCa1 = nCa1, nCa2 = nCa2) 
+                      sp = sp, R = R, Ve = Ve, dof.a = dof.a, dof = dof, nCa1 = nCa1, nCa2 = nCa2,  coef.t = coef.t) 
 
 }
 

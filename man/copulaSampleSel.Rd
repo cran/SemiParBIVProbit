@@ -41,20 +41,18 @@ copulaSampleSel(formula, data = list(), weights = NULL, subset = NULL,
                to the link function of the first equation whose response is always assumed to be binary. The response 
                for the second equation can be normal ("N"), normal where sigma2 corresponds to 
                the standard deviation instead of the variance ("N2"), log-normal ("LN"), Gumbel ("GU"), reverse Gumbel ("rGU"), 
-               logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"), 
-               gamma with identity link for the location parameter ("GAi"), Dagum ("DAGUM"), 
-               Singh-Maddala ("SM"), beta ("BE"), Fisk ("FISK", also known as log-logistic distribution),
-               Poisson ("PO"), zero truncated 
+               logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"), Dagum ("DAGUM"), 
+               Singh-Maddala ("SM"), beta ("BE"), Fisk ("FISK", also known as log-logistic distribution), Poisson ("PO"), zero truncated 
                Poisson ("ZTP"), negative binomial - type I ("NBI"), negative 
                binomial - type II ("NBII"), Poisson inverse Gaussian ("PIG").}
-
+               
 \item{dof}{If \code{BivD = "T"} then the degrees of freedom can be set to a value greater than 2 and smaller than 249.}          
                  
 \item{BivD}{Type of bivariate error distribution employed. Possible choices are "N", "C0", "C90", "C180", "C270", "J0", "J90", "J180", "J270", 
-            "G0", "G90", "G180", "G270", "F", "AMH", "FGM", "T" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
+            "G0", "G90", "G180", "G270", "F", "AMH", "FGM", "T", "PL", "HO" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
              Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Ali-Mikhail-Haq, 
-             Farlie-Gumbel-Morgenstern and Student-t with fixed \code{dof}.}            
+             Farlie-Gumbel-Morgenstern, Student-t with fixed \code{dof}, Plackett, Hougaard.}            
 
 \item{fp}{If \code{TRUE} then a fully parametric model with unpenalised regression splines if fitted. See the example below.}              
 
@@ -127,7 +125,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 Marra G. and Radice R. (2013), Estimation of a Regression Spline Sample Selection Model. \emph{Computational Statistics and Data Analysis}, 61, 158-173.
 
-Marra G. and Wyszynski K. (in press), Semi-Parametric Copula Sample Selection Models for Count Responses. \emph{Computational Statistics and Data Analysis}.
+Marra G. and Wyszynski K. (2016), Semi-Parametric Copula Sample Selection Models for Count Responses. \emph{Computational Statistics and Data Analysis}, 104, 110-129.
 
 Wojtys M. and Marra G. (submitted). Copula-Based Generalized Additive Models with Non-Random Sample Selection.
 
@@ -320,9 +318,9 @@ res <- imputeSS(outC0, n.m)
 
 set.seed(1)
 
-y  <- rgamma(n, shape = 1/2^2, exp(-0.68 - 1.5*bi + f21(x1) + u[, 2])*2^2)
+y  <- exp(-0.68 - 1.5*bi + f21(x1) + u[, 2])
 yo <- y*(ys > 0)
-  
+    
 dataSim <- data.frame(ys, yo, bi, x1, x2)
 
 
@@ -334,6 +332,8 @@ conv.check(out)
 post.check(out)
 summary(out)
 
+
+ATE <- NA
 n.m <- 10
 res <- imputeSS(out, n.m)
 
@@ -342,11 +342,17 @@ for(i in 1:n.m){
 dataSim$yo[dataSim$ys == 0] <- res[[i]]
 
 outg <- gamlss(list(yo ~ bi + s(x1)), margin = "GA", data = dataSim)
-bet[i] <- coef(outg)["bi"]
+
+out$gamlss <- outg
+ATE[i] <- AT(out, nm.end = "bi", type = "univariate")$res[2]
+
 print(i)
+
 }
 
-mean(bet)
+AT(out, nm.end = "bi")
+mean(ATE)
+
 
 #
 #

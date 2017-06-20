@@ -1,238 +1,153 @@
-bcorrec <- function(VC, esnl, lp){
+bcorrec <- function(VC){
+
+m2sel <- c("WEI","iG","GA","BE","FISK","DAGUM","SM")
 
 ###############################
 # fixed quantities
 ###############################
 
-n  <- VC$n
-rc <- VC$rc
-rsim <- VC$rsim
+n      <- VC$n
+rc     <- VC$rc
+margin <- VC$margins[2]
 
-int1 <- int2 <- int3 <- NA
-H <- XXX <- XXXX <- BH <- list()
-G <- matrix(NA, n, lp)
+weights <- VC$weights
 
-if(VC$margins[2] == "ZTP") rZTP <- function(n, mu) qpois(runif(n, dpois(0, mu), 1), mu)
+if(is.null(VC$X2)){VC$X2 <- VC$X3 <- matrix(1, n, 1); VC$X2.d2 <- VC$X3.d2 <- 1} 
 
-if(is.null(VC$X2)) X2 <- matrix(1, n, 1) else X2 <- VC$X2 
-# need to generalise to three parameter case (the whole code below as well) 
+if(is.null(VC$lB) && is.null(VC$uB)){
 
-# need to check y1m for discrete margin as this would have to be changed I guess
-###############################
+if( margin %in% c("N","N2","GU","rGU","LO","LN") )             { lB <- -Inf;      uB <- Inf}
+if( margin %in% c("WEI","iG","GA","DAGUM","SM","FISK")  )      { lB <- 0.0000001; uB <- Inf}
+if( margin %in% c("BE")  )                                     { lB <- 0.0000001; uB <- 0.9999999}
 
-for(i in 1:n){
+}else{lB <- VC$lB; uB <- VC$uB} 
 
-set.seed(1) # yes or no? we would use this to make sure the results are reproducible
-if(VC$margins[2] == "N")     y <- rNO(   rsim,    mu =     esnl$eta[i],     sigma = sqrt(esnl$sigma2[i])) 
-if(VC$margins[2] == "N2")    y <- rNO(   rsim,    mu =     esnl$eta[i],     sigma =      esnl$sigma2[i]) 
-if(VC$margins[2] == "GU")    y <- rGU(   rsim,    mu =     esnl$eta[i],     sigma = sqrt(esnl$sigma2[i])) 
-if(VC$margins[2] == "rGU")   y <- rRG(   rsim,    mu =     esnl$eta[i],     sigma = sqrt(esnl$sigma2[i])) 
-if(VC$margins[2] == "LO")    y <- rLO(   rsim,    mu =     esnl$eta[i],     sigma = sqrt(esnl$sigma2[i])) 
-if(VC$margins[2] == "LN")    y <- rLOGNO(rsim,    mu =     esnl$eta[i],     sigma = sqrt(esnl$sigma2[i])) 
-if(VC$margins[2] == "WEI")   y <- rWEI(  rsim,    mu = exp(esnl$eta[i]),    sigma = sqrt(esnl$sigma2[i])) 
-if(VC$margins[2] == "iG")    y <- rIG(   rsim,    mu = exp(esnl$eta[i]),    sigma = sqrt(esnl$sigma2[i])) 
-if(VC$margins[2] == "GA")    y <- rGA(   rsim,    mu = exp(esnl$eta[i]),    sigma = sqrt(esnl$sigma2[i])) 
-if(VC$margins[2] == "GAi")   y <- rGA(   rsim,    mu =     esnl$eta[i],     sigma = sqrt(esnl$sigma2[i])) 
-if(VC$margins[2] == "DAGUM") y <- rGB2(  rsim,    mu = exp(esnl$eta[i]),    sigma = sqrt(esnl$sigma2[i]), nu = esnl$nu[i], tau = 1 ) 
-if(VC$margins[2] == "SM")    y <- rGB2(  rsim,    mu = exp(esnl$eta[i]),    sigma = sqrt(esnl$sigma2[i]), nu = 1 , tau = esnl$nu[i]) 
-if(VC$margins[2] == "BE")    y <- rBE(   rsim, mu = plogis(esnl$eta[i]),    sigma = sqrt(esnl$sigma2[i])) 
-if(VC$margins[2] == "FISK")  y <- rGB2(  rsim,    mu = exp(esnl$eta[i]),    sigma = sqrt(esnl$sigma2[i]), nu = 1 , tau = 1 )
-if(VC$margins[2] == "NBI")   y <- rNBI(  rsim,    mu = exp(esnl$eta[i]),    sigma = sqrt(esnl$sigma2[i])) 
-if(VC$margins[2] == "NBII")  y <- rNBII( rsim,    mu = exp(esnl$eta[i]),    sigma = sqrt(esnl$sigma2[i])) 
-if(VC$margins[2] == "PIG")   y <- rPIG(  rsim,    mu = exp(esnl$eta[i]),    sigma = sqrt(esnl$sigma2[i])) 
-if(VC$margins[2] == "PO")    y <- rPO(   rsim,    mu = exp(esnl$eta[i])) 
-if(VC$margins[2] == "ZTP")   y <- rZTP(  rsim,    mu = exp(esnl$eta[i])) 
-rm(list=".Random.seed", envir=globalenv()) 
+###################################################################################################
+###################################################################################################
 
-#print(y)
-#print(c(esnl$eta[i], sqrt(esnl$sigma2[i])) )
+eta <- eta.tr(VC$X1%*%VC$params[1:VC$X1.d2], margin)
+ss  <- esp.tr(VC$X2%*%VC$params[(1+VC$X1.d2):(VC$X1.d2+VC$X2.d2)], margin)
 
-if(VC$margins[2] %in% VC$m2)            dHs  <-      distrHs(y, esnl$eta[i], esnl$sigma2[i], esnl$sigma2.st[i], nu = 1, nu.st = 1, margin2=VC$margins[2], naive = TRUE)
-if(VC$margins[2] %in% c(VC$m1d,VC$m2d)) dHs  <- distrHsDiscr(y, esnl$eta[i], esnl$sigma2[i], esnl$sigma2.st[i], nu = 1, nu.st = 1, margin2=VC$margins[2], naive = TRUE, y2m = VC$y1m)
+sigma2    <- ss$vrb
+sigma2.st <- ss$vrb.st
 
-pdf2                         <- dHs$pdf2
-derpdf2.dereta2              <- dHs$derpdf2.dereta2 
-derpdf2.dersigma2.st         <- dHs$derpdf2.dersigma2.st  
-der2pdf2.dereta2             <- dHs$der2pdf2.dereta2
-der2pdf2.dersigma2.st2       <- dHs$der2pdf2.dersigma2.st2         
-der2pdf2.dereta2dersigma2.st <- dHs$der2pdf2.dereta2dersigma2.st  
+if( margin %in% c("DAGUM","SM") ){
 
-comp1   <- 1 + exp(log(pdf2) + rc) 
-comp2   <- pdf2/comp1
-comp3   <- pdf2/comp1^2
+            nus   <- enu.tr(VC$X3%*%VC$params[(1+VC$X1.d2+VC$X2.d2):(VC$X1.d2+VC$X2.d2+VC$X3.d2)], margin)
+            nu    <- nus$vrb
+            nu.st <- nus$vrb.st
+            
+} else nu <- nu.st <- 1
 
-int1[i] <- mean( log(comp1)/ pdf2 )
+###################################################################################################
+###################################################################################################
 
+intB1   <- function(eta, sigma2, sigma2.st, nu, nu.st, margin, rc, lB, uB) integrate(intB, lower = lB, upper = uB, eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc)$value              
+v.intB1 <- Vectorize(intB1) 
+int1    <- v.intB1(eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc, lB = lB, uB = uB)
+b       <- sum(weights) - exp(-rc)*sum(weights*int1)
 
+###################################################################################################
+###################################################################################################
 
+if( margin %in% m2sel ){
 
-
-#integ <- NA
-#
-#int1f <- function(y) log( 1 + exp( log( dnorm(y, mu, sqrt(sig2)) ) + rc ) )
-#
-#for(i in 1:n){
-#
-#mu   <- esnl$eta[i]
-#sig2 <- esnl$sigma2[i]
-#
-#integ[i] <- integrate(int1f, -Inf, Inf)
-#
-#}
-#
-#n - exp(-rc)*sum(integ)
-
-
-
-
-##########
-
-dl.dbe       <- derpdf2.dereta2/pdf2
-dl.dsigma.st <- derpdf2.dersigma2.st/pdf2
-
-G[i, ] <- c(   colMeans( t(t(comp2*dl.dbe/pdf2))%*%VC$X1[i,] ), colMeans( t(t(comp2*dl.dsigma.st/pdf2))%*%X2[i,] )    )
-
-
-#eta2 <- esnl$eta[i]
-#sigma2 <- esnl$sigma2[i]
-#sigma2.st <- esnl$sigma2.st[i]
-#X1 <- VC$X1
-#
-#int2f <- function(y2){ 
-#
-#pdf2 <-  dnorm(y2, eta2, sqrt(sigma2)) 
-#
-#epsilon <- 0.0000001 
-#pdf2 <- ifelse(pdf2 < epsilon, epsilon, pdf2 )
-#
-#dermu2.dereta2  <- 1
-#derpdf2.dermu2  <- (1/(sqrt(2 * pi * sigma2))) * (exp(-0.5 * (y2 - eta2)^2/sigma2) * (0.5 * (2 * (y2 - eta2))/sigma2))  
-#derpdf2.dereta2 <- derpdf2.dermu2*dermu2.dereta2  
-#
-#
-#dersigma2.dersigma2.st <- exp(sigma2.st)  
-#derpdf2.sigma2  <- (2 * ((y2 - eta2)^2/(2 * sigma2)^2) - 1/(2 * sigma2)) * exp(-((y2 - eta2)^2/(2 * sigma2)))/sqrt(2 * (pi * sigma2)) 
-#derpdf2.dersigma2.st  <- derpdf2.sigma2 * dersigma2.dersigma2.st   
-#
-#
-#dl.dbe       <- derpdf2.dereta2/pdf2
-#dl.dsigma.st <- derpdf2.dersigma2.st/pdf2
-#
-#comp1   <- 1 + exp(log(pdf2) + rc) 
-#comp2   <- pdf2/comp1
-#
-##comp2*dl.dbe*X1[i, 3]
-#
-#comp2*dl.dsigma.st
-#
-#
-#}
-#
-#
-#integrate(int2f, -Inf, Inf)
-#
-
-
-
- 
-##########
-
-
-
-
-
-
-#eta2 <- esnl$eta[i]
-#sigma2 <- esnl$sigma2[i]
-#sigma2.st <- esnl$sigma2.st[i]
-#X1 <- VC$X1
-#
-#int3f <- function(y2){ 
-#
-#pdf2 <-  dnorm(y2, eta2, sqrt(sigma2)) 
-#
-#epsilon <- 0.0000001 
-#pdf2 <- ifelse(pdf2 < epsilon, epsilon, pdf2 )
-#
-#dermu2.dereta2  <- 1
-#der2mu2.dereta2eta2    <- 0 
-#
-#derpdf2.dermu2  <- (1/(sqrt(2 * pi * sigma2))) * (exp(-0.5 * (y2 - eta2)^2/sigma2) * (0.5 * (2 * (y2 - eta2))/sigma2))  
-#derpdf2.dereta2 <- derpdf2.dermu2*dermu2.dereta2  
-#
-#
-#dersigma2.dersigma2.st <- exp(sigma2.st)  
-#derpdf2.sigma2  <- (2 * ((y2 - eta2)^2/(2 * sigma2)^2) - 1/(2 * sigma2)) * exp(-((y2 - eta2)^2/(2 * sigma2)))/sqrt(2 * (pi * sigma2)) 
-#derpdf2.dersigma2.st  <- derpdf2.sigma2 * dersigma2.dersigma2.st   
-#
-#
-#dl.dbe       <- derpdf2.dereta2/pdf2
-#dl.dsigma.st <- derpdf2.dersigma2.st/pdf2
-#
-#comp1   <- 1 + exp(log(pdf2) + rc) 
-#comp2   <- pdf2/comp1
-#
-##comp2*dl.dbe*X1[i, 3]
-#
-#der2pdf2.dermu2       <- ((y2 - eta2)^2/sigma2 - 1) * exp(-(0.5 * ((y2 - eta2)^2/sigma2)))/(sigma2 * sqrt(2 * (pi * sigma2)))
-#
-#
-#der2pdf2.dereta2 <- der2pdf2.dermu2* dermu2.dereta2^2 + derpdf2.dermu2*der2mu2.dereta2eta2        
-#
-#
-#d2l.be.be        <- (der2pdf2.dereta2*pdf2 - (derpdf2.dereta2)^2)/pdf2^2 
-#
-#d2l.be.be * comp2
-#
-#}
-#
-#
-#integrate(int3f, -Inf, Inf)
-#
-#
-#
-#
-
-
-d2l.be.be        <- (der2pdf2.dereta2*pdf2 - (derpdf2.dereta2)^2)/pdf2^2 
-d2l.sigma.sigma  <- (der2pdf2.dersigma2.st2*pdf2-(derpdf2.dersigma2.st)^2)/pdf2^2 
-d2l.be.sigma     <- (der2pdf2.dereta2dersigma2.st*pdf2 - derpdf2.dereta2*derpdf2.dersigma2.st)/pdf2^2 
-
-for(j in 1:rsim){ # this operation can be vectorised # this part needs to be verified
-
-XX <- c(VC$X1[i, ]*dl.dbe[j], X2[i, ]*dl.dsigma.st[j])
-XXX[[j]] <- (XX%*%t(XX))*(comp3/pdf2)[j]
+intgrad   <- function(eta, sigma2, sigma2.st, nu, nu.st, margin, rc, lB, uB) integrate(gradBbit1, lower = lB, upper = uB, eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc)$value              
+v.intgrad <- Vectorize(intgrad) 
+intgrad   <- v.intgrad(eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc, lB = lB, uB = uB)
+gradbit1  <- -colSums( c(weights*intgrad)*VC$X1 )
 
 }
 
+intgrad   <- function(eta, sigma2, sigma2.st, nu, nu.st, margin, rc, lB, uB) integrate(gradBbit2, lower = lB, upper = uB, eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc)$value              
+v.intgrad <- Vectorize(intgrad) 
+intgrad   <- v.intgrad(eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc, lB = lB, uB = uB)
+gradbit2  <- -colSums( c(weights*intgrad)*VC$X2 )
 
+if( margin %in% c("DAGUM","SM") ){
 
-
-
-XXXX[[i]] <- Reduce("+", XXX)/length(XXX)
-
-
-H1 <- apply(  outer(VC$X1[i, ]%*%t(VC$X1[i, ]), d2l.be.be * comp2/pdf2, FUN = "*"),        c(1, 2), FUN = mean)
-H2 <- apply(  outer(   X2[i, ]%*%t(   X2[i, ]), d2l.sigma.sigma * comp2/pdf2, FUN = "*"),  c(1, 2), FUN = mean)
-H3 <- apply(  outer(VC$X1[i, ]%*%t(   X2[i, ]), d2l.be.sigma * comp2/pdf2, FUN = "*"),     c(1, 2), FUN = mean)
-
-H[[i]] <- rbind( cbind( H1      , H3  ), 
-                 cbind( t(H3)   , H2  ) )  
-
-
-BH[[i]] <- XXXX[[i]] + H[[i]]   
-
+intgrad   <- function(eta, sigma2, sigma2.st, nu, nu.st, margin, rc, lB, uB) integrate(gradBbit3, lower = lB, upper = uB, eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc)$value              
+v.intgrad <- Vectorize(intgrad) 
+intgrad   <- v.intgrad(eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc, lB = lB, uB = uB)
+gradbit3  <- -colSums( c(weights*intgrad)*VC$X3 )
 
 }
 
+###################################################################################################
+###################################################################################################
 
-b <- n - exp(-rc)*sum(int1)
-bp <- - colSums(G) 
-bs <- - Reduce("+", BH) 
+if( margin %in% m2sel ){
 
-#print("end")
+intgrad   <- function(eta, sigma2, sigma2.st, nu, nu.st, margin, rc, lB, uB) integrate(hessBbit1, lower = lB, upper = uB, eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc)$value              
+v.intgrad <- Vectorize(intgrad) 
+intgrad   <- v.intgrad(eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc, lB = lB, uB = uB)
+hessbit1  <- - crossprod(VC$X1*c(weights*intgrad), VC$X1)
+
+intgrad   <- function(eta, sigma2, sigma2.st, nu, nu.st, margin, rc, lB, uB) integrate(hessBbit3, lower = lB, upper = uB, eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc)$value              
+v.intgrad <- Vectorize(intgrad) 
+intgrad   <- v.intgrad(eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc, lB = lB, uB = uB)
+hessbit3  <- - crossprod(VC$X1*c(weights*intgrad), VC$X2)
+
+}
+
+intgrad   <- function(eta, sigma2, sigma2.st, nu, nu.st, margin, rc, lB, uB) integrate(hessBbit2, lower = lB, upper = uB, eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc)$value              
+v.intgrad <- Vectorize(intgrad) 
+intgrad   <- v.intgrad(eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc, lB = lB, uB = uB)
+hessbit2  <- - crossprod(VC$X2*c(weights*intgrad), VC$X2)
+
+if( margin %in% c("DAGUM","SM") ){
+
+intgrad   <- function(eta, sigma2, sigma2.st, nu, nu.st, margin, rc, lB, uB) integrate(hessBbit4, lower = lB, upper = uB, eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc)$value              
+v.intgrad <- Vectorize(intgrad) 
+intgrad   <- v.intgrad(eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc, lB = lB, uB = uB)
+hessbit4  <- - crossprod(VC$X3*c(weights*intgrad), VC$X3)
+
+intgrad   <- function(eta, sigma2, sigma2.st, nu, nu.st, margin, rc, lB, uB) integrate(hessBbit5, lower = lB, upper = uB, eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc)$value              
+v.intgrad <- Vectorize(intgrad) 
+intgrad   <- v.intgrad(eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc, lB = lB, uB = uB)
+hessbit5  <- - crossprod(VC$X1*c(weights*intgrad), VC$X3)
+
+intgrad   <- function(eta, sigma2, sigma2.st, nu, nu.st, margin, rc, lB, uB) integrate(hessBbit6, lower = lB, upper = uB, eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc)$value              
+v.intgrad <- Vectorize(intgrad) 
+intgrad   <- v.intgrad(eta = eta, sigma2 = sigma2, sigma2.st = sigma2.st, nu = nu, nu.st = nu.st, margin = margin, rc = rc, lB = lB, uB = uB)
+hessbit6  <- - crossprod(VC$X2*c(weights*intgrad), VC$X3)
+
+}
+
+###################################################################################################
+###################################################################################################
+
+if(margin %in% VC$m2){
+   if(margin %in% m2sel) bp <- c(gradbit1, gradbit2) else bp <- c(rep(0,length(VC$params[1:VC$X1.d2])), gradbit2) 
+}
+
+if(margin %in% VC$m3)    bp <- c(gradbit1, gradbit2, gradbit3) 
+
+
+###################################################################################################
+
+if(margin %in% VC$m2){
+
+   if(margin %in% m2sel) bs <- rbind( cbind( hessbit1   , hessbit3  ), 
+                                      cbind( t(hessbit3), hessbit2  ) ) else{
+                                      
+                                            lb <- length( c( 1:VC$X1.d2 ) )
+                                            ls <- length( c( (1+VC$X1.d2):(VC$X1.d2+VC$X2.d2) ) )
+
+                                            bs <- rbind( cbind( matrix(0,lb,lb), matrix(0,lb,ls)  ), 
+                                                         cbind( t(matrix(0,lb,ls)), hessbit2  ) ) 
+                                                                          
+                                                                             }
+}
+
+if(margin %in% VC$m3) bs <- rbind( cbind( hessbit1   , hessbit3   , hessbit5 ), 
+                                   cbind( t(hessbit3), hessbit2   , hessbit6 ),
+                                   cbind( t(hessbit5), t(hessbit6), hessbit4 ) ) 
+
+###################################################################################################
+###################################################################################################
 
 list(b = b, bp = bp, bs = bs)
 
-
 }    
+

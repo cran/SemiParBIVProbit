@@ -1,17 +1,30 @@
-triprobgHs <- function (params, respvec, VC, ps, AT = FALSE){
+triprobgHs <- function(params, respvec, VC, ps, AT = FALSE){
   
   eta1 <- VC$X1%*%params[1:VC$X1.d2]
   eta2 <- VC$X2%*%params[(VC$X1.d2 + 1):(VC$X1.d2 + VC$X2.d2)]
   eta3 <- VC$X3%*%params[(VC$X1.d2 + VC$X2.d2 + 1):(VC$X1.d2 + VC$X2.d2 + VC$X3.d2)]
   
+  theta12 <- theta13 <- theta23 <- NA
+  
+  
   etad <- p111 <- A <- NULL
   
-  theta12.st <- params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2+1)]    
-  theta12    <- tanh(theta12.st)    
-  theta13.st <- params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2+2)]    
-  theta13    <- tanh(theta13.st) 
-  theta23.st <- params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2+3)]    
-  theta23    <- tanh(theta23.st)
+  if(is.null(VC$X4)){
+    
+    theta12.st <- params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2+1)]    
+    theta13.st <- params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2+2)]    
+    theta23.st <- params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2+3)]  
+    
+  }
+  
+  if(!is.null(VC$X4)){
+    
+    theta12.st <- VC$X4%*%params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2 + 1):(VC$X1.d2 + VC$X2.d2 + VC$X3.d2 + VC$X4.d2)]    
+    theta13.st <- VC$X5%*%params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2 + VC$X4.d2 + 1):(VC$X1.d2 + VC$X2.d2 + VC$X3.d2 + VC$X4.d2 + VC$X5.d2)]    
+    theta23.st <- VC$X6%*%params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2 + VC$X4.d2 + VC$X5.d2 + 1):(VC$X1.d2 + VC$X2.d2 + VC$X3.d2 + VC$X4.d2 + VC$X5.d2 + VC$X6.d2)]  
+    
+  }  
+  
   
   #####
   # ! #
@@ -37,55 +50,74 @@ triprobgHs <- function (params, respvec, VC, ps, AT = FALSE){
   
   ###########################
   
-  
-  #####
-  # ! #
-  ##############################################################
-  ## eta1, eta2 and eta3 were replaced by mar1, mar2 and mar3 ##                   
-  ##############################################################
-  
-  p11 <- mm( pbinorm( mar1, mar2, cov12 = theta12) )
-  p13 <- mm( pbinorm( mar1, mar3, cov12 = theta13) )
-  p23 <- mm( pbinorm( mar2, mar3, cov12 = theta23) )
-  
-  #####################################################################
-  
-  Sigma <-  matrix( c( 1,        theta12, theta13,
-                       theta12,        1, theta23,
-                       theta13,  theta23,        1), 3 , 3) 
-  
-  
-  eS <- eigen(Sigma)                 
-  check.eigen <- any(eS$values < 0)
-  
-  if(check.eigen == TRUE){
+  if(VC$Chol == FALSE){
     
-    D.dash <- diag(abs(eS$values), 3, 3)
-    P      <- eS$vectors
-    R.dash <- P %*% D.dash %*% t(P)
-    D1 <- diag(1/sqrt( diag(R.dash) ), 3, 3)
-    Sigma <- D1 %*% R.dash %*% D1
+    theta12 <- tanh(theta12.st)
+    theta13 <- tanh(theta13.st)
+    theta23 <- tanh(theta23.st)
+    
+    Sigma <-  matrix( c( 1,        theta12, theta13,
+                         theta12,        1, theta23,
+                         theta13,  theta23,        1), 3 , 3) 
+    
+    Sigma <- PosDefCor(Sigma, Chol = FALSE, theta12.st, theta13.st, theta23.st)
     
     theta12 <- Sigma[1,2]
     theta13 <- Sigma[1,3]
     theta23 <- Sigma[2,3]   
     
-    theta12.st <- atanh(theta12) 
+    theta12.st <- atanh(theta12)
     theta13.st <- atanh(theta13)
     theta23.st <- atanh(theta23)
     
-    params <- c(params[1:(VC$X1.d2 + VC$X2.d2 + VC$X3.d2)],theta12.st,theta13.st,theta23.st)
+  }
+  
+  if(VC$Chol == TRUE){
     
-  } else Sigma <- Sigma 
+    if(is.null(VC$X4)){
   
-  #####
-  # ! #
-  ##############################################################
-  ## eta1, eta2 and eta3 were replaced by mar1, mar2 and mar3 ##                   
-  ##############################################################
+      Sigma <- PosDefCor(Sigma = 1, Chol = TRUE, theta12.st, theta13.st, theta23.st)
+ 
+      theta12 <- Sigma[1,2]
+      theta13 <- Sigma[1,3]
+      theta23 <- Sigma[2,3]   
+    } 
+    
+    
+    if(!is.null(VC$X4)){
+      
+      Sigma <- list()
+      
+      for(i in 1:VC$n){
+        
+        Sigma[[i]] <- PosDefCor(Sigma = NULL, Chol = TRUE, theta12.st = theta12.st[i], theta13.st = theta13.st[i], theta23.st = theta23.st[i]) 
+       
+        theta12[i] <- Sigma[[i]][1,2]
+        theta13[i] <- Sigma[[i]][1,3]
+        theta23[i] <- Sigma[[i]][2,3]   
+        
+      }
+      
+    }   
+    
+    
+  }
   
-  if(VC$approx == FALSE){ for(i in 1:VC$n) p111[i] <- mm( pmnorm(x = c(mar1[i], mar2[i], mar3[i]), varcov = Sigma)[1] )   }
-  if(VC$approx == TRUE) p111 <- mm( TRIapprox(mar1, mar2, mar3, Sigma) )
+  p11 <- mm( pbinorm( mar1, mar2, cov12 = theta12) )
+  p13 <- mm( pbinorm( mar1, mar3, cov12 = theta13) )
+  p23 <- mm( pbinorm( mar2, mar3, cov12 = theta23) )
+  
+  #if(VC$Chol == FALSE) params <- c(params[1:(VC$X1.d2 + VC$X2.d2 + VC$X3.d2)],theta12.st,theta13.st,theta23.st)
+  
+  if(is.null(VC$X4)){
+    if(VC$approx == FALSE){ for(i in 1:VC$n) p111[i] <- mm( pmnorm(x = c(mar1[i], mar2[i], mar3[i]), varcov = Sigma)[1] )   }
+    if(VC$approx == TRUE) p111 <- mm( TRIapprox(mar1, mar2, mar3, Sigma) )
+  }
+  
+  if(!is.null(VC$X4)){
+    for(i in 1:VC$n) p111[i] <- mm( pmnorm(x = c(mar1[i], mar2[i], mar3[i]), varcov = Sigma[[i]])[1] ) 
+  }  
+  
   
   ############################################################################################
   
@@ -127,12 +159,29 @@ triprobgHs <- function (params, respvec, VC, ps, AT = FALSE){
   
   gTRI <- g.tri(respvec = respvec, VC = VC, TIn = TIn)
   
-  G <- -c( colSums(c(gTRI$dl.de1) * VC$X1), 
-           colSums(c(gTRI$dl.de2) * VC$X2), 
-           colSums(c(gTRI$dl.de3) * VC$X3), 
-           sum(gTRI$dl.dtheta12.st), 
-           sum(gTRI$dl.dtheta13.st), 
-           sum(gTRI$dl.dtheta23.st) )
+  if(is.null(VC$X4)){  
+    
+    G <- -c( colSums(c(gTRI$dl.de1) * VC$X1), 
+             colSums(c(gTRI$dl.de2) * VC$X2), 
+             colSums(c(gTRI$dl.de3) * VC$X3), 
+             sum(gTRI$dl.dtheta12.st), 
+             sum(gTRI$dl.dtheta13.st), 
+             sum(gTRI$dl.dtheta23.st) )
+    
+  }
+  
+  
+  if(!is.null(VC$X4)){  
+    
+    G <- -c( colSums(c(gTRI$dl.de1) * VC$X1), 
+             colSums(c(gTRI$dl.de2) * VC$X2), 
+             colSums(c(gTRI$dl.de3) * VC$X3), 
+             colSums(c(gTRI$dl.dtheta12.st) * rbind(VC$X4, VC$X4, VC$X4)), 
+             colSums(c(gTRI$dl.dtheta13.st) * rbind(VC$X5, VC$X5, VC$X5)), 
+             colSums(c(gTRI$dl.dtheta23.st) * rbind(VC$X6, VC$X6, VC$X6)) )
+    
+  }  
+  
   
   
   #####

@@ -1,6 +1,6 @@
-distrHsATDiscr <- function(y2, eta2, sigma2, nu, margin2, y2m){
+distrHsATDiscr <- function(y2, eta2, sigma2, nu, margin2, y2m, robust = FALSE){
 
-
+p2 <- 1
 
 if(margin2 %in% c("NBI","NBIa")){
 
@@ -81,7 +81,7 @@ y2  <- mpfr( y2, prec)
 pdf2FUNC <- function(y2, mu2) mu2^y2/(exp(mu2)-1)*1/factorial(y2)  
 pdf2     <- as.numeric( pdf2FUNC(y2, mu2) ) 
 
-p2  <- rowSums( matrix(as.numeric( pdf2FUNC(y2m, mu2)),dim(y2m)[1],dim(y2m)[2]), na.rm = TRUE ) 
+if(robust == FALSE) p2  <- rowSums( matrix(as.numeric( pdf2FUNC(y2m, mu2)),dim(y2m)[1],dim(y2m)[2]), na.rm = TRUE ) 
 
 
 }

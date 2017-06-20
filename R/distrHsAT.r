@@ -71,6 +71,14 @@ if(margin2 == "WEI"){
 
 }
 
+if(margin2 == "GO"){
+
+  pdf2          <- exp(eta2)*exp(sqrt(sigma2)*y2)*exp( ( 1 - exp(sqrt(sigma2)*y2) )*exp(eta2)/sqrt(sigma2) )
+                   
+    p2          <- 1 - exp( ( 1 - exp(sqrt(sigma2)*y2) )*exp(eta2)/sqrt(sigma2) )  
+
+}
+
 
 if(margin2 == "FISK"){
 
@@ -141,6 +149,37 @@ sigma2    <- ifelse(sigma2 < 0.006, 0.006, sigma2) # related to gamma function
     p2          <-  pgamma(y2, shape = 1/sigma2, scale = exp(eta2) * sigma2)
     
     }
+    
+    
+    
+    
+if(margin2 %in% c("GA2")){
+
+sigma2    <- ifelse(sigma2 < 0.006, 0.006, sigma2) # related to gamma function
+
+pdf2 <- exp(eta2)^(sqrt(sigma2))  * y2^(sqrt(sigma2) -1) * exp(-(y2*exp(eta2))) / gamma(sqrt(sigma2))          
+                   
+p2  <- pgamma(y2, shape =  sqrt(sigma2), rate= exp(eta2))
+    
+    }
+    
+    
+    
+if(margin2 %in% c("GGA")){
+
+
+pdf2 <- (sqrt(sigma2) / gamma(nu))*(y2^(sqrt(sigma2)*nu -1) / exp(eta2)^(sqrt(sigma2)*nu))* exp(-(y2/exp(eta2))^sqrt(sigma2))           
+                   
+p2  <- pgamma(exp((log(y2) - log(exp(eta2))) * sqrt(sigma2)), shape =  nu)
+    
+    }    
+    
+    
+    
+    
+    
+    
+    
     
 if(margin2 %in% c("GAi")){
 

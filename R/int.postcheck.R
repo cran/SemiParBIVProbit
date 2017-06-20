@@ -1,7 +1,9 @@
 int.postcheck <- function(mo, margin, n.rep = 50, prob.lev = 0.05, y2m, eq = 1){
 
-cont <- c("N", "N2", "GU", "rGU", "LO", "LN", "WEI", "iG", "GA", "GAi", "DAGUM", "SM", "BE", "FISK")
+cont <- c("N", "N2", "GU", "rGU", "LO", "LN", "WEI","iG", "GA", "GAi", "DAGUM", "SM", "BE", "FISK")
 disc <- c("NBI", "NBII", "PIG", "PO", "ZTP") 
+
+
 
 n   <- mo$n
 
@@ -80,9 +82,14 @@ if(margin == "rGU")   y2s <- rRG(   n,    mu = eta2,         sigma = sqrt(sigma2
 if(margin == "LO")    y2s <- rLO(   n,    mu = eta2,         sigma = sqrt(sigma2)) 
 if(margin == "LN")    y2s <- rLOGNO(n,    mu = eta2,         sigma = sqrt(sigma2)) 
 if(margin == "WEI")   y2s <- rWEI(  n,    mu = exp(eta2),    sigma = sqrt(sigma2)) 
+#if(margin == "GO")    y2s <- rgompertz(n, shape = exp(eta2), rate = sqrt(sigma2))
 if(margin == "iG")    y2s <- rIG(   n,    mu = exp(eta2),    sigma = sqrt(sigma2)) 
 if(margin == "GA")    y2s <- rGA(   n,    mu = exp(eta2),    sigma = sqrt(sigma2)) 
 if(margin == "GAi")   y2s <- rGA(   n,    mu = eta2,         sigma = sqrt(sigma2)) 
+
+#if(margin == "GA2")   y2s <- rgamma(n, shape = sqrt(sigma2), rate = exp(eta2) ) 
+#if(margin == "GGA")   y2s <- exp( log(rgamma(n, shape = nu))/sqrt(sigma2) + log(exp(eta2)) )
+ 
 if(margin == "DAGUM") y2s <- rGB2(  n,    mu = exp(eta2),    sigma = sqrt(sigma2), nu = nu, tau = 1) 
 if(margin == "SM")    y2s <- rGB2(  n,    mu = exp(eta2),    sigma = sqrt(sigma2), nu = 1,  tau = nu) 
 if(margin == "BE")    y2s <- rBE(   n,    mu = plogis(eta2), sigma = sqrt(sigma2))

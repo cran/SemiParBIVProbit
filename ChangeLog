@@ -1,3 +1,8 @@
+version 3.8-2
+- all smoothers available in mgcv now allowed for.
+- GEV link function allowed for when using gamlss(). (This is more general, faster and more stable than bgeva.)
+- references updated.
+
 version 3.8-1
 - manual updated.
 - Univariate generalised additive models for location, scale and shape. The new function is gamlss().

@@ -7,7 +7,6 @@ v3 <- v2 <- NULL
  
 if(triv == TRUE){    
 
-  if( l.flist == 3 ){  
     v1 <- all.vars(as.formula(formula[[1]]))[1]
     v1 <- c(v1, ig[[1]]$pred.names)
     v2 <- all.vars(as.formula(formula[[2]]))[1]
@@ -15,14 +14,22 @@ if(triv == TRUE){
     v3 <- all.vars(as.formula(formula[[3]]))[1]
     v3 <- c(v3, ig[[3]]$pred.names)    
     
-    pred.n <- union(v1,c(v2,v3))
-                    }     
+    pred.n <- union(v1, c(v2, v3))
+                       
+                    
+  if( l.flist == 6 ){  
+
+    v4 <- ig[[4]]$pred.names  
+    v5 <- ig[[5]]$pred.names  
+    v6 <- ig[[6]]$pred.names  
+   
+    pred.n <- union(v1, c(v2, v3, v4, v5, v6))
     
+                    }                     
+                      
 }
     
     
-
-
 if(gaml == FALSE && triv == FALSE){    
 
     or1 <- as.character(formula[[1]][2])

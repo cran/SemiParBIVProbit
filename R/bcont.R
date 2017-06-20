@@ -346,7 +346,7 @@ if(VC$extra.regI == "pC") H <- regH(H, type = 1)
   
   if( length(S.h) != 1){
   
-  S.h1 <- 0.5*crossprod(params,S.h)%*%params
+  S.h1 <- 0.5*crossprod(params,S.h)%*%params # as(S.h, "sparseMatrix") not sure about advantage...
   S.h2 <- S.h%*%params
   
   } else S.h <- S.h1 <- S.h2 <- 0   

@@ -203,6 +203,55 @@ if(type == "triv"){
     }
 
 
+if(!is.null(x$tableP4)){
+
+
+  cat("\nEQUATION 4\n")
+  cat("Formula: "); print(x$formula[[4]])   
+  cat("\n")
+  cat("Parametric coefficients:\n")
+  printCoefmat(x$tableP4,digits = digits, signif.stars = signif.stars,na.print = "NA",...)
+  cat("\n")
+
+    if(x$l.sp4!=0){
+    cat("Smooth components' approximate significance:\n")
+    printCoefmat(x$tableNP4,digits = digits, signif.stars = signif.stars,has.Pvalue = TRUE,na.print = "NA",cs.ind = 1,...)
+    cat("\n")
+    }
+
+  cat("\nEQUATION 5\n")
+  cat("Formula: "); print(x$formula[[5]])   
+  cat("\n")
+  cat("Parametric coefficients:\n")
+  printCoefmat(x$tableP5,digits = digits, signif.stars = signif.stars,na.print = "NA",...)
+  cat("\n")
+
+    if(x$l.sp5!=0){
+    cat("Smooth components' approximate significance:\n")
+    printCoefmat(x$tableNP5,digits = digits, signif.stars = signif.stars,has.Pvalue = TRUE,na.print = "NA",cs.ind = 1,...)
+    cat("\n")
+    }
+
+
+  cat("\nEQUATION 6\n")
+  cat("Formula: "); print(x$formula[[6]])   
+  cat("\n")
+  cat("Parametric coefficients:\n")
+  printCoefmat(x$tableP6,digits = digits, signif.stars = signif.stars,na.print = "NA",...)
+  cat("\n")
+
+    if(x$l.sp6!=0){
+    cat("Smooth components' approximate significance:\n")
+    printCoefmat(x$tableNP6,digits = digits, signif.stars = signif.stars,has.Pvalue = TRUE,na.print = "NA",cs.ind = 1,...)
+    cat("\n")
+    }
+
+
+
+
+
+
+}
 
 
 
@@ -225,7 +274,9 @@ if(type == "copR"){
 
 
   cat("\n\nEQUATION 1")    
-  cat("\nLink function for mu.1:",m1l,"\n")
+  if(x$surv.flex == FALSE) cat("\nLink function for mu.1:",m1l,"\n")
+  if(x$surv.flex == TRUE) cat("\n")  
+
   cat("Formula: "); print(x$formula[[1]]) 
   cat("\n") 
   cat("Parametric coefficients:\n")
@@ -239,8 +290,10 @@ if(type == "copR"){
     }
     
     
-   cat("\nEQUATION 2") 
-  cat("\nLink function for mu.2:",m2l,"\n")
+  cat("\nEQUATION 2") 
+  if(x$surv.flex == FALSE) cat("\nLink function for mu.2:",m2l,"\n")
+  if(x$surv.flex == TRUE) cat("\n")  
+
   cat("Formula: "); print(x$formula[[2]])   
   cat("\n")
   cat("Parametric coefficients:\n")
@@ -1059,7 +1112,9 @@ if(type == "gamls"){
 
 
   cat("\n\nEQUATION 1")    
-  cat("\nLink function for mu:",m1l,"\n")
+  if(x$surv.flex == FALSE) cat("\nLink function for mu:",m1l,"\n")
+  if(x$surv.flex == TRUE) cat("\n")
+
   cat("Formula: "); print(x$formula[[1]])  
   cat("\n") 
   cat("Parametric coefficients:\n")

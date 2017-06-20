@@ -11,7 +11,7 @@ print.summary.gamlss <- function(x, digits = max(3, getOption("digits") - 3),
    s1 <- "sigma2 = "; s1.p <- x$sigma2.a
    n1 <- "nu = "; n1.p <- x$nu.a
    
-   pscr0(x, type = "gamls")    
+   pscr0(x, type = "gamlss")    
   
    pscr(x, lind = NULL, m1l, m2l = NULL, cont1par, cont2par, cont3par, type = "gamls", digits, signif.stars, ...)
   

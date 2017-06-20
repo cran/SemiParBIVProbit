@@ -1,6 +1,7 @@
 \name{bprobgHsContUniv}
 \alias{bprobgHsContUniv}
 \alias{bprobgHsContUniv3}
+\alias{bprobgHsContUnivBIN}
 
 \title{Internal Function}
 

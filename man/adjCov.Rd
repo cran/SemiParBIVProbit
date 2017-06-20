@@ -6,7 +6,7 @@
 
 \description{ 
 
-\code{adjCov} can be used to adjust the covariance matrix of a fitted \code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel}/\code{SemiParTRIV} object.}
+\code{adjCov} can be used to adjust the covariance matrix of a fitted \code{SemiParBIVProbit}, \code{copulaReg}, \code{copulaSampleSel}, \code{SemiParTRIV} object.}
 
 
 \usage{
@@ -17,7 +17,7 @@ adjCov(x, id)
 
 \arguments{ 
 
-\item{x}{A fitted \code{SemiParBIVProbit}/\code{copulaReg}/\code{copulaSampleSel}/\code{SemiParTRIV} object as produced by the respective fitting function.}
+\item{x}{A fitted \code{SemiParBIVProbit}, \code{copulaReg}, \code{copulaSampleSel}, \code{SemiParTRIV} object as produced by the respective fitting function.}
  
 \item{id}{Cluster identifier.} 
 

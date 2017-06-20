@@ -3,9 +3,10 @@ ass.dp <- function(ass.s, BivD, scc, sccn, nCa){
 if(BivD %in% scc)  ass.s <-  abs(ass.s)   
 if(BivD %in% sccn) ass.s <- -abs(ass.s) 
 
-if(!(BivD %in% c("AMH","FGM"))) i.rho <- BiCopTau2Par(family = nCa, tau = ass.s)
-if(  BivD %in% c("AMH","FGM") ) i.rho <- BiCopTau2Par(family = 1,   tau = ass.s)
-
+if(!(BivD %in% c("AMH","FGM","PL","HO"))) i.rho <- BiCopTau2Par(family = nCa, tau = ass.s)
+if(  BivD %in% c("AMH","FGM") )           i.rho <- BiCopTau2Par(family = 1,   tau = ass.s)
+if(  BivD %in% c("PL") )                  i.rho <- BiCopTau2Par(family = 3,   tau = ass.s)
+if(  BivD %in% c("HO") )                  i.rho <- ass.s - 1
 
 if(BivD %in% c("N","AMH","FGM","T"))         i.rho <- atanh( i.rho ) 
 if(BivD == "F")                              i.rho <- ifelse( abs(i.rho) < 0.0000001, 0.0000001, i.rho ) 

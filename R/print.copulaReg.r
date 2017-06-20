@@ -29,11 +29,14 @@ print.copulaReg <- function(x, ...){
 
 
   cat("\n\nEQUATION 1")
-  cat("\nLink function for mu.1:",m1l,"\n")
+  if(x$surv.flex == FALSE) cat("\nLink function for mu.1:",m1l,"\n")
+  if(x$surv.flex == TRUE)  cat("\n")
+
   cat("Formula: "); print(x$gam1$formula) 
   
   cat("\nEQUATION 2") 
-  cat("\nLink function for mu.2:",m2l,"\n")
+  if(x$surv.flex == FALSE) cat("\nLink function for mu.2:",m2l,"\n")
+  if(x$surv.flex == TRUE)  cat("\n")  
   cat("Formula: "); print(x$gam2$formula) 
   
   
@@ -172,6 +175,15 @@ if( x$margins[1] %in% cont3par && x$margins[2] %in% cont3par){
 
 }else{
  
+ 
+  if( x$margins[1] %in% cont1par && x$margins[2] %in% cont1par ){
+  
+
+  cat("\nEQUATION 3")
+  cat("\nLink function for theta:",lind,"\n") 
+  cat("Formula: "); print(x$formula[[3]]) 
+     
+     } 
  
  
 

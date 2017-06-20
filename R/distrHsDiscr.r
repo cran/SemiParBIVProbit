@@ -76,7 +76,7 @@ der2pdf2.mu2dersigma2 <- 0
 
 
 
-if(naive == FALSE){   
+if(naive == FALSE){   # needs y2m 
  
 p2  <- pPO(as.numeric(y2), mu = as.numeric(mu2)) 
  
@@ -129,7 +129,7 @@ der2pdf2.dersigma22   <- 0
 der2pdf2.mu2dersigma2 <- 0
 
 
-if(naive == FALSE){   
+if(naive == FALSE){   #needs y2m
 
 mu2 <- c(mu2)
 
@@ -436,17 +436,9 @@ der2p2.derdermu2sigma2 <- der2pdf2.mu2dersigma2FUNC2p(function(mu2, sigma2) pNBI
 
 
 
-
-
-
-
-
-
-
-
-
-
-if(margin2 == "NBI"){ # half analy half numerical - we need y2m
+if(margin2 == "NBI"){ # half analy half numerical - we need y2m, was deemed best choice up until 03/05/2017
+                      # in pahse of robust testing the presence of the gamma function created problems
+                      # so using all numerical maybe is better but there is no general rule, we will leave the default for now 
 
 sigma2    <- ifelse(sigma2 < 4.151334e-05, 4.151334e-05, sigma2) # related to gamma function
 sigma2.st <- log(sigma2) 

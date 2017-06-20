@@ -12,10 +12,12 @@ print.gamlss <- function(x, ...){
   n1 <- "  nu = "; n1.p <- x$nu.a
   
 
-  pscr0(x, type = "gamls")  
+  pscr0(x, type = "gamlss")  
 
   cat("\n\nEQUATION 1")
-  cat("\nLink function for mu:",m1l,"\n")
+  if(x$surv.flex == FALSE) cat("\nLink function for mu:",m1l,"\n")
+  if(x$surv.flex == TRUE)  cat("\n")
+  
   cat("Formula: "); print(x$gam1$formula) 
   
   

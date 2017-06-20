@@ -50,21 +50,7 @@ teta   <- teta.tr(x$VC, x$X5s[s, ]%*%betahatSim[(l1 + l2 + l3 + l4 + 1):(l1 + l2
 }
 
 
-if(x$margins[2] == "N")     y2 <- rNO(   1,    mu = eta2,         sigma = sqrt(sigma2)) 
-if(x$margins[2] == "N2")    y2 <- rNO(   1,    mu = eta2,         sigma = sigma2) 
-if(x$margins[2] == "GU")    y2 <- rGU(   1,    mu = eta2,         sigma = sqrt(sigma2)) 
-if(x$margins[2] == "rGU")   y2 <- rRG(   1,    mu = eta2,         sigma = sqrt(sigma2)) 
-if(x$margins[2] == "LO")    y2 <- rLO(   1,    mu = eta2,         sigma = sqrt(sigma2)) 
-if(x$margins[2] == "LN")    y2 <- rLOGNO(1,    mu = eta2,         sigma = sqrt(sigma2)) 
-if(x$margins[2] == "WEI")   y2 <- rWEI(  1,    mu = exp(eta2),    sigma = sqrt(sigma2)) 
-if(x$margins[2] == "iG")    y2 <- rIG(   1,    mu = exp(eta2),    sigma = sqrt(sigma2)) 
-if(x$margins[2] == "GA")    y2 <- rGA(   1,    mu = exp(eta2),    sigma = sqrt(sigma2)) 
-if(x$margins[2] == "GAi")   y2 <- rGA(   1,    mu = eta2,         sigma = sqrt(sigma2)) 
-if(x$margins[2] == "DAGUM") y2 <- rGB2(  1,    mu = exp(eta2),    sigma = sqrt(sigma2), nu = nu, tau = 1 ) 
-if(x$margins[2] == "SM")    y2 <- rGB2(  1,    mu = exp(eta2),    sigma = sqrt(sigma2), nu = 1 , tau = nu) 
-if(x$margins[2] == "BE")    y2 <- rBE(   1,    mu = plogis(eta2), sigma = sqrt(sigma2)) # correct? I think so
-if(x$margins[2] == "FISK")  y2 <- rGB2(  1,    mu = exp(eta2),    sigma = sqrt(sigma2), nu = 1 , tau = 1 )
-
+y2 <- sim.resp(x$margins[2], 1, eta2, sigma2, nu, setseed = FALSE)
 
 list(p1 = p1, eta2 = eta2, sigma2 = sigma2, nu = nu, teta = teta, y2 = y2, margin = x$margins[2], BivD = x$BivD)
 
@@ -88,7 +74,7 @@ BivD   <- out.beta$BivD
 y2 <- y2.st 
 
 if(margin %in% c("LN","WEI","iG","GA","GAi","DAGUM","SM","FISK") ) y2 <- esp.tr(y2.st, "LN")$vrb # it can be any distr
-if(margin %in% c("BE") )                                           y2 <- esp.tr(y2.st, "BE")$vrb
+if(margin %in% c("BE") )                                                            y2 <- esp.tr(y2.st, "BE")$vrb
 
 
 ppdf <- distrHsAT(y2, eta2, sigma2, nu, margin)

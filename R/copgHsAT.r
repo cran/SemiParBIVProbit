@@ -34,6 +34,33 @@ if(Ln == FALSE){
 
 
 
+
+if(BivD == "PL"){
+                    
+c.copula.be2 <- (teta - (0.5 * ((2 * ((p1 + p2) * (teta - 1) + 1) - 4 * (p1 * 
+    teta)) * (teta - 1)/sqrt(((p1 + p2) * (teta - 1) + 1)^2 - 
+    4 * (p1 * p2 * teta * (teta - 1)))) + 1))/(2 * (teta - 1)) 
+
+}
+
+
+
+
+
+if(BivD == "HO"){
+                    
+c.copula.be2 <- (-log(p2))^(1/teta - 1) * ((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^(teta - 
+    1) * exp(-((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^teta)/p2 
+
+}
+
+
+
+
+
+
+
+
 if(BivD == "AMH"){
                     
 c.copula.be2 <- p1 * (1 - p2 * teta * (1 - p1)/(1 - teta * (1 - p1) * (1 - p2)))/(1 - 
@@ -114,6 +141,37 @@ c.copula.be2 <- mm(c.copula.be2)
 
 
 if(Ln == TRUE){
+
+
+
+
+
+if(BivD == "HO"){
+                    
+c.copula2.be1be2 <- ((-log(p1))^(1/teta - 1) * (-log(p2))^(1/teta - 1) * ((-log(p1))^(1/teta) + 
+    (-log(p2))^(1/teta))^(2 * (teta - 1)) - (-log(p1))^(1/teta - 
+    1) * (-log(p2))^(1/teta - 1) * ((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^(teta - 
+    2) * (teta - 1)/teta) * exp(-((-log(p1))^(1/teta) + (-log(p2))^(1/teta))^teta)/(p1 * 
+    p2) 
+
+}
+
+
+
+
+
+if(BivD == "PL"){
+                    
+c.copula2.be1be2 <- -(((2 * (teta - 1) - 4 * teta)/sqrt(((p1 + p2) * (teta - 1) + 
+    1)^2 - 4 * (p1 * p2 * teta * (teta - 1))) - 0.5 * ((2 * ((p1 + 
+    p2) * (teta - 1) + 1) - 4 * (p1 * teta)) * (2 * ((p1 + p2) * 
+    (teta - 1) + 1) - 4 * (p2 * teta)) * (teta - 1)/(((p1 + p2) * 
+    (teta - 1) + 1)^2 - 4 * (p1 * p2 * teta * (teta - 1)))^1.5))/4) 
+
+}
+
+
+
 
 
 

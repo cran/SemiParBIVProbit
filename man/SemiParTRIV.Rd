@@ -4,8 +4,7 @@
 \title{Semiparametric Trivariate Binary Models}
 
 \description{ 
-\code{SemiParTRIV} fits flexible trivariate binary probit models with several types of covariate 
-effects. 
+\code{SemiParTRIV} fits flexible trivariate binary models with several types of covariate effects. 
 
 }
 
@@ -15,7 +14,7 @@ effects.
 SemiParTRIV(formula, data = list(), weights = NULL, subset = NULL,  
             Model = "T", margins = c("probit", "probit", "probit"),
             penCor = "unpen", sp.penCor = 3, 
-            approx = FALSE, infl.fac = 1, 
+            approx = FALSE, Chol = FALSE, infl.fac = 1, 
             gamma = 1, w.alasso = NULL, rinit = 1, rmax = 100, 
             iterlimsp = 50, tolsp = 1e-07,
             gc.l = FALSE, parscale, extra.regI = "t")
@@ -39,7 +38,7 @@ SemiParTRIV(formula, data = list(), weights = NULL, subset = NULL,
 \item{Model}{It indicates the type of model to be used in the analysis. Possible values are "T" (trivariate model), 
              "TSS" (trivariate model with double sample selection).}
 
-\item{margins}{It indicates the link functions used for the three margins. Possible choices are "probit", "logit" and "cloglog".}
+\item{margins}{It indicates the link functions used for the three margins. Possible choices are "probit", "logit", "cloglog"".}
 
 \item{penCor}{Type of penalty for correlation coefficients. Possible values are "unpen", "lasso", "ridge", "alasso".}
 
@@ -47,6 +46,8 @@ SemiParTRIV(formula, data = list(), weights = NULL, subset = NULL,
 
 \item{approx}{If \code{TRUE} then an approximation of the trivariate normal integral is employed. This may speed up computations but make them 
               unstable at the same time (especially for highly correlated responses).}
+
+\item{Chol}{If \code{TRUE} then the Cholesky method instead of the eigenvalue method is employed for the correlation matrix.}
                     
 \item{infl.fac}{Inflation factor for the model degrees of freedom in the approximate AIC. Smoother models can be obtained setting 
              this parameter to a value greater than 1.}
@@ -103,7 +104,7 @@ The function returns an object of class \code{SemiParTRIV} as described in \code
 
 \author{
 
-Authors: Panagiota Filippou and Giampiero Marra
+Authors: Panagiota Filippou, Giampiero Marra and Rosalba Radice
 
 Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
@@ -112,7 +113,7 @@ Maintainer: Giampiero Marra \email{giampiero.marra@ucl.ac.uk}
 
 \references{
 
-Filippou P., Marra G. and Radice R. (submitted), Penalized Likelihood Estimation of a Trivariate Additive Probit Model.
+Filippou P., Marra G. and Radice R. (in press), Penalized Likelihood Estimation of a Trivariate Additive Probit Model. \emph{Biostatistics}.
 
 
 }
@@ -178,6 +179,8 @@ f.l <- list(y1 ~ x1 + s(x2),
             y3 ~ x1)  
 
 out  <- SemiParTRIV(f.l, data = dataSim)
+out1 <- SemiParTRIV(f.l, data = dataSim, Chol = TRUE)
+
 conv.check(out)
 summary(out)
 plot(out, eq = 1)
@@ -187,7 +190,57 @@ BIC(out)
 
 out  <- SemiParTRIV(f.l, data = dataSim, 
                     margins = c("probit","logit","cloglog"))
-                         
+out1 <- SemiParTRIV(f.l, data = dataSim, Chol = TRUE,
+                    margins = c("probit","logit","cloglog"))                    
+conv.check(out)
+summary(out)
+plot(out, eq = 1)
+plot(out, eq = 2)
+AIC(out)
+BIC(out)
+
+f.l <- list(y1 ~ x1 + s(x2), 
+            y2 ~ x1 + s(x2),
+            y3 ~ x1,
+               ~ 1, ~ 1, ~ 1) 
+               
+out1 <- SemiParTRIV(f.l, data = dataSim, Chol = TRUE)
+   
+f.l <- list(y1 ~ x1 + s(x2), 
+            y2 ~ x1 + s(x2),
+            y3 ~ x1,
+               ~ 1, ~ s(x2), ~ 1) 
+               
+out2 <- SemiParTRIV(f.l, data = dataSim, Chol = TRUE)   
+
+f.l <- list(y1 ~ x1 + s(x2), 
+            y2 ~ x1 + s(x2),
+            y3 ~ x1,
+               ~ x1, ~ s(x2), ~ x1 + s(x2)) 
+               
+out2 <- SemiParTRIV(f.l, data = dataSim, Chol = TRUE)   
+
+f.l <- list(y1 ~ x1 + s(x2), 
+            y2 ~ x1 + s(x2),
+            y3 ~ x1,
+               ~ x1, ~ x1, ~ s(x2)) 
+               
+out2 <- SemiParTRIV(f.l, data = dataSim, Chol = TRUE) 
+
+f.l <- list(y1 ~ x1 + s(x2), 
+            y2 ~ x1 + s(x2),
+            y3 ~ x1,
+               ~ x1, ~ x1 + x2, ~ s(x2)) 
+               
+out2 <- SemiParTRIV(f.l, data = dataSim, Chol = TRUE) 
+
+f.l <- list(y1 ~ x1 + s(x2), 
+            y2 ~ x1 + s(x2),
+            y3 ~ x1,
+               ~ x1 + x2, ~ x1 + x2, ~ x1 + x2) 
+               
+out2 <- SemiParTRIV(f.l, data = dataSim, Chol = TRUE) 
+         
 ############
 ## EXAMPLE 2
 ############

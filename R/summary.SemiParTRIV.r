@@ -3,23 +3,80 @@ summary.SemiParTRIV <- function(object, n.sim = 100, prob.lev = 0.05, ...){
   n <- object$n
   epsilon <- 0.0000001; max.p   <- 0.9999999
   
+if(is.null(object$X4)) epd12s <- epd13s <- epd23s <- NA  
+if(!is.null(object$X4)) epd12s <- epd13s <- epd23s <- matrix(NA, n, n.sim)  
+  
+  
   lf <- length(object$coefficients)
   Vb <- object$Vb 
   SE <- sqrt(diag(Vb)) 
   bs <- rMVN(n.sim, mean = object$coefficients, sigma=Vb)  
 
-  #epd12s <- t(as.matrix(   teta.tr(object$VC, bs[, lf-2])$teta  ) # t matrix needed when dealing with vectors
-  #epd13s <- t(as.matrix(   teta.tr(object$VC, bs[, lf-1])$teta  )
-  #epd23s <- t(as.matrix(   teta.tr(object$VC, bs[, lf])$teta    )
+if(!is.null(object$X4)){      
+  theta12.st <- object$VC$X4%*%t(bs[,(object$VC$X1.d2 + object$VC$X2.d2 + object$VC$X3.d2 + 1):(object$VC$X1.d2 + object$VC$X2.d2 + object$VC$X3.d2 + object$VC$X4.d2)])    
+  theta13.st <- object$VC$X5%*%t(bs[,(object$VC$X1.d2 + object$VC$X2.d2 + object$VC$X3.d2 + object$VC$X4.d2 + 1):(object$VC$X1.d2 + object$VC$X2.d2 + object$VC$X3.d2 + object$VC$X4.d2 + object$VC$X5.d2)])    
+  theta23.st <- object$VC$X6%*%t(bs[,(object$VC$X1.d2 + object$VC$X2.d2 + object$VC$X3.d2 + object$VC$X4.d2 + object$VC$X5.d2 + 1):(object$VC$X1.d2 + object$VC$X2.d2 + object$VC$X3.d2 + object$VC$X4.d2 + object$VC$X5.d2 + object$VC$X6.d2)])  
+}
+
+
+
+if(object$VC$Chol == FALSE){
   
-  epd12s <- teta.tr(object$VC, bs[, lf-2])$teta  
-  epd13s <- teta.tr(object$VC, bs[, lf-1])$teta  
-  epd23s <- teta.tr(object$VC, bs[, lf]  )$teta  
+ epd12s <- teta.tr(object$VC, bs[, lf-2])$teta  
+ epd13s <- teta.tr(object$VC, bs[, lf-1])$teta  
+ epd23s <- teta.tr(object$VC, bs[, lf]  )$teta  
   
+}
+  
+  
+if(object$VC$Chol == TRUE){ 
+  
+  if(is.null(object$X4)){  
+ 
+     for(i in 1:n.sim){ 
+
+      Sigma <- PosDefCor(Sigma = 1, Chol = TRUE, theta12.st = bs[i, lf-2], theta13.st = bs[i, lf-1], theta23.st = bs[i, lf])
+      
+      epd12s[i] <- Sigma[1,2]
+      epd13s[i] <- Sigma[1,3]
+      epd23s[i] <- Sigma[2,3]  
+    }
+}    
+    
+    
+   if(!is.null(object$X4)){  
+      
+    for(i in 1:n){    
+
+       for(j in 1:n.sim){
+       
+      Sigma <- PosDefCor(Sigma = 1, Chol = TRUE, theta12.st = theta12.st[i, j], theta13.st = theta13.st[i, j], theta23.st = theta23.st[i, j])
+     
+      epd12s[i,j] <- Sigma[1,2]
+      epd13s[i,j] <- Sigma[1,3]
+      epd23s[i,j] <- Sigma[2,3] 
+      
+      }}
+      
+    }    
+    
+}
+               
+  
+if(is.null(object$X4)){   
   CI12s <- rowQuantiles(t(epd12s), probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE) 
   CI13s <- rowQuantiles(t(epd13s), probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE) 
   CI23s <- rowQuantiles(t(epd23s), probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE) 
-   
+}
+
+if(!is.null(object$X4)){   
+  CI12s <- rowQuantiles(epd12s, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE) 
+  CI13s <- rowQuantiles(epd13s, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE) 
+  CI23s <- rowQuantiles(epd23s, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE) 
+}
+
+
+
   if(object$VC$gc.l == TRUE) gc()
   
   susuR <- susu(object, SE, Vb)

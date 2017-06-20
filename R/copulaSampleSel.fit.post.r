@@ -12,7 +12,9 @@ if(VC$margins[2] != "LN") logLik <- -SemiParFit$fit$l else logLik <- -SemiParFit
 pVbres <- postVb(SemiParFit, VC)
 
 He         <- pVbres$He        
-Vb         <- pVbres$Vb        
+Vb         <- pVbres$Vb  
+Vb.t       <- pVbres$Vb.t
+
 HeSh       <- pVbres$HeSh      
 F          <- pVbres$F         
 F1         <- pVbres$F1        
@@ -126,7 +128,7 @@ sp <- SemiParFit$sp
   
   
   
-                 list(SemiParFit = SemiParFit, He = He, logLik = logLik, Vb = Vb, HeSh = HeSh, F = F, F1 = F1, t.edf = t.edf, edf = edf, 
+                 list(SemiParFit = SemiParFit, He = He, logLik = logLik, Vb = Vb, HeSh = HeSh, F = F, F1 = F1, t.edf = t.edf, edf = edf, Vb.t = Vb.t,
                       edf11=edf1,
                       edf1 = edf[[1]], edf2 = edf[[2]], edf3 = edf[[3]], edf4 = edf[[4]], edf5 = edf[[5]], edf6 = edf[[6]],
                       edf7 = edf[[7]], edf8 = edf[[8]],

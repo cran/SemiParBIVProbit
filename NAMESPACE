@@ -1,25 +1,25 @@
 export(AT, AT2, RR, OR, rMVN, post.check,mm,enu.tr,llpsi,imputeSS,
 prev, distrHs, numch, numgh,distrHsAT,distrHsAT1,distrHsDiscr,distrHsATDiscr,
-adjCov, copgHsCont, BCDF, BiCDF, jc.probs,probm,postVb,ass.ms,edf.loop,pred.var,form.check,
+adjCov, copgHsCont, BCDF, BiCDF, jc.probs,probm,probmS,postVb,ass.ms,edf.loop,pred.var,form.check,
 adjCovSD,int.postcheck, overall.svG, susutsn, susu,pscr, pscr0, 
 gt.bpm, esp.tr, eta.tr, teta.tr,copgHsAT,dof.tr,ass.dp,form.eq12,startsn, overall.sv,
 bprobgHs,bprobgHstwoParC, mb, H.tri, g.tri, triprobgHs, H.triSS, g.triSS, triprobgHsSS, 
-H.triESS, g.triESS, triprobgHsESS, pp,
-bprobgHsPO, bcorrec,
+H.triESS, g.triESS, triprobgHsESS, pp, SS,
+bprobgHsPO, bcorrec, bcorrec2, bcorrecDiscr,  Xdpred, 
 bprobgHsSS,
-bprobgHsContUniv, 
-copgHs, copgHs2, copgHs3,
+bprobgHsContUniv,
+copgHs, copgHs2, copgHs3, PosDefCor,
 logLik.SemiParBIVProbit,
-LM.bpm,
+LM.bpm, hazsurv.plot,
 VuongClarke,
-plot.SemiParBIVProbit,
+plot.SemiParBIVProbit, vis.SemiParBIVProbit,
 predict.SemiParBIVProbit,
 print.AT, print.AT2, print.RR, print.OR, 
 print.prev, 
 print.mb,
 print.SemiParBIVProbit,
 print.SemiParTRIV,
-print.copulaReg,
+print.copulaReg, sim.resp,
 print.gamlss,
 print.copulaSampleSel,
 print.summary.SemiParBIVProbit,
@@ -52,27 +52,27 @@ polys.map, polys.setup)
 importFrom(magic, adiag)
 importFrom(survey, svyrecvar, twophasevar, twophase2var, svyCprod)
 importFrom(trust,trust)
+importFrom(scam, scam)
 importFrom(VGAM,pbinorm,dbinorm)
+importFrom(survival, survfit, Surv)
 import(mgcv)
+importFrom(psych, tetrachoric)
+importFrom(copula, tau, plackettCopula) 
 importFrom(VineCopula, BiCopHfunc1, BiCopHfunc2, BiCopHfuncDeriv, BiCopCDF, BiCopTau2Par, BiCopPar2Tau, BiCopPDF, BiCopDeriv, BiCopDeriv2, BiCopHfuncDeriv2)
 importFrom(ggplot2, fortify)
 importFrom(matrixStats, rowQuantiles, colQuantiles, colWeightedMeans)
 importFrom(gamlss.dist, pNBI, dNBI, pNBII, dNBII, pPIG, dPIG, pDEL, dDEL, pSICHEL, dSICHEL, pPO, rNO,rGU,rRG,rLO,rLOGNO,rWEI,rIG,rGA,rGB2,rBE,rNBI,rNBII,rPIG,rPO)
 
-
-
 importFrom(Rmpfr,getPrec,mpfr,pmax)
-
 importFrom(mnormt, pmnorm)
 importFrom(graphics, axTicks, abline, hist, lines, par, polygon, plot, rug, points) 
-importFrom(grDevices, cm.colors, gray, heat.colors, terrain.colors, topo.colors, dev.new)   
+importFrom(grDevices, cm.colors, gray, heat.colors, terrain.colors, topo.colors, dev.new, dev.interactive, devAskNewPage)   
 importFrom(stats, qt, dpois, qpois, qlogis, plogis, dgamma, dlnorm, dlogis, dnorm, density, cor, coef, as.formula, aggregate.data.frame, integrate, 
            model.matrix, na.omit, na.pass, pbinom, pchisq, pgamma, plnorm, pnorm, printCoefmat,
            qnorm, qqnorm, quantile, residuals, rnorm, sd, uniroot, update, var, weighted.mean, dbeta, pbeta,
-           ks.test, shapiro.test, runif, update.formula, qqplot) 
+           ks.test, shapiro.test, runif, update.formula, qqplot, .checkMFClasses, delete.response,
+           model.frame, model.offset, napredict, predict, reformulate, termplot)           
 importFrom(utils, getFromNamespace)
-
-
 
 S3method(plot, SemiParBIVProbit)
 S3method(summary, SemiParBIVProbit)

@@ -4,11 +4,9 @@ AT <- function(x, nm.end, eq = NULL, E = TRUE, treat = TRUE, type = "simultaneou
    xlab = "Simulated Average Effects", ...){
 
 
-
-
 if(x$Cont == "YES") stop("This function is not suitable for bivariate models with continuous/discrete margins.")
 if(x$triv == TRUE && x$Model == "TSS") stop("This function is not suitable for trivariate probit models with double sample selection.")
-if(x$Cont == "NO" && x$VC$ccss == "yes" ) stop("This function is not suitable for selection models.")
+if(x$Cont == "NO" && x$VC$ccss == "yes" && x$margins[2] != "GA") stop("This function is not suitable for selection models.")
 
 # TESS case? not done yet
 
@@ -113,7 +111,7 @@ m2d  <- x$VC$m2d
 m2  <- x$VC$m2 
 m3  <- x$VC$m3 
 bin.link <- x$VC$bl  
-mat <- c("SM","DAGUM","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK") # excludes "N"
+mat <- c("SM","DAGUM","GU","rGU","LO","LN","WEI","iG","GA","BE","FISK") # excludes "N"
 
 
 end <- 0
@@ -130,18 +128,27 @@ if(x$v2[1] %in% x$v1[-1]) {end <- 2; eq <- 1}
 if(x$margins[2] == "DAGUM" && eq == 2) { if( min(sqrt(x$sigma2)) <= 1) stop("sigma parameter has value(s) smaller than 1, hence the mean is indeterminate.")}
 if(x$margins[2] == "SM"    && eq == 2) { if( min(sqrt(x$sigma2)*x$nu) <= 1) stop("sigma*nu has value(s) smaller than 1, hence the mean is indeterminate.")}
 if(x$margins[2] == "FISK"  && eq == 2) { if( min(sqrt(x$sigma2)) <= 1) stop("sigma parameter has value(s) smaller than 1, hence the mean is indeterminate.")}
-
+# not sure about FISK2 
 
 if( !( type %in% c("naive","univariate","simultaneous") ) ) stop("Error in parameter type value. It should be one of: naive, univariate or simultaneous.")
 
 
 if(missing(nm.end)) stop("You must provide the name of the endogenous variable.")
 
+
+if(x$VC$ccss == "yes" && x$margins[2] != "GA"){
 if(x$Model=="BSS" || x$Model=="BPO" || x$Model=="BPO0" || end==0) stop("Calculation of this average treatment effect is valid for recursive models only.")
+}
+
 
 if(type == "univariate" && x$margins[2] %in% c("N","N2") && eq == 2 && x$gamlssfit == FALSE) stop("You need to fit the univariate model to obtain the AT. Refit the model and set gamlssfit = TRUE.")
 
+
+
+if(x$VC$ccss == "yes" && x$margins[2] != "GA"){
 if(x$margins[2] %in% mat && eq == 2) stop("AT currently available for Gaussian outcome margin only.")
+}
+
 
 if(is.character(nm.end)==FALSE) stop("nm.end is not a character!")
 if( !is.null(ind) && E == FALSE) stop("ind is not designed to be used when some observations are excluded from the AT's calculation.")
@@ -297,6 +304,99 @@ if(delta == FALSE){
 
 ######################################################################
 ######################################################################
+
+if(type != "naive" && x$margins[2] %in% c("GA") && x$VC$ccss == "yes"){ ## binary binary case with eq = 1 or eq = 2
+
+#############
+
+eq <- 2
+
+if(type == "simultaneous"){
+	indD[[1]] <- 1:x$X1.d2 
+	indD[[2]] <- x$X1.d2+(1:x$X2.d2)
+                       }
+
+if(eq==2){ X.int <- as.matrix(x$X2s[ind,])
+    if(type == "simultaneous") ind.int <- indD[[2]] 
+         }
+
+if(type == "simultaneous") coef.int <- as.numeric(coef(x)[ind.int])
+	   
+             
+d0 <- d1 <- X.int
+d0[,nm.end] <- 0
+d1[,nm.end] <- 1
+
+
+if(type == "simultaneous"){
+	eti1 <- d1%*%coef.int 
+	eti0 <- d0%*%coef.int 
+                       }
+
+if(type == "univariate"){
+
+	ngam <- x$gamlss 
+
+	eti1 <- d1%*%coef(ngam)[1:x$X2.d2] 
+	eti0 <- d0%*%coef(ngam)[1:x$X2.d2] 
+                         }
+
+#############
+
+p.int1 <- exp(eti1) 
+p.int0 <- exp(eti0)
+
+est.AT <- mean(p.int1, na.rm = TRUE) - mean(p.int0, na.rm = TRUE) 
+
+
+#############
+
+
+if(delta == FALSE){
+
+ if(type == "univariate")    {bs <- rMVN(n.sim, mean = coef(ngam), sigma=ngam$Vb); eti1s <- d1%*%t(bs[,1:x$X2.d2]); eti0s <- d0%*%t(bs[,1:x$X2.d2]) }
+ if(type == "simultaneous")  {bs <- rMVN(n.sim, mean = coef(x),    sigma=x$Vb);    eti1s <- d1%*%t(bs[,ind.int]);   eti0s <- d0%*%t(bs[,ind.int]) } 
+
+ peti1s  <- exp(eti1s) 
+ peti0s  <- exp(eti0s) 
+ est.ATb <- colMeans(peti1s, na.rm = TRUE) - colMeans(peti0s, na.rm = TRUE) 
+ 
+ CIs <- as.numeric(quantile(est.ATb, c(prob.lev/2, 1 - prob.lev/2), na.rm = TRUE))
+
+                   }
+
+
+
+  if(hd.plot == TRUE && delta == FALSE){
+  
+  if(x$margins[2] %in% c(m2, m3) && eq == 2) mult <- 1 else mult <- 100
+  
+  hist(est.ATb*mult, freq = FALSE, main=main, 
+       xlab=xlab, 
+       ylim=c(0,max(density(est.ATb*mult)$y,hist(est.ATb*mult, plot = FALSE)$density)), ...)
+  lines(density(est.ATb*mult))
+
+                     }
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+######################################################################
+######################################################################
+
+
+
 
 
 

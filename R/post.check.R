@@ -11,6 +11,38 @@ qr <- qr1 <- qr2 <- NULL
 if(x$univar.gamlss == FALSE){###
 
 
+if(x$surv.flex == TRUE){ ###
+
+par(mfrow = c(2, 2))
+
+qr1 <- -log(x$fit$p1)
+H1  <- -log(survfit(Surv(qr1, x$cens1) ~ 1,  type = "kaplan-meier", conf.type = "none")$surv)
+
+hist(qr1, freq = FALSE, main = main, xlab = "Cox-Snell residuals", ylab = "Density", ...)
+lines(density(qr1, adjust = 2), lwd = 2)
+
+qqplot(qr1, H1, xlab = "Cox-Snell residuals", ylab = "Cumulative Hazards of residuals")
+abline(0, 1, col = "red")
+
+qr2 <- -log(x$fit$p2)
+H2  <- -log(survfit(Surv(qr2, x$cens2) ~ 1,  type = "kaplan-meier", conf.type = "none")$surv)
+
+hist(qr2, freq = FALSE, main = main, xlab = "Cox-Snell residuals", ylab = "Density", ...)
+lines(density(qr2, adjust = 2), lwd = 2)
+
+qqplot(qr2, H2, xlab = "Cox-Snell residuals", ylab = "Cumulative Hazards of residuals")
+abline(0, 1, col = "red")
+
+
+
+}###
+
+
+
+
+if(x$surv.flex == FALSE){##
+
+
 if(x$Cont == "NO"){
 
 
@@ -160,14 +192,10 @@ lines(density(qr2, adjust = 2),lwd=2)
 if(intervals == FALSE){qqnorm(qr2); abline(0, 1, col = "red")}
 if(intervals == TRUE) int.postcheck(x, x$VC$margins[2], n.rep = n.sim, prob.lev = prob.lev, y2m = y2m, eq = 2)
 
-
-
-
-
-
-
 }
 
+
+}##
 
 }###
 
@@ -176,31 +204,28 @@ if(intervals == TRUE) int.postcheck(x, x$VC$margins[2], n.rep = n.sim, prob.lev 
 
 if(x$univar.gamlss == TRUE){
 
+if(x$surv.flex == FALSE){ ###
+
+if(x$VC$margins[1] %in% c("GEVlink") ) stop("It does not make much sense to check the residuals for a binary response model.")
 
 y1 <- x$y1
 
-if(x$VC$margins[1] %in% c("ZTP")){
-     
+if(x$VC$margins[1] %in% c("ZTP")){    
     ly1 <- length(y1)
     y1m <- list()
     my1 <- max(y1)
     for(i in 1:ly1){ y1m[[i]] <- seq(0, y1[i]); length(y1m[[i]]) <- my1+1} 
-    y1m <- do.call(rbind, y1m)     
-     
-}
+    y1m <- do.call(rbind, y1m)         
+                                 }
 
 
-if(x$VC$margins[1] %in% c(x$VC$m2,x$VC$m3))  p1 <- distrHsAT(x$y1, x$eta1, x$sigma2, x$nu, x$margins[1])$p2 
-
+if(x$VC$margins[1] %in% c(x$VC$m2,x$VC$m3)) p1 <- distrHsAT(x$y1, x$eta1, x$sigma2, x$nu, x$margins[1])$p2 
 if(x$VC$margins[1] %in% c(x$VC$m1d,x$VC$m2d,x$VC$m3d)){
-
-pd <- distrHsATDiscr(x$y1, x$eta1, x$sigma2, x$nu, x$margins[1], y2m = y1m) 
-p <- pd$p2
-d <- pd$pdf2   
-
-p1 <- runif(y1, p - d, p) 
-
-}
+      pd <- distrHsATDiscr(x$y1, x$eta1, x$sigma2, x$nu, x$margins[1], y2m = y1m) 
+      p <- pd$p2
+      d <- pd$pdf2   
+      p1 <- runif(y1, p - d, p) 
+                                                      }
 
 par(mfrow = c(1, 2))
 
@@ -211,8 +236,27 @@ lines(density(qr, adjust = 2), lwd = 2)
 if(intervals == FALSE){qqnorm(qr); abline(0, 1, col = "red")}
 if(intervals == TRUE) int.postcheck(x, x$VC$margins[1], n.rep = n.sim, prob.lev = prob.lev, y2m = y1m)
 
+}###
+
+
+if(x$surv.flex == TRUE){ ###
+
+par(mfrow = c(1, 2))
+
+qr <- -log(x$fit$p1)
+H  <- -log(survfit(Surv(qr, x$cens) ~ 1,  type = "kaplan-meier", conf.type = "none")$surv)
+
+hist(qr, freq = FALSE, main = main, xlab = "Cox-Snell residuals", ylab = "Density", ...)
+lines(density(qr, adjust = 2), lwd = 2)
+
+qqplot(qr, H, xlab = "Cox-Snell residuals", ylab = "Cumulative Hazards of residuals")
+abline(0, 1, col = "red")
+
+}###
+
 
 }
+
 
 L <- list(qr = qr, qr1 = qr1, qr2 = as.numeric(qr2))
 

@@ -37,7 +37,24 @@ print.SemiParTRIV <- function(x, ...){
   cat("\nEQUATION 3")
   cat("\nLink function for mu.3:",m3l,"\n")
   cat("Formula: "); print(x$formula[[3]])  
+ 
+if(!is.null(x$X4)){
+
+  cat("\nEQUATION 4\n")
+  cat("Formula: "); print(x$formula[[4]])  
+
+  cat("\nEQUATION 5\n")
+  cat("Formula: "); print(x$formula[[5]])  
   
+  cat("\nEQUATION 6\n")
+  cat("Formula: "); print(x$formula[[6]])    
+
+}
+
+
+
+ 
+ 
   cat("\n")
             
 if(x$Model == "T" || x$Model == "TESS")   cat("n = ",x$n,"\ntheta12 = ", format(as.p12, digits=3),"  theta13 = ", format(as.p13, digits=3),"  theta23 = ", format(as.p23, digits=3),"\ntotal edf = ",format(x$t.edf, digits=3),"\n\n", sep="")

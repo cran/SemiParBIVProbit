@@ -1,6 +1,6 @@
 SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
                              Model = "T", margins = c("probit","probit","probit"), 
-                             penCor = "unpen", sp.penCor = 3, approx = FALSE, 
+                             penCor = "unpen", sp.penCor = 3, approx = FALSE, Chol = FALSE, 
                              infl.fac = 1, gamma = 1, w.alasso = NULL, 
                              rinit = 1, rmax = 100, 
                              iterlimsp = 50, tolsp = 1e-07,
@@ -17,7 +17,8 @@ SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
   opc  <- scc <- sccn <- m2 <- m2d <- m3 <- m3d <- bl <- NULL  
    
   fp <- FALSE
-  
+  surv.flex <- FALSE
+
   X2s <- X3s <- ct <- cta <- nC  <- nCa <- NULL
     
   sp1 <- sp2 <- NULL
@@ -50,12 +51,15 @@ SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
   if(penCor != "unpen"){ spCor <- sp.penCor; names(spCor) <- "spCor"} 
  
   M <- list(mb = c("T", "TSS", "TESS"), margins = margins, penCor = penCor, w.alasso = w.alasso, 
-            extra.regI = extra.regI, Model = Model)
+            extra.regI = extra.regI, Model = Model, Chol = Chol)
   
   if(!is.list(formula)) stop("You must specify a list of equations.")
   l.flist <- length(formula)
+  if(l.flist > 3 && l.flist != 6) stop("You have to specify six equations.")
+
   pream.wm(formula, margins = margins, M, l.flist, type = "triv")
   
+  cl <- match.call()
   mf <- match.call(expand.dots = FALSE)        
   pred.varR <- pred.var(formula, l.flist, triv = TRUE) 
    
@@ -68,7 +72,7 @@ SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
   fake.formula <- paste(v1[1], "~", paste(pred.n, collapse = " + ")) 
   environment(fake.formula) <- environment(formula[[1]])
   mf$formula <- fake.formula 
-  mf$margins <- mf$infl.fac <- mf$rinit <- mf$approx <- mf$gamma <- mf$w.alasso <- mf$rmax <- mf$Model <- mf$iterlimsp <- mf$tolsp <- mf$gc.l <- mf$parscale <- mf$extra.regI <- mf$penCor <- mf$sp.penCor <- NULL                           
+  mf$Chol <- mf$margins <- mf$infl.fac <- mf$rinit <- mf$approx <- mf$gamma <- mf$w.alasso <- mf$rmax <- mf$Model <- mf$iterlimsp <- mf$tolsp <- mf$gc.l <- mf$parscale <- mf$extra.regI <- mf$penCor <- mf$sp.penCor <- NULL                           
   mf$drop.unused.levels <- TRUE 
   if(Model=="TSS") mf$na.action <- na.pass
   mf[[1]] <- as.name("model.frame")
@@ -76,7 +80,23 @@ SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
   
   if(gc.l == TRUE) gc()  
   
-  if(Model=="TSS"){  # do something for TESS here?
+  
+if(Model=="TESS"){
+ 
+     data[is.na(data[, v1[1]]), v1[1]] <- 0
+     indS1 <- data[, v1[1]]  
+     indS1[is.na(indS1)] <- 0      
+     indS1 <- as.logical(indS1)
+     
+     data[indS1 == FALSE, v2[1]] <- 0
+     data[indS1 == FALSE, v3[1]] <- 0  
+     
+     data <- na.omit(data)
+    
+                   }
+
+  
+  if(Model=="TSS"){
   
      data[is.na(data[, v1[1]]), v1[1]] <- 0
      indS1 <- data[, v1[1]] 
@@ -95,7 +115,7 @@ SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
                    }
   
 
-  if(is.null(weights)) {weights <- rep(1,dim(data)[1]) 
+  if(!("(weights)" %in% names(data))) {weights <- rep(1,dim(data)[1]) 
                         data$weights <- weights
                         names(data)[length(names(data))] <- "(weights)"} else weights <- data[,"(weights)"]    
   
@@ -118,20 +138,16 @@ SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
   
   inde1 <- inde2 <- inde2.1 <- rep(TRUE, n) # useful for double ss
   
-  if(Model == "TSS") inde1 <- inde2 <- as.logical(y1)
+  ########################
   
-  ###
+  if(Model == "TSS")  inde1 <- inde2 <- as.logical(y1)
+  if(Model == "TESS") inde1 <- inde2 <- inde2.1 <- as.logical(y1)
   
-  if (Model == "TESS") inde1 <- inde2 <- inde2.1 <- as.logical(y1)
-  
-  
-  
-  
-  ###
+  ###########
 
   gam2 <- eval(substitute(gam(formula.eq2, binomial(link = margins[2]), gamma=infl.fac, weights=weights, data=data, subset=inde1),list(weights=weights,inde1=inde1))) 
 
-  if(Model == "TSS"){
+  if(Model %in% c("TSS","TESS")){
   
   X2s <- try(predict.gam(gam2, newdata = data[,-dim(data)[2]], type = "lpmatrix"), silent = TRUE)
   if(class(X2s)=="try-error") stop("Check that the numbers of factor variables' levels\nin the selected sample are the same as those in the complete dataset.\nRead the Details section in ?SemiParTRIV for more information.")    
@@ -145,7 +161,7 @@ SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
   if(l.sp2 != 0) sp2 <- gam2$sp
   
 
-  ###
+  ###########
   
   if(Model == "TSS"){ inde2[inde1] <- as.logical(gam2$y); inde2.1 <- inde2[inde1]}
   
@@ -153,7 +169,7 @@ SemiParTRIV <- function(formula, data = list(), weights = NULL, subset = NULL,
   gam3 <- eval(substitute(gam(formula.eq3, binomial(link = margins[3]), gamma=infl.fac, weights=weights, data=data, subset=inde2),list(weights=weights,inde2=inde2))) 
 
 
-  if(Model == "TSS"){
+  if(Model %in% c("TSS","TESS")){
   
   X3s <- try(predict.gam(gam3, newdata = data[,-dim(data)[2]], type = "lpmatrix"), silent = TRUE)
   if(class(X3s)=="try-error") stop("Check that the numbers of factor variables' levels\nin the selected sample are the same as those in the complete dataset.\nRead the Details section in ?SemiParTRIV for more information.")    
@@ -198,7 +214,7 @@ if(Model == "TSS"){
     inde <- inde1
     
     cy1        <- (1-y1)
-    y1.y2.y3   <-  y1[inde]*y2*y3  
+    y1.y2.y3   <- y1[inde]*y2*y3  
     y1.y2.cy3  <- y1[inde]*y2*(1-y3)  
     y1.cy2.cy3 <- y1[inde]*(1-y2)*(1-y3)
     y1.cy2.y3  <- y1[inde]*(1-y2)*y3 
@@ -216,32 +232,88 @@ if(Model == "TSS"){
 
 if(Model == "T"){
 
-res1 <- residuals(gam1)
-res2 <- residuals(gam2)
-res3 <- residuals(gam3)
+#res1 <- residuals(gam1)
+#res2 <- residuals(gam2)
+#res3 <- residuals(gam3)
 
-cor1 <- cor(res1, res2)
-cor2 <- cor(res1, res3)
-cor3 <- cor(res2, res3)
+#cor1 <- cor(res1, res2)
+#cor2 <- cor(res1, res3)
+#cor3 <- cor(res2, res3)
+
+tcorrs <- tetrachoric(data[,c(v1[1],v2[1],v3[1])])$rho
+
+cor1 <- tcorrs[1,2]
+cor2 <- tcorrs[1,3]
+cor3 <- tcorrs[2,3]
 
 cor1 <- sign(cor1)*ifelse(abs(cor1) > 0.85, 0.85, abs(cor1))
 cor2 <- sign(cor2)*ifelse(abs(cor2) > 0.85, 0.85, abs(cor2))
 cor3 <- sign(cor3)*ifelse(abs(cor3) > 0.85, 0.85, abs(cor3))
 
-theta12 <- atanh(cor1)
-theta13 <- atanh(cor2)
-theta23 <- atanh(cor3)
-
 }
 
+if(Model == "TSS" || Model == "TESS"){ cor1 <- cor2 <- cor3 <- 0.01; theta12 <- theta13 <- theta23 <- atanh(cor1) } # this can be improved for TESS
 
-if(Model == "TSS" || Model == "TESS") theta12 <- theta13 <- theta23 <- atanh(0.01) # this can be improved for TESS
-  
+
+if(Chol == FALSE){
+      
+      theta12 <- atanh(cor1)
+      theta13 <- atanh(cor2)
+      theta23 <- atanh(cor3)
+      
+                 }
+    
+  if(Chol == TRUE) {
+    SigmaSt <- matrix(c(1, cor1, cor2, cor1, 1, cor3, cor2, cor3, 1), 3, 3)
+    SigmaSt <- PosDefCor(SigmaSt)
+    theta12 <- SigmaSt[1, 2]
+    theta13 <- SigmaSt[1, 3]
+    theta23 <- SigmaSt[2, 3]
+    
+    theta12.st <- sign(theta12) * sqrt( theta12^2/(1 - theta12^2) )
+    th23sol    <- ( (theta23 * sqrt(1 + theta12.st^2) - theta12.st * theta13)/sqrt(1 - theta13^2) )^2
+    theta13.st <- sign(theta13) * sqrt( (theta13^2 * (1 + th23sol/(1 - th23sol)))/(1 - theta13^2) )
+    theta23.st <- sign(theta23) * sqrt( th23sol/(1 - th23sol) )
+    
+    theta12 <- theta12.st
+    theta13 <- theta13.st
+    theta23 <- theta23.st
+  }
+
+
 names(theta12) <- "theta12.st"
 names(theta13) <- "theta13.st"
 names(theta23) <- "theta23.st"
   
 start.v <- c(coef(gam1), coef(gam2), coef(gam3), theta12, theta13, theta23)
+
+
+##############################################################  
+# starting values for case of predictors on all parameters
+##############################################################  
+  
+    if(l.flist > 3){
+    
+    vo <- list(gam1 = gam1, gam2 = gam2, gam3 = gam3, theta12 = theta12, theta13 = theta13, theta23 = theta23, n = n )
+
+    overall.svGR <- overall.svG(formula = formula, data = data, ngc = 2, margins = margins, M = M, vo = vo, gam1 = gam1, gam2 = gam2, gam3 = gam3, type = "triv")
+        
+    start.v = overall.svGR$start.v 
+    X4 = overall.svGR$X4; X5 = overall.svGR$X5
+    X6 = overall.svGR$X6; X7 = overall.svGR$X7; X8 = overall.svGR$X8
+    X4.d2 = overall.svGR$X4.d2; X5.d2 = overall.svGR$X5.d2
+    X6.d2 = overall.svGR$X6.d2; X7.d2 = overall.svGR$X7.d2; X8.d2 = overall.svGR$X8.d2
+    gp4 = overall.svGR$gp4; gp5 = overall.svGR$gp5
+    gp6 = overall.svGR$gp6; gp7 = overall.svGR$gp7; gp8 = overall.svGR$gp8
+    gam4 = overall.svGR$gam4; gam5 = overall.svGR$gam5
+    gam6 = overall.svGR$gam6; gam7 = overall.svGR$gam7; gam8 = overall.svGR$gam8
+    l.sp4 = overall.svGR$l.sp4; l.sp5 = overall.svGR$l.sp5
+    l.sp6 = overall.svGR$l.sp6; l.sp7 = overall.svGR$l.sp7; l.sp8 = overall.svGR$l.sp8
+    sp4 = overall.svGR$sp4; sp5 = overall.svGR$sp5
+    sp6 = overall.svGR$sp6; sp7 = overall.svGR$sp7; sp8 = overall.svGR$sp8
+    
+    }
+
 
 ##############################################################
 
@@ -273,8 +345,9 @@ L.SP <- list(l.sp1 = l.sp1, l.sp2 = l.sp2, l.sp3 = l.sp3, l.sp4 = l.sp4,
   
 if(!(penCor %in% c("unpen")) && fp==FALSE){
     
-    l.sp4  <- 1
-    sp <- c(sp1, sp2, sp3, sp4, sp5, sp6, sp7, spCor)  
+    l.sp4 <- 1
+    sp <- c(sp1, sp2, sp3, sp4, sp5, sp6, sp7, spCor) # all this part is fine when using Chol = T since 
+                                                      # we dont' allow for penalty and additive predictors on corrs
   
 ########################################### 
 # no penalty for corrs they are added after  
@@ -309,8 +382,24 @@ if(missing(parscale)) parscale <- 1
                   y1.cy2    = y1.cy2,
                   y1.y2.cy3 = y1.y2.cy3, univ = 0)
  
+  lsgam1 <- length(gam1$smooth)
+  lsgam2 <- length(gam2$smooth)
+  lsgam3 <- length(gam3$smooth)
+  lsgam4 <- length(gam4$smooth)
+  lsgam5 <- length(gam5$smooth)
+  lsgam6 <- length(gam6$smooth)
+  lsgam7 <- length(gam7$smooth)
+  lsgam8 <- length(gam8$smooth)
    
-  VC <- list(X1 = X1, inde = inde, inde1 = inde1, inde2 = inde2, inde2.1 = inde2.1,
+  VC <- list(lsgam1 = lsgam1,
+             lsgam2 = lsgam2,
+             lsgam3 = lsgam3,
+             lsgam4 = lsgam4,
+             lsgam5 = lsgam5,
+             lsgam6 = lsgam6,
+             lsgam7 = lsgam7,
+             lsgam8 = lsgam8, 
+             X1 = X1, inde = inde, inde1 = inde1, inde2 = inde2, inde2.1 = inde2.1,
              X2 = X2, 
              X3 = X3,
              X4 = X4, 
@@ -354,7 +443,7 @@ if(missing(parscale)) parscale <- 1
              Cont = "NO", ccss = "no", m2 = m2, m3 = m3, m2d = m2d, m3d = m3d, bl = bl, triv = TRUE,
              X2s = X2s, X3s = X3s,
              approx = approx, gamma = gamma, wc = w.alasso, qu.mag = qu.mag,
-             zerov = -10)
+             zerov = -10, Chol = Chol, surv.flex = surv.flex, l.flist = l.flist)
              
   if(gc.l == TRUE) gc()           
              
@@ -377,17 +466,20 @@ if(missing(parscale)) parscale <- 1
                                             
 if(gc.l == TRUE) gc()
 
-e.v <- min(eigen(SemiParFit$fit$hessian, symmetric=TRUE, only.values = TRUE)$values)
+e.v <- round(min(eigen(SemiParFit$fit$hessian, symmetric=TRUE, only.values = TRUE)$values), 6)
 gradi <- round(max(abs(SemiParFit$fit$gradient)),1)
 
 me1 <- "Largest absolute gradient value is not close to 0."
 me2 <- "Information matrix is not positive definite."
 me3 <- "Read the WARNINGS section in ?SemiParTRIProbit."
 
-if(gradi > 10 && e.v <= 0){ warning(me1, call. = FALSE); warning(paste(me2,"\n",me3), call. = FALSE)} 
+if(gradi > 10 && e.v < 0){ warning(me1, call. = FALSE); warning(paste(me2,"\n",me3), call. = FALSE)} 
 if(gradi > 10 && e.v > 0)   warning(paste(me1,"\n",me3), call. = FALSE)
-if(gradi < 10 && e.v <= 0)  warning(paste(me2,"\n",me3), call. = FALSE)
+if(gradi < 10 && e.v < 0)  warning(paste(me2,"\n",me3), call. = FALSE)
+  ##########################################################################################################################
 
+gam1$call$data <- gam2$call$data <- gam3$call$data <- gam4$call$data <- gam5$call$data <- gam6$call$data <- gam7$call$data <- gam8$call$data <- cl$data 
+  # for all.terms
   ##########################################################################################################################
 
 L <- list(fit = SemiParFit$fit, formula = formula, Model = Model,
@@ -420,7 +512,7 @@ L <- list(fit = SemiParFit$fit, formula = formula, Model = Model,
           edf1.4 = SemiParFit.p$edf1.4, edf1.5 = SemiParFit.p$edf1.5, edf1.6 = SemiParFit.p$edf1.6,
           edf1.7 = SemiParFit.p$edf1.7, edf1.8 = SemiParFit.p$edf1.8, 
           R = SemiParFit.p$R,
-          bs.mgfit = SemiParFit$bs.mgfit, conv.sp = SemiParFit$conv.sp, 
+          bs.mgfit = SemiParFit$bs.mgfit, conv.sp = SemiParFit$conv.sp, Vb.t = SemiParFit.p$Vb.t,
           wor.c = SemiParFit$wor.c,
           p111 = SemiParFit$fit$p111,
           p011 = SemiParFit$fit$p011,
@@ -443,7 +535,8 @@ L <- list(fit = SemiParFit$fit, formula = formula, Model = Model,
           gamlss = gamlss, gamlssfit = TRUE, Cont = "NO", triv = TRUE,  
           l.flist = l.flist, margins = margins,
           inde2 = inde2, X2s = X2s, X3s = X3s,
-          p1n = SemiParFit.p$p1n, p2n = SemiParFit.p$p2n, p3n = SemiParFit.p$p3n, v1 = v1, v2 = v2, v3 = v3, univar.gamlss = FALSE)
+          p1n = SemiParFit.p$p1n, p2n = SemiParFit.p$p2n, p3n = SemiParFit.p$p3n, v1 = v1, v2 = v2, v3 = v3, univar.gamlss = FALSE, call = cl,
+          surv = FALSE, surv.flex = surv.flex)
 
 class(L) <- c("SemiParTRIV","SemiParBIVProbit")
 

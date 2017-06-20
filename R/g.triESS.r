@@ -26,7 +26,7 @@ g.triESS <- function(params, respvec, VC, TIn){
   
   p.2.11  <- mm(pbinorm( TIn$mar1[VC$inde],   TIn$mar3, mean1 =   mean3, mean2 =   mean4, var1 = var1, var2 = var3, cov12 =   cov2) )
   p.2.10  <- mm(pbinorm( TIn$mar1[VC$inde],  -TIn$mar3, mean1 =   mean3, mean2 =  -mean4, var1 = var1, var2 = var3, cov12 =  -cov2) )
-   
+  
   p.3.11  <- mm(pbinorm( TIn$mar1[VC$inde],   TIn$mar2, mean1 =   mean5, mean2 =   mean6, var1 = var2, var2 = var3, cov12 =   cov3) )
   p.3.10  <- mm(pbinorm( TIn$mar1[VC$inde],  -TIn$mar2, mean1 =   mean5, mean2 =  -mean6, var1 = var2, var2 = var3, cov12 =  -cov3) ) 
   
@@ -78,9 +78,6 @@ g.triESS <- function(params, respvec, VC, TIn){
   p13.g.c <- mm(1 - p13.g)
   p23.g.c <- mm(1 - p23.g)
   
-  dtheta12.dtheta12.st <- 4 * exp( 2 * TIn$theta12.st )/( exp(2 * TIn$theta12.st) + 1 )^2
-  dtheta13.dtheta13.st <- 4 * exp( 2 * TIn$theta13.st )/( exp(2 * TIn$theta13.st) + 1 )^2
-  dtheta23.dtheta23.st <- 4 * exp( 2 * TIn$theta23.st )/( exp(2 * TIn$theta23.st) + 1 )^2
   
   d11.12 <- dbinorm( TIn$mar1[VC$inde],  TIn$mar2, cov12 =  TIn$theta12)
   d11.13 <- dbinorm( TIn$mar1[VC$inde],  TIn$mar3, cov12 =  TIn$theta13)
@@ -102,9 +99,46 @@ g.triESS <- function(params, respvec, VC, TIn){
     respvec$y1.cy2.cy3/TIn$p100 * d11.23 * p23.g - 
     respvec$y1.cy2.y3/TIn$p101 * d11.23 * p23.g
   
-  dl.dtheta12.st <- dl.dtheta12 * dtheta12.dtheta12.st
-  dl.dtheta13.st <- dl.dtheta13 * dtheta13.dtheta13.st
-  dl.dtheta23.st <- dl.dtheta23 * dtheta23.dtheta23.st
+  if(VC$Chol == FALSE){
+    dtheta12.dtheta12.st <- 4 * exp( 2 * TIn$theta12.st )/( exp(2 * TIn$theta12.st) + 1 )^2
+    dtheta13.dtheta13.st <- 4 * exp( 2 * TIn$theta13.st )/( exp(2 * TIn$theta13.st) + 1 )^2
+    dtheta23.dtheta23.st <- 4 * exp( 2 * TIn$theta23.st )/( exp(2 * TIn$theta23.st) + 1 )^2
+    
+    dl.dtheta12.st <- dl.dtheta12 * dtheta12.dtheta12.st
+    dl.dtheta13.st <- dl.dtheta13 * dtheta13.dtheta13.st
+    dl.dtheta23.st <- dl.dtheta23 * dtheta23.dtheta23.st
+  }
+  
+  if(VC$Chol == TRUE){
+    dl.dtheta <- matrix(c ( dl.dtheta12,
+                            dl.dtheta13,
+                            dl.dtheta23), length(which(VC$inde==TRUE)), 3)
+    
+    dth12.dth12.st <- 1/(1 + TIn$theta12.st^2)^(3/2) 
+    dth12.dth13.st <- 0
+    dth12.dth23.st <- 0
+    
+    dth13.dth12.st <- 0
+    dth13.dth13.st <- (1 + TIn$theta23.st^2)/(1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2)
+    dth13.dth23.st <- - (TIn$theta13.st * TIn$theta23.st)/(1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2)
+    
+    
+    dth23.dth12.st <- TIn$theta13.st/sqrt((1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)) - (TIn$theta12.st * (TIn$theta12.st * TIn$theta13.st + TIn$theta23.st))/((1 + TIn$theta12.st^2)^(3/2) * sqrt(1 + TIn$theta13.st^2 + TIn$theta23.st^2))
+    dth23.dth13.st <- TIn$theta12.st/sqrt((1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)) - (TIn$theta13.st * (TIn$theta12.st * TIn$theta13.st + TIn$theta23.st))/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2))
+    dth23.dth23.st <- 1/sqrt((1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)) - (TIn$theta23.st * (TIn$theta12.st * TIn$theta13.st + TIn$theta23.st))/(sqrt(1 + TIn$theta12.st^2) * (1 + TIn$theta13.st^2 + TIn$theta23.st^2)^(3/2))
+    
+    dtheta.theta.st <- matrix( c(  dth12.dth12.st,  dth13.dth12.st, dth23.dth12.st,
+                                   dth12.dth13.st,  dth13.dth13.st, dth23.dth13.st,
+                                   dth12.dth23.st,  dth13.dth23.st, dth23.dth23.st ), 3 , 3)
+    
+    
+    dl.dtheta.st   <- dl.dtheta %*% dtheta.theta.st
+    
+    dl.dtheta12.st <- dl.dtheta.st[, 1]
+    dl.dtheta13.st <- dl.dtheta.st[, 2]
+    dl.dtheta23.st <- dl.dtheta.st[, 3]
+    
+  }
   
   GTRIVec <- list(p12.g = p12.g, p13.g = p13.g, p23.g = p23.g, 
                   p12.g.c = p12.g.c, p13.g.c = p13.g.c,

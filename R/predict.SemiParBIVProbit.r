@@ -4,6 +4,8 @@ if(missing(eq)) stop("You must provide the equation number.")
 
 if(eq > object$l.flist) stop("The fitted model has a smaller number of equations.") 
 
+ #if(object$surv == TRUE) predict.gam <- predict.SemiParBIVProbitB 
+
                          
  if(eq==1){ ss.pred <- object$gam1
             ind <- 1:object$X1.d2 
@@ -31,10 +33,13 @@ if(eq > object$l.flist) stop("The fitted model has a smaller number of equations
                                              
                                    
            ss.pred$coefficients <- object$coefficients[ind]
-           ss.pred$Vp <- object$Vb[ind,ind] 
+           ss.pred$Vp   <- object$Vb[ind,ind]
+           ss.pred$Vp.t <- object$Vb.t[ind,ind]
            ss.pred$sig2 <- 1
            ss.pred$scale.estimated <- FALSE 
 
-  predict.gam(ss.pred, ...)
+  #predict.gam(ss.pred, ...)
+  predict(ss.pred, ...)
+
 
 }

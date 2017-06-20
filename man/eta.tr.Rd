@@ -16,8 +16,16 @@
 \alias{pscr0}
 \alias{startsn}
 \alias{bcorrec}
+\alias{bcorrec2}
+\alias{bcorrecDiscr}
 \alias{Cop1Cop2}
 \alias{Reg2Copost}
+\alias{SS}
+\alias{sim.resp}
+\alias{probmS}
+\alias{PosDefCor}
+\alias{bcorrecFuncs}
+\alias{Xdpred}
 
 
 \title{Internal Function}

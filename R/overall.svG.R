@@ -1,11 +1,97 @@
-overall.svG <- function(formula, data, ngc, margins, M, vo, gam1, gam2, type = "copR", inde = NULL, c.gam2 = NULL){
+overall.svG <- function(formula, data, ngc, margins, M, vo, gam1, gam2, type = "copR", inde = NULL, c.gam2 = NULL, gam3 = NULL){
   
 X3 = X4 = X5 = X6 = X7 = X8 = X3.d2 = X4.d2 = X5.d2 = X6.d2 = X7.d2 = X8.d2 = NULL
 gp3 = gp4 = gp5 = gp6 = gp7 = gp8 = NULL
-gam3 = gam4 = gam5 = gam6 = gam7 = gam8 = NULL
+gam4 = gam5 = gam6 = gam7 = gam8 = NULL
 l.sp3 = l.sp4 = l.sp5 = l.sp6 = l.sp7 = l.sp8 = 0  
 sp3 = sp4 = sp5 = sp6 = sp7 = sp8 = NULL  
 X3s = X4s = X5s = NULL
+  
+if(type != "triv") gam3 <- NULL    
+  
+  
+  
+  
+if(type == "triv"){
+
+    
+    formula.eq4 <- formula[[4]] 
+    nad <- "theta12" 
+    formula.eq4 <- as.formula( paste(nad,"~",formula.eq4[2],sep="") )
+    
+    set.seed(1)
+    theta12 <- rnorm(vo$n, vo$theta12, 0.001)    
+    rm(list=".Random.seed", envir=globalenv()) 
+    
+    gam4 <- gam(formula.eq4, data = data, gamma = ngc, subset=inde) 
+    
+    formula.eq5 <- formula[[5]] 
+    nad <- "theta13" 
+    formula.eq5 <- as.formula( paste(nad,"~",formula.eq5[2],sep="") )
+    
+    set.seed(1)
+    theta13 <- rnorm(vo$n, vo$theta13, 0.001)    
+    rm(list=".Random.seed", envir=globalenv()) 
+    
+    gam5 <- gam(formula.eq5, data = data, gamma = ngc, subset=inde)       
+      
+    formula.eq6 <- formula[[6]] 
+    nad <- "theta23" 
+    formula.eq6 <- as.formula( paste(nad,"~",formula.eq6[2],sep="") )
+    
+    set.seed(1)
+    theta23 <- rnorm(vo$n, vo$theta23, 0.001)    
+    rm(list=".Random.seed", envir=globalenv()) 
+    
+    gam6 <- gam(formula.eq6, data = data, gamma = ngc, subset=inde)    
+ 
+    l.sp5 <- length(gam5$sp)    
+    l.sp4 <- length(gam4$sp)    
+    l.sp6 <- length(gam6$sp)    
+    
+    if(l.sp4 != 0){
+    ngc <- 2
+    while( any(round(summary(gam4)$edf, 1) > 1) ) {gam4 <- gam(formula.eq4, data = data, gamma = ngc + 1); ngc <- ngc + 1; if(ngc > 5) break}  
+                   } 
+                   
+    if(l.sp5 != 0){
+    ngc <- 2
+    while( any(round(summary(gam5)$edf, 1) > 1) ) {gam5 <- gam(formula.eq5, data = data, gamma = ngc + 1); ngc <- ngc + 1; if(ngc > 5) break}  
+                   }
+                   
+    if(l.sp6 != 0){
+    ngc <- 2
+    while( any(round(summary(gam6)$edf, 1) > 1) ) {gam6 <- gam(formula.eq6, data = data, gamma = ngc + 1); ngc <- ngc + 1; if(ngc > 5) break}  
+                   }                     
+
+                
+    X4 <- model.matrix(gam4)
+    X4.d2 <- dim(X4)[2]
+    X5 <- model.matrix(gam5)
+    X5.d2 <- dim(X5)[2]    
+    X6 <- model.matrix(gam6)
+    X6.d2 <- dim(X6)[2] 
+
+    if(l.sp4 != 0) sp4 <- gam4$sp 
+    environment(gam4$formula) <- environment(gam2$formula)
+    gp4 <- gam4$nsdf 
+    
+    if(l.sp5 != 0) sp5 <- gam5$sp 
+    environment(gam5$formula) <- environment(gam2$formula)
+    gp5 <- gam5$nsdf   
+    
+    if(l.sp6 != 0) sp6 <- gam6$sp 
+    environment(gam6$formula) <- environment(gam2$formula)
+    gp6 <- gam6$nsdf     
+  
+    start.v  <- c(coef(gam1), coef(gam2), coef(gam3), coef(gam4), coef(gam5), coef(gam6) )
+    
+    
+    
+}  
+  
+  
+  
   
 if(type == "biv"){
 
@@ -208,13 +294,14 @@ if(M$Model != "BSS") start.v  <- c( coef(gam1), coef(gam2), coef(gam3) )
 if(type == "copR"){   
   
 
-  
+BivD <- M$BivD
+if(M$surv == TRUE) BivD <- "N"  
 
     
     
     
     
-if(margins[1] %in% c(M$m2,M$m3) && margins[2] %in% c(M$m2,M$m3) && M$BivD == "T"){
+if(margins[1] %in% c(M$m2,M$m3) && margins[2] %in% c(M$m2,M$m3) && BivD == "T"){
 
 
 
@@ -701,7 +788,7 @@ if(margins[1] %in% c(M$m2,M$m3) && margins[2] %in% c(M$m2,M$m3) && M$BivD == "T"
     
 
 
-    if(margins[1] %in% c(M$m1d) && margins[2] %in% c(M$m1d)){
+    if(margins[1] %in% c(M$m1d,M$bl) && margins[2] %in% c(M$m1d,M$bl)){
     
     formula.eq3 <- formula[[3]] 
     
@@ -1536,41 +1623,7 @@ if(M$l.flist == 3){
   
   
 
-
-
-
-
-
-
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

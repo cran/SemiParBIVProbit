@@ -1,8 +1,8 @@
 pp <- function(x){
 
-   cont1par <- c("PO","ZTP")  
-   cont2par <- c("N","N2","GU","rGU","LO","LN","WEI","iG","GA","GAi","BE","FISK","NBI", "NBII","NBIa", "NBIIa","PIG")  
-   cont3par <- c("DAGUM","SM","DEL","SICHEL")   
+   cont1par <- c("PO","ZTP","probit","logit","cloglog","GEVlink")  
+   cont2par <- c("N","N2","GU","rGU","LO","LN","WEI","GO","iG","GA","GA2","GAi","BE","FISK","NBI", "NBII","NBIa", "NBIIa","PIG")  
+   cont3par <- c("DAGUM","SM","DEL","SICHEL","GGA")   
 
 if(x$univar.gamlss == TRUE) x$BivD <- "N" 
 
@@ -11,6 +11,10 @@ if(x$univar.gamlss == TRUE) x$BivD <- "N"
   if(x$BivD=="AMH")  {cop <- "AMH"                ;lind <- "atanh"} 
   if(x$BivD=="N")    {cop <- "Gaussian"           ;lind <- "atanh"} 
   if(x$BivD=="F")    {cop <- "Frank"              ;lind <- "identity"}       
+  
+  if(x$BivD=="PL")   {cop <- "Plackett"           ;lind <- "log"}
+  if(x$BivD=="HO")   {cop <- "Hougaard"           ;lind <- "qlogis"} 
+  
   if(x$BivD=="C0")   {cop <- "Clayton"            ;lind <- "log"}   
   if(x$BivD=="C90")  {cop <- "90\u00B0 Clayton"   ;lind <- "log(- \u00B7)"}                 
   if(x$BivD=="C180") {cop <- "180\u00B0 Clayton"  ;lind <- "log"}                    
@@ -43,7 +47,7 @@ if(x$univar.gamlss == TRUE) x$BivD <- "N"
   
   # if(x$BivD=="N" && x$Model=="BPO0") cop <- "Independent"   
     
-  mml <- c("LN","WEI","iG","GA","DAGUM","SM","FISK","NBI","NBII","NBIa","NBIIa","PIG","PO","ZTP")  
+  mml <- c("LN","WEI","GO","iG","GA","GA2","GGA","DAGUM","SM","FISK","NBI","NBII","NBIa","NBIIa","PIG","PO","ZTP")  
     
   if(x$margins[1] %in% c("N","N2","GU","rGU","LO","GAi") )  m1l <- "identity"
   if(x$margins[2] %in% c("N","N2","GU","rGU","LO","GAi") )  m2l <- "identity"
@@ -57,12 +61,16 @@ if(x$univar.gamlss == TRUE) x$BivD <- "N"
   if(x$margins[1]=="probit")  m1l <- "probit"
   if(x$margins[1]=="logit")   m1l <- "logit"
   if(x$margins[1]=="cloglog") m1l <- "cloglog"
-  if(x$margins[1]=="cauchit") m1l <- "cauchit" 
+  if(x$margins[1]=="cauchit") m1l <- "cauchit"
+  if(x$margins[1]=="GEVlink") m1l <- "GEVlink" 
+  
   
   if(x$margins[2]=="probit")  m2l <- "probit"
   if(x$margins[2]=="logit")   m2l <- "logit"
   if(x$margins[2]=="cloglog") m2l <- "cloglog"
-  if(x$margins[2]=="cauchit") m2l <- "cauchit"   
+  if(x$margins[2]=="cauchit") m2l <- "cauchit"  
+  if(x$margins[2]=="GEVlink") m2l <- "GEVlink" 
+  
  
  
 list(cont1par = cont1par, cont2par = cont2par, cont3par = cont3par, cop = cop, lind = lind, m1l = m1l, m2l = m2l)

@@ -44,17 +44,17 @@ SemiParBIVProbit(formula, data = list(), weights = NULL, subset = NULL,
              "BSS" (bivariate model with non-random sample selection), "BPO" (bivariate model with partial observability)
              and "BPO0" (bivariate model with partial observability and zero correlation).}
 
-\item{margins}{It indicates the link functions used for the two margins. Possible choices are "probit", "logit" and "cloglog".}
+\item{margins}{It indicates the link functions used for the two margins. Possible choices are "probit", "logit", "cloglog".}
            
 \item{dof}{If \code{BivD = "T"} then the degrees of freedom can be set to a value greater than 2 and smaller than 249.}          
            
 \item{gamlssfit}{This is for internal purposes only.}               
 
 \item{BivD}{Type of bivariate error distribution employed. Possible choices are "N", "C0", "C90", "C180", "C270", "J0", "J90", "J180", "J270", 
-            "G0", "G90", "G180", "G270", "F", "AMH", "FGM", "T" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
+            "G0", "G90", "G180", "G270", "F", "AMH", "FGM", "T", "PL", "HO" which stand for bivariate normal, Clayton, rotated Clayton (90 degrees), survival Clayton,
              rotated Clayton (270 degrees), Joe, rotated Joe (90 degrees), survival Joe, rotated Joe (270 degrees),
              Gumbel, rotated Gumbel (90 degrees), survival Gumbel, rotated Gumbel (270 degrees), Frank, Ali-Mikhail-Haq,
-             Farlie-Gumbel-Morgenstern and Student-t with fixed \code{dof}. Note that Clayton, Joe and Gumbel are somewhat similar. Also, 
+             Farlie-Gumbel-Morgenstern, Student-t with fixed \code{dof}, Plackett, Hougaard. Note that Clayton, Joe and Gumbel are somewhat similar. Also, 
              there might be situations in which the use of a specific copula may result in more stable computations. If \code{Model = "B"} then
              each of the Clayton, Joe and Gumbel copulae is allowed to be mixed with a rotated version of the same
 family. The options are: "C0C90", "C0C270", "C180C90", "C180C270", "G0G90", "G0G270", "G180G90",

@@ -33,11 +33,15 @@ cat("\nMARGIN 3: Bernoulli")
 
     
     
-    
+if(length(x$CI12s) == 2){    
   CI12 <- x$CI12s
   CI13 <- x$CI13s
   CI23 <- x$CI23s
-
+}else{
+  CI12 <- colMeans(x$CI12s)
+  CI13 <- colMeans(x$CI13s)
+  CI23 <- colMeans(x$CI23s)
+}
 
 
 # tess can be improved with n.sel

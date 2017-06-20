@@ -105,7 +105,6 @@ der2p2.dery22  <- sqrt(sigma2) * (y2^((sqrt(sigma2) - 1) - 1) * (sqrt(sigma2) -
 
 if(margin2 == "WEI"){
 
-
 y2 <- dery.dery.st <- der2y.dery.st2 <- exp(y2.st)
 mu2 <- exp(eta2)
 
@@ -114,20 +113,26 @@ der2p2.dery22  <- sqrt(sigma2)/mu2 * ((y2/mu2)^((sqrt(sigma2) - 1) - 1) * ((sqrt
     (y2/mu2)^(sqrt(sigma2) - 1) * (exp(-(y2/mu2)^sqrt(sigma2)) * 
     ((y2/mu2)^(sqrt(sigma2) - 1) * (sqrt(sigma2) * (1/mu2))))
 
+}
+
+
+
+if(margin2 == "GO"){
+
+y2 <- dery.dery.st <- der2y.dery.st2 <- exp(y2.st)
+mu2 <- exp(eta2)
+
+der2p2.dery22 <- mu2 * exp(mu2 * (1 - exp(y2 * sqrt(sigma2)))/sqrt(sigma2)) * 
+    exp(y2 * sqrt(sigma2)) * (sigma2/sqrt(sigma2) - mu2 * exp(y2 * 
+    sqrt(sigma2))) 
 
 }
 
 
 
-
-
 if(margin2 == "BE"){
 
-
-
 #########################
-
-
 
 y2  <- plogis(y2.st)
 mu2 <- plogis(eta2)
@@ -243,6 +248,40 @@ mu2 <- exp(eta2)
 
 
     }
+    
+    
+if(margin2 == "GA2"){
+
+sigma2    <- ifelse(sigma2 < 0.006, 0.006, sigma2) 
+
+y2 <- dery.dery.st <- der2y.dery.st2 <- exp(y2.st)
+mu2 <- exp(eta2)
+
+  der2p2.dery22 <- exp(-(mu2 * y2)) * (mu2^sqrt(sigma2) * y2^(sqrt(sigma2) - 2) * 
+    (sqrt(sigma2) - 1) - mu2^(1 + sqrt(sigma2)) * y2^(sqrt(sigma2) - 
+    1))/gamma(sqrt(sigma2))
+
+    }    
+    
+    
+    
+if(margin2 == "GGA"){
+
+y2 <- dery.dery.st <- der2y.dery.st2 <- exp(y2.st)
+mu2 <- exp(eta2)
+
+der2p2.dery22 <- exp(-(y2/mu2)^sqrt(sigma2)) * (y2^(nu * sqrt(sigma2) - 2) * (nu * 
+    sqrt(sigma2) - 1) * sqrt(sigma2)/mu2^(nu * sqrt(sigma2)) - 
+    sigma2 * y2^(nu * sqrt(sigma2) - 1) * (y2/mu2)^(sqrt(sigma2) - 
+        1)/mu2^(1 + nu * sqrt(sigma2)))/gamma(nu)
+
+
+    }       
+    
+ 
+ 
+    
+    
     
 if(margin2 %in% c("GAi")){
 

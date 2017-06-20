@@ -25,8 +25,8 @@ resp.check(y, margin = "N", main = "Histogram and Density of Response",
 \item{y}{Response.}
  
 \item{margin}{The distributions allowed are: normal ("N"), normal where 
-               sigma2 corresponds to 
-               the standard deviation instead of the variance ("N2"), log-normal ("LN"), 
+              sigma2 corresponds to 
+              the standard deviation instead of the variance ("N2"), log-normal ("LN"), 
               Gumbel ("GU"), reverse Gumbel ("rGU"), logistic ("LO"), Weibull ("WEI"), inverse Gaussian ("iG"), gamma ("GA"),
               Dagum ("DAGUM"), Singh-Maddala ("SM"), beta ("BE"), Fisk ("FISK"), Poisson ("PO"), zero truncated Poisson ("ZTP"), 
               negative binomial - type I ("NBI"), negative 

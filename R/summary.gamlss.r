@@ -2,7 +2,7 @@ summary.gamlss <- function(object, n.sim = 100, prob.lev = 0.05, ...){
 
   bs <- SE <- Vb <- epds <- sigma2.st <- sigma2 <- nu.st <- nu <- est.RHOb <- XX <- Xt <- V <- 1
   
-cont1par  <- c(object$VC$m1d)   
+cont1par  <- c(object$VC$m1d, object$VC$bl)   
 cont2par  <- c(object$VC$m2,object$VC$m2d) 
 cont3par  <- c(object$VC$m3,object$VC$m3d) 
   
@@ -10,9 +10,11 @@ cont3par  <- c(object$VC$m3,object$VC$m3d)
   epsilon <- 0.0000001; max.p   <- 0.9999999
 
   lf <- length(object$coefficients)
-  Vb <- object$Vb 
+  
+  if(object$VC$surv.flex == FALSE) Vb <- object$Vb else Vb <- object$Vb.t  
+  
   SE <- sqrt(diag(Vb)) 
-  bs <- rMVN(n.sim, mean = object$coefficients, sigma=Vb)  
+  bs <- rMVN(n.sim, mean = object$coefficients, sigma=Vb) # this is not correct when surv.flex == TRUE but actually I need no sampling here for output so ok 
 
 #######
 # CIs
@@ -55,7 +57,7 @@ rm(bs, SE, Vb, XX, Xt, V)
               l.sp1 = object$l.sp1, l.sp2 = object$l.sp2, l.sp3 = object$l.sp3, 
               l.sp4 = object$l.sp4, l.sp5 = object$l.sp5, l.sp6 = object$l.sp6, 
               l.sp7 = object$l.sp7, l.sp8 = object$l.sp8,
-              X2.null = is.null(object$X2), univar.gamlss = TRUE
+              X2.null = is.null(object$X2), univar.gamlss = TRUE, surv.flex = object$surv.flex
               )
               
               

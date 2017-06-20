@@ -13,9 +13,9 @@ m2d  <- c("NBI", "NBII","NBIa", "NBIIa","PIG")
 m3d  <- c("DEL","SICHEL")
 
 y1m <- NA
-y <- na.omit(y)
+y <- as.numeric( na.omit(y) )
 
-if(!(margin %in% c(m2,m3,m1d,m2d)) ) stop("Error in margin value. It should be one of:\nN, N2, GU, rGU, LO, LN, WEI, iG, GA, GAi, DAGUM, SM, BE, FISK, NBI, NBII, PIG, PO, ZTP.") 
+if(!(margin %in% c(m2,m3,m1d,m2d)) ) stop("Error in margin value. It should be one of:\nN, N2, GU, rGU, LO, LN, WEI, iG, GA, DAGUM, SM, BE, FISK, NBI, NBII, PIG, PO, ZTP.") 
 
 if(margin %in% c("LN","WEI","iG","GA","GAi","DAGUM","SM","FISK") && min(y, na.rm = TRUE) <= 0) stop("The response must be positive.")
 if(margin %in% c("BE") && (min(y, na.rm = TRUE) <= 0 || max(y, na.rm = TRUE) >= 1) ) stop("The response must be in the interval (0,1).")
@@ -43,32 +43,35 @@ VC <- list(X1 = matrix(1, nrow = length(y), ncol = 1), X1.d2 = 1,
            l.sp1 = 0, l.sp2 = 0, l.sp3 = 0, l.sp4 = 0, l.sp5 = 0, l.sp6 = 0, l.sp7 = 0, l.sp8 = 0, 
            weights = 1, m2 = m2, m3 = m3, m1d = m1d, m2d = m2d, m3d = m3d, 
            margins = margins, fp = TRUE,
-           extra.regI = "t", Cont = "NO", ccss = "no", triv = FALSE)
+           extra.regI = "t", Cont = "NO", ccss = "no", triv = FALSE, surv = FALSE)
 
 ps <- list(S.h = 0, S.h1 = 0, S.h2 = 0)
 
 respvec <- list(y1 = y)
            
-if( margin %in% c("PO","ZTP") )   st.v <- c( log( mean((y + mean(y))/2) ) )           
-if( margin %in% c("NBI","NBIa","PIG") )  st.v <- c( log(mean((y + mean(y))/2)), log( max( (var(y) - mean(y))/mean(y)^2, 0.1) ) )
-if( margin %in% c("NBII","NBIIa") )       st.v <- c( log(mean((y + mean(y))/2)), log( max( (var(y)/mean(y)) - 1, 0.1) ) )    
-if( margin %in% c("DEL") )        st.v <- c( log(mean((y + mean(y))/2)), log( max( (var(y) - mean(y))/mean(y)^2, 0.1) ), qlogis(0.5) )  
-if( margin %in% c("SICHEL") )     st.v <- c( log(mean((y + mean(y))/2)), log( max( (var(y) - mean(y))/mean(y)^2, 0.1) ), -0.5 )    
+if( margin %in% c("PO","ZTP") )         st.v <- c( log( mean((y + mean(y))/2) ) )           
+if( margin %in% c("NBI","NBIa","PIG") ) st.v <- c( log(mean((y + mean(y))/2)), log( max( (var(y) - mean(y))/mean(y)^2, 0.1) ) )
+if( margin %in% c("NBII","NBIIa") )     st.v <- c( log(mean((y + mean(y))/2)), log( max( (var(y)/mean(y)) - 1, 0.1) ) )    
+if( margin %in% c("DEL") )              st.v <- c( log(mean((y + mean(y))/2)), log( max( (var(y) - mean(y))/mean(y)^2, 0.1) ), qlogis(0.5) )  
+if( margin %in% c("SICHEL") )           st.v <- c( log(mean((y + mean(y))/2)), log( max( (var(y) - mean(y))/mean(y)^2, 0.1) ), -0.5 )    
+if( margin %in% c("N","LN") )           st.v <- c( mean((y + mean(y))/2) ,           log( var(y) ) )  
+if( margin %in% c("N2") )               st.v <- c( mean((y + mean(y))/2) ,           log( sqrt(var(y)) ) )  
+if( margin %in% c("LO") )               st.v <- c( mean((y + mean(y))/2) ,           log(  3*var(y)/pi^2 ) )  
+if( margin %in% c("iG") )               st.v <- c( log( mean((y + mean(y))/2) ) , log( var(y)/mean(y)^3)  )    
+if( margin %in% c("GU") )               st.v <- c( mean(y) + 0.57722*sqrt(var(y)/1.64493) ,  log(6*var(y)/pi^2) )    
+if( margin %in% c("rGU") )              st.v <- c( mean(y) - 0.57722*sqrt(var(y)/1.64493) ,  log(6*var(y)/pi^2) )   
+if( margin %in% c("WEI") )              st.v <- c( log( mean( exp(log(y) + 0.5772/(1.283/sqrt(var(log(y))))) )  ) , log( ( 1.283/sqrt(var(log(y))) )^2 ) ) 
+if( margin %in% c("GA") )               st.v <- c( log(mean((y + mean(y))/2)), log(var(y)/mean(y)^2)  ) # log( 1^2 )             
+if( margin %in% c("GAi") )              st.v <- c( mean((y + mean(y))/2), log(var(y)/mean(y)^2)  ) # log( 1^2 )
 
-if( margin %in% c("N","LN") )     st.v <- c( mean((y + mean(y))/2) ,           log( var(y) ) )  
-if( margin %in% c("N2") )     st.v <- c( mean((y + mean(y))/2) ,           log( sqrt(var(y)) ) )  
 
-if( margin %in% c("LO") )         st.v <- c( mean((y + mean(y))/2) ,           log(  3*var(y)/pi^2 ) )  
-if( margin %in% c("iG") )         st.v <- c( log( mean((y + mean(y))/2) ) , log( var(y)/mean(y)^3)  )    
-if( margin %in% c("GU") )         st.v <- c( mean(y) + 0.57722*sqrt(var(y)/1.64493) ,  log(6*var(y)/pi^2) )    
-if( margin %in% c("rGU") )        st.v <- c( mean(y) - 0.57722*sqrt(var(y)/1.64493) ,  log(6*var(y)/pi^2) )   
-if( margin %in% c("WEI") )        st.v <- c( log( mean( exp(log(y) + 0.5772/(1.283/sqrt(var(log(y))))) )  ) , log( ( 1.283/sqrt(var(log(y))) )^2 ) ) 
-if( margin %in% c("GA") )         st.v <- c( log(mean((y + mean(y))/2)), log(var(y)/mean(y)^2)  ) # log( 1^2 )             
-if( margin %in% c("GAi") )        st.v <- c( mean((y + mean(y))/2), log(var(y)/mean(y)^2)  ) # log( 1^2 )             
-if( margin %in% c("DAGUM","SM") ) st.v <- c( log(mean((y + mean(y))/2)), log(sqrt(2)), log(1) )   # log(0.01) #  log(sqrt(2))       # 0.1    
-if( margin %in% c("FISK") )       st.v <- c( log(mean((y + mean(y))/2)), log(sqrt(2)))    
-if( margin %in% c("BE") )         st.v <- c( qlogis(mean((y + mean(y))/2)), qlogis( var(y)/( mean(y)*(1-mean(y)) )  )  )              
+#if( margin %in% c("GA2") )              st.v <- c( mean(y)^2/var(y), log(mean(y)/var(y))  ) # log( 1^2 )
+#if( margin %in% c("GGA") )              st.v <- c( log(mean(y)), log(1), log(1) )
 
+
+if( margin %in% c("DAGUM","SM") )       st.v <- c( log(mean((y + mean(y))/2)), log(sqrt(2)), log(1) )   # log(0.01) #  log(sqrt(2))       # 0.1    
+if( margin %in% c("FISK") )             st.v <- c( log(mean((y + mean(y))/2)), log(sqrt(2)))    
+if( margin %in% c("BE") )               st.v <- c( qlogis(mean((y + mean(y))/2)), qlogis( var(y)/( mean(y)*(1-mean(y)) )  )  )              
 
 if( margin %in% c(m1d) )    names(st.v) <- c("mu.star")
 if( margin %in% c(m2,m2d) ) names(st.v) <- c("mu.star", "sigma2.star")
@@ -106,7 +109,7 @@ if(margin == "LN") y <- exp(y)
     ly1 <- length(y)
     y1m <- list()
     my1 <- max(y)
-    for(i in 1:ly1){ y1m[[i]] <- seq(0, y[i]); length(y1m[[i]]) <- my1+1} 
+    for(i in 1:ly1){ y1m[[i]] <- seq(1, y[i]); length(y1m[[i]]) <- my1} 
     y1m <- do.call(rbind, y1m)  
     
     if(max(y) > 170) y1m <- mpfr( y1m, pmax(53, getPrec(y))) 

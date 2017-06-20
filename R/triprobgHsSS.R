@@ -7,11 +7,8 @@ triprobgHsSS <- function (params, respvec, VC, ps, AT = FALSE){
   etad <- p111 <- A <- NULL
   
   theta12.st <- params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2+1)]    
-  theta12    <- tanh(theta12.st)    
   theta13.st <- params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2+2)]    
-  theta13    <- tanh(theta13.st) 
   theta23.st <- params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2+3)]    
-  theta23    <- tanh(theta23.st)
   
   #####
   # ! #
@@ -37,57 +34,52 @@ triprobgHsSS <- function (params, respvec, VC, ps, AT = FALSE){
   
   ###########################
   
-  #####
-  # ! #
-  ##############################################################
-  ## eta1, eta2 and eta3 were replaced by mar1, mar2 and mar3 ##                   
-  ##############################################################
-  
-  p11 <- mm( pbinorm( mar1[VC$inde1],   mar2, cov12 = theta12) )
-  p13 <- mm( pbinorm( mar1[VC$inde2],   mar3, cov12 = theta13) )
-  p23 <- mm( pbinorm( mar2[VC$inde2.1], mar3, cov12 = theta23) )
-  
-  #####################################################################
-  
-  Sigma <-  matrix( c( 1,        theta12, theta13,
-                       theta12,        1, theta23,
-                       theta13,  theta23,        1), 3 , 3) 
-  
-  
-  eS <- eigen(Sigma)                 
-  check.eigen <- any(eS$values < 0)
-  
-  if(check.eigen == TRUE){
+  if(VC$Chol == FALSE){
     
-    D.dash <- diag(abs(eS$values), 3, 3)
-    P      <- eS$vectors
-    R.dash <- P %*% D.dash %*% t(P)
-    D1 <- diag(1/sqrt( diag(R.dash) ), 3, 3)
-    Sigma <- D1 %*% R.dash %*% D1
+    theta12    <- tanh(theta12.st)
+    theta13    <- tanh(theta13.st)
+    theta23    <- tanh(theta23.st)
+    
+    Sigma <-  matrix( c( 1,        theta12, theta13,
+                         theta12,        1, theta23,
+                         theta13,  theta23,        1), 3 , 3) 
+    
+    Sigma <- PosDefCor(Sigma, Chol = FALSE, theta12.st, theta13.st, theta23.st)
     
     theta12 <- Sigma[1,2]
     theta13 <- Sigma[1,3]
     theta23 <- Sigma[2,3]   
     
-    theta12.st <- atanh(theta12) 
+    theta12.st <- atanh(theta12)
     theta13.st <- atanh(theta13)
     theta23.st <- atanh(theta23)
     
-    params <- c(params[1:(VC$X1.d2 + VC$X2.d2 + VC$X3.d2)],theta12.st,theta13.st,theta23.st)
-    
-  } else Sigma <- Sigma 
+  }
   
-  #####
-  # ! #
-  ##############################################################
-  ## eta1, eta2 and eta3 were replaced by mar1, mar2 and mar3 ##                   
-  ##############################################################
+  if(VC$Chol == TRUE){
+    
+      Sigma <- PosDefCor(Sigma = 1, Chol = TRUE, theta12.st, theta13.st, theta23.st)
+    
+    theta12 <- Sigma[1,2]
+    theta13 <- Sigma[1,3]
+    theta23 <- Sigma[2,3]   
+    
+  }
+  
+  p11 <- mm(pbinorm(mar1[VC$inde1], mar2, cov12 = theta12))
+  p13 <- mm(pbinorm(mar1[VC$inde2], mar3, cov12 = theta13))
+  p23 <- mm(pbinorm(mar2[VC$inde2.1], mar3, cov12 = theta23))
+  
+  #params <- c(params[1:(VC$X1.d2 + VC$X2.d2 + VC$X3.d2)],theta12.st,theta13.st,theta23.st)
+  
+  
   
   if(VC$approx == FALSE){ eta123 <- cbind(mar1[VC$inde2],mar2[VC$inde2.1],mar3)
-                          for(i in 1:length(mar3)) p111[i] <- mm( pmnorm(x = eta123[i, ], varcov = Sigma)[1] )
+  for(i in 1:length(mar3)) p111[i] <- mm( pmnorm(x = eta123[i, ], varcov = Sigma)[1] )
   }
   
   if(VC$approx == TRUE) p111 <- mm(  TRIapprox(mar1[VC$inde2], mar2[VC$inde2.1], mar3, Sigma) )
+  
   
   ############################################################################################
   

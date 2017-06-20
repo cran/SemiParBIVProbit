@@ -65,18 +65,18 @@ susu <- function(object, SE, Vb){
   if( object$l.sp1!=0 || object$l.sp2!=0 || object$l.sp3!=0 || object$l.sp4!=0 || object$l.sp5!=0 || object$l.sp6!=0 || object$l.sp7!=0 || object$l.sp8!=0){
 
   	pTerms.df <- pTerms.chi.sq <- pTerms.pv <- tableN <- list(0, 0, 0, 0, 0, 0, 0, 0)
-        XX <- object$R
+        XX <- object$R # this should be ok for monotonic effects as well but I may come back to this
         
            for(i in index){
 
-             if(i==1) {mm <- object$l.sp1; if(mm==0) next}
-             if(i==2) {mm <- object$l.sp2; if(mm==0) next} 
-             if(i==3) {mm <- object$l.sp3; if(mm==0) next} 
-             if(i==4) {mm <- object$l.sp4; if(mm==0) next} 
-             if(i==5) {mm <- object$l.sp5; if(mm==0) next} 
-             if(i==6) {mm <- object$l.sp6; if(mm==0) next} 
-             if(i==7) {mm <- object$l.sp7; if(mm==0) next}              
-             if(i==8) {mm <- object$l.sp8; if(mm==0) break} 
+             if(i==1) {mm <- object$VC$lsgam1; if(mm==0) next}
+             if(i==2) {mm <- object$VC$lsgam2; if(mm==0) next} 
+             if(i==3) {mm <- object$VC$lsgam3; if(mm==0) next} 
+             if(i==4) {mm <- object$VC$lsgam4; if(mm==0) next} 
+             if(i==5) {mm <- object$VC$lsgam5; if(mm==0) next} 
+             if(i==6) {mm <- object$VC$lsgam6; if(mm==0) next} 
+             if(i==7) {mm <- object$VC$lsgam7; if(mm==0) next}              
+             if(i==8) {mm <- object$VC$lsgam8; if(mm==0) break} 
   
 		for(k in 1:mm){
 
@@ -93,7 +93,7 @@ susu <- function(object, SE, Vb){
                         gam$sig2            <- 1
                         gam$scale.estimated <- FALSE                          
                           
-                        if(gam$smooth[[k]]$null.space.dim == 0){
+                        if(max(gam$smooth[[k]]$null.space.dim) == 0){
                         
                         LRB <- rbind(XX, t(mroot(object$fit$S.h)))
 			LRB <- cbind(LRB[, -ind], LRB[, ind])
@@ -112,15 +112,17 @@ susu <- function(object, SE, Vb){
                           
                         }
                           
-			if(gam$smooth[[k]]$null.space.dim != 0){
+			if(max(gam$smooth[[k]]$null.space.dim) != 0){
 			
-			b  <- coef(object)[ind]
-			V  <- Vb[ind,ind, drop = FALSE]
+			if(object$VC$surv.flex == FALSE) b <- coef(object)[ind] else b <- object$coef.t[ind] 
+			
+			V <- Vb[ind,ind, drop = FALSE]
+			
 			Xt <- XX[, ind, drop = FALSE] 
 			pTerms.df[[i]][k] <- min(ncol(Xt), object$edf11[[i]][k])
 			Tp <- testStat(b, Xt, V, pTerms.df[[i]][k], type = 0, res.df = -1)
 			
-			}
+			} 
 			
 			
 			pTerms.chi.sq[[i]][k] <- Tp$stat 

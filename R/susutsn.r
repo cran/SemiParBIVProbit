@@ -105,7 +105,11 @@ if(type == "copR"){
 
 
 
-if(object$VC$BivD == "T") ec <- 1 else ec <- 0  
+BivD <- object$VC$BivD 
+if(object$surv == TRUE) BivD <- "N"
+
+
+if(BivD == "T") ec <- 1 else ec <- 0  
 
 
 ###############################################
@@ -115,7 +119,7 @@ if(object$VC$BivD == "T") ec <- 1 else ec <- 0
   if( !is.null(object$X3) ){ 
   
    
-   if(object$VC$margins[1] %in% c(object$VC$m2,object$VC$m3) && object$VC$margins[2] %in% c(object$VC$m2,object$VC$m3) && object$VC$BivD == "T"){
+   if(object$VC$margins[1] %in% c(object$VC$m2,object$VC$m3) && object$VC$margins[2] %in% c(object$VC$m2,object$VC$m3) && BivD == "T"){
    
      if(object$VC$margins[1] %in% cont2par && object$VC$margins[2] %in% cont2par) epds <- object$X6%*%t(bs[,(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2+object$X5.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2+object$X5.d2+object$X6.d2)])
      if((object$VC$margins[1] %in% cont3par && object$VC$margins[2] %in% cont2par) || (object$VC$margins[1] %in% cont2par && object$VC$margins[2] %in% cont3par) ) epds <- object$X7%*%t(bs[,(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2+object$X5.d2+object$X6.d2+1):(object$X1.d2+object$X2.d2+object$X3.d2+object$X4.d2+object$X5.d2+object$X6.d2+object$X7.d2)])
@@ -141,7 +145,7 @@ if(object$VC$BivD == "T") ec <- 1 else ec <- 0
 ###############################################
 
 
-if(object$VC$margins[1] %in% c(object$VC$m2,object$VC$m3) && object$VC$margins[2] %in% c(object$VC$m2,object$VC$m3) && object$VC$BivD == "T"){###
+if(object$VC$margins[1] %in% c(object$VC$m2,object$VC$m3) && object$VC$margins[2] %in% c(object$VC$m2,object$VC$m3) && BivD == "T"){###
 
   if(  is.null(object$X3) ) epds1 <- bs[, lf - ec]
   
@@ -158,6 +162,7 @@ if(object$VC$margins[1] %in% c(object$VC$m2,object$VC$m3) && object$VC$margins[2
    
  CIdof <- rowQuantiles(est.dof, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE)
  if( is.null(object$X3) ) CIdof <- t(CIdof) 
+  
 
 }###
 
@@ -204,7 +209,7 @@ if(object$VC$margins[1] %in% cont1par && object$VC$margins[2] %in% cont1par){
     sigma22 <- esp.tr(sigma2.2.star, object$VC$margins[2])$vrb  
 
    if(!(object$VC$margins[1] %in% cont1par)) CIsig21 <- rowQuantiles(sigma21, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE) else CIsig21 <- c(0,0)
-   if(!(object$VC$margins[2] %in% cont1par)) CIsig22 <- rowQuantiles(sigma22, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE)
+   if(!(object$VC$margins[2] %in% cont1par)) CIsig22 <- rowQuantiles(sigma22, probs = c(prob.lev/2,1-prob.lev/2), na.rm = TRUE) else CIsig22 <- c(0,0)
    if( is.null(object$X3) ){ CIsig21 <- t(CIsig21); CIsig22 <- t(CIsig22) }
   
 ###############################################

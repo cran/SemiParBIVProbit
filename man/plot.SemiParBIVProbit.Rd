@@ -1,6 +1,8 @@
 \name{plot.SemiParBIVProbit}
 \alias{plot.SemiParBIVProbit}
 
+
+
 \title{Plotting function}
 
 
@@ -8,13 +10,14 @@
 by \code{SemiParBIVProbit()}, \code{copulaReg()}, \code{copulaSampleSel()}, \code{SemiParTRIV()} and 
 plots the 
 estimated smooth functions on the scale of the linear predictors. This function is a 
-wrapper for \code{plot.gam()} in \code{mgcv}. Please see 
+wrapper of \code{plot.gam()} in \code{mgcv}. Please see 
 the documentation of \code{plot.gam()} for full details. 
 
 }
 
 \usage{
 \method{plot}{SemiParBIVProbit}(x, eq, ...)
+
 }
 
 

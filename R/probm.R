@@ -1,14 +1,40 @@
-probm <- function(eta, margin, only.pr = TRUE, bc = FALSE){ # bc stands for binary continuous case
+probm <- function(eta, margin, only.pr = TRUE, bc = FALSE, tau = NULL){ # bc stands for binary continuous case
  
   epsilon <- 0.0000001 
-  max.p   <- 0.9999999 
   
-  derp1.dereta1 <- der2p1.dereta1eta1 <- d.n <- der2p.dereta <- NULL
+  derp1.dereta1 <- der2p1.dereta1eta1 <- d.n <- der2p.dereta <- tauetaIND <- NULL
+ 
+ 
+if( margin == "GEVlink" ){
+ 
+  taueta    <- tau*eta 
+  tauetaIND <- ifelse(taueta < -1, TRUE, FALSE) 
+  taueta[tauetaIND] <- -1
+  
+  pr  <- exp(-(1+taueta)^(-1/tau))
+  
+  if(only.pr == FALSE){
+  
+  d.n <- exp(-(1 + taueta)^-(1/tau))/(1 + taueta)^(1 + 1/tau)
+  d.n <- ifelse(d.n < epsilon, epsilon, d.n )
+  der2p.dereta <- -(exp(-(1 + taueta)^-(1/tau)) * (tau * (1 + 1/tau)/(1 + taueta)^(1/tau + 2) - 1/(1 + taueta)^(2 * (1 + 1/tau))))
+
+                      }
+  
+  if(bc == TRUE){ 
+  
+  
+  derp1.dereta1      <- -(exp(-(1 + taueta)^-(1/tau))/(1 + taueta)^(1 + 1/tau))   
+  der2p1.dereta1eta1 <- exp(-(1 + taueta)^-(1/tau)) * (tau * (1 + 1/tau)/(1 + taueta)^(1/tau + 2) - 1/(1 + taueta)^(2 * (1 + 1/tau))) 
+  
+                }  
+      
+} 
+ 
  
 if( margin == "probit" ){
  
   pr  <- pnorm(eta)
-  
   
   if(only.pr == FALSE){
   
@@ -16,7 +42,7 @@ if( margin == "probit" ){
   d.n <- ifelse(d.n < epsilon, epsilon, d.n )
   der2p.dereta <- -(eta * dnorm(eta))          # second deriv
   
-  }
+                      }
   
   if(bc == TRUE){ 
   
@@ -25,10 +51,8 @@ if( margin == "probit" ){
   
   der2p1.dereta1eta1 <- eta * dnorm(-eta)  ## This is the second derivative of 1 - p1 respect to eta1 
   
-  }  
-    
-    
-    
+                }  
+      
 }
 
 
@@ -146,20 +170,11 @@ if( margin == "log" ){
 }
 
 
-
-
-
-
-
-
-
-
-
   pr <- mm(pr) 
   
     
     
  list(pr = pr, d.n = d.n, der2p.dereta = der2p.dereta, 
-      derp1.dereta1 = derp1.dereta1, der2p1.dereta1eta1 = der2p1.dereta1eta1 )  
+      derp1.dereta1 = derp1.dereta1, der2p1.dereta1eta1 = der2p1.dereta1eta1, tauetaIND = tauetaIND )  
  
 }    

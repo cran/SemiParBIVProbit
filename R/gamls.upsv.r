@@ -61,7 +61,7 @@ if( margins[2] %in% M$m3 ){
 
 if(type == "copR"){
 
-  if(margins[1] %in% M$m1d && margins[2] %in% c(M$m1d)){
+  if(margins[1] %in% c(M$m1d,M$bl) && margins[2] %in% c(M$m1d,M$bl) && l.flist == 2){
   
   b1 <- gamlss1$coefficients[1:VC$X1.d2]
   b2 <- gamlss2$coefficients[1:VC$X2.d2]
@@ -72,6 +72,19 @@ if(type == "copR"){
   if( VC$l.sp2 != 0 ) sp2 <- gamlss2$sp
   
   } 
+  
+  
+  if(margins[1] %in% c(M$m1d,M$bl) && margins[2] %in% c(M$m1d,M$bl) && l.flist > 2){
+  
+  b1 <- gamlss1$coefficients[1:VC$X1.d2]
+  b2 <- gamlss2$coefficients[1:VC$X2.d2]
+ 
+  start.v <- c(b1, b2, GAM$gam3$coefficients); names(start.v) <- nstv  
+  
+  if( VC$l.sp1 != 0 ) sp1 <- gamlss1$sp
+  if( VC$l.sp2 != 0 ) sp2 <- gamlss2$sp
+  
+  }   
   
   
   if(margins[1] %in% M$m1d && margins[2] %in% c(M$m2,M$m2d) && l.flist == 2){

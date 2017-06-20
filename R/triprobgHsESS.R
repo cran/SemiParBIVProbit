@@ -7,52 +7,57 @@ triprobgHsESS <- function (params, respvec, VC, ps, AT = FALSE){
   etad <- p111 <- A <- NULL
   
   theta12.st <- params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2+1)]    
-  theta12    <- tanh(theta12.st)    
   theta13.st <- params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2+2)]    
-  theta13    <- tanh(theta13.st) 
   theta23.st <- params[(VC$X1.d2 + VC$X2.d2 + VC$X3.d2+3)]    
-  theta23    <- tanh(theta23.st)
   
   p1 <- probm(eta1, VC$margins[1])$pr
   p2 <- probm(eta2, VC$margins[2])$pr
   p3 <- probm(eta3, VC$margins[3])$pr 
-
+  
   mar1 <- qnorm(p1)
   mar2 <- qnorm(p2)
   mar3 <- qnorm(p3)
   
-  p11 <- mm( pbinorm( mar1[VC$inde], mar2, cov12 = theta12) )
-  p13 <- mm( pbinorm( mar1[VC$inde], mar3, cov12 = theta13) )
-  p23 <- mm( pbinorm( mar2         , mar3, cov12 = theta23) )
+  ###########################
   
-
-  Sigma <-  matrix( c( 1,        theta12, theta13,
-                       theta12,        1, theta23,
-                       theta13,  theta23,        1), 3 , 3) 
-  
-  
-  eS <- eigen(Sigma)                 
-  check.eigen <- any(eS$values < 0)
-  
-  if(check.eigen == TRUE){
+  if(VC$Chol == FALSE){
     
-    D.dash <- diag(abs(eS$values), 3, 3)
-    P      <- eS$vectors
-    R.dash <- P %*% D.dash %*% t(P)
-    D1 <- diag(1/sqrt( diag(R.dash) ), 3, 3)
-    Sigma <- D1 %*% R.dash %*% D1
+    theta12    <- tanh(theta12.st)
+    theta13    <- tanh(theta13.st)
+    theta23    <- tanh(theta23.st)
+    
+    Sigma <-  matrix( c( 1,        theta12, theta13,
+                         theta12,        1, theta23,
+                         theta13,  theta23,        1), 3 , 3) 
+    
+   Sigma <- PosDefCor(Sigma, Chol = FALSE, theta12.st, theta13.st, theta23.st)
     
     theta12 <- Sigma[1,2]
     theta13 <- Sigma[1,3]
     theta23 <- Sigma[2,3]   
     
-    theta12.st <- atanh(theta12) 
+    theta12.st <- atanh(theta12)
     theta13.st <- atanh(theta13)
     theta23.st <- atanh(theta23)
     
-    params <- c(params[1:(VC$X1.d2 + VC$X2.d2 + VC$X3.d2)],theta12.st,theta13.st,theta23.st)
+  }
+  
+  if(VC$Chol == TRUE){
     
-  } else Sigma <- Sigma 
+      Sigma <- PosDefCor(Sigma = 1, Chol = TRUE, theta12.st, theta13.st, theta23.st)
+    
+    theta12 <- Sigma[1,2]
+    theta13 <- Sigma[1,3]
+    theta23 <- Sigma[2,3]   
+    
+  }
+  
+  p11 <- mm(pbinorm(mar1[VC$inde], mar2, cov12 = theta12))
+  p13 <- mm(pbinorm(mar1[VC$inde], mar3, cov12 = theta13))
+  p23 <- mm(pbinorm(mar2, mar3, cov12 = theta23))
+  
+  #params <- c(params[1:(VC$X1.d2 + VC$X2.d2 + VC$X3.d2)],theta12.st,theta13.st,theta23.st)
+  
   
   
   if(VC$approx == FALSE){ eta123 <- cbind(mar1[VC$inde],mar2,mar3)
@@ -60,6 +65,8 @@ triprobgHsESS <- function (params, respvec, VC, ps, AT = FALSE){
   }
   
   if(VC$approx == TRUE) p111 <- mm(  TRIapprox(mar1[VC$inde], mar2, mar3, Sigma) )
+  
+  ############################################################################################
   
   
   p110 <- mm(p11 - p111)
@@ -92,7 +99,7 @@ triprobgHsESS <- function (params, respvec, VC, ps, AT = FALSE){
            sum(gTRI$dl.dtheta12.st), 
            sum(gTRI$dl.dtheta13.st), 
            sum(gTRI$dl.dtheta23.st) )
-                
+  
   
   LgTRI <- list(p12.g = gTRI$p12.g, p13.g = gTRI$p13.g, p23.g = gTRI$p23.g, 
                 p12.g.c = gTRI$p12.g.c, p13.g.c = gTRI$p13.g.c, p23.g.c = gTRI$p23.g.c, 
@@ -120,7 +127,7 @@ triprobgHsESS <- function (params, respvec, VC, ps, AT = FALSE){
   
   ##########################################################################################
   ##########################################################################################
-
+  
   S.h  <- ps$S.h
   
   

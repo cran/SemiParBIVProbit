@@ -2,9 +2,7 @@ plot.SemiParBIVProbit <- function(x, eq, ...){
 
  if(missing(eq)) stop("You must provide the equation number.")
 
-
  if(eq > x$l.flist) stop("The fitted model has a smaller number of equations.") 
-
 
  if(eq==1 && x$l.sp1==0) stop("There is no model component to plot.")   
  if(eq==2 && x$l.sp2==0) stop("There is no model component to plot.")   
@@ -16,7 +14,6 @@ plot.SemiParBIVProbit <- function(x, eq, ...){
  if(eq==8 && x$l.sp8==0) stop("There is no model component to plot.")   
 
  
-
  if(eq==1){ ss.plot <- x$gam1
             ind <- 1:x$X1.d2 
             } 
@@ -44,11 +41,14 @@ plot.SemiParBIVProbit <- function(x, eq, ...){
                
            ss.plot$coefficients <- x$coefficients[ind]
            ss.plot$Vp <- x$Vb[ind,ind]
+           ss.plot$Vp.t <- x$Vb.t[ind,ind]
            ss.plot$sig2 <- 1
            ss.plot$edf <- diag(x$F)[ind]
            ss.plot$scale.estimated <- FALSE 
+           ss.plot$call$data <- x$call$data
 
-  plot.gam(ss.plot, ...)  
+  #plot.gam(ss.plot, ...)
+  plot(ss.plot, ...) 
        
 }
 

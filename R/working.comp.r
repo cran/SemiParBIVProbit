@@ -9,8 +9,8 @@ working.comp <- function(fit){
   if(min(W.eig$values) < sqrt(.Machine$double.eps) ) { pep <- which(W.eig$values < sqrt(.Machine$double.eps)); W.eig$values[pep] <- 0.0000001 }  
 
   srev    <- sqrt(W.eig$val)
-  c.W     <- W.eig$vec%*%tcrossprod(diag(srev)  ,W.eig$vec) 
-  W.invsr <- W.eig$vec%*%tcrossprod(diag(1/srev),W.eig$vec)
+  c.W     <- W.eig$vec%*%tcrossprod(diag(srev, nrow = length(srev), ncol = length(srev) )  ,W.eig$vec) 
+  W.invsr <- W.eig$vec%*%tcrossprod(diag(1/srev, nrow = length(srev), ncol = length(srev)),W.eig$vec)
   
   X <- c.W 
   Z <- W.invsr%*%G + X%*%fit$argument 
